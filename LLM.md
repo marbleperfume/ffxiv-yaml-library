@@ -1,4 +1,4 @@
-# CLAUDE.md — Unified RPG Design Hub / YAML Library
+# LLM.md — Unified RPG Design Hub / YAML Library
 
 ## Project Overview
 
@@ -11,7 +11,7 @@ data assets.
 
 - Most tools: Tkinter (`*.pyw`), one entry point (`Hub_Master.pyw`): PyQt6
 - Output: YAML files, organized by category folder, meant to be human- and
-  Claude-readable design docs as much as engine input
+  LLM-readable design docs as much as engine input
 - `Project_Validator.py`: cross-reference integrity checker (Race/Class/Item
   references actually exist)
 
@@ -102,18 +102,18 @@ Longer-term direction is moving this data pipeline toward:
 
 - Windows machine. If Bash tool calls fail with a "requires git-bash" error,
   Git Bash is installed but not being detected — do **not** assume Git is
-  missing. The fix is `CLAUDE_CODE_GIT_BASH_PATH`, either in
-  `.claude/settings.json`:
+  missing. The fix is `LLM_CODE_GIT_BASH_PATH`, either in
+  `.LLM/settings.json`:
   ```json
-  { "env": { "CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe" } }
+  { "env": { "LLM_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe" } }
   ```
   or as a user-level environment variable pointing at the actual `bash.exe`
   (typically `C:\Program Files\Git\bin\bash.exe`). If it's set but still not
-  detected, that's a known Claude Code rough edge on Windows — don't loop on
+  detected, that's a known LLM Code rough edge on Windows — don't loop on
   re-diagnosing it; just note it and fall back to the CLI/Git Bash terminal
   directly instead of the VS Code extension panel.
 
-## Working Conventions for Claude Code
+## Working Conventions for LLM Code
 
 - Don't "fix" the dot-namespaced-filename vs `Name.replace(' ','_')` question
   unilaterally — ask which convention to standardize on before doing a
