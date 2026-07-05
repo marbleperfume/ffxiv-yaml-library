@@ -1,0 +1,12 @@
+Name: Resurrection_Sickness
+UE5_Context: GE_Resurrection_Sickness_Debuff
+PillarAffinity: Mercenary
+Duration: 60.0
+IsCleanseable: false
+Stacking:
+  IsStackable: true
+  MaxStacks: 2
+GameplayGoal: "-20% Stats. Applied on reviving from revival skills rather than respawn."
+NarrativeIntent: "The lingering disorientation of being torn back from the void."
+AudioTrigger: "SFX_Debuff_ResurrectionSickness"
+VisualTrigger: "VFX_Debuff_ResurrectionSickness"

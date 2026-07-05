@@ -1,0 +1,19 @@
+Key: Character.Madolt.Warrior
+Name: ''
+RaceKey: Madolt
+ClassKey: Warrior
+MainAttribute: STRENGTH
+Role: Tank
+Gender: ''
+Appearance: ''
+Voice: ''
+EquippedAttire: []
+AssignedSkills:
+- Skill.Combat.AeroSlash
+Titles: []
+Passives: []
+PlayerAdventurerRank: 1
+PlayerMercenaryRank: 1
+PlayerStrategyRank: 1
+Tags:
+- Tag.Character.Warrior

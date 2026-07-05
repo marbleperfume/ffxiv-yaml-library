@@ -1,0 +1,12 @@
+Name: Stun
+UE5_Context: GE_Stun_Base
+PillarAffinity: Mercenary
+Duration: 2.0
+IsCleanseable: true
+Stacking:
+  IsStackable: false
+  MaxStacks: 1
+AudioTrigger: "SFX_Stun_Impact"
+VisualTrigger: "VFX_Stun_Animation_is_Stun"
+GameplayGoal: "Stop either the player or the enemy with a stun animation."
+NarrativeIntent: "Usable in combat or through quest scenarios jokingly."

@@ -1,0 +1,38 @@
+{
+    "STRENGTH": {
+        "default": "10",
+        "intent": "Physical damage and structural force."
+    },
+    "STAMINA": {
+        "default": "10",
+        "intent": "Directly anchors the Base Health pool."
+    },
+    "SPEED": {
+        "default": "10",
+        "intent": "Movement speed and animation frame throughput."
+    },
+    "CRAFT": {
+        "default": "0",
+        "intent": "Efficiency in item assembly and repair."
+    },
+    "GATHER": {
+        "default": "0",
+        "intent": "Yield efficiency for raw materials."
+    },
+    "MAGICCAPACITY": {
+        "default": "100",
+        "intent": "Resource pool for casting abilities."
+    },
+    "MAG": {
+        "default": "10",
+        "intent": "Scaling for Shields, Barriers, and offensive magic output."
+    },
+    "MED": {
+        "default": "10",
+        "intent": "Scaling for raw Healing output and medicinal items."
+    },
+    "DEXTERITY": {
+        "default": "2",
+        "intent": "Controls critical damage and is the damage modifier for ranged physical attacks."
+    }
+}

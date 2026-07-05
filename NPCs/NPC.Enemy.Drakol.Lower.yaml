@@ -1,0 +1,41 @@
+Key: NPC.Enemy.Drakol.Lower
+Name: Lower Drakol
+Level: 3
+Location: Zone.FanVillage.OpenWorld
+Tags:
+  - Tag.NPC.Enemy
+  - Tag.Race.Drakol
+  - Tag.Class.Lancer 
+Stats:
+  HP: 450
+  PhysicalAttack: 35
+  Speed: 110
+AssignedSkills:
+  - Skill.Combat.SpearThrust
+  - Skill.Combat.DragonLeap
+LootRegistry:
+  - ItemKey: Item.Material.DrakolScale
+    BaseDropRate: 40.0
+
+# --- Updated Rank Logic ---
+RankScaling:
+  # Autopiloted: Calls a global loot modifier based on lowest party rank
+  AdventurerLoot: Global.LootScaling.CurveA 
+  
+  # Hand-crafted: Cast bar conditions, interrupts, and tier swaps
+  MercenaryReaction:
+    Rank1:
+      - Condition: "TargetInRange"
+        Action: "Skill.Combat.SpearThrust"
+        CastTime: 2.5
+    Rank2:
+      - Condition: "TargetCasting"
+        Action: "Skill.Combat.SpearThrust.Tier2" # Triggers altered VFX/Animation interrupt
+        CastTime: 1.0 
+        
+  # Hand-crafted: Local map utilization and FFXIV aggro rules
+  StrategyAI:
+    AggroRadius: 800
+    LeashRadius: 2500
+    ResetBehavior: HealAndReturn
+    TerrainProfile: Profile.FanVillage.Cliffside # Links to specific UE5 Nav constraints

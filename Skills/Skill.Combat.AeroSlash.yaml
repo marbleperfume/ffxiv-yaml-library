@@ -1,0 +1,18 @@
+Key: "Skill.Combat.AeroSlash"
+Name: "Aero Slash"
+Intent: "Basic GCD wind attack with mobility"
+Tags:
+  - "Skill.Type.Spell"
+  - "Skill.Element.Wind"
+BaseState:
+  Animation: "Anim_Slash_Standard"
+  VFX: "VFX_Wind_Light"
+  IsOGCD: false
+  CanCastWhileMoving: true
+Tiers:
+  Tier2:
+    AnimationOverride: "Anim_Slash_Heavy"
+    VFXOverride: "VFX_Wind_Tornado"
+  Tier3:
+    AnimationOverride: "Anim_Slash_Airborne"
+    VFXOverride: "VFX_Wind_Hurricane"

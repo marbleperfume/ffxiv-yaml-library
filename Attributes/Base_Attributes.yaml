@@ -1,0 +1,19 @@
+# INTENT: This defines the global attribute schema for all characters.
+# Every character class in your UE5 project must support these fields.
+Base_Character:
+  Attributes:
+    Strength: 10
+    Stamina: 10
+    Speed: 10
+    Craft: 0
+    Gather: 0
+    MagicCapacity: 100
+    Mag: 10
+    Med: 10
+    Intellect: 10
+  
+  # Tags that every entity starts with
+  DefaultTags:
+    - "State.Alive"
+    - "Resource.Mana"
+    - "Resource.Stamina"

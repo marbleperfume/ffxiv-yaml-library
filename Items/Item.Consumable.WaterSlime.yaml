@@ -1,0 +1,8 @@
+Key: Item.Consumable.WaterSlime
+Name: Water Slime
+Description: A viscous fluid used in basic alchemy.
+Tags:
+- Item.Material.Alchemy
+- Item.Tradeable
+MaxStack: 99
+Item Category: Consumable

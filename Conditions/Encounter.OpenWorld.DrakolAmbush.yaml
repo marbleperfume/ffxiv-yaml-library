@@ -1,0 +1,13 @@
+Key: "Encounter.OpenWorld.DrakolAmbush"
+Type: "CombatSpawn"
+Actors:
+  - "NPC.Enemy.Drakol.Lower"
+Conditions:
+  Trigger: "VolumeOverlap"
+  TimeOfDay: "Night"
+ScalingLogic:
+  Target: "Party"
+  Method: "LowestPlayerRank"
+  Parameters:
+    AdjustHealthMultiplier: true
+    AdjustAggroRadius: true
