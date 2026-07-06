@@ -1,0 +1,37 @@
+Key: NPC.Enemy.Galactos.Drone
+Name: Galactos Combat Drone
+Level: 8
+Location: Zone.MalachiteCity.Outskirts
+RaceKey: null
+Tags:
+  - Tag.NPC.Enemy
+  - Tag.Quest.Reiden.GalactosUprising
+Stats:
+  HP: 800
+  PhysicalAttack: 55
+  Speed: 90
+AssignedSkills:
+  - Skill.Combat.Drone.LaserBurst
+LootRegistry: []
+
+# --- Rank Profile (see Ranks/Rank_System.yaml) ---
+# Minimal authoring example, same shape as NPC.Enemy.Drakol.Lower.yaml.
+RankProfile:
+  PartyResolution: Lowest
+  Adventurer:
+    LootCurve: null
+  Mercenary:
+    Rank1:
+      - Condition: "TargetInRange"
+        Action: "Skill.Combat.Drone.LaserBurst"
+        CastTime: 1.5
+  Doctrine:
+    Level1:
+      Profile: Profile.Reiden.GalactosSkirmish
+      AggroRadius: 700
+      LeashRadius: 1500
+      ResetBehavior: FullReset
+NarrativeIntent: >
+  Trash-mob fixture for Quests/Reiden.GalactosUprising_Seq1.yaml -- the
+  investigate/skirmish step that establishes Reiden's Convergence
+  Blade/Shield before the Chapter 1 Colossus Prime finale.

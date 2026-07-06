@@ -1,0 +1,19 @@
+PipelineID: Reiden.GalactosUprising
+SequenceIndex: 4
+QuestID: Reiden.GalactosUprising.Aftermath
+StepType: QuestGiver
+TargetNPCs:
+  - NPC.Friendly.MalachiteCity.ReidenKurogane
+Action: Dialogue_Override
+RequiresFlag: ColossusPrime.Defeated
+DialogueRef: Dialogue.Reiden.GalactosUprising.Seq4.Aftermath
+OnComplete:
+  SetsFlag: Reiden.Recruited
+Reward:
+  Copper: 500
+  ItemID: null
+  TitleID: null
+NarrativeIntent: >
+  Chapter 1 epilogue -- Reiden formally joins as a standing ally following
+  the Colossus Prime fight, closing his introductory chain while leaving
+  Galactos alive and at large for future chapters.

@@ -16,3 +16,9 @@ Expression.Awkward.PoliteSmile
 Expression.Warm.Grateful
 Expression.Smug.Innuendo
 Expression.Flustered.Blush
+Expression.Cocky.Dismissive
+Expression.Grim.Determined
+Expression.Weary.Resolute
+Expression.Shocked.Awe
+Expression.Warm.Reverent
+Expression.Flat.Unimpressed

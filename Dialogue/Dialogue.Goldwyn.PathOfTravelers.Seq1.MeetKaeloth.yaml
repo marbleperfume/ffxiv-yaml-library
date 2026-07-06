@@ -1,0 +1,54 @@
+Key: Dialogue.Goldwyn.PathOfTravelers.Seq1.MeetKaeloth
+Scene: Goldwyn brings the player to Kaeloth's cliffside training ground
+Participants:
+  - NPC.Friendly.MalachiteCity.GoldwynExcelsior
+  - NPC.Friendly.MalachiteCity.KaelothWindpaw
+  - Player
+Lines:
+  - Speaker: NPC.Friendly.MalachiteCity.GoldwynExcelsior
+    Text: >
+      This is him. THE Kaeloth Windpaw. Nobody even knows which Landwin
+      bloodline he's from -- the records just... stop. Some say that's the
+      point.
+    ExpressionTag: Expression.Warm.Reverent
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.KaelothWindpaw
+    Text: >
+      Records are for people who need to be told what they are. Watch,
+      instead.
+    ExpressionTag: Expression.Grim.Determined
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [Kaeloth draws energy in from the air around him, visibly condensing
+      it against his own frame, then expels it as a compact bolt that
+      splits a boulder clean in half. A beat later he channels differently
+      -- and a spirit shape, anthropomorphic and feline, rises alongside
+      him, mirroring his stance with the exact bearing of an Ancient
+      feline warrior.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.KaelothWindpaw
+    Text: >
+      Learned this style from the Ancients, before Nyanto ever walked. I
+      don't hold energy the way they do -- so I borrow the shape of it
+      instead. Doesn't make it any less real.
+    ExpressionTag: Expression.Grim.Determined
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.GoldwynExcelsior
+    Text: >
+      He says it like it's nothing. It is, factually, everything.
+    ExpressionTag: Expression.Warm.Reverent
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.KaelothWindpaw
+    Text: >
+      Strength is a fact about the fight you're already in. It says
+      nothing about the next one. Remember that, both of you. Can't keep
+      a winner down.
+    ExpressionTag: Expression.Grim.Determined
+    VOPath: ""
+NarrativeIntent: >
+  Establishes Kaeloth's legend, his Ryu/Udyr-style channel-condense-expel
+  technique, the borrowed Ancient feline martial style
+  (Summons/Summon.Landwin.FelineSpirit.yaml), and his slogan -- all before
+  Seq2 makes the borrowed style the reason he dies.

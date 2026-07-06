@@ -1,0 +1,16 @@
+PipelineID: Reiden.GalactosUprising
+SequenceIndex: 2
+QuestID: Reiden.GalactosUprising.Confrontation
+StepType: Cutscene
+TargetNPCs:
+  - NPC.Boss.Galactos
+  - NPC.Friendly.MalachiteCity.ReidenKurogane
+Action: PlayCutscene
+RequiresFlag: DroneSquad.Cleared
+DialogueRef: Dialogue.Reiden.GalactosUprising.Seq2.Confrontation
+OnComplete:
+  SetsFlag: ColossusPrime.Deployed
+NarrativeIntent: >
+  Galactos is cornered but escapes via EmergencyTeleport the moment Colossus
+  Prime deploys, per NPC.Boss.Galactos.yaml's recurring-villain design --
+  leaves the actual boss fight to Seq3.

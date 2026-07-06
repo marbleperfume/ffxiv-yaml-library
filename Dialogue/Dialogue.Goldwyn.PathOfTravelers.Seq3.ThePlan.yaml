@@ -1,0 +1,42 @@
+Key: Dialogue.Goldwyn.PathOfTravelers.Seq3.ThePlan
+Scene: Days later, Goldwyn lays out a plan at Kaeloth's cliffside
+Participants:
+  - NPC.Friendly.MalachiteCity.GoldwynExcelsior
+  - Player
+Lines:
+  - Speaker: NPC.Friendly.MalachiteCity.GoldwynExcelsior
+    Text: >
+      I've had a few days to think, and to stop thinking about the parts I
+      shouldn't. Here's what I've got.
+    ExpressionTag: Expression.Weary.Resolute
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.GoldwynExcelsior
+    Text: >
+      Felines hold their energy inside themselves -- Nekrath included. My
+      Spine Sword already caught a piece of that fight; it's been holding
+      onto Nekrath's exact wavelength since. It won't grab onto you, and it
+      wouldn't have grabbed onto Kaeloth either -- Drakols and dragons
+      don't hold energy the way felines do. This only works because of what
+      Nekrath is.
+    ExpressionTag: Expression.Weary.Resolute
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.GoldwynExcelsior
+    Text: >
+      I'm not strong enough to beat him. I never was, and pretending
+      otherwise got Kaeloth nothing. But I don't need to win a fight I can
+      set up instead. You'll carry the fight. I only need one opening.
+    ExpressionTag: Expression.Grim.Determined
+    VOPath: ""
+  - Speaker: Player
+    Text: "You're sure about this?"
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.GoldwynExcelsior
+    Text: "Can't keep a winner down. Kaeloth's words. Mine too, now."
+    ExpressionTag: Expression.Grim.Determined
+    VOPath: ""
+NarrativeIntent: >
+  Goldwyn's grief resolves into a plan, not a power-up -- explicitly closes
+  the "why doesn't the sword just work on anyone" plothole by stating the
+  internal-vs-external energy distinction on-screen, and reframes his role
+  for Seq4: setup and one critical opening, not a straight fight.

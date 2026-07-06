@@ -1,0 +1,25 @@
+Intent:
+  Narrative: >
+    Lower Drakol -- semi-aquatic wanderers who carry an innate Water Slime
+    companion from birth to offset an inherited vulnerability to dry
+    environments (see Passives/DrySkin.yaml).
+Definition:
+  ParentCategory: Wanderers
+  Subrace: Lower Drakols
+  AttributeModifiers:
+    STRENGTH: 12
+    STAMINA: 14
+    SPEED: 11
+    CRAFT: 0
+    GATHER: 0
+    MAGICCAPACITY: 10
+    MAG: 11
+    MED: 10
+    DEXTERITY: 10
+  Assets:
+    Mesh: Mesh.Race.LowerDrakol
+    AnimSet: AnimSet.LowerDrakol
+  Restrictions:
+    BannedTags: []
+  BonusSkills:
+    - Skill.Combat.Drakol.GenerateWater

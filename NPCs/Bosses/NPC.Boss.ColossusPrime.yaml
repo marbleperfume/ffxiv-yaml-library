@@ -1,0 +1,48 @@
+Identity:
+  Key: NPC.Boss.ColossusPrime
+  Name: Colossus Prime
+  TemplateRef: null
+AssignedSkills:
+  - Skill.Combat.ColossusPrime.BuildingSlash
+  - Skill.Combat.ColossusPrime.OverloadStomp
+LootTable: null
+Tags:
+  - Tag.NPC.Boss
+  - Tag.Quest.Reiden.GalactosUprising
+EncounterMath:
+  ExpectedDurationMinutes: 7.0
+  BaseHealthPlaceholder: 200000
+PhaseLogic:
+  Phase2Trigger: "BuildingSlash blocked by Reiden's Convergence Shield -> Block Burst -> Convergence Blade discharge -> forced Downed Phase"
+  Phase3Trigger: null
+MechanicScaling:
+  AnimTier: 3
+  Rank1_MacroMechanic: "Building-scale telegraphed slash (BuildingSlash), scripted to be intercepted by Reiden rather than dodged by the player -- a Susano-style 'ally blocks the unblockable' beat"
+  Rank2_MicroPunish: "Downed Phase after the discharge is the player's real damage window; no repeatable trial variant, one-off Chapter 1 finale"
+
+# --- Rank Profile (see Ranks/Rank_System.yaml) ---
+# Scripted Chapter 1 finale boss -- minimal example, same pattern as
+# NPC.Boss.Nekrath.yaml.
+RankProfile:
+  PartyResolution: Lowest
+  Adventurer:
+    LootCurve: null
+  Mercenary:
+    Rank1:
+      - Condition: "TargetInRange"
+        Action: "Skill.Combat.ColossusPrime.OverloadStomp"
+        CastTime: 2.5
+  Doctrine:
+    Level1:
+      Profile: Profile.Reiden.ColossusFinale
+      AggroRadius: 1500
+      LeashRadius: 1500
+      ResetBehavior: NoReset
+NarrativeIntent: >
+  Galactos's Chapter 1 finale machine, giant-robot-vs-Susano homage. The
+  building-scale BuildingSlash exists specifically to be blocked by Reiden
+  (see Items/Item.Equipment.Reiden.ConvergenceShield.yaml Block Burst),
+  which feeds a discharge from the Convergence Blade into a Downed Phase --
+  the player's real damage window. Destroyed at the end of
+  Quests/Reiden.GalactosUprising_Seq3.yaml; Galactos escapes rather than
+  going down with it.

@@ -1,0 +1,50 @@
+Key: NPC.Friendly.MalachiteCity.KaelothWindpaw
+Name: Kaeloth Windpaw
+Role: Mentor
+Location: Zone.FanVillage.Cliffside
+RaceKey: Unrecorded
+Gender: Male
+Status: DeceasedAsOf_Goldwyn.PathOfTravelers_Seq2
+Appearance:
+  Note: >
+    A living legend's silhouette rather than a specific one -- weathered,
+    unarmored, fights bare-handed. Even his own subrace among the Landwin
+    was never recorded; nobody could place his lineage, which only added to
+    the legend.
+Voice: ""
+SpeechPattern:
+  Theme: WarriorMonk_Slogan
+  Note: >
+    LLM authoring aid: speaks in short, settled certainties -- never brags,
+    never explains more than once. Signature line, delivered without
+    irony: "Can't keep a winner down." Everything he says should sound like
+    it was already true before he said it.
+BanterSets:
+  Default:
+    - "Strength is a fact about the fight you're already in. It says nothing about the next one."
+    - "Can't keep a winner down."
+  GHOST_SEQ4_ONLY:
+    - "Can't keep a winner down."
+AssignedSkills:
+  - Skill.Combat.Landwin.EnergyChannel
+  - Skill.Combat.Landwin.FelineSpiritForm
+SocialLinks:
+  - NPC_ID: NPC.Friendly.MalachiteCity.GoldwynExcelsior
+    Relation: Mentor_To_Student
+    Tone: Fond_Exacting
+Tags:
+  - Tag.NPC.Friendly
+  - Tag.Race.Landwin
+  - Tag.Quest.Goldwyn.PathOfTravelers
+NarrativeIntent: >
+  Ryu (Street Fighter) x Udyr (League of Legends) homage: channels outside
+  energy inward, condenses it, expels it -- as a Hadouken-style bolt
+  (Skill.Combat.Landwin.EnergyChannel) or as a summoned feline spirit
+  copying the Ancient feline martial style he personally learned
+  (Skill.Combat.Landwin.FelineSpiritForm / Summons/Summon.Landwin.FelineSpirit.yaml).
+  Dies in Quests/Goldwyn.PathOfTravelers_Seq2.yaml, in a Toji-style
+  contest-of-strength upset against Nekrath (NPC.Boss.Nekrath.yaml), an
+  Ancient feline who considers an outsider inheriting their sacred style an
+  offense worth killing over. Reappears once, silently and without dialogue
+  beyond his slogan, as a ghost in Seq4 -- the only outside factor that
+  saves Goldwyn and the player.

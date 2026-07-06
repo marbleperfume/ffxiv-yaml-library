@@ -3,6 +3,7 @@ Landwin:
   - Grimm
   - Tryll
   - Redels
+  - Unrecorded   # subrace lost to record -- see NPC.Friendly.MalachiteCity.KaelothWindpaw; deliberate lore ambiguity, not a data gap
 Noct Aurorus:
   - Noms
   - Midnights
@@ -30,3 +31,4 @@ Depth Dead:
 # ClassCreator and CharacterCreator exclude this category.
 Monsters:
   - Bee Cloud
+  - Ancient Feline   # precursor race, predates Nyanto -- see NPC.Boss.Nekrath

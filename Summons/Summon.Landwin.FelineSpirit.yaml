@@ -1,0 +1,34 @@
+Key: Summon.Landwin.FelineSpirit
+Name: Feline Spirit
+RacialAttachment: null   # not a racial BonusSkill grant -- personal technique, see Skill.Combat.Landwin.FelineSpiritForm
+PresenceType: Cast
+PresenceNote: >
+  Summoned on demand via Skill.Combat.Landwin.FelineSpiritForm, unlike the
+  innate/always-present Water Slime pattern (Summons/Water_Slime.yaml). An
+  anthropomorphic tiger-spirit, visually and mechanically copying the
+  Ancient feline martial style Kaeloth Windpaw learned firsthand.
+RequiredCondition: null
+DismissTrigger: null
+PassiveEffect: null
+Attributes:
+  STRENGTH: 0.4
+  STAMINA: 0.3
+  SPEED: 0.5
+  CRAFT: 0.0
+  GATHER: 0.0
+  MAGICCAPACITY: 0.1
+  MAG: 0.1
+  MED: 0.0
+  DEXTERITY: 0.4
+AI:
+  Behavior: "Aggressive melee companion; mirrors Ancient feline strike patterns; follows and assists possessor in combat"
+Lifecycle:
+  Duration: 45   # seconds; finite, unlike Water Slime's permanent presence
+Tags:
+  - Tag.Summon.Personal
+  - Tag.Race.Landwin
+  - Tag.Race.AncientFeline
+NarrativeIntent: >
+  This IS the "inheriting a sacred style" that provokes Nekrath in
+  Quests/Goldwyn.PathOfTravelers_Seq2.yaml -- an outsider Landwin copying
+  Ancient feline technique rather than a member of that race performing it.

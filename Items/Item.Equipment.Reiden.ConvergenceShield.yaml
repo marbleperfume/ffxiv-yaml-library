@@ -1,0 +1,29 @@
+Name: Elemental Convergence Shield
+Category: Equipment
+Rarity: Unique
+Stacking:
+  IsStackable: false
+  MaxStacks: 1
+EquipmentData:
+  Slot: Accessory
+  Stats:
+    Atk: 0
+    Def: 90
+    MAG: 0
+    MED: 0
+  RestrictionTags:
+    - Tag.Character.Reiden.Unique
+Material: Convergence-forged alloy, self-generating electron field
+IconPath: ""
+Description: >
+  Paired counterpart to Item.Equipment.Reiden.ConvergenceBlade.yaml. The same
+  electron-field convergence tech shaped into a tower shield capable of
+  no-sell blocking attacks from opponents many times Reiden's size --
+  including a building-scale weapon swing in Quests/Reiden.GalactosUprising_Seq3.yaml.
+Function:
+  Block: "Full-block against attacks well outside normal scale, including giant/boss-class weapons"
+  BlockBurst: "A well-timed block builds secondary charge that can be released as an outward burst, knocking the attacker back and feeding stored charge to the paired Convergence Blade for an immediate discharge"
+NarrativeIntent: >
+  The mechanical backbone of the "it's not always about strength when you
+  fight a Landwin" beat -- the shield doesn't out-muscle the blow, it
+  redirects and banks it, then the blade cashes the banked charge in.

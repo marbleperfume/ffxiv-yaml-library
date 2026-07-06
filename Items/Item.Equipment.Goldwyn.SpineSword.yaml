@@ -1,0 +1,33 @@
+Name: Spine Sword
+Category: Equipment
+Rarity: Unique
+Stacking:
+  IsStackable: false
+  MaxStacks: 1
+EquipmentData:
+  Slot: Weapon
+  Stats:
+    Atk: 180
+    Def: 0
+    MAG: 0
+    MED: 0
+  RestrictionTags:
+    - Tag.Character.Goldwyn.Unique
+Material: Vertebra of a Heavenly Black Drakol
+IconPath: ""
+Description: >
+  Forged from a single vertebra of a Heavenly Black Drakol -- more relic than
+  ordinary steel, and the only piece of Goldwyn's kit with any real bite. Its
+  edge holds a faint magnetic "grip" on whatever magic wavelength it last cut
+  deeply into, letting the Recall Sphere re-track a specific target rather
+  than just the sword itself. This magnetizing property is the mechanical
+  seat of the Nekrath finale (see Quests/Goldwyn.PathOfTravelers_Seq4.yaml):
+  it locks onto Nekrath's specific signature during the fight, which is why
+  the later ignite/Recall Sphere payoff only ever endangers Nekrath and not
+  the player -- felines hold their energy internally where it can be tagged
+  this way; Drakols and dragons don't, which is also why this trick could
+  never have worked if the roles were reversed.
+NarrativeIntent: >
+  Goldwyn's one genuinely dangerous asset, and also the one piece of his kit
+  that AREN'T load-bearing comedy -- it's the Chekhov's gun for the Nekrath
+  fight's finale.

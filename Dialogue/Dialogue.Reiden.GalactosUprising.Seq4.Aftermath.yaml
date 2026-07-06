@@ -1,0 +1,29 @@
+Key: Dialogue.Reiden.GalactosUprising.Seq4.Aftermath
+Scene: The outskirts, wreckage of Colossus Prime still smoking
+Participants:
+  - NPC.Friendly.MalachiteCity.ReidenKurogane
+  - Player
+Lines:
+  - Speaker: NPC.Friendly.MalachiteCity.ReidenKurogane
+    Text: "Galactos is already planning the next one. He always is."
+    ExpressionTag: Expression.Flat.Unimpressed
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.ReidenKurogane
+    Text: >
+      You held your own. I don't say that to just anyone. Whatever comes
+      next out of that workshop, I'd rather be standing next to you for it
+      than hearing about it after.
+    ExpressionTag: Expression.Flat.Unimpressed
+    VOPath: ""
+  - Speaker: Player
+    Text: "That an offer?"
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.ReidenKurogane
+    Text: "It's an offer. I don't repeat myself, so take it or don't."
+    ExpressionTag: Expression.Flat.Unimpressed
+    VOPath: ""
+NarrativeIntent: >
+  Closes Chapter 1's Reiden chain with his formal recruitment as a
+  standing ally -- terse, understated, consistent with his established
+  gets-the-job-done characterization throughout.

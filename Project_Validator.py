@@ -45,6 +45,40 @@ def get_enhancement_keys():
             keys.add(data['Key'])
     return keys
 
+def get_skill_registry():
+    """Key -> parsed data for every Skills/*.yaml file."""
+    registry = {}
+    for f in glob.glob("Skills/*.yaml"):
+        try:
+            data = load_yaml(f)
+        except Exception:
+            continue
+        if data.get('Key'):
+            registry[data['Key']] = data
+    return registry
+
+def check_race_bonus_skills(skill_registry):
+    """Every Race BonusSkills entry must resolve to a real Skill, and if that
+    skill declares RaceRestrictions, the granting race must be on the list --
+    a race shouldn't be handed a skill its own restrictions forbid it."""
+    for f in glob.glob("Races/*.yaml"):
+        if os.path.basename(f) == "Race_Library.yaml": continue
+        try:
+            data = load_yaml(f)
+        except Exception as e:
+            err(f"{f}: unparseable YAML ({e})")
+            continue
+        definition = data.get('Definition') or {}
+        subrace = definition.get('Subrace')
+        for skill_key in (definition.get('BonusSkills') or []):
+            if skill_key not in skill_registry:
+                err(f"{f} BonusSkills references missing Skill: {skill_key}")
+                continue
+            race_restrictions = skill_registry[skill_key].get('RaceRestrictions')
+            if race_restrictions and subrace and subrace not in race_restrictions:
+                err(f"{f} grants '{skill_key}' as a BonusSkill, but that skill's "
+                    f"RaceRestrictions {race_restrictions} doesn't include '{subrace}'")
+
 def check_region_enhancements(zone_data):
     """Every Region.Enhancement.TrackRef must resolve to a real Enhancements/*.yaml Key."""
     enhancement_keys = get_enhancement_keys()
@@ -100,6 +134,8 @@ def validate_project():
     zone_lib_path = os.path.join("Zones", "Zone_Library.yaml")
     if os.path.exists(zone_lib_path):
         check_region_enhancements(load_yaml(zone_lib_path))
+
+    check_race_bonus_skills(get_skill_registry())
 
     for npc_file in glob.glob("NPCs/**/*.yaml", recursive=True):
         try:

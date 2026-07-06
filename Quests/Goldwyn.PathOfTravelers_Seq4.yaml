@@ -1,0 +1,29 @@
+PipelineID: Goldwyn.PathOfTravelers
+SequenceIndex: 4
+QuestID: Goldwyn.PathOfTravelers.NekrathFinale
+StepType: Custom
+TargetNPCs:
+  - NPC.Boss.Nekrath
+  - NPC.Friendly.MalachiteCity.GoldwynExcelsior
+  - NPC.Friendly.MalachiteCity.KaelothWindpaw
+Action: Custom
+RequiresFlag: Goldwyn.PlanReady
+DialogueRef: Dialogue.Goldwyn.PathOfTravelers.Seq4.NekrathFinale
+Branches:
+  - Condition: "PlayerDowned == true"
+    Effect: "DoNotFail -- Nekrath's cocky PhaseLogic.Phase3Trigger prevents a kill; proceed straight into the scripted ignite beat rather than a wipe"
+OnComplete:
+  SetsFlag: Nekrath.Defeated
+Reward:
+  Copper: 0
+  ItemID: null
+  TitleID: null
+NarrativeIntent: >
+  Chapter-closing boss fight against NPC.Boss.Nekrath.yaml. Player handles
+  the majority of the fight; scripted beats (see
+  Dialogue.Goldwyn.PathOfTravelers.Seq4.NekrathFinale) strip Goldwyn's gear
+  piece by piece, down the player, and resolve the encounter through the
+  ignite/Recall Sphere/ghost-assist finisher rather than a conventional
+  DPS check. The PlayerDowned branch exists so the encounter can't
+  accidentally hard-fail the quest -- Nekrath's cockiness is diegetic, not
+  a UI safety net, but it still needs to be encoded as one.

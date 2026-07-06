@@ -237,6 +237,66 @@ Resolved (see git history / file contents for the actual fix):
   trivially split this fight otherwise; `RoleToolBudget` per-role
   (Tank: 1 tool expected, NonTank: 3) is encoded on both the quest and the
   Vanguard NPC.
+- **Racial bonus skills (GAS-referenced design decision)** — bonus racial
+  skills are granted via `RaceKey`, NOT baked into Class files. Rationale
+  (GAS-grounded): Lyra's `AbilitySet` pattern grants multiple independent
+  ability sets onto one ASC (class kit, racial bonus, equipment) rather than
+  one monolithic per-archetype blob; baking racial skills into Class files
+  would also reintroduce the Race×Class file multiplication problem already
+  avoided for class-switching. Mechanism, split grant-from-restriction like
+  GAS does: `RaceCreator.pyw`'s per-subrace spec files
+  (`Races/<Parent>_<Subrace>.yaml`) gained `Definition.Subrace` (the race's
+  own name, for cross-checking) and `Definition.BonusSkills` (a multi-select
+  Skill picker — the grant list, GAS-AbilitySet-equivalent), while the Skill
+  itself still carries `RaceRestrictions` (already existed on
+  `Skill.Combat.Drakol.GenerateWater` — the GAS-tag-requirement-equivalent
+  gate). A character's real kit is the union of Class `AssignedSkills` +
+  Race `BonusSkills` + skill-quest-earned skills + Mercenary-rank unlocks —
+  four independent sources, never one combined file. Worked example:
+  `Races/Wanderers_Lower_Drakols.yaml` grants `GenerateWater` via
+  `BonusSkills`. `Project_Validator.py` now cross-checks every Race's
+  `BonusSkills` resolve to a real `Skills/*.yaml` Key, and — if that skill
+  declares `RaceRestrictions` — that the granting race's `Subrace` is
+  actually on the list.
+
+- **Two Madolt NPCs, full quest chains (worked example)** — `Goldwyn.PathOfTravelers`
+  (Seq0-5) and `Reiden.GalactosUprising` (Seq0-4), each a full quest
+  Seq*.yaml + matching Dialogue/*.yaml chain like Chef.Crem.Courier.
+  Goldwyn Excelsior (`NPC.Friendly.MalachiteCity.GoldwynExcelsior.yaml`) is
+  a comedic-weak rich-boy Traveler hopeful whose gear
+  (`Items/Item.Equipment.Goldwyn.SpineSword.yaml`,
+  `Items/Item.Equipment.Goldwyn.RecallSphere.yaml`,
+  `Attire/GoldWasteplate_*.yaml`) does the work his own strength can't; his
+  mentor Kaeloth Windpaw (`NPC.Friendly.MalachiteCity.KaelothWindpaw.yaml`,
+  RaceKey `Unrecorded` -- new Landwin subrace added to
+  `Races/Race_Library.yaml` specifically to encode "lineage never
+  recorded" as intentional lore) dies in Seq2 to Nekrath
+  (`NPCs/Bosses/NPC.Boss.Nekrath.yaml`, RaceKey `Ancient Feline` -- new
+  Monsters entry), an Ancient feline offended by a Landwin inheriting their
+  martial style (`Skills/Skill.Combat.Landwin.EnergyChannel.yaml` +
+  `FelineSpiritForm.yaml` + `Summons/Summon.Landwin.FelineSpirit.yaml`).
+  Seq4 is the full cinematic finale (armor stripped piece by piece, player
+  downed, ignite via the Spine Sword's pre-magnetized lock on Nekrath's
+  internally-held energy, two failed Recall Sphere attempts, a ghost-assist
+  redirect, final explosion) -- the internal-vs-external energy distinction
+  is stated on-screen in Seq3 specifically to seal the "why doesn't this
+  work on anyone" plothole. Chain closes with the `Reputation.Agents.yaml`
+  faction founded as this world's Scions-equivalent. Reiden Kurogane
+  (`NPC.Friendly.MalachiteCity.ReidenKurogane.yaml`) is the anime-competent
+  foil: same RaceKey (Madolt), opposite relationship to strength. His paired
+  `Item.Equipment.Reiden.ConvergenceBlade/Shield.yaml` (gunlance-style
+  sword + tower shield, both electron-field "Elemental Convergence" tech)
+  block/discharge loop is taught small in Seq1 against
+  `NPCGroups/Group.MalachiteCity.GalactosDroneSquad.yaml`, then scaled up
+  in the Seq3 Chapter 1 finale (Susano-style ally-blocks-the-unblockable
+  beat vs `NPC.Boss.ColossusPrime.yaml`, deployed by recurring villain
+  `NPC.Boss.Galactos.yaml`, who escapes by design rather than dying).
+  Both Madolts share the same payoff line ("strength isn't the only thing
+  that wins a fight" / "it's not always about strength when you fight a
+  Landwin") as a deliberate structural echo. All Boss-folder files carry a
+  minimal `RankProfile` (Drakol-minimal pattern) purely for contract
+  completeness -- these are one-off scripted story fights, not repeatable
+  rank trials.
 
 Still open (needs a decision, not a unilateral fix):
 

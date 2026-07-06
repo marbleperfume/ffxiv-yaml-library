@@ -1,0 +1,17 @@
+Key: Reputation.Agents
+FactionName: Agents
+Description: >
+  Standing with the Agents -- the group Goldwyn Excelsior founds at the end
+  of Quests/Goldwyn.PathOfTravelers_Seq5.yaml, this world's Scions-of-the-
+  Seventh-Dawn equivalent, dedicated to preventing needless death and
+  conflict. Founding member roster starts at just Goldwyn and the player.
+Tiers:
+  - Threshold: 0
+    Title: Prospective Agent
+  - Threshold: 500
+    Title: Field Agent
+  - Threshold: 1500
+    Title: Trusted Agent
+Tags:
+  - Tag.Faction.Agents
+  - Tag.Quest.Goldwyn.PathOfTravelers

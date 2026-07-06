@@ -1,0 +1,20 @@
+Key: "Skill.Combat.Landwin.FelineSpiritForm"
+Name: "Feline Spirit Form"
+Intent: "Buff/summon GCD -- condenses channeled energy into an anthropomorphic tiger-spirit that fights alongside the caster, copying the Ancient feline martial style"
+Tags:
+  - "Skill.Type.Spell"
+  - "Skill.Element.None"
+RaceRestrictions:
+  - Unrecorded
+BaseState:
+  Animation: "Anim_Channel_SpiritCall"
+  VFX: "VFX_Landwin_FelineSpirit"
+  IsOGCD: false
+  CanCastWhileMoving: false
+SummonRef: Summon.Landwin.FelineSpirit
+NarrativeIntent: >
+  The Udyr half of Kaeloth's kit -- rather than shapeshifting himself, he
+  condenses channeled energy into a feline spirit (see
+  Summons/Summon.Landwin.FelineSpirit.yaml) that fights in the Ancient
+  feline style he learned. This borrowed style is the specific thing
+  Nekrath takes as an offense worth killing over.

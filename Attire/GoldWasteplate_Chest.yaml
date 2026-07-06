@@ -1,0 +1,11 @@
+Name: Gold Wasteplate Chest
+Slot: Torso
+IsDyeable: false
+RestrictionTags:
+  - Tag.Character.Goldwyn.Unique
+IconPath: ""
+Description: >
+  Gem-dusted Waste Metal breastplate, the visual centerpiece of Goldwyn's
+  "rich boy in golden armor" silhouette. Knocked loose partway through the
+  Nekrath fight, then deliberately ignited in the finale -- see
+  Quests/Goldwyn.PathOfTravelers_Seq4.yaml.

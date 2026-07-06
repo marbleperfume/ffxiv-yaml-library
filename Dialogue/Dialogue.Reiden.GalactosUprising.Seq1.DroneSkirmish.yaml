@@ -1,0 +1,27 @@
+Key: Dialogue.Reiden.GalactosUprising.Seq1.DroneSkirmish
+Scene: Reiden and the player clear a drone squad at the outskirts
+Participants:
+  - NPC.Friendly.MalachiteCity.ReidenKurogane
+  - Player
+Lines:
+  - Speaker: Narration
+    Text: >
+      [Reiden plants his Convergence Shield against the first drone volley
+      without flinching, then answers with a Convergence Blade discharge
+      that drops two drones in the same bolt.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.ReidenKurogane
+    Text: "Block, discharge, done. Whatever's left is yours."
+    ExpressionTag: Expression.Flat.Unimpressed
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.ReidenKurogane
+    Text: >
+      These are throwaway units. Galactos builds them cheap and loses them
+      on purpose -- means whatever he's actually protecting is close.
+    ExpressionTag: Expression.Flat.Unimpressed
+    VOPath: ""
+NarrativeIntent: >
+  Establishes the Convergence Blade/Shield combat loop (block -> charge ->
+  discharge) in a low-stakes skirmish before the Colossus Prime finale
+  scales the same loop up to building-size.

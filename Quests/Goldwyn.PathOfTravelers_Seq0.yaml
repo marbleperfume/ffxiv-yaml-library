@@ -1,0 +1,14 @@
+PipelineID: Goldwyn.PathOfTravelers
+SequenceIndex: 0
+QuestID: Goldwyn.PathOfTravelers.Introduction
+StepType: QuestGiver
+TargetNPCs:
+  - NPC.Friendly.MalachiteCity.GoldwynExcelsior
+Action: Dialogue_Override
+DialogueRef: Dialogue.Goldwyn.PathOfTravelers.Seq0.Introduction
+OnComplete:
+  SetsFlag: Goldwyn.Met
+NarrativeIntent: >
+  Cold-open on Goldwyn's premise: golden armor, borrowed strength, genuine
+  weakness played for comedy. No stakes yet -- purely characterization
+  before Seq1 introduces Kaeloth.

@@ -1,0 +1,150 @@
+Key: Dialogue.Goldwyn.PathOfTravelers.Seq4.NekrathFinale
+Scene: The player and Goldwyn confront Nekrath for the finale
+Participants:
+  - NPC.Friendly.MalachiteCity.GoldwynExcelsior
+  - NPC.Boss.Nekrath
+  - NPC.Friendly.MalachiteCity.KaelothWindpaw
+  - Player
+LevelSequenceRef: ""
+Lines:
+  - Speaker: NPC.Boss.Nekrath
+    Text: "Back again. And you brought help this time -- smarter than the last one, at least."
+    ExpressionTag: Expression.Cocky.Dismissive
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [BEAT 1 -- The Fight. The player carries the bulk of the encounter;
+      Goldwyn contributes a handful of openings, mostly deflections and
+      timing calls rather than raw damage, exactly as planned.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [BEAT 2 -- Goldwyn presses in for one real strike. Nekrath backhands
+      him aside without slowing down; the Gold Wasteplate Helm flickers and
+      fails to re-phase in time, knocked clean off.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.GoldwynExcelsior
+    Text: "That one I felt. Good -- I need to be paying attention for this part."
+    ExpressionTag: Expression.Weary.Resolute
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [BEAT 3 -- The Spine Sword is knocked from Goldwyn's grip and skids
+      well outside reach. He doesn't chase it.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Boss.Nekrath
+    Text: "Lose the sword and you're just a boy in a metal suit."
+    ExpressionTag: Expression.Cocky.Dismissive
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [BEAT 4 -- A follow-up blow shatters the Gold Wasteplate Chest.
+      Goldwyn is left standing in only the Gold Wasteplate Legs.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Boss.Nekrath
+    Text: >
+      You actually thought you stood a chance against the pinnacle of
+      strength. That's not bravery. That's just not understanding the
+      math.
+    ExpressionTag: Expression.Cocky.Dismissive
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [BEAT 5 -- Goldwyn removes the last armor piece himself, unhurried,
+      rather than having it torn off. It's the first thing all fight that
+      looks like a choice instead of damage.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.GoldwynExcelsior
+    Text: "Don't need these where we're going next."
+    ExpressionTag: Expression.Grim.Determined
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [BEAT 6 -- Nekrath turns his attention to the player and puts them
+      down hard -- decisively outclassed, not a close fight. He doesn't
+      finish it. He's too satisfied with himself to bother.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Boss.Nekrath
+    Text: "Stay down. Both of you. I've made my point."
+    ExpressionTag: Expression.Cocky.Dismissive
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.GoldwynExcelsior
+    Text: >
+      With Landwin -- and the people who borrow from them -- strength isn't
+      the only thing that wins a fight.
+    ExpressionTag: Expression.Weary.Resolute
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [BEAT 7 -- Goldwyn snaps his fingers. Every scattered piece of golden
+      Wasteplate -- helm, chest, the legs he just removed -- ignites at
+      once, magnetized against Nekrath's own signature since the moment the
+      Spine Sword first tasted it. Goldwyn himself is untouched. Nekrath is
+      wreathed in green magical fire.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Boss.Nekrath
+    Text: "What -- get this OFF of me--"
+    ExpressionTag: Expression.Shocked.Awe
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [BEAT 8 -- Goldwyn reaches for the Recall Sphere to finish it -- pull
+      the burning armor and the Spine Sword together, onto Nekrath, and end
+      this. It doesn't magnetize. The signal isn't catching.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.GoldwynExcelsior
+    Text: "No -- no, not now--"
+    ExpressionTag: Expression.Shocked.Awe
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [BEAT 9 -- Goldwyn runs at Nekrath, weak and staggering, and throws
+      the Recall Sphere by hand as a manual override. Nekrath, furious and
+      burning, flails an arm and bats it out of the air. It fails again.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [BEAT 10 -- Both the player and Goldwyn's heads follow the sphere as
+      it tumbles away, panicked. The camera pans past them -- and catches,
+      for one frame, a Landwin's fist meeting Nekrath's own channeled
+      strike in the empty air beside the falling sphere. Kaeloth Windpaw's
+      ghost. Everyone present, Nekrath included, is too stunned to move.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Boss.Nekrath
+    Text: "...You. You're supposed to be--"
+    ExpressionTag: Expression.Shocked.Awe
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.KaelothWindpaw
+    Text: "Can't keep a winner down."
+    ExpressionTag: Expression.Grim.Determined
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [BEAT 11 -- The redirected strike sends the Recall Sphere back on
+      course. It remagnetizes at last, and every burning piece of armor and
+      the Spine Sword converge on Nekrath's body at once. The resulting
+      blast reduces him to ash -- and consumes every piece of equipment
+      with him, save for the Spine Sword's handle, thrown clear by the
+      force of the explosion.]
+    ExpressionTag: ""
+    VOPath: ""
+NarrativeIntent: >
+  Full cinematic beat sheet for the Nekrath finale exactly as scripted:
+  fight -> helmet knocked off -> sword thrown aside -> chest shattered ->
+  legs self-removed -> player downed (Nekrath too cocky to finish either
+  combatant) -> ignite via magnetized armor -> Recall Sphere misfires twice
+  (auto, then manual throw) -> ghost-assisted redirect -> remagnetize ->
+  final explosion, sword handle the only survivor. Mechanically the
+  player carries most of the actual fight; Goldwyn's contributions are
+  narrative-critical but combat-light, consistent with his established
+  weakness.

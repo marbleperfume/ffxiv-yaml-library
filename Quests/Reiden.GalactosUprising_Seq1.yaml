@@ -1,0 +1,16 @@
+PipelineID: Reiden.GalactosUprising
+SequenceIndex: 1
+QuestID: Reiden.GalactosUprising.DroneSkirmish
+StepType: Custom
+TargetNPCs:
+  - NPC.Friendly.MalachiteCity.ReidenKurogane
+TargetNPCGroup: Group.MalachiteCity.GalactosDroneSquad
+Action: Custom
+RequiresFlag: Reiden.Met
+DialogueRef: Dialogue.Reiden.GalactosUprising.Seq1.DroneSkirmish
+OnComplete:
+  SetsFlag: DroneSquad.Cleared
+NarrativeIntent: >
+  Small combat step that teaches the Convergence Blade/Shield block-charge-
+  discharge loop against Group.MalachiteCity.GalactosDroneSquad.yaml before
+  it matters at boss scale in Seq3.

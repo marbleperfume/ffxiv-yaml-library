@@ -1,0 +1,24 @@
+Key: Dialogue.Reiden.GalactosUprising.Seq0.Introduction
+Scene: Reiden intercepts the player near a smoking outskirts checkpoint
+Participants:
+  - NPC.Friendly.MalachiteCity.ReidenKurogane
+  - Player
+Lines:
+  - Speaker: NPC.Friendly.MalachiteCity.ReidenKurogane
+    Text: "Galactos again. Drones inbound from the outskirts. You're geared for a fight?"
+    ExpressionTag: Expression.Flat.Unimpressed
+    VOPath: ""
+  - Speaker: Player
+    Text: "What's Galactos want this time?"
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.ReidenKurogane
+    Text: >
+      Same as always -- Malachite City, under new management, his. He never
+      says it that plainly. He builds toward it instead. Come on.
+    ExpressionTag: Expression.Flat.Unimpressed
+    VOPath: ""
+NarrativeIntent: >
+  No-nonsense introduction, gets-the-job-done trope stated through action
+  and brevity rather than exposition -- Reiden doesn't monologue about
+  Galactos, he just moves.

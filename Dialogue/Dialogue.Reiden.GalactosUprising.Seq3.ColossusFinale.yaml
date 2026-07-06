@@ -1,0 +1,69 @@
+Key: Dialogue.Reiden.GalactosUprising.Seq3.ColossusFinale
+Scene: Colossus Prime's building-scale slash is blocked and turned into an opening
+Participants:
+  - NPC.Friendly.MalachiteCity.ReidenKurogane
+  - NPC.Boss.ColossusPrime
+  - Player
+LevelSequenceRef: ""
+Lines:
+  - Speaker: Narration
+    Text: >
+      [Colossus Prime raises a sword easily the size of a city block and
+      brings it down toward the player -- a blow with no realistic dodge
+      window, the same kind of unblockable-by-normal-means strike a Susano
+      would need to answer. Reiden gets there first.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.ReidenKurogane
+    Text: "Not today."
+    ExpressionTag: Expression.Grim.Determined
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [The Convergence Shield takes the full blow without buckling. The
+      impact banks into a Block Burst -- Reiden releases it outward,
+      staggering Colossus Prime back a full stride, and feeds the stored
+      charge straight into the Convergence Blade.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.ReidenKurogane
+    Text: "It's not always about strength when you fight a Landwin."
+    ExpressionTag: Expression.Flat.Unimpressed
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [The Convergence Blade discharges the banked charge directly into
+      Colossus Prime's chassis. Systems arc and buckle across its frame --
+      it drops into a Downed Phase, wide open.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.ReidenKurogane
+    Text: "That's your opening. Take it."
+    ExpressionTag: Expression.Flat.Unimpressed
+    VOPath: ""
+  - Speaker: Narration
+    Text: >
+      [Distantly, over a damaged comm relay, Galactos's voice crackles in,
+      incredulous.]
+    ExpressionTag: ""
+    VOPath: ""
+  - Speaker: NPC.Boss.Galactos
+    Text: >
+      That's not -- that shield should NOT be able to take a hit like
+      that! Do you have any idea what that sword weighs?!
+    ExpressionTag: Expression.Shocked.Awe
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.ReidenKurogane
+    Text: "Apparently not as much as you think it should."
+    ExpressionTag: Expression.Flat.Unimpressed
+    VOPath: ""
+NarrativeIntent: >
+  Chapter 1 finale centerpiece, explicitly modeled on a Susano-style "ally
+  intercepts the unblockable" beat: Reiden's Convergence Shield eats a
+  building-scale blow, Block Bursts it, and feeds the banked charge into
+  the Convergence Blade for a discharge that forces Colossus Prime's Downed
+  Phase -- the player's real damage window. Reiden's slogan line lands right
+  after the block, mirrored against Goldwyn's "can't keep a winner down"
+  chain as the second Madolt's take on the same idea (preparation/technique
+  over raw strength), and Galactos's incredulous remote reaction punctuates
+  it rather than a direct rebuttal.

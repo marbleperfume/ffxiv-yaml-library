@@ -1,0 +1,52 @@
+Key: NPC.Friendly.MalachiteCity.ReidenKurogane
+Name: Reiden Kurogane
+Role: PartyMember
+Location: Zone.MalachiteCity.Plaza
+RaceKey: Madolt
+Gender: Male
+Appearance:
+  Note: >
+    Black hair, anime-protagonist silhouette. Heavy Gunlance-inspired plate
+    (Attire/ConvergencePlate_*.yaml) with no helmet -- face always visible,
+    a deliberate contrast against Goldwyn's phasing helm. Carries the paired
+    Elemental Convergence Blade and Shield
+    (Items/Item.Equipment.Reiden.ConvergenceBlade.yaml /
+    ConvergenceShield.yaml).
+Voice: ""
+SpeechPattern:
+  Theme: TerseCompetent_GetsItDone
+  Note: >
+    LLM authoring aid: understated, economical dialogue -- never narrates
+    his own competence, just states outcomes. Signature line, delivered flat
+    rather than triumphant: "It's not always about strength when you fight a
+    Landwin." Foil to Goldwyn's over-explaining; where Goldwyn brags before a
+    fight, Reiden reports after one.
+BanterSets:
+  Default:
+    - "Block. Discharge. Done. Every fight's some version of that."
+    - "Strength's not the only stat that wins a fight."
+Equipment:
+  Weapon: Item.Equipment.Reiden.ConvergenceBlade
+  Shield: Item.Equipment.Reiden.ConvergenceShield
+  Attire:
+    - ConvergencePlate_Chest
+    - ConvergencePlate_Arms
+    - ConvergencePlate_Legs
+AssignedSkills: []
+SocialLinks:
+  - NPC_ID: NPC.Boss.Galactos
+    Relation: RecurringRival
+    Tone: Flat_Unimpressed
+Tags:
+  - Tag.NPC.Friendly
+  - Tag.Race.Madolt
+  - Tag.Faction.Agents
+  - Tag.Quest.Reiden.GalactosUprising
+NarrativeIntent: >
+  Narrative main-supporting-character role (player is the protagonist).
+  Anime-protagonist-competence trope, contrasted deliberately against
+  Goldwyn: same race (Madolt), opposite relationship to strength -- Goldwyn
+  compensates for weakness with gear and planning, Reiden's gear IS his
+  competence expressed directly. Introduced via Quests/Reiden.GalactosUprising
+  chapter 1, which closes on him block-bursting a building-scale blow from
+  Colossus Prime and discharging it for the player's finishing window.

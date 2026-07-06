@@ -1,0 +1,31 @@
+Name: Elemental Convergence Blade
+Category: Equipment
+Rarity: Unique
+Stacking:
+  IsStackable: false
+  MaxStacks: 1
+EquipmentData:
+  Slot: Weapon
+  Stats:
+    Atk: 220
+    Def: 10
+    MAG: 40
+    MED: 0
+  RestrictionTags:
+    - Tag.Character.Reiden.Unique
+Material: Convergence-forged alloy, self-generating electron field
+IconPath: ""
+Description: >
+  A sword-length, bladed evolution of a gunlance -- a real melee edge that
+  also wraps itself in a self-sustained electron field. The field lets the
+  blade discharge stored charge as a cannon-grade bolt (short range, huge
+  single-target burst) instead of only cutting, and pairs directly with
+  Item.Equipment.Reiden.ConvergenceShield.yaml: a shield Block Burst dumps
+  its stored charge straight into this weapon for an immediate discharge.
+Function:
+  MeleeMode: "Standard bladed melee weapon, no different from any other sword"
+  DischargeMode: "Consumes stored electron-field charge to fire a single heavy bolt -- the finisher used to stagger Colossus Prime in Quests/Reiden.GalactosUprising_Seq3.yaml"
+NarrativeIntent: >
+  Reiden's kit answers "what if a gunlance's melee mode were the primary
+  form and the cannon were the special, not the other way around" -- gets
+  the job done in either mode, no gimmick required to justify carrying it.

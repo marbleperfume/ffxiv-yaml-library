@@ -13,7 +13,7 @@ class RaceCreatorApp:
     def __init__(self, root):
         self.root = root
         self.root.title("AAA Race Design Suite")
-        self.root.geometry("600x850")
+        self.root.geometry("600x950")
         
         # Load Schema and Base Data
         self.schema, self.base_data = get_full_attribute_data(__file__)
@@ -50,6 +50,13 @@ class RaceCreatorApp:
         tk.Label(root, text="Banned Tags (Name/Key, comma separated):").pack()
         self.ban_entry = tk.Entry(root, width=50); self.ban_entry.pack()
 
+        # --- Bonus Skills (racial AbilitySet, orthogonal to Class kit) ---
+        tk.Label(root, text="Bonus Skills (granted by race, independent of Class):").pack(pady=(10, 0))
+        self.bonus_skills_listbox = tk.Listbox(root, selectmode=tk.MULTIPLE, height=5, width=55, exportselection=False)
+        for skill in self.get_list("Skills"):
+            self.bonus_skills_listbox.insert(tk.END, skill)
+        self.bonus_skills_listbox.pack()
+
         # --- Attribute Modifiers ---
         tk.Label(root, text="--- Attribute Modifiers ---", font=("Arial", 10, "bold")).pack(pady=10)
         
@@ -67,6 +74,10 @@ class RaceCreatorApp:
             self.stats[stat] = entry
 
         tk.Button(root, text="Save AAA Race Spec", command=self.save_yaml, bg="#2c3e50", fg="white", height=2, width=30).pack(pady=20)
+
+    def get_list(self, folder):
+        if not os.path.exists(folder): return []
+        return sorted(f.replace('.yaml', '').replace('.yml', '') for f in os.listdir(folder) if f.endswith(('.yaml', '.yml')))
 
     def load_and_populate_library(self):
         """Loads data from Races/Race_Library.yaml and populates the Treeview."""
@@ -102,9 +113,11 @@ class RaceCreatorApp:
             'Intent': {'Narrative': self.narr_entry.get()},
             'Definition': {
                 'ParentCategory': parent,
+                'Subrace': subrace,
                 'AttributeModifiers': stat_data,
                 'Assets': {'Mesh': self.mesh_entry.get(), 'AnimSet': self.anim_entry.get()},
-                'Restrictions': {'BannedTags': [b.strip() for b in self.ban_entry.get().split(',') if b.strip()]}
+                'Restrictions': {'BannedTags': [b.strip() for b in self.ban_entry.get().split(',') if b.strip()]},
+                'BonusSkills': [self.bonus_skills_listbox.get(i) for i in self.bonus_skills_listbox.curselection()]
             }
         }
         
