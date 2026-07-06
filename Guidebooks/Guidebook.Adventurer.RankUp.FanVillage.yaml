@@ -1,0 +1,13 @@
+Key: Guidebook.Adventurer.RankUp.FanVillage
+Topic: Adventurer
+Region: FanVillage
+PopupTitle: "Growing Stronger"
+PopupText: >
+  Adventurer rank rises the more you prove yourself here: your character
+  level, your hunting log, how much of FanVillage you've explored -- and a
+  relic you can grow across both OpenWorld and Cliffside. Ask this region's
+  guide for the specifics.
+WaypointNPC: null   # TBD -- set once a guide NPC is authored for FanVillage
+TriggerCondition: FirstEntryToRegion
+RelatedSystem: Ranks.Adventurer.Defaults
+RelatedEnhancement: Enhancements.Relic.FanVillage

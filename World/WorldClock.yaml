@@ -1,0 +1,10 @@
+Key: World.Clock.Primary
+Description: >
+  Global game-time clock. Borrows the FFXIV Eorzea Time convention of running
+  faster than real time so day-cycle-gated content resolves inside a normal
+  play session, even with no map/level yet to visualize it against.
+RealSecondsPerGameDay: 4200          # 70 real minutes per full game day
+GameHoursPerDay: 24
+DayStartEpoch: 0                     # game-seconds elapsed at world start; placeholder until save/load exists
+Tags:
+  - Tag.World.Clock

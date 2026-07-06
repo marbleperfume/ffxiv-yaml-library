@@ -1,0 +1,28 @@
+PipelineID: Test.Mercenary.Rank3.Tank
+SequenceIndex: 0
+QuestID: Quest.Test.Mercenary.Rank3.Tank
+StepType: Custom
+Role: Tank
+TargetNPCs:
+  - NPC.Boss.Test.MechaGolem
+Action: Custom
+RequiresFlag: Quest.Test.Mercenary.Rank2.Tank.Cleared
+TestConfig:
+  ForcedDoctrineLevel: Level3
+  Checks:
+    - RoleMechanicUse
+    - ClassMechanicUse
+    - CastBarTiming
+    - StabilityContestAvoidance
+Reward:
+  TitleID: null
+  ItemID: null
+  Copper: 0
+  Reputation: null
+NarrativeIntent: >
+  Broad Mercenary Rank 3 test, Tank variant. Escalates
+  NPC.Boss.Test.MechaGolem to Doctrine Level3, which adds the Stability
+  Contest hazard: casting a Tag.Skill.Risky skill while the Golem is
+  mid-cast instantly drops the player's own cast. Passing requires
+  everything Rank2 required, plus avoiding (or deliberately timing around)
+  that hazard.

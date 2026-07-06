@@ -1,0 +1,17 @@
+Key: NPC.Friendly.MalachiteCity.TryllChild
+Name: Wyllo
+Role: Static
+Location: Zone.MalachiteCity.Residential
+RaceKey: Tryll
+Gender: Male
+Age: Child
+SpeechPattern:
+  Theme: Guarded_Hopeful
+  Note: >
+    LLM authoring aid: withdrawn/deflated in Seq1, wary-but-curious through
+    Seq3, opens up once Crem shares his backstory in Seq4. The hurt should
+    read as quiet, never bratty or tantrum-y.
+Tags:
+  - Tag.NPC.Friendly
+  - Tag.Race.Tryll
+  - Tag.Quest.Chef.Crem.Courier

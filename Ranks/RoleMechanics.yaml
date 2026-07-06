@@ -1,0 +1,32 @@
+Key: Ranks.RoleMechanics
+Description: >
+  RoleMechanic = the skill/resource/stance unique to a Role, tested during
+  Mercenary rank-up (see Ranks/Mercenary_Unlocks.yaml). Distinct from
+  ClassMechanic (Classes/ClassMechanics.yaml), which is per-Class within a
+  Role rather than shared across the whole Role.
+Tank:
+  Definition: >
+    Focus generation + Aggro management + Unfocus application -- see
+    Combat/AggroSystem.yaml. A Tank's RoleMechanic skills (e.g.
+    Skills/Shield_Bash.yaml) generate Focus and apply Unfocus stacks,
+    letting the Tank hold an enemy's attention while blunting its escalated
+    kit rather than its baseline attacks.
+  ExampleSkill: Skill.Combat.Shield.Bash
+Healer:
+  Definition: >
+    Healing output under genuine HP pressure. Unlike Tank/DPS, a Healer's
+    RoleMechanic can't be exercised on demand -- it only manifests once the
+    party (or the Healer) is at critical HP / risk of losing, since a
+    Healer otherwise spends most of an encounter buffing or dealing damage.
+    This is why the Healer Mercenary test
+    (Quest.Test.Mercenary.Rank2.Healer) is structured as a buff/damage
+    phase followed by a forced crisis, rather than a continuous check like
+    the Tank/DPS Golem test.
+  ExampleSkill: null   # TBD -- no healer skills authored yet
+DPS:
+  Definition: >
+    Maximum rotation uptime -- sustained optimal skill sequencing rather
+    than a resource/stance. Reuses the same Mecha Golem test shape as Tank
+    (RoleMechanic/ClassMechanic/timing checks against the Golem's cast
+    bar), swapping in rotation-uptime as the RoleMechanic being graded.
+  ExampleSkill: null   # TBD -- no worked example authored yet

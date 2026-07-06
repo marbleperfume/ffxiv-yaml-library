@@ -78,14 +78,173 @@ Resolved (see git history / file contents for the actual fix):
   `TagSelectorModal` were duplicated verbatim in three tools~~ — extracted into
   shared `tag_library.py`, imported by `Item Registry Creator.pyw`,
   `ConditionCreator.pyw`, and `AttireCreator.pyw`.
+- ~~All `tk.Listbox` widgets defaulted to `exportselection=True`, so selecting
+  in one listbox silently cleared another's selection (multi-list forms lost
+  data on save)~~ — every Listbox in the repo now passes `exportselection=False`.
+- ~~`Skill Creator.pyw` had its own stale copy of `add_to_tag_library` and no
+  cooldown/combo/status/class fields~~ — reworked to the GameplayAbility shape
+  (ActionType/IsOGCD, RecastTime, MaxCharges, Resource, Combo, AppliesStatuses,
+  ClassRestrictions), now imports shared `tag_library.py`.
+- ~~`LootCreator.pyw` wrote one entry per file, unable to express the loot
+  tables NPC YAML references~~ — now a table editor: one file per table with an
+  `Entries` list (load/edit/save roundtrip).
+- ~~`SummonCreator.pyw` hardcoded its own attribute list~~ — now pulls the
+  schema from `attr_loader` like Race/Character/Class creators.
+- ~~`BossCreator.pyw` output had no identity — no Key, TemplateRef, skills, or
+  loot link~~ — now writes `Identity.Key` (`NPC.Boss.*`), optional TemplateRef,
+  AssignedSkills, and a LootTable reference.
+
+## Additions (2026-07-06)
+
+- **New content types + folders**: `Quests/` (extended step schema: StepType,
+  TargetNPCs list, TargetNPCGroup, DialogueRef, GrantItem, RequiresFlag /
+  OnComplete.SetsFlag, Branches, Reward.Copper / Reward.Reputation),
+  `Dialogue/` (per-scene files: Participants, Lines with
+  Speaker/Text/ExpressionTag/VOPath, LevelSequenceRef for cutscenes),
+  `Expressions/expression_library.txt` (+ shared `expression_library.py`,
+  mirrors tag_library pattern; maps to GameplayCue.Expression.* / facial
+  montages in UE5), `NPCGroups/`, `Reputation/`, `World/WorldClock.yaml`
+  (Eorzea-style accelerated clock), `Zones/Zone_Library.yaml` (MalachiteCity
+  is `IsPlaceholder: true` — a stand-in town until maps exist).
+- **New tools**: `DialogueCreator.pyw`; `QuestCreator.pyw` reworked (tabbed,
+  produces the extended schema; still viewer-compatible).
+- **Reference quest chain**: `Chef.Crem.Courier` Seq0–Seq5 + 6 dialogue files —
+  treat as the canonical example of the extended schema.
+- **Races**: `Race_Library.yaml` gained a `Monsters` category (unique race per
+  monster, e.g. `Bee Cloud`); ClassCreator/CharacterCreator exclude it — class
+  kits are racially locked to playable races only. `ClassCreator.pyw` now
+  multi-selects races and batch-writes one `Race_Class.yaml` per selection.
+- **`NPC Hostile Creator.pyw` deleted** (was a strict field subset of
+  `NPCCreator.pyw`; confirmed with user before removing).
+- **Hub_Master**: `export_project_relationships` was never wired into the File
+  menu (unreachable) — now added, alongside a new **Export Gameplay Tags**
+  action that emits a UE5 `DefaultGameplayTags.ini` from the tag library,
+  expression library (as `GameplayCue.Expression.*`), and every YAML `Tags:`
+  list, skipping entries that violate UE5 tag naming.
+- **Rank pipeline (`Ranks/` folder)** — the three-pillar system is now a
+  formal contract; `Ranks/Rank_System.yaml` is canonical. Core rules: enemies
+  only read a per-area-resolved snapshot `{Adventurer, Mercenary, Strategy:
+  1-3}`, never raw progression; enemy `RankProfile` requires `Mercenary.Rank1`
+  and `Doctrine.Level1` (higher tiers optional, missing tier inherits the tier
+  below); enemy-side Strategy is named **Doctrine**; Adventurer is
+  subzone-scoped (widens per `Zone_Library.yaml` `RankEscalation`), Mercenary
+  and Strategy are account-scoped; Mercenary adds kit breadth + SyncRetention,
+  never potency; gear never feeds rank computation; Doctrine mechanics
+  requiring outside knowledge must declare `KnowledgeChecks` with a
+  `LoreSource`. `Zone_Library.yaml` restructured to Regions → Subzones with
+  LevelBand. Drakol/BeeCloud migrated `RankScaling` → `RankProfile` (Drakol =
+  minimal example, BeeCloud = full-tier example). `NPCCreator.pyw` authors the
+  new shape (empty tier box = omitted = inherits). `Project_Validator.py`
+  enforces the contract (required tiers, inherit direction, LoreSource,
+  RaceKey ↔ Race_Library, Location ↔ Zone_Library) and exits nonzero on
+  failure. `CharacterCreator.pyw` rank spinboxes now 1-3 to match the
+  snapshot range.
+- **Adventurer rank-up methods** — see **`RankUpMethods.md`** (design-doc
+  reference, not shown in-game) for the full writeup. Summary: Adventurer
+  gained a 4th weighted source, `RegionEnhancement` (20 of 100, redistributed
+  to the other three if a Region declares none), fed by a per-Region
+  enhancement track declared in `Zone_Library.yaml` (`Enhancement.Model`:
+  `Relic` or `Materia` — varies per region, not fixed globally) and defined in
+  the new `Enhancements/` folder (`Enhancements/Relic.FanVillage.yaml` is the
+  worked Relic example; Materia has no worked example yet — write one when a
+  region actually wants it). New `Guidebooks/` folder holds in-game pop-up
+  content pointing players at rank-up methods
+  (`Guidebook.Adventurer.RankUp.FanVillage.yaml`: PopupTitle/PopupText +
+  optional WaypointNPC, left `null` until a real guide NPC exists — don't
+  invent one to fill the field). `Project_Validator.py` now checks every
+  Region's `Enhancement.TrackRef` resolves to a real `Enhancements/*.yaml`.
+  Mercenary/Strategy/racial-summon rank-up methods are still pending — stubbed
+  in `RankUpMethods.md` so they read as "not designed yet," not forgotten.
+- **Mercenary rank-up methods (worked example)** — new `Combat/AggroSystem.yaml`
+  is the canonical Focus/Aggro/Unfocus contract: `Aggro = Proximity + Focus +
+  StrategyRankModifier` (weighted), an enemy drops its current cast and
+  retargets if a non-current-target's Aggro crosses
+  `RankProfile.Doctrine.<Tier>.FocusRedirectThreshold` — a genuine
+  self-interrupt, not just a threat-table swap. This *is* the Tank
+  RoleMechanic (`Ranks/RoleMechanics.yaml`), not a separate system; Healer's
+  RoleMechanic is Healing-under-pressure (can't be exercised on demand, hence
+  its test's different shape); DPS is Maximum Rotation Uptime (no worked
+  example yet). `Classes/ClassMechanics.yaml` (PLACEHOLDER, only Adafold's
+  "Bulwark Gauge" defined) and `Classes/Class_Prerequisites.yaml` (Base = no
+  gate; Promoted = Base-class level + Role Quest + Mercenary Rank2; Special =
+  a SEPARATE track, not built on Promoted, requiring its own quest + Mercenary
+  Rank3 — one worked example each, Lancer/Dracomancer, both forward-reference
+  quests that don't exist yet) round out the class side.
+  `Passives/Unfocus.yaml` (stacking debuff, reduces potency of an enemy's
+  Doctrine Level2/3 skills only) and `Skills/Shield_Bash.yaml` (Adafold's
+  Focus-generating RoleMechanic skill, gated behind a skill quest rather than
+  granted by leveling) are the worked content. `Ranks/Mercenary_Unlocks.yaml`
+  now states the `SkillQuestGate` rule explicitly (clear every skill quest for
+  skills outside the current class's level-up schema before the broad
+  Rank2/Rank3 test unlocks) and `TestQuest` varies per Role. Test fixture:
+  `NPCs/Bosses/NPC.Boss.Test.MechaGolem.yaml` reuses `RankProfile.Doctrine` to
+  express the test tiers themselves — Level2 has a `RandomCastPool` of 3
+  skills (one randomly selected per attempt, tests adaptability not
+  memorization), Level3 adds a `StabilityContest` hazard (using a
+  `Tag.Skill.Risky` skill mid-cast instantly drops the player's own cast). Four
+  worked quests in `Quests/`: `SkillQuest.Adafold.ShieldBash`,
+  `Test.Mercenary.Rank2.Tank`, `Test.Mercenary.Rank3.Tank`,
+  `Test.Mercenary.Rank2.Healer` (buff/damage phase → crisis-triggered healing
+  phase, rather than a continuous check). `Project_Validator.py`'s existing
+  RankProfile checks cover this fixture without modification (Doctrine
+  inherit-direction, required tiers).
+- **Racial summon exemption (worked example)** — `Ranks/Rank_System.yaml`
+  gained `RacialSummonExemption`: a Summon with a `RacialAttachment` field
+  (`RaceKey` + `MercStratExempt: true`) bypasses Mercenary/Strategy gating
+  entirely, even though summons normally count as "extra buttons" gated like
+  Skills/Classes — cross-referenced from both `Mercenary_Unlocks.yaml` and
+  `Strategy_Unlocks.yaml`. Worked example: `Summons/Water_Slime.yaml`, unique
+  to the "Lower Drakols" race (matches `Race_Library.yaml` exactly — the
+  existing `NPC.Enemy.Drakol.Lower.yaml` gained `RaceKey: Lower Drakols` and
+  `InnateSummon: Summon.Water.Slime` to tie the lore in). Mechanically it's
+  not a normal on/off summon: `PresenceType: Innate` (present by default, no
+  cast needed) with a `DismissTrigger` — the new racial skill
+  `Skills/GenerateWater.yaml` (`Skill.Combat.Drakol.GenerateWater`, gated via
+  a new `RaceRestrictions` field, parallel to `ClassRestrictions`) temporarily
+  dismisses it for a water-environment synergy, and it returns on its own
+  after `ReturnAfterSeconds`. The trade-off: the Slime's `PassiveEffect`
+  suppresses `Passives/DrySkin.yaml` (new — Fire damage-taken +15%, Speed
+  -10) while present; dismissing it removes that suppression for the
+  window. `Water Slime` as a name already existed as an unrelated alchemy
+  consumable (`Items/Item.Consumable.WaterSlime.yaml`) — confirmed by the
+  user to be a deliberate planted artifact testing exactly this kind of
+  naming-collision handling; left untouched, different category/key, no
+  actual collision. Correct call was to flag it and not merge/rename either
+  file.
+  Note: the real race/Drakol lore this is based on lives in a text file on
+  the user's other PC, not in this repo — what's captured here is a
+  from-scratch retelling given in this conversation, so treat it as
+  authoritative unless the original file resurfaces and disagrees.
+- **Strategy rank-up methods (worked example)** — `Ranks/Strategy_Unlocks.yaml`
+  gained `TestEncounterConstraints`: Strategy tests always draw from a
+  Goblin/Flying-enemy pool and escalate by RECOMBINING those building blocks
+  into a new layout per rank — a different pattern than Mercenary tests,
+  which reuse one NPC and escalate via `RankProfile.Doctrine` tiers. Also
+  gained `RoleToolBudget`: Tanks are expected to need fewer of a test's
+  provided tactical tools than other roles (their RoleMechanic already
+  covers part of the job), and that gap widens at higher Strategy rank.
+  Worked example (Rank2): `NPCs/Bosses/NPC.Boss.Test.GoblinVanguard.yaml`
+  (melee frontline, Doctrine Level1 only — no tier escalation on this file)
+  plus `NPCGroups/Group.Test.GoblinRangedCasters.yaml` (3 ranged AoE
+  casters). New `Items/Item.Tactical.*.yaml` (Category: `Tactical`, not yet
+  in Item Registry Creator's Category dropdown): Smokescreen
+  (suppresses ranged targeting so the player can safely close on the
+  Vanguard), Bombs (flat burst damage, any role), Traps (conditional
+  immobilize — breaks free if cumulative damage on the target exceeds a
+  small threshold, so committing real damage costs you the control). The
+  quest `Quests/Test.Strategy.Rank2_Seq0.yaml` runs the whole thing solo
+  (`SoloOnly: true`) specifically because a party's tank/healer would
+  trivially split this fight otherwise; `RoleToolBudget` per-role
+  (Tank: 1 tool expected, NonTank: 3) is encoded on both the quest and the
+  Vanguard NPC.
 
 Still open (needs a decision, not a unilateral fix):
 
-- File naming is inconsistent at the tool level: `NPC Hostile Creator.pyw`,
-  `Item Registry Creator.pyw`, `Skill Creator.pyw`, `Title Registry Creator.pyw`
-  have spaces; most other tools don't. Nothing references these filenames
-  programmatically (grepped — clean), but renaming may break desktop
-  shortcuts/muscle memory, so ask before renaming.
+- File naming is inconsistent at the tool level: `Item Registry Creator.pyw`,
+  `Skill Creator.pyw`, `Title Registry Creator.pyw` have spaces; most other
+  tools don't. Nothing references these filenames programmatically (grepped —
+  clean), but renaming may break desktop shortcuts/muscle memory, so ask
+  before renaming.
 
 ## Roadmap / Direction (from design notes)
 

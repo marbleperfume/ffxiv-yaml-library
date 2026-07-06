@@ -1,0 +1,17 @@
+Key: Item.Tactical.Bombs
+Name: Bombs
+Category: Tactical
+Rarity: Common
+Stackable: true
+MaxStacks: 10
+Description: >
+  Thrown consumable. Deals flat burst damage regardless of role or gear --
+  lets any role contribute meaningful direct damage against a tough single
+  target (e.g. a Goblin Vanguard) without relying on a damage-focused kit.
+Effect:
+  Type: DirectDamage
+  Potency: 400
+  Targeting: Target
+IconPath: ""
+RestrictionTags:
+  - Tag.Quest.Strategy.Trial

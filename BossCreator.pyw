@@ -11,6 +11,26 @@ class BossCreatorApp:
         tk.Label(root, text="Boss Name:").pack(pady=2)
         self.name_entry = tk.Entry(root, width=50); self.name_entry.pack()
 
+        # --- Identity Links (so the boss resolves to real character/skill/loot data) ---
+        link_frame = tk.LabelFrame(root, text="Identity & Data Links")
+        link_frame.pack(fill="x", padx=10, pady=5)
+
+        tk.Label(link_frame, text="Character Template (optional — leave blank for a flat boss):").pack()
+        self.template_cb = ttk.Combobox(link_frame, values=[""] + self.get_list("Characters"), state="readonly", width=45)
+        self.template_cb.current(0)
+        self.template_cb.pack()
+
+        tk.Label(link_frame, text="Assigned Skills:").pack()
+        self.skills_listbox = tk.Listbox(link_frame, selectmode=tk.MULTIPLE, height=5, width=48, exportselection=False)
+        for skill in self.get_list("Skills"):
+            self.skills_listbox.insert(tk.END, skill)
+        self.skills_listbox.pack()
+
+        tk.Label(link_frame, text="Loot Table:").pack()
+        self.loot_cb = ttk.Combobox(link_frame, values=["None"] + self.get_list("Loot"), state="readonly", width=45)
+        self.loot_cb.current(0)
+        self.loot_cb.pack()
+
         # --- Health vs DPS Timeline Expectations ---
         time_frame = tk.LabelFrame(root, text="Encounter Math (FF14 Style DPS vs Health)")
         time_frame.pack(fill="x", padx=10, pady=10)
@@ -42,11 +62,22 @@ class BossCreatorApp:
 
         tk.Button(root, text="Save Boss Architecture", command=self.save_yaml, height=2, width=30, bg="#c0392b", fg="white").pack(pady=20)
 
+    def get_list(self, folder):
+        if not os.path.exists(folder): return []
+        return sorted(f.replace('.yaml', '').replace('.yml', '') for f in os.listdir(folder) if f.endswith(('.yaml', '.yml')))
+
     def save_yaml(self):
         name = self.name_entry.get().strip()
         if not name: return messagebox.showerror("Error", "Name required.")
 
         data = {
+            'Identity': {
+                'Key': f"NPC.Boss.{name.replace(' ', '.')}",
+                'Name': name,
+                'TemplateRef': self.template_cb.get() or None
+            },
+            'AssignedSkills': [self.skills_listbox.get(i) for i in self.skills_listbox.curselection()],
+            'LootTable': self.loot_cb.get() if self.loot_cb.get() != "None" else None,
             'EncounterMath': {
                 'ExpectedDurationMinutes': float(self.dur_entry.get()),
                 'BaseHealthPlaceholder': int(self.hp_entry.get())
@@ -64,7 +95,7 @@ class BossCreatorApp:
         
         if not os.path.exists("NPCs/Bosses"): os.makedirs("NPCs/Bosses")
         with open(f"NPCs/Bosses/{name.replace(' ', '_')}.yaml", 'w') as f:
-            yaml.dump(data, f, default_flow_style=False)
+            yaml.dump(data, f, default_flow_style=False, sort_keys=False)
         messagebox.showinfo("Success", "Boss Saved.")
 
 if __name__ == "__main__":

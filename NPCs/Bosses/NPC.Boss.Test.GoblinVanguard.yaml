@@ -1,0 +1,52 @@
+Identity:
+  Key: NPC.Boss.Test.GoblinVanguard
+  Name: Goblin Vanguard (Strategy Trial)
+  TemplateRef: null
+AssignedSkills:
+  - Skill.Combat.Goblin.ShieldSlam
+  - Skill.Combat.Goblin.Taunt
+LootTable: null
+Tags:
+  - Tag.NPC.Test
+  - Tag.Quest.Strategy.Trial
+EncounterMath:
+  ExpectedDurationMinutes: 3.0
+  BaseHealthPlaceholder: 25000
+PhaseLogic:
+  Phase2Trigger: null
+  Phase3Trigger: null
+MechanicScaling:
+  AnimTier: 1
+  Rank1_MacroMechanic: "Melee-only frontline threat, no ranged capability of its own"
+  Rank2_MicroPunish: "Can be trapped (Item.Tactical.Traps), but the trap breaks free if it takes more than the trap's DamageThreshold in cumulative damage"
+
+# --- Rank Profile (see Ranks/Rank_System.yaml) ---
+# Test fixture, not a normal overworld enemy. Unlike the Mercenary trial
+# (NPC.Boss.Test.MechaGolem.yaml), Strategy rank escalation does NOT happen
+# via Doctrine tiers on this NPC -- it happens by recombining this and other
+# goblin/flying building blocks into a new layout per rank (see
+# Ranks/Strategy_Unlocks.yaml TestEncounterConstraints). This file only
+# needs Level1.
+RankProfile:
+  PartyResolution: Lowest
+  Adventurer:
+    LootCurve: null
+  Mercenary:
+    Rank1:
+      - Condition: "TargetInRange"
+        Action: "Skill.Combat.Goblin.ShieldSlam"
+        CastTime: 2.0
+  Doctrine:
+    Level1:
+      Profile: Profile.Test.StrategyTrial
+      AggroRadius: 900
+      LeashRadius: 900
+      ResetBehavior: FullReset
+      Note: >
+        In a normal party, the tank/healer would just handle this unit
+        while ranged DPS answers the goblin casters elsewhere -- trivial.
+        The Strategy Rank2 test (Quest.Test.Strategy.Rank2) runs this SOLO
+        instead, removing that option.
+      RoleToolBudget:
+        Tank: 1     # expected to need at most 1 of the 3 provided tools
+        NonTank: 3  # expected to use all 3 tools as intended

@@ -59,7 +59,7 @@ class ConditionCreatorApp:
         btn_frame = tk.Frame(restrict_frame); btn_frame.pack()
         tk.Button(btn_frame, text="Add Tag", command=self.add_tag).pack(side="left", padx=2)
         tk.Button(btn_frame, text="Tag List", command=self.open_tag_modal).pack(side="left", padx=2)
-        self.tags_listbox = tk.Listbox(restrict_frame, height=4, width=40); self.tags_listbox.pack()
+        self.tags_listbox = tk.Listbox(restrict_frame, height=4, width=40, exportselection=False); self.tags_listbox.pack()
         tk.Button(restrict_frame, text="Remove Selected", command=self.remove_tag).pack()
 
         tk.Button(root, text="Save Condition", command=self.save_yaml, height=2, width=20, bg="#2c3e50", fg="white").pack(pady=20)

@@ -1,0 +1,42 @@
+Key: Ranks.Strategy
+Scope: Account
+PlayerFacingName: Strategy      # what the player sees: item gate + indicator
+EnemyFacingName: Doctrine       # what enemy YAML uses: AI pattern tiers
+Description: >
+  Player-side Strategy rank is tested through the same instanced-quest
+  mechanism as Mercenary and gates specific items. Enemy-side, the pillar is
+  named Doctrine and lives in each enemy's RankProfile.Doctrine block --
+  the split name keeps "Strategy 2 player vs Doctrine 3 enemy" unambiguous.
+Rank1:
+  ItemGates: []
+Rank2:
+  TestQuest: Quest.Test.Strategy.Rank2
+  ItemGates: []                 # item Keys requiring Strategy >= 2
+Rank3:
+  TestQuest: Quest.Test.Strategy.Rank3
+  ItemGates: []
+RacialSummonException: >
+  Summons are normally item-gated the same as anything else above -- EXCEPT
+  summons with a RacialAttachment field (see Ranks/Rank_System.yaml
+  RacialSummonExemption), which bypass this gate entirely. Worked example:
+  Summons/Water_Slime.yaml.
+TestEncounterConstraints: >
+  Strategy tests always use Goblins or Flying enemies as the enemy pool --
+  never a new monster archetype per rank. This is a DIFFERENT escalation
+  pattern than Mercenary tests: Mercenary reuses one NPC and escalates via
+  RankProfile.Doctrine tiers (see NPC.Boss.Test.MechaGolem.yaml); Strategy
+  reuses a small set of goblin/flying building-block NPCs and escalates by
+  RECOMBINING them into a new layout per rank (different count, arrangement,
+  which building blocks appear) rather than tiering up any single enemy.
+  Worked example (Rank2): a melee Goblin Vanguard + ranged AoE-casting
+  goblins (see NPCs/Bosses/NPC.Boss.Test.GoblinVanguard.yaml,
+  NPCGroups/Group.Test.GoblinRangedCasters.yaml).
+RoleToolBudget: >
+  Tanks are expected to need FEWER of a Strategy test's provided tactical
+  tools (Smokescreen/Bombs/Traps, see Items/Item.Tactical.*.yaml) than other
+  roles for the same test, since their inherent RoleMechanic (Focus/Aggro/
+  mitigation, see Ranks/RoleMechanics.yaml) already covers part of what the
+  tools are for. This gap widens at higher Strategy rank, since more
+  inherent tools unlock as rank rises -- a Rank3 Tank should need even fewer
+  of the provided consumables than a Rank2 Tank. Non-tank roles are expected
+  to use the full toolkit regardless of rank.

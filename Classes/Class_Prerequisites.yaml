@@ -1,0 +1,33 @@
+Key: Classes.Prerequisites
+Description: >
+  Prerequisites for advancing into a Promoted or Special class (see
+  Classes/Class_Library.yaml for the Base/Promoted/Special lists). Base
+  classes have no prerequisite gate beyond normal character leveling.
+  Special is a SEPARATE track from Promoted -- it does not chain off
+  completing a Promoted class -- and is restricted to a higher minimum
+  Mercenary rank than Promoted. Only one worked example per tier is
+  authored here; add the rest as each class is actually designed.
+Base:
+  Rule: No prerequisite gate beyond character level.
+Promoted:
+  Rule: >
+    Requires (1) a specific Base class at a specific character level,
+    (2) a Role Quest, and (3) a minimum Mercenary rank.
+  WorkedExample:
+    Class: Lancer
+    RequiredBaseClass: Adafold (Shield Knight)
+    RequiredBaseLevel: 30
+    RoleQuest: Quest.Role.Lancer          # not yet authored -- forward reference
+    RequiredMercenaryRank: 2
+Special:
+  Rule: >
+    SEPARATE from Promoted -- does not require completing a Promoted
+    class first. Requires (1) a specific Base class at a specific
+    character level, (2) a dedicated Special Quest (not the Role Quest),
+    and (3) a higher minimum Mercenary rank than Promoted requires.
+  WorkedExample:
+    Class: Dracomancer
+    RequiredBaseClass: Elementalist
+    RequiredBaseLevel: 30
+    SpecialQuest: Quest.Special.Dracomancer   # not yet authored -- forward reference
+    RequiredMercenaryRank: 3

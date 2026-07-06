@@ -1,0 +1,28 @@
+# Zone hierarchy: Region -> Subzones, FFXIV-style (La Noscea vs Lower/Middle).
+# Adventurer rank is earned per-Subzone and widens to the Region only via the
+# declared RankEscalation rule -- never implicitly.
+Regions:
+  FanVillage:
+    Subzones:
+      OpenWorld:
+        LevelBand: [1, 10]
+      Cliffside:
+        LevelBand: [10, 20]
+    RankEscalation:
+      # Region-wide Adventurer Rank N is granted once every Subzone is at N.
+      Adventurer: AllSubzonesAtRank
+    Enhancement:
+      # Feeds the RegionEnhancement source in Ranks/Adventurer_Thresholds.yaml.
+      # Model varies per-Region (Relic or Materia) -- see RankUpMethods.md.
+      Model: Relic
+      TrackRef: Enhancements.Relic.FanVillage
+
+Towns:
+  MalachiteCity:
+    IsPlaceholder: true
+    Archetype: Town
+    Description: >
+      Placeholder settlement standing in for "a town" until real maps/levels
+      are designed. Quest/NPC/Item content should keep referencing this key
+      rather than inventing new ad hoc placeholder names, so there is a
+      single seam to swap when a real, designed location replaces it.

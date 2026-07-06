@@ -2,6 +2,7 @@ Key: NPC.Enemy.Swarm.BeeCloud
 Name: Bee Cloud
 Level: 12
 Archetype: Swarm
+RaceKey: Bee Cloud   # Monsters category, Races/Race_Library.yaml
 
 # --- Visual Assets Manifest ---
 # These keys are referenced by the Unreal Engine 5 DataAsset loader
@@ -34,18 +35,34 @@ AssignedSkills:
   - Skill.Combat.AutoAttack.Sting
   - Skill.Combat.PoisonSting
 
-# --- Rank Scaling (Dynamic FFXIV-Style) ---
-RankScaling:
-  AdventurerLoot: Global.LootScaling.CurveA
-  MercenaryReaction:
+# --- Rank Profile (see Ranks/Rank_System.yaml for the contract) ---
+# Full authoring example: every optional tier used. Compare with the minimal
+# Drakol file -- both are valid; missing tiers inherit the tier below.
+RankProfile:
+  PartyResolution: Lowest
+  Adventurer:
+    LootCurve: Global.LootScaling.CurveA
+  Mercenary:
     Rank1:
-      Condition: "TargetInRange"
-      Action: "Skill.Combat.AutoAttack.Sting"
-      CastTime: 1.5
+      - Condition: "TargetInRange"
+        Action: "Skill.Combat.AutoAttack.Sting"
+        CastTime: 1.5
     Rank2:
-      Condition: "TargetHPBelow50"
-      Action: "Skill.Combat.PoisonSting"
-      CastTime: 1.0
-  StrategyAI:
-    Profile: Profile.Forest.OpenArea
-    Behavior: "OrbitAndSting"
+      - Condition: "TargetHPBelow50"
+        Action: "Skill.Combat.PoisonSting"
+        CastTime: 1.0
+  Doctrine:
+    Level1:
+      Profile: Profile.Forest.OpenArea
+      Behavior: "OrbitAndSting"
+    Level2:
+      Inherit: Level1
+      KitOptions:
+        - Skill.Combat.PoisonSting.Instant   # uncast version -- inconveniences, doesn't ambush
+    Level3:
+      Inherit: Level2
+      KitOptions:
+        - Skill.Combat.SwarmSplit            # splits into two half-HP clouds
+      KnowledgeChecks:
+        - Mechanic: Mechanic.SwarmSplit.MergePunish   # re-merge heals unless bodies are separated
+          LoreSource: Lore.Bestiary.BeeCloud          # learnable in-game before the fight

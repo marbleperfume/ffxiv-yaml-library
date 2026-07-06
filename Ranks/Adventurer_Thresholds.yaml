@@ -1,0 +1,25 @@
+Key: Ranks.Adventurer.Defaults
+Scope: Subzone
+Description: >
+  Default Adventurer rank resolver, applied per subzone unless overridden.
+  Score is 0-100 from weighted sources; CharacterLevel contribution is capped
+  at the subzone's LevelBand ceiling so over-leveling contributes nothing
+  (anti-trivialization at the source). RegionEnhancement is the active
+  "prove yourself" source -- see Enhancements/ and RankUpMethods.md for the
+  Relic vs Materia schema (which model a Region uses is declared per-Region
+  in Zones/Zone_Library.yaml, not fixed globally).
+Sources:
+  CharacterLevel:    {Weight: 30, CapAtLevelBand: true}
+  HuntingLog:        {Weight: 30}   # completion % of this subzone's log
+  Exploration:       {Weight: 20}   # % of subzone map revealed
+  RegionEnhancement: {Weight: 20}   # progress on the Region's Enhancement.TrackRef
+RegionEnhancementFallback: >
+  If a Region declares no Enhancement.TrackRef (Zones/Zone_Library.yaml),
+  RegionEnhancement's 20 weight is redistributed proportionally across the
+  other three sources for that Region only (30/30/20 -> ~37.5/37.5/25).
+Thresholds:
+  Rank1: 0        # default entry state -- always met
+  Rank2: 40
+  Rank3: 80
+GearSync: SyncToLocalRankCeiling
+Overrides: {}     # per-subzone: Region.Subzone -> {Sources/Thresholds deltas}

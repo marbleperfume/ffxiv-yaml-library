@@ -1,0 +1,38 @@
+Key: Combat.AggroSystem
+Description: >
+  Canonical Focus/Aggro/Unfocus contract. Aggro determines which target an
+  enemy's Doctrine AI casts at; Focus is the primary lever players have over
+  it. Player Strategy rank modifies the formula, tying enemy-targeting
+  behavior into the same rank pipeline as everything else -- see
+  Ranks/Rank_System.yaml.
+AggroFormula: >
+  Aggro(target) = (ProximityScore * ProximityWeight)
+                + (FocusScore * FocusWeight)
+                + (StrategyRankModifier * StrategyWeight)
+  Enemy Doctrine AI casts at / redirects toward whichever target currently
+  has the highest Aggro score.
+DefaultWeights: {ProximityWeight: 0.3, FocusWeight: 0.5, StrategyWeight: 0.2}
+FocusRedirectRule: >
+  If a non-current-target's Aggro score crosses the enemy's
+  FocusRedirectThreshold (declared per-enemy under
+  RankProfile.Doctrine.<Tier>.FocusRedirectThreshold), the enemy DROPS its
+  current cast and retargets the new highest-Aggro target instead of
+  finishing the cast. This is a genuine self-interrupt, not just a
+  threat-table swap.
+PlayerAdvantageWindow: >
+  Dropping a cast this way opens a brief window where the enemy isn't
+  casting at anyone -- a free action window for whoever isn't the new
+  target. In practice only Tanks can safely trigger this on purpose (high
+  enough Focus tools + the survivability to eat the redirect). For any
+  other role, spiking Focus this way is a punishment: they pull the cast
+  onto themselves without the kit to survive it.
+UnfocusStatus: >
+  Applied by Tank-flavored skills (see Passives/Unfocus.yaml). Each stack
+  reduces the potency of the enemy's HIGHER Doctrine-tier skills
+  specifically -- it does not touch baseline/Level1 skills. This is what
+  lets a Tank use Aggro-holding to blunt an enemy's escalated kit rather
+  than only its target selection.
+NoteOnRoleMechanic: >
+  For the Tank role, this entire system (Focus generation, Aggro
+  management, Unfocus application) IS the Tank RoleMechanic -- see
+  Ranks/RoleMechanics.yaml. It is not a separate bolt-on system.

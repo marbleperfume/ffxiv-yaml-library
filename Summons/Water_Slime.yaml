@@ -1,0 +1,48 @@
+Key: Summon.Water.Slime
+Name: Water Slime
+RacialAttachment:
+  RaceKey: Lower Drakols
+  UnlockSource: Innate
+  MercStratExempt: true
+  Note: >
+    Mostly unique to Lower Drakols specifically, not Drakol broadly (e.g.
+    Heavenly Black Drakols do not have this). See
+    Ranks/Rank_System.yaml RacialSummonExemption for the general rule this
+    exemplifies.
+PresenceType: Innate
+PresenceNote: >
+  Not toggled via a summon skill/button like a normal summon (FFXIV
+  Summoner's pet is the general reference point for "managed actor
+  following the possessor," but that one IS cast). A Lower Drakol has this
+  present by default without casting anything.
+RequiredCondition: null   # unused for Innate-presence summons
+DismissTrigger:
+  Skill: Skill.Combat.Drakol.GenerateWater
+  ReturnAfterSeconds: 30
+  Note: >
+    The Slime isn't destroyed, just temporarily absent -- it returns on its
+    own after ReturnAfterSeconds with no further player action required.
+PassiveEffect:
+  SuppressesStatus: Dry Skin
+  Note: >
+    While present, the possessor does not suffer Dry Skin (see
+    Passives/DrySkin.yaml). Dismissing it via Generate Water removes this
+    suppression for the dismissal window -- the trade-off for the water
+    synergy that skill opens up.
+Attributes:
+  STRENGTH: 0.1
+  STAMINA: 0.3
+  SPEED: 0.2
+  CRAFT: 0.0
+  GATHER: 0.0
+  MAGICCAPACITY: 0.2
+  MAG: 0.3
+  MED: 0.1
+  DEXTERITY: 0.1
+AI:
+  Behavior: "Passive companion; follows possessor; provides no combat action of its own"
+Lifecycle:
+  Duration: 0   # 0 = infinite/permanent, per the existing SummonCreator.pyw convention -- semi-permanent, not a finite-duration summon
+Tags:
+  - Tag.Summon.Racial
+  - Tag.Race.LowerDrakols

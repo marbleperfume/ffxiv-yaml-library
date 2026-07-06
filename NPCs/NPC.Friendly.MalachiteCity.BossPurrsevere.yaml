@@ -1,0 +1,24 @@
+Key: NPC.Friendly.MalachiteCity.BossPurrsevere
+Name: Forewoman Purrsevere
+Role: Shopkeeper
+Location: Zone.MalachiteCity.Bakery
+RaceKey: Nyanto
+Gender: Female
+Appearance:
+  Note: Strict, spotless apron, zero patience for nonsense.
+Voice: ""
+SpeechPattern:
+  Theme: Blunt_Managerial
+  Note: >
+    LLM authoring aid: short, clipped sentences. Cuts off Crem's innuendo
+    mid-sentence rather than reacting to the joke itself. Underneath the
+    sternness is exasperated fondness, never real cruelty.
+SocialLinks:
+  - NPC_ID: NPC.Friendly.MalachiteCity.Crem
+    Relation: Employer
+    Tone: Exasperated_Fond
+Tags:
+  - Tag.NPC.Friendly
+  - Tag.Profession.Shopkeeper
+  - Tag.Race.Nyanto
+  - Tag.Quest.Chef.Crem.Courier

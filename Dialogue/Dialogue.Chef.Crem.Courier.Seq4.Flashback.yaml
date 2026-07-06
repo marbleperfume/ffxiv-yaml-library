@@ -1,0 +1,36 @@
+Key: Dialogue.Chef.Crem.Courier.Seq4.Flashback
+Scene: Crem consoles Wyllo with his own backstory
+Participants:
+  - NPC.Friendly.MalachiteCity.Crem
+  - NPC.Friendly.MalachiteCity.TryllChild
+  - Player
+LevelSequenceRef: ""
+POV: Flashback_Crem_Childhood
+Lines:
+  - Speaker: NPC.Friendly.MalachiteCity.Crem
+    Text: >
+      You know, when I was your age, my family had nothing. My parents mined
+      ore twelve hours a day. For my birthday one year, a famous chef's
+      order got cancelled -- a whole turkey, a tiny cake -- and it ended up
+      with us instead. Wasn't even meant for us. Didn't matter. Best meal of
+      my life.
+    ExpressionTag: Expression.Warm.Nostalgic
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.Crem
+    Text: >
+      [FLASHBACK] Bald as a river stone even as a boy -- unlike my father,
+      who never lost a hair on his head. I decided right there I'd learn to
+      cook like that chef someday. Trained under him myself, eventually.
+      Here we are.
+    ExpressionTag: Expression.Warm.Nostalgic
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.Crem
+    Text: >
+      So come on, Wyllo. Give this pastry of life another chance -- you
+      might be surprised what filling's inside.
+    ExpressionTag: Expression.Encouraging.Gentle
+    VOPath: ""
+NarrativeIntent: >
+  Emotional turn of the chain. LevelSequenceRef left blank until a UE5
+  Sequencer asset for the flashback exists -- POV field records intent for
+  whoever builds it.

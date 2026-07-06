@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 import yaml
 import json # Added this
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QDockWidget,
@@ -13,6 +14,64 @@ from PyQt6.QtCore import Qt, QDir
 
 # Target the project directory this script lives in
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# UE5 gameplay tag rule: dot-separated alphanumeric/underscore segments,
+# no spaces or punctuation (spaces are the usual offender in this project)
+_VALID_UE5_TAG = re.compile(r"[A-Za-z0-9_]+(\.[A-Za-z0-9_]+)*")
+
+
+def collect_gameplay_tags(project_dir=PROJECT_DIR):
+    """Gathers candidate gameplay tags from the three places they live:
+    tags/tag_library.txt, Expressions/expression_library.txt (prefixed with
+    GameplayCue., since expressions fire as one-shot cues in UE5), and every
+    Tags: list inside the project's YAML files.
+    Returns (valid, skipped) — skipped entries fail UE5's tag naming rules."""
+    tags = set()
+
+    lib = os.path.join(project_dir, "tags", "tag_library.txt")
+    if os.path.exists(lib):
+        with open(lib) as f:
+            tags.update(line.strip() for line in f if line.strip())
+
+    expr_lib = os.path.join(project_dir, "Expressions", "expression_library.txt")
+    if os.path.exists(expr_lib):
+        with open(expr_lib) as f:
+            tags.update("GameplayCue." + line.strip() for line in f if line.strip())
+
+    def scan(node):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k == "Tags" and isinstance(v, list):
+                    tags.update(t for t in v if isinstance(t, str) and t.strip())
+                else:
+                    scan(v)
+        elif isinstance(node, list):
+            for v in node:
+                scan(v)
+
+    for root, dirs, files in os.walk(project_dir):
+        for file in files:
+            if file.endswith((".yaml", ".yml")):
+                try:
+                    with open(os.path.join(root, file)) as f:
+                        scan(yaml.safe_load(f))
+                except Exception:
+                    continue
+
+    valid = sorted(t for t in tags if _VALID_UE5_TAG.fullmatch(t))
+    skipped = sorted(tags - set(valid))
+    return valid, skipped
+
+
+def build_gameplay_tags_ini(valid_tags):
+    """Formats tags as a UE5 Config/DefaultGameplayTags.ini payload."""
+    lines = [
+        "[/Script/GameplayTags.GameplayTagsSettings]",
+        "ImportTagsFromConfig=True",
+        "WarnOnInvalidTags=True",
+    ]
+    lines += [f'+GameplayTagList=(Tag="{t}",DevComment="")' for t in valid_tags]
+    return "\n".join(lines) + "\n"
 
 class TagPickerDialog(QDialog):
     def __init__(self, current_tags, available_tags, parent=None):
@@ -228,11 +287,20 @@ class UnifiedDesignHub(QMainWindow):
         save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self.save_current_tab)
         
+        export_json_action = QAction("Export Project Relationships (JSON)", self)
+        export_json_action.triggered.connect(self.export_project_relationships)
+
+        export_tags_action = QAction("Export Gameplay Tags (DefaultGameplayTags.ini)", self)
+        export_tags_action.triggered.connect(self.export_gameplay_tags)
+
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)
-        
+
         file_menu.addAction(new_action)
         file_menu.addAction(save_action)
+        file_menu.addSeparator()
+        file_menu.addAction(export_json_action)
+        file_menu.addAction(export_tags_action)
         file_menu.addSeparator()
         file_menu.addAction(exit_action)
 
@@ -396,6 +464,38 @@ class UnifiedDesignHub(QMainWindow):
                 QMessageBox.information(self, "Export Complete", "LLM Context Map generated successfully. You can now provide this JSON file to an AI to give it complete visibility of your game's data structure.")
             except Exception as e:
                 QMessageBox.critical(self, "Export Error", f"Failed to save JSON:\n{str(e)}")
+
+    def export_gameplay_tags(self):
+        """Exports every known tag (tag library, expression library as
+        GameplayCue.*, and YAML Tags: lists) as a UE5 DefaultGameplayTags.ini."""
+        valid, skipped = collect_gameplay_tags()
+        if not valid:
+            QMessageBox.warning(self, "Export Failed", "No valid gameplay tags found in the project.")
+            return
+
+        save_path, _ = QFileDialog.getSaveFileName(
+            self, "Export Gameplay Tags",
+            os.path.join(PROJECT_DIR, "DefaultGameplayTags.ini"),
+            "INI Files (*.ini)")
+        if not save_path:
+            return
+
+        try:
+            with open(save_path, 'w') as f:
+                f.write(build_gameplay_tags_ini(valid))
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", f"Failed to save INI:\n{str(e)}")
+            return
+
+        msg = f"Exported {len(valid)} gameplay tags.\n\nDrop this file into your UE5 project's Config/ folder (or merge into an existing DefaultGameplayTags.ini)."
+        if skipped:
+            preview = "\n".join(skipped[:10])
+            msg += f"\n\nSkipped {len(skipped)} entries that violate UE5 tag naming (spaces/punctuation):\n{preview}"
+            if len(skipped) > 10:
+                msg += f"\n...and {len(skipped) - 10} more."
+        self.statusBar().showMessage(f"Exported {len(valid)} gameplay tags.", 5000)
+        QMessageBox.information(self, "Export Complete", msg)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

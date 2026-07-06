@@ -1,0 +1,13 @@
+PipelineID: Chef.Crem.Courier
+SequenceIndex: 2
+QuestID: Chef.Crem.Courier.ReportBack
+StepType: Dialogue
+TargetNPCs:
+  - NPC.Friendly.MalachiteCity.Crem
+Action: Dialogue_Override
+DialogueRef: Dialogue.Chef.Crem.Courier.Seq2.CremReaction
+RequiresFlag: Chef.Crem.Courier.NoAttendees
+NarrativeIntent: >
+  Crem reacts with theatrical, over-the-top "wounded Frenchman" despair --
+  not that the cake went undelivered, but that a child was left unable to
+  taste his food. He decides they need to gather real attendees.

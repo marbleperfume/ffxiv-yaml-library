@@ -1,0 +1,26 @@
+Key: Dialogue.Chef.Crem.Courier.Seq3.Gathering
+Scene: Gathering invitations around Malachite City
+Participants:
+  - Player
+  - NPCGroup.MalachiteCity.BirthdayInvitees
+Lines:
+  - Speaker: Commonfolk
+    Text: "Free cake? Well, thanks, don't mind if I do! ...Attend the actual party, though? Eh, maybe not."
+    ExpressionTag: Expression.Pleasant.Noncommittal
+    VOPath: ""
+  - Speaker: Commonfolk
+    Text: "A Tryll's birthday, you say? Heh. Well -- you know what they say."
+    ExpressionTag: Expression.Wry.Knowing
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.Blacksmith
+    Text: "If it involves a Tryll, there's no thrill -- bah, nonsense saying. Kid deserves better. I'll bring him a sword."
+    ExpressionTag: Expression.Proud.Determined
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.Weaver
+    Text: "A sword? For a child's birthday? ...Actually, you know, I'll bring him a book basket. Tryll love to read."
+    ExpressionTag: Expression.Amused.Fond
+    VOPath: ""
+NarrativeIntent: >
+  Delivers the in-lore "if it involves a Tryll, there's no thrill" stereotype
+  and the Blacksmith's sword joke (played straight by him, awkward to
+  everyone else -- paid off again in Seq5).

@@ -1,0 +1,13 @@
+Key: NPC.Friendly.MalachiteCity.Weaver
+Name: Sennit Loomwell
+Role: Townsperson
+Location: Zone.MalachiteCity.WeaversRow
+RaceKey: Grimm
+Gender: Female
+GiftContribution:
+  ItemGiven: "a woven book-basket"
+  Note: Chosen deliberately because Tryll are known to be avid readers.
+Tags:
+  - Tag.NPC.Friendly
+  - Tag.Profession.Weaver
+  - Tag.Quest.Chef.Crem.Courier

@@ -1,0 +1,16 @@
+Key: Item.KeyItem.Crem.InvitationGiftBox
+Name: "Crem's Invitation Box"
+Category: KeyItem
+Rarity: Common
+Stackable: false
+MaxStacks: 1
+IsKeyItem: true
+Discardable: false
+Description: >
+  An empty pastry box Crem repurposed as an invitation carrier. The cake it
+  once held is implied, not simulated -- this item exists purely as a quest
+  trigger to hand to townsfolk and profession NPCs, not as a real container
+  with sub-inventory.
+IconPath: ""
+RestrictionTags:
+  - Tag.Quest.Chef.Crem.Courier

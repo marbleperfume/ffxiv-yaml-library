@@ -37,11 +37,14 @@ class ClassCreatorApp:
         self.lock_class = tk.BooleanVar()
         self.lock_attr = tk.BooleanVar()
 
-        # Race Row
+        # Race Row (multi-select: pick every race this class is unlocked for,
+        # one Race_Class.yaml is generated per selected race)
         frame_r = tk.Frame(root); frame_r.pack(pady=(10,0))
-        tk.Label(frame_r, text="Race:").pack(side="left")
-        self.race_cb = ttk.Combobox(frame_r, values=self.get_race_options(), width=40, state="readonly")
-        self.race_cb.pack(side="left", padx=5)
+        tk.Label(frame_r, text="Races (racially locked — select all allowed):").pack(side="left")
+        self.race_listbox = tk.Listbox(frame_r, selectmode=tk.MULTIPLE, height=6, width=40, exportselection=False)
+        for race in self.get_race_options():
+            self.race_listbox.insert(tk.END, race)
+        self.race_listbox.pack(side="left", padx=5)
         tk.Checkbutton(frame_r, text="Lock", variable=self.lock_race).pack(side="left")
 
         # Class Row
@@ -73,7 +76,11 @@ class ClassCreatorApp:
             with open(lib_path, 'r') as f:
                 data = yaml.safe_load(f)
                 races = []
-                for broad in data.values(): races.extend(broad)
+                # Monsters get race entries for NPC tagging/validation, but are
+                # not valid targets for class kits, so exclude them here.
+                for broad, members in data.items():
+                    if broad == "Monsters": continue
+                    races.extend(members)
                 return races
         except Exception: return ["ERROR: Missing Races/Race_Library.yaml"]
 
@@ -99,36 +106,38 @@ class ClassCreatorApp:
                     self.tree.insert("", "end", values=(parts[0], parts[1]))
 
     def save_yaml(self):
-        race = self.race_cb.get()
+        races = [self.race_listbox.get(i) for i in self.race_listbox.curselection()]
         cls = self.class_cb.get()
-        if "ERROR" in race or "ERROR" in cls or not race or not cls:
-            messagebox.showerror("Error", "Library files not loaded correctly.")
+        if not races or "ERROR" in races[0] or "ERROR" in cls or not cls:
+            messagebox.showerror("Error", "Select at least one Race and a Class (check library files).")
             return
 
-        data = {
-            'Definition': {
-                'Race': race,
-                'Class': cls,
-                'MainAttribute': self.attr_cb.get(),
-                'Role': self.role_entry.get(),
-                'Intent': self.narr_entry.get()
+        saved = []
+        for race in races:
+            data = {
+                'Definition': {
+                    'Race': race,
+                    'Class': cls,
+                    'MainAttribute': self.attr_cb.get(),
+                    'Role': self.role_entry.get(),
+                    'Intent': self.narr_entry.get()
+                }
             }
-        }
-        
-        filename = os.path.join(self.classes_dir, f"{race}_{cls}.yaml")
-        with open(filename, 'w') as f:
-            yaml.dump(data, f, default_flow_style=False)
-        
+            filename = os.path.join(self.classes_dir, f"{race}_{cls}.yaml")
+            with open(filename, 'w') as f:
+                yaml.dump(data, f, default_flow_style=False)
+            saved.append(f"{race}_{cls}.yaml")
+
         # Post-save clearing logic based on locks
-        if not self.lock_race.get(): self.race_cb.set("")
+        if not self.lock_race.get(): self.race_listbox.selection_clear(0, tk.END)
         if not self.lock_class.get(): self.class_cb.set("")
         if not self.lock_attr.get(): self.attr_cb.set("")
-        
+
         self.role_entry.delete(0, tk.END)
         self.narr_entry.delete(0, tk.END)
-        
+
         self.refresh_preview()
-        messagebox.showinfo("Success", f"Saved: {race}_{cls}.yaml")
+        messagebox.showinfo("Success", "Saved:\n" + "\n".join(saved))
 
 if __name__ == "__main__":
     root = tk.Tk()

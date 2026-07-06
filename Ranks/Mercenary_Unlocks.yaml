@@ -1,0 +1,49 @@
+Key: Ranks.Mercenary
+Scope: Account
+Description: >
+  Horizontal progression, optional by design. Mercenary rank NEVER adds
+  potency -- it adds kit breadth (skills, classes) and decides how much of
+  the kit survives an Area-Stage down-sync (SyncRetention). This is the
+  level-desync answer: a synced Rank 3 player keeps their utility toolkit,
+  a Rank 1 player fights near the local floor.
+SkillQuestGate: >
+  Before the broad Rank2/Rank3 TestQuest unlocks, the player must clear
+  every available skill quest (mini rank-test) for skills NOT granted by
+  their CURRENT class's normal level-up schema (worked example:
+  Skills/Shield_Bash.yaml, via Quest.SkillQuest.Adafold.ShieldBash). This is
+  evaluated per-class -- switch class, and the gate re-evaluates against
+  that class's own skill quests. "Reach the height of the current class"
+  means every such skill quest for that class is cleared, not overall
+  account completion.
+ClassAdvancement: >
+  Promoted and Special class access is NOT listed flatly under each rank's
+  Unlocks below -- see Classes/Class_Prerequisites.yaml. Summary: Promoted
+  requires a Base class at a level threshold + a Role Quest + Mercenary
+  Rank2. Special is a SEPARATE track (not built on Promoted) requiring a
+  Base class at a level threshold + a dedicated Special Quest + Mercenary
+  Rank3.
+Rank1:
+  SyncRetention: 0.25
+  Unlocks: {Skills: [], Classes: []}
+Rank2:
+  TestQuest:
+    Tank: Quest.Test.Mercenary.Rank2.Tank
+    Healer: Quest.Test.Mercenary.Rank2.Healer
+    DPS: null   # TBD -- reuses the Tank Golem-test shape, RoleMechanic swapped to Maximum Rotation Uptime
+  SyncRetention: 0.5
+  Unlocks: {Skills: [], Classes: []}   # Promoted classes gated via Classes/Class_Prerequisites.yaml instead
+Rank3:
+  TestQuest:
+    Tank: Quest.Test.Mercenary.Rank3.Tank
+    Healer: null   # TBD -- not yet authored
+    DPS: null      # TBD -- not yet authored
+  SyncRetention: 0.75
+  Unlocks: {Skills: [], Classes: []}   # Special classes gated via Classes/Class_Prerequisites.yaml instead
+NoPotencyRule: >
+  Nothing in Unlocks may raise damage/healing numbers directly; unlocked
+  skills must be utility/counterplay (interrupts, mitigations, mobility).
+RacialSummonException: >
+  Summons count as "extra buttons" and are normally gated the same as
+  Skills/Classes above -- EXCEPT summons with a RacialAttachment field (see
+  Ranks/Rank_System.yaml RacialSummonExemption), which bypass this gate
+  entirely. Worked example: Summons/Water_Slime.yaml.

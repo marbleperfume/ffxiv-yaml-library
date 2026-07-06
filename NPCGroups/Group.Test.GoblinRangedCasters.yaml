@@ -1,0 +1,16 @@
+Key: NPCGroup.Test.GoblinRangedCasters
+Description: >
+  Ranged AoE-casting goblins accompanying the Goblin Vanguard in the
+  Strategy Rank2 test. In a party, a tank/healer duo could simply ignore
+  these and let ranged DPS answer them from range -- the SOLO test removes
+  that option, which is why Item.Tactical.Smokescreen exists: it lets the
+  player approach and finish the Vanguard without eating hits from this
+  group.
+Members:
+  Count: 3
+  Behavior: RangedAoE
+  AssignedSkills:
+    - Skill.Combat.Goblin.MortarLob
+  TargetingSuppressibleBy: Item.Tactical.Smokescreen
+Tags:
+  - Tag.Quest.Strategy.Trial

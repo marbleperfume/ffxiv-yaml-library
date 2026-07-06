@@ -25,3 +25,8 @@ Depth Dead:
   - Hecapqo
   - Jumpers
   - Triclaw
+# Monster races: unique per-monster entries so NPC files can carry a valid
+# RaceKey/Tag.Race.* without polluting the playable class/character race pool.
+# ClassCreator and CharacterCreator exclude this category.
+Monsters:
+  - Bee Cloud

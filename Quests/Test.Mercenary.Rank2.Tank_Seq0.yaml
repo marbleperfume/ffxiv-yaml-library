@@ -1,0 +1,28 @@
+PipelineID: Test.Mercenary.Rank2.Tank
+SequenceIndex: 0
+QuestID: Quest.Test.Mercenary.Rank2.Tank
+StepType: Custom
+Role: Tank
+TargetNPCs:
+  - NPC.Boss.Test.MechaGolem
+Action: Custom
+RequiresFlag: SkillQuest.Adafold.AllCleared   # aggregate flag: every Adafold skill quest cleared (see Mercenary_Unlocks.yaml SkillQuestGate) -- not set by a single quest step
+TestConfig:
+  ForcedDoctrineLevel: Level2
+  Checks:
+    - RoleMechanicUse       # must land Shield Bash (or another Tank class's equivalent) successfully
+    - ClassMechanicUse      # must use Adafold's Bulwark Gauge
+    - CastBarTiming         # must correctly react to whichever of the 3 random Golem casts occurs
+Reward:
+  TitleID: null
+  ItemID: null
+  Copper: 0
+  Reputation: null
+NarrativeIntent: >
+  Broad Mercenary Rank 2 test, Tank variant. Requires all of the player's
+  current-class skill quests cleared first. Faces
+  NPC.Boss.Test.MechaGolem forced to Doctrine Level2 -- one randomly
+  selected cast pattern of 3 per attempt, testing adaptability rather than
+  memorization. Passing requires demonstrating RoleMechanic use
+  (Focus/Aggro/Unfocus via Shield Bash), ClassMechanic use (Bulwark Gauge),
+  and correct cast-bar timing.

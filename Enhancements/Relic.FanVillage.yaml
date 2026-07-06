@@ -1,0 +1,21 @@
+Key: Enhancements.Relic.FanVillage
+Model: Relic
+Region: FanVillage
+Description: >
+  Single evolving item tied to the FanVillage region (FFXIV relic-weapon
+  analog): sequential steps, each gated behind a task in a specific subzone.
+  Completing a step contributes toward the RegionEnhancement source in
+  Ranks/Adventurer_Thresholds.yaml. See RankUpMethods.md for the general
+  Relic vs Materia schema used to author other regions.
+Steps:
+  Step1:
+    Subzone: OpenWorld
+    Task: "Defeat 20 Lower Drakol and deliver a scale to the region's smith"
+    ItemStage: Item.Relic.FanVillage.Stage1
+    ScoreContribution: 10
+  Step2:
+    Subzone: Cliffside
+    Task: "Recover an unhatched Heavenly Black Drakol feather from the cliffs"
+    ItemStage: Item.Relic.FanVillage.Stage2
+    ScoreContribution: 10
+MaxScoreContribution: 20   # must equal RegionEnhancement Weight in Ranks/Adventurer_Thresholds.yaml

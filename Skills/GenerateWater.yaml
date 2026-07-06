@@ -1,0 +1,34 @@
+Key: Skill.Combat.Drakol.GenerateWater
+Name: Generate Water
+Intent: >
+  Unique Lower Drakol racial AoE. Temporarily dismisses the race's innate
+  Water Slime companion (see Summons/Water_Slime.yaml) to create a
+  water-environment zone enabling water-type skill synergies. Trade-off:
+  Dry Skin (Passives/DrySkin.yaml) is no longer suppressed until the Slime
+  returns.
+ActionType: Spell
+Tags:
+  - Skill.Type.Spell
+  - Skill.Element.Water
+  - Tag.Race.LowerDrakols
+RaceRestrictions:
+  - Lower Drakols
+BaseState:
+  Animation: Anim_Drakol_GenerateWater
+  VFX: VFX_Water_AoEZone
+  IsOGCD: false
+  CanCastWhileMoving: false
+Mechanics:
+  Targeting: Area_Circle
+  Potency: 0
+  Range: 15
+  CastTime: 2.0
+  RecastTime: 60
+  MaxCharges: 1
+Resource:
+  Type: None
+  Cost: 0
+Combo: null
+DismissesSummon: Summon.Water.Slime
+AppliesStatuses: []
+ClassRestrictions: []

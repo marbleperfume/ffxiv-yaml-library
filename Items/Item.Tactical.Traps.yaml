@@ -1,0 +1,20 @@
+Key: Item.Tactical.Traps
+Name: Traps
+Category: Tactical
+Rarity: Common
+Stackable: true
+MaxStacks: 10
+Description: >
+  Deployable consumable. Roots/immobilizes the target for as long as it
+  isn't hit for more than a small cumulative damage threshold -- lets any
+  role soft-lock a threat (e.g. a Goblin Vanguard) while dealing with
+  something else, at the cost of NOT being able to commit real damage to
+  the trapped target without breaking the trap free.
+Effect:
+  Type: ConditionalImmobilize
+  DamageThreshold: 25       # cumulative damage above this breaks the trap
+  BreaksOnExceedThreshold: true
+  Duration: 12
+IconPath: ""
+RestrictionTags:
+  - Tag.Quest.Strategy.Trial

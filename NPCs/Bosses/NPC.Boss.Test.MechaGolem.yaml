@@ -1,0 +1,71 @@
+Identity:
+  Key: NPC.Boss.Test.MechaGolem
+  Name: Mecha Golem (Mercenary Trial)
+  TemplateRef: null
+AssignedSkills:
+  - Skill.Combat.Golem.SlamSmash
+  - Skill.Combat.Golem.OverloadBeam
+  - Skill.Combat.Golem.GroundPound
+LootTable: null
+Tags:
+  - Tag.NPC.Test
+  - Tag.Quest.Mercenary.Trial
+EncounterMath:
+  ExpectedDurationMinutes: 4.0
+  BaseHealthPlaceholder: 60000
+PhaseLogic:
+  Phase2Trigger: null
+  Phase3Trigger: null
+MechanicScaling:
+  AnimTier: 2
+  Rank1_MacroMechanic: "Telegraphed slam, generous timing window"
+  Rank2_MicroPunish: "Same three skills, cast order and timing randomized per attempt"
+
+# --- Rank Profile (see Ranks/Rank_System.yaml) ---
+# This is a dedicated TEST fixture, not a normal overworld enemy: the two
+# Mercenary test quests below force a specific Doctrine tier regardless of
+# the player's actual Strategy/Doctrine standing, so the trial is
+# controlled and repeatable rather than varying with normal progression.
+RankProfile:
+  PartyResolution: Lowest
+  Adventurer:
+    LootCurve: null
+  Mercenary:
+    Rank1:
+      - Condition: "TargetInRange"
+        Action: "Skill.Combat.Golem.SlamSmash"
+        CastTime: 3.0
+  Doctrine:
+    Level1:
+      Profile: Profile.Test.MercenaryTrial
+      AggroRadius: 1000
+      LeashRadius: 1000
+      ResetBehavior: FullReset
+      FocusRedirectThreshold: null   # no redirect at Level1 -- fully telegraphed baseline
+    Level2:
+      Inherit: Level1
+      RandomCastPool:
+        PoolSize: 3
+        Skills:
+          - Skill.Combat.Golem.SlamSmash
+          - Skill.Combat.Golem.OverloadBeam
+          - Skill.Combat.Golem.GroundPound
+        SelectionRule: "One randomly selected per attempt; timing window differs per skill"
+      FocusRedirectThreshold: 600
+      TestGate:
+        TestQuest: Quest.Test.Mercenary.Rank2.Tank
+        Checks: [RoleMechanicUse, ClassMechanicUse, CastBarTiming]
+    Level3:
+      Inherit: Level2
+      StabilityContest:
+        Description: >
+          If the player casts a skill tagged Tag.Skill.Risky while the
+          Golem is mid-cast, the player automatically loses the stability
+          contest: their cast is instantly interrupted/dropped. Teaches
+          recognizing when NOT to commit a risky action, rather than
+          adding raw Golem damage.
+        RiskySkillTag: Tag.Skill.Risky
+        PlayerCastInstantlyDropped: true
+      TestGate:
+        TestQuest: Quest.Test.Mercenary.Rank3.Tank
+        Checks: [RoleMechanicUse, ClassMechanicUse, CastBarTiming, StabilityContestAvoidance]

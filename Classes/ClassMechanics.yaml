@@ -1,0 +1,16 @@
+Key: Classes.ClassMechanics
+Description: >
+  PLACEHOLDER definitions. ClassMechanic = a per-Class resource/gauge
+  distinct from the shared per-Role RoleMechanic (Ranks/RoleMechanics.yaml)
+  -- e.g. FFXIV Reaper's gauge management or Warrior's self-heal gimmick.
+  Class skill kits aren't finished, so only Adafold has a worked
+  (placeholder) definition; add the rest as each class's skills get
+  designed.
+Adafold (Shield Knight):
+  MechanicName: Bulwark Gauge
+  Definition: >
+    PLACEHOLDER. Builds by blocking/mitigating incoming hits; spent on a
+    strong defensive cooldown. Distinct from the shared Tank RoleMechanic
+    (Focus/Aggro/Unfocus, which every Tank class participates in) --
+    Bulwark Gauge is what makes Adafold specifically different from
+    another Tank class.

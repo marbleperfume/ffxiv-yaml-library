@@ -65,7 +65,7 @@ class CharacterCreatorApp:
         btn_frame = tk.Frame(tag_frame); btn_frame.pack()
         tk.Button(btn_frame, text="Add Tag", command=self.add_tag).pack(side="left", padx=2)
         tk.Button(btn_frame, text="Tag List", command=self.open_tag_modal).pack(side="left", padx=2)
-        self.tags_listbox = tk.Listbox(tag_frame, height=4, width=40); self.tags_listbox.pack()
+        self.tags_listbox = tk.Listbox(tag_frame, height=4, width=40, exportselection=False); self.tags_listbox.pack()
         tk.Button(tag_frame, text="Remove Selected", command=self.remove_tag).pack()
 
         tk.Button(root, text="Save Character Template", command=self.save_yaml,
@@ -77,7 +77,11 @@ class CharacterCreatorApp:
             with open(lib_path, 'r') as f:
                 data = yaml.safe_load(f)
                 races = []
-                for broad in data.values(): races.extend(broad)
+                # Monsters are excluded: character templates pair Race+Class,
+                # and class kits are for playable/humanoid races only.
+                for broad, members in data.items():
+                    if broad == "Monsters": continue
+                    races.extend(members)
                 return races
         except Exception:
             return ["ERROR: Missing Races/Race_Library.yaml"]
@@ -99,7 +103,7 @@ class CharacterCreatorApp:
 
     def make_picker(self, root, label, folder):
         tk.Label(root, text=label).pack()
-        listbox = tk.Listbox(root, selectmode=tk.MULTIPLE, height=5, width=55)
+        listbox = tk.Listbox(root, selectmode=tk.MULTIPLE, height=5, width=55, exportselection=False)
         for item in self.get_list(folder):
             listbox.insert(tk.END, item)
         listbox.pack()
@@ -107,7 +111,8 @@ class CharacterCreatorApp:
 
     def make_rank_spin(self, root, label):
         tk.Label(root, text=label).pack()
-        spin = tk.Spinbox(root, from_=1, to=99)
+        # Snapshot range is 1-3 (see Ranks/Rank_System.yaml)
+        spin = tk.Spinbox(root, from_=1, to=3)
         spin.pack()
         return spin
 

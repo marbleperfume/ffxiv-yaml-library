@@ -29,7 +29,7 @@ class TagSelectorModal:
         self.callback = callback
 
         tk.Label(self.modal, text="Select Tags to Add:").pack(pady=5)
-        self.listbox = tk.Listbox(self.modal, selectmode=tk.MULTIPLE, height=15)
+        self.listbox = tk.Listbox(self.modal, selectmode=tk.MULTIPLE, height=15, exportselection=False)
         self.listbox.pack(fill="both", expand=True, padx=10)
 
         for tag in get_tag_library():

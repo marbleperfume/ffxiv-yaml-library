@@ -1,0 +1,53 @@
+Key: System.RankPipeline
+Description: >
+  Canonical contract for the three-pillar rank system. Enemies never read raw
+  player progression (level, logs, gear, tests) -- they read a resolved
+  snapshot. Everything upstream of the snapshot can change without touching a
+  single enemy file.
+
+Snapshot:
+  ResolvedOn: AreaEnter          # "Area-Staged": recomputed every subzone entry
+  Fields:
+    Adventurer: {Range: [1, 3], Scope: Subzone}   # widens to Region via Zone_Library RankEscalation
+    Mercenary:  {Range: [1, 3], Scope: Account}
+    Strategy:   {Range: [1, 3], Scope: Account}
+
+DefaultingRule: >
+  Enemy RankProfile: Mercenary.Rank1 and Doctrine.Level1 are REQUIRED (the
+  default pattern every player can meet). Rank2/Rank3 and Level2/Level3 are
+  OPTIONAL; a missing tier inherits the tier below it. Project_Validator
+  enforces the required tiers.
+
+PartyResolution:
+  Default: Lowest                # party snapshot collapses to lowest member
+  PerEnemyOverride: RankProfile.PartyResolution
+
+NamingSplit:
+  PlayerFacing: Strategy         # item gate + progression indicator
+  EnemyFacing: Doctrine          # AI pattern decider + kit unlock tiers
+
+GearSync: >
+  Items gated by Adventurer rank stay equipped everywhere; their effective
+  stats sync down to the local subzone's rank ceiling on Area-Stage. Gating
+  is acquisition-side; play-side is sync, not stripping (FFXIV level-sync
+  analog).
+
+NoFeedbackRule: >
+  Gear NEVER contributes to rank computation. Rank gates gear; gear feeding
+  rank would be a feedback loop.
+
+KnowledgeCheckRule: >
+  Any Doctrine mechanic that expects out-of-encounter knowledge must be
+  declared under KnowledgeChecks with a LoreSource reference, so "learnable
+  in-game" is the authored default and external-knowledge checks are a
+  visible, deliberate choice.
+
+RacialSummonExemption: >
+  A Summon with a RacialAttachment field (RaceKey + MercStratExempt: true,
+  see Summons/*.yaml) bypasses Mercenary/Strategy rank gating entirely, even
+  though summons normally count as "extra buttons" gated the same as
+  Skills/Classes under Ranks/Mercenary_Unlocks.yaml and
+  Ranks/Strategy_Unlocks.yaml. Rationale: it's not an earned tool, it's part
+  of the race's baseline identity -- gating it behind account-progression
+  rank would contradict it being racially innate. Worked example:
+  Summons/Water_Slime.yaml (Lower Drakols).

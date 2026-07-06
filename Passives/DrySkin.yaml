@@ -1,0 +1,25 @@
+Name: Dry Skin
+UE5_Context: GameplayCue.Status.DrySkin
+PillarAffinity: Mercenary
+AudioTrigger: ""
+VisualTrigger: ""
+Duration: 0   # persists until suppressed/removed, not a timed buff
+IsCleanseable: false
+CleanseRequirement: Mechanic
+Stacking:
+  IsStackable: false
+  MaxStacks: 1
+AppliesTo: Self
+Effect:
+  DamageTakenModifier: {Tag: Tag.Element.Fire, Multiplier: 1.15}
+  SpeedModifier: -10
+GameplayGoal: >
+  Represents Lower Drakol's innate vulnerability away from water. Normally
+  suppressed passively by the race's innate Water Slime companion (see
+  Summons/Water_Slime.yaml) -- reapplies whenever that companion is
+  temporarily dismissed (e.g. via Skill.Combat.Drakol.GenerateWater).
+NarrativeIntent: >
+  Not a punishment status by default -- most Lower Drakol never experience
+  it, since the Water Slime suppresses it passively. It's the visible cost
+  of the race's one deliberate risk/reward trade: dismiss the Slime for a
+  water-environment skill synergy, take this vulnerability while it's gone.

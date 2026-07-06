@@ -1,0 +1,37 @@
+PipelineID: Test.Strategy.Rank2
+SequenceIndex: 0
+QuestID: Quest.Test.Strategy.Rank2
+StepType: Custom
+TargetNPCs:
+  - NPC.Boss.Test.GoblinVanguard
+TargetNPCGroup: NPCGroup.Test.GoblinRangedCasters
+Action: Custom
+SoloOnly: true
+TestConfig:
+  Layout: "Goblin Vanguard (melee frontline) + 3 ranged AoE-casting goblins, solo -- no party role division to lean on"
+  ProvidedTools:
+    - Item.Tactical.Smokescreen
+    - Item.Tactical.Bombs
+    - Item.Tactical.Traps
+  RoleToolBudget:
+    Tank:
+      MaxToolsExpected: 1
+      Note: "Inherent Focus/Aggro/mitigation RoleMechanic covers most of what the tools are for; budget shrinks further at Strategy Rank3+"
+    NonTank:
+      MaxToolsExpected: 3
+      Note: "Expected to use the full kit -- Smokescreen to approach safely, Bombs (or sustained damage) to break the Vanguard, Traps to control it without overcommitting"
+Reward:
+  TitleID: null
+  ItemID: null
+  Copper: 0
+  Reputation: null
+NarrativeIntent: >
+  Strategy Rank 2 test. In a normal party, the tank/healer would just handle
+  the Vanguard while ranged DPS deals with the casting goblins -- trivial.
+  Run SOLO instead, forcing the player to learn the toolkit themselves:
+  Smokescreen suppresses the ranged casters' targeting while the player
+  closes on the Vanguard; Bombs let any role burst it down directly; Traps
+  immobilize it as long as damage stays below a small threshold (control
+  without overcommitting -- hit it too hard and the trap breaks). Tanks are
+  graded on a smaller tool budget, since their inherent RoleMechanic already
+  covers aggro/mitigation the tools would otherwise provide.

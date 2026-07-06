@@ -1,0 +1,14 @@
+PipelineID: SkillQuest.Adafold.ShieldBash
+SequenceIndex: 0
+QuestID: Quest.SkillQuest.Adafold.ShieldBash
+StepType: Custom
+RequiredClass: Adafold (Shield Knight)
+TargetNPCs: []   # TBD -- no Adafold trainer NPC authored yet
+Action: Custom
+GrantSkill: Skill.Combat.Shield.Bash
+NarrativeIntent: >
+  Mini rank-test example: Shield Bash is NOT part of Adafold's level-up
+  schema -- it must be earned through this skill quest. Clearing every such
+  skill quest available to the player's CURRENT class is the prerequisite
+  for the broad Mercenary test unlocking (see Ranks/Mercenary_Unlocks.yaml
+  SkillQuestGate).

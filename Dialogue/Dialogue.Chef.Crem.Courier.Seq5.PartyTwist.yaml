@@ -1,0 +1,33 @@
+Key: Dialogue.Chef.Crem.Courier.Seq5.PartyTwist
+Scene: Arrival at the party -- parents are there after all
+Participants:
+  - NPC.Friendly.MalachiteCity.Crem
+  - NPC.Friendly.MalachiteCity.TryllChild
+  - NPC.Friendly.MalachiteCity.TryllParents
+  - Player
+Lines:
+  - Speaker: NPC.Friendly.MalachiteCity.TryllParents
+    Text: "Wyllo! There you are -- and guests! We were told the delivery was for four in the afternoon, not eight in the morning!"
+    ExpressionTag: Expression.Surprised.Relieved
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.Crem
+    Text: "Oh, sugar cookies -- that was ME. I wrote down the wrong hour. Completely my fault, I am the worst pastry chef in--"
+    ExpressionTag: Expression.Mortified.Comedic
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.Blacksmith
+    Text: "Happy birthday, lad! Forged this myself -- good steel, none of that decorative nonsense."
+    ExpressionTag: Expression.Proud.Beaming
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.TryllChild
+    Text: "...Thank you. It's, um. Very sharp."
+    ExpressionTag: Expression.Awkward.PoliteSmile
+    VOPath: ""
+  - Speaker: NPC.Friendly.MalachiteCity.Crem
+    Text: "Thank you for this, truly. You did more for this delivery than my job ever asked of you."
+    ExpressionTag: Expression.Warm.Grateful
+    VOPath: ""
+NarrativeIntent: >
+  Resolves the "wrong time" mixup as Crem's own mistake (comedic self-blame,
+  child-safe curse "oh, sugar cookies"), plays the Blacksmith's sword gift
+  for the awkward laugh, and closes the chain on a warm beat before the
+  reward.

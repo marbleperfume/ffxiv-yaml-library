@@ -23,7 +23,7 @@ class FriendlyNPCCreatorApp:
 
         # --- Shop Items (Linked to Registry) ---
         tk.Label(root, text="Select Shop Inventory (Only for Shopkeepers/Vendors):").pack()
-        self.item_listbox = tk.Listbox(root, selectmode=tk.MULTIPLE, height=5, width=40)
+        self.item_listbox = tk.Listbox(root, selectmode=tk.MULTIPLE, height=5, width=40, exportselection=False)
         self.item_listbox.pack()
         for item in self.get_registry_list("Items"):
             self.item_listbox.insert(tk.END, item)

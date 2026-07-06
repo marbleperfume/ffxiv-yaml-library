@@ -1,0 +1,23 @@
+Name: Unfocus
+UE5_Context: GameplayCue.Status.Unfocus
+PillarAffinity: Strategy
+AudioTrigger: ""
+VisualTrigger: ""
+Duration: 15
+IsCleanseable: false
+CleanseRequirement: Mechanic
+Stacking:
+  IsStackable: true
+  MaxStacks: 5
+AppliesTo: Enemy
+Effect:
+  PotencyReductionPerStack: 0.08   # -8% potency per stack
+  AffectsTiers: [Level2, Level3]   # baseline/Level1 skills are unaffected
+GameplayGoal: >
+  Lets a Tank blunt an enemy's escalated (Level2/Level3) Doctrine kit while
+  holding Aggro, without directly reducing the enemy's base difficulty for
+  everyone else in the encounter.
+NarrativeIntent: >
+  The enemy is being needled/distracted out of its stronger techniques, not
+  losing raw power -- represented as stacking Unfocus rather than a flat
+  damage-taken debuff.

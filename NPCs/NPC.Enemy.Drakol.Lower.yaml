@@ -2,10 +2,11 @@ Key: NPC.Enemy.Drakol.Lower
 Name: Lower Drakol
 Level: 3
 Location: Zone.FanVillage.OpenWorld
+RaceKey: Lower Drakols
 Tags:
   - Tag.NPC.Enemy
   - Tag.Race.Drakol
-  - Tag.Class.Lancer 
+  - Tag.Class.Lancer
 Stats:
   HP: 450
   PhysicalAttack: 35
@@ -13,17 +14,20 @@ Stats:
 AssignedSkills:
   - Skill.Combat.SpearThrust
   - Skill.Combat.DragonLeap
+  - Skill.Combat.Drakol.GenerateWater
+InnateSummon: Summon.Water.Slime   # carried innately, not cast -- see Summons/Water_Slime.yaml
 LootRegistry:
   - ItemKey: Item.Material.DrakolScale
     BaseDropRate: 40.0
 
-# --- Updated Rank Logic ---
-RankScaling:
-  # Autopiloted: Calls a global loot modifier based on lowest party rank
-  AdventurerLoot: Global.LootScaling.CurveA 
-  
-  # Hand-crafted: Cast bar conditions, interrupts, and tier swaps
-  MercenaryReaction:
+# --- Rank Profile (see Ranks/Rank_System.yaml for the contract) ---
+# Minimal authoring example: required tiers + one optional Mercenary Rank2.
+# Doctrine has no Level2/3, so all players see the Level1 pattern.
+RankProfile:
+  PartyResolution: Lowest
+  Adventurer:
+    LootCurve: Global.LootScaling.CurveA
+  Mercenary:
     Rank1:
       - Condition: "TargetInRange"
         Action: "Skill.Combat.SpearThrust"
@@ -31,11 +35,10 @@ RankScaling:
     Rank2:
       - Condition: "TargetCasting"
         Action: "Skill.Combat.SpearThrust.Tier2" # Triggers altered VFX/Animation interrupt
-        CastTime: 1.0 
-        
-  # Hand-crafted: Local map utilization and FFXIV aggro rules
-  StrategyAI:
-    AggroRadius: 800
-    LeashRadius: 2500
-    ResetBehavior: HealAndReturn
-    TerrainProfile: Profile.FanVillage.Cliffside # Links to specific UE5 Nav constraints
+        CastTime: 1.0
+  Doctrine:
+    Level1:
+      Profile: Profile.FanVillage.Cliffside # Links to specific UE5 Nav constraints
+      AggroRadius: 800
+      LeashRadius: 2500
+      ResetBehavior: HealAndReturn

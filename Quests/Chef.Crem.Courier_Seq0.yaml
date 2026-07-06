@@ -1,0 +1,13 @@
+PipelineID: Chef.Crem.Courier
+SequenceIndex: 0
+QuestID: Chef.Crem.Courier.FirstDelivery
+StepType: QuestGiver
+TargetNPCs:
+  - NPC.Friendly.MalachiteCity.Crem
+Action: Dialogue_Override
+DialogueRef: Dialogue.Chef.Crem.Courier.Seq0.Assignment
+GrantItem: Item.KeyItem.Crem.BirthdayCake
+NarrativeIntent: >
+  Crem's boss has no courier service; he asks the player to run his first
+  delivery -- a birthday cake for a child in Malachite City -- since he can't
+  leave the shop himself.

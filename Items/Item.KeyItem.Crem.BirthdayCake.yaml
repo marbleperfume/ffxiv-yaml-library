@@ -1,0 +1,15 @@
+Key: Item.KeyItem.Crem.BirthdayCake
+Name: "Wyllo's Birthday Cake"
+Category: KeyItem                    # new Item category -- Item Registry Creator.pyw only has Equipment/Attire/Minion/Music/Consumable/Material
+Rarity: Common
+Stackable: false
+MaxStacks: 1
+IsKeyItem: true
+Discardable: false
+Description: >
+  A cake Crem baked for a child's birthday delivery. Becomes the (empty,
+  implied) box repurposed as Item.KeyItem.Crem.InvitationGiftBox once the
+  party falls through in Seq1.
+IconPath: ""
+RestrictionTags:
+  - Tag.Quest.Chef.Crem.Courier

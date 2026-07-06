@@ -1,0 +1,37 @@
+PipelineID: Test.Mercenary.Rank2.Healer
+SequenceIndex: 0
+QuestID: Quest.Test.Mercenary.Rank2.Healer
+StepType: Custom
+Role: Healer
+TargetNPCs:
+  - NPC.Boss.Test.MechaGolem
+Action: Custom
+RequiresFlag: SkillQuest.CurrentClass.AllCleared   # resolves to whichever Healer-role class the player is on -- no Healer Base class confirmed yet
+TestConfig:
+  ForcedDoctrineLevel: Level2
+  Phase1:
+    Requirement: "Sustain buffs/damage output -- no healing input required or expected"
+    Duration: "Until Phase2Trigger fires"
+  Phase2Trigger:
+    Condition: "PartyHP <= 25% OR SelfHP <= 25%"
+    Description: >
+      Scripted or emergent crisis, never a fixed timer -- forces the
+      Healer's RoleMechanic (Healing) to actually manifest, since a Healer
+      otherwise spends the whole test buffing/dealing damage.
+  Phase2:
+    Requirement: "Successfully stabilize the party/self above 25% HP within the crisis window"
+    Checks:
+      - RoleMechanicUse   # Healing, under real pressure
+      - ClassMechanicUse
+Reward:
+  TitleID: null
+  ItemID: null
+  Copper: 0
+  Reputation: null
+NarrativeIntent: >
+  Deliberately rougher than the Tank/DPS test: Healers spend most of an
+  encounter buffing or dealing damage, since their actual RoleMechanic
+  (Healing) can't be exercised on demand. The test can't grade continuous
+  healing uptime, so instead it grades whether the player CAN heal
+  decisively the moment a genuine crisis (party or self critical HP)
+  occurs.

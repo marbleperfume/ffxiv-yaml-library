@@ -1,0 +1,43 @@
+Key: Skill.Combat.Shield.Bash
+Name: Shield Bash
+Intent: >
+  Adafold's implementation of the Tank RoleMechanic -- generates Focus and
+  applies Unfocus stacks to the target, letting a Tank hold Aggro while
+  blunting an enemy's escalated (Doctrine Level2/3) kit rather than its
+  baseline attacks. Other Tank classes are expected to get their own
+  analogous Focus-generating skill later, not necessarily this one.
+ActionType: Ability
+Tags:
+  - Skill.Type.Ability
+  - Skill.Role.Tank
+  - Tag.Mechanic.Role
+Acquisition:
+  Method: SkillQuest
+  SkillQuestRef: Quest.SkillQuest.Adafold.ShieldBash
+  Note: >
+    NOT part of Adafold's normal level-up schema -- this is the worked
+    example of a "skill not offered in the level up schema," gated behind
+    its own mini rank-test (see Ranks/Mercenary_Unlocks.yaml SkillQuestGate).
+RoleMechanic: Tank
+ClassMechanic: null
+BaseState:
+  Animation: Anim_ShieldBash
+  VFX: VFX_Impact_Stagger
+  IsOGCD: true
+  CanCastWhileMoving: true
+Mechanics:
+  Targeting: Target
+  Potency: 150
+  Range: 5
+  CastTime: 0
+  RecastTime: 8
+  MaxCharges: 1
+Resource:
+  Type: None
+  Cost: 0
+Combo: null
+FocusGeneration: 400   # high Focus-per-use relative to a typical damage skill -- this IS the aggro tool
+AppliesStatuses:
+  - Unfocus
+ClassRestrictions:
+  - Adafold (Shield Knight)
