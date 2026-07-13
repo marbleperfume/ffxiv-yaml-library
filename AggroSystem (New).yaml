@@ -1,0 +1,467 @@
+# Combat/AggroSystem.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+# AGGRO SYSTEM — Enemy Targeting & Frontliner Control Reference
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# THERE IS NO ENMITY TABLE.
+#
+# This system has no threat numbers, no "enmity per skill," no aggro meters.
+# "Who does the enemy attack?" is answered by:
+#   1. Strategy Rank (AI behavior tier)
+#   2. Proximity (who's closest?)
+#   3. Force Targeting (physical compulsion — Adafold)
+#   4. Unfocus (AI suppression — Madolt)
+#   5. Capacitor Pull (electromagnetic suction — Madolt)
+#
+# Players cannot see a threat number because one DOES NOT EXIST.
+#
+# Authority: DESIGN_OVERRIDE.md > BalanceTargets.yaml > this file
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Key: Combat.AggroSystem
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1: STRATEGY RANK (ENEMY AI TIERS)
+# ─────────────────────────────────────────────────────────────────────────────
+
+StrategyRank:
+  Scale: "1-4 (confirmed)"
+  Type: "AI behavior set — NOT a stat multiplier"
+  Description: >
+    Every enemy in the game has a Strategy Rank that determines its
+    TARGETING AI. This is entirely separate from the enemy's HP, damage,
+    or other stats. Strategy Rank answers ONE question: "How does this
+    enemy decide who to attack and how to approach combat?"
+
+  Ranks:
+    Rank1:
+      Name: "Mindless"
+      Behavior:
+        Targeting: "Attack whoever's closest. Period."
+        Pathfinding: "Direct line. No flanking. No avoidance."
+        Retreat: "Never. Fights to death in place."
+        Coordination: "None. Each enemy is independent."
+        Installations: "Ignores summons/deployables entirely."
+      Examples: "Trash mobs, wildlife, ambient hostiles, mindless undead"
+      FrontlinerImplication: >
+        Just be in front. If Madolt or Adafold is the closest target,
+        Rank 1 enemies attack them by default. No tools needed. This is
+        the FFXIV Normal experience — existing in front IS tanking.
+      PartyImplication: >
+        Cluster and mash. As long as the frontliner is between enemies
+        and the party, everything works. Rank 1 players thrive here.
+
+    Rank2:
+      Name: "Aware"
+      Behavior:
+        Targeting: "Seek shortest open path to lowest-HP or caster-type targets."
+        Pathfinding: "Will path AROUND obstacles to reach preferred target."
+        Retreat: "No. Will advance through danger to reach target."
+        Coordination: "Minimal. Multiple enemies may converge on same target by coincidence."
+        Installations: "Ignores. Does not recognize summons as threats."
+      Examples: "Dungeon elites, pack leaders, trained soldiers, predators"
+      FrontlinerImplication: >
+        Enemies will try to path around the frontliner to reach squishies.
+        Adafold: body-block the path (Force Targeting).
+        Madolt: suppress to Rank 1 behavior so they stop trying (Unfocus).
+        First time players notice the tank is doing actual WORK.
+      PartyImplication: >
+        Frontliner awareness required. If the frontliner isn't actively
+        controlling enemies, casters/healers will get hit. Healer may
+        need to self-heal occasionally. DPS should stay behind frontliner.
+
+    Rank3:
+      Name: "Tactical"
+      Behavior:
+        Targeting: "Prioritize high-value targets. Recognize healer/caster roles."
+        Pathfinding: "Flank. Use multiple approach vectors simultaneously."
+        Retreat: "Yes — retreats when low HP to regroup or heal if able."
+        Coordination: "Active. Groups split to attack from multiple angles."
+        Installations: >
+          RECOGNIZES summons/deployables as threats. 30-50% chance to
+          target Bone Spirit if in melee range. 50% chance to target
+          Floating Bone if within reach. Will path to destroy if convenient.
+      Examples: "Boss adds, veteran enemies, elite squads, pack alphas"
+      FrontlinerImplication: >
+        Multiple enemies flanking simultaneously. Adafold cannot block
+        all paths — must tether priority targets. Madolt must AoE suppress
+        to prevent flankers from reaching casters. BOTH tanks working
+        simultaneously may be needed. Parry critical for Madolt survival.
+      PartyImplication: >
+        Strategic play required. Party may choose to split. Shaman summon
+        placement becomes a puzzle (enemies will target installations).
+        Healer enters triage mode. DPS must manage positioning (enemies
+        advance on ranged attackers).
+
+    Rank4:
+      Name: "Strategic"
+      Behavior:
+        Targeting: "Exploit weaknesses. Target whoever has lowest mitigation active."
+        Pathfinding: "Set ambushes. Pre-position before engaging."
+        Retreat: "Yes — retreats to call reinforcements or reposition."
+        Coordination: >
+          Full tactical coordination. Send adds down different corridors.
+          Distract frontliner while flankers hit backline. Bait cooldowns
+          then punish the gap.
+        Installations: >
+          PRIORITIZE destroying deployables. Will path specifically to kill
+          Bone Spirit / Floating Bone. Recognizes installations as force
+          multipliers and eliminates them first.
+      Examples: "Bosses, named NPCs, raid encounters, enemy commanders"
+      FrontlinerImplication: >
+        Everything simultaneously. Parry, suppress, position, control.
+        Enemies bait your cooldowns. Rank 4 enemies recognize Capacitor Pull
+        and retreat BEFORE entering radius. Force Tethers get broken faster
+        (Rank 3+ break 2s early). The full toolkit is load-bearing.
+      PartyImplication: >
+        Full system engagement. Every class axis active. Procgen geometry
+        matters. Summon HP matters. Healer who over-heals triggers >50% rule.
+        DPS who cheese at range get pushed by advancing enemies. Communication
+        and strategy required. This is the end-game skill expression.
+
+  IndependenceFromStats: >
+    Strategy Rank is COMPLETELY INDEPENDENT from enemy HP/damage/defense.
+    You can have:
+    - Rank 4, 100 HP = smart but fragile (dies in one hit, hard to catch)
+    - Rank 1, 50000 HP = dumb but beefy (stands still, takes forever to kill)
+    - Rank 3, 5000 HP, 500 damage = the "standard hard enemy" package
+    These are separate design axes. Tuning one does not affect the other.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2: FORCE TARGETING (ADAFOLD'S MODEL)
+# ─────────────────────────────────────────────────────────────────────────────
+
+ForceTargeting:
+  Owner: "Adafold (Shield Knight)"
+  RacialAffinity: "Rawrotin (Linfree) — bodyguard tradition"
+  Type: "Physical compulsion. NOT a number. NOT AI manipulation."
+  CorePrinciple: >
+    Force Targeting works by PHYSICALLY PREVENTING enemies from reaching
+    their preferred targets. It doesn't change what the enemy WANTS to do —
+    it makes what they want to do IMPOSSIBLE. A Rank 4 enemy force-targeted
+    by Adafold still WANTS to flank the healer. It just CAN'T, because
+    there's a shield in the way.
+
+  Mechanics:
+    IronBody:
+      Name: "Iron Body (Passive)"
+      Effect: >
+        Adafold has COLLISION with enemies. The shield physically blocks
+        corridor passage. Enemies cannot walk through Adafold — they must
+        path around. In a single-width corridor, Adafold IS a wall.
+      StrategyRankInteraction: "Works on ALL ranks. Physics don't care about intelligence."
+      Limitation: "Only blocks ONE path. Open areas have multiple routes."
+
+    ForceTether:
+      Name: "Force Tether (Shield Lob)"
+      Effect: >
+        Projectile that tethers to target. Tethered enemy MUST path toward
+        Adafold for 8s (cannot move away from tether origin). The enemy is
+        physically compelled to approach — not because it wants to, but
+        because the tether is pulling.
+      Duration: 8s
+      StrategyRankBypass: "Rank 3+ break tether 2s faster (6s effective)"
+      MaxTargets: 1  # Single target. Choose wisely.
+      Cooldown: 15s
+
+    Pin:
+      Name: "Shield Bash (Pin)"
+      Effect: "Target is stunned + immobilized for 3s. Cannot act or move."
+      Duration: 3s
+      StrategyRankBypass: "Rank 4 enemies have 50% stun resistance (1.5s effective)"
+      Cooldown: 20s
+
+    ZoneDenial:
+      Name: "Consecrate (Zone Denial)"
+      Effect: >
+        Ground-targeted zone. Enemy AI treats the zone as a WALL for
+        pathfinding purposes. Enemies will not willingly path through
+        Consecrate — they'll route around it. If no route exists, they
+        stop at the edge.
+      Duration: 15s
+      Radius: 5y
+      StrategyRankBypass: "Rank 4 enemies path through if NO alternative exists (still take damage + slow)"
+      Cooldown: 30s
+
+    KnockbackReroute:
+      Name: "Shooting Star (Knockback Reroute)"
+      Effect: >
+        Line projectile. All enemies hit are knocked back 5y and their
+        pathfinding RESETS. After knockback, enemies recalculate their
+        route from new position — buying time for repositioning.
+      Knockback: 5y
+      PathReset: true
+      Cooldown: 30s
+
+  WhyForceWorks: >
+    Force Targeting is ABSOLUTE against geometry. If there's one corridor
+    and Adafold is in it (Iron Body), nothing gets through regardless of
+    Strategy Rank. A Rank 4 genius enemy still can't walk through a wall.
+    The weakness: multiple paths. Adafold can block ONE route. In open
+    areas with 3+ approaches, Force Targeting requires choosing which
+    path to block — and accepting enemies come from the others.
+    That's Madolt's territory.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3: UNFOCUS (MADOLT'S MODEL — AI SUPPRESSION)
+# ─────────────────────────────────────────────────────────────────────────────
+
+Unfocus:
+  Owner: "Madolt Warrior (Frontliner)"
+  Type: "Debuff applied to ENEMIES. Reduces effective Strategy Rank."
+  CorePrinciple: >
+    Unfocus doesn't make enemies "like Madolt more." It makes enemies
+    DUMBER. A suppressed enemy temporarily forgets its tactics and reverts
+    to lower-rank behavior. Since lower-rank behavior = "attack nearest
+    target," and Madolt is standing right there... the enemy attacks Madolt.
+    Not because of a number. Because it's too stupid to do anything else.
+
+  Application:
+    Type: "Debuff on enemy"
+    PerApplication: "1 rank suppression"
+    MaxSuppression: "2 ranks (hard cap — cannot suppress more than 2 ranks)"
+    BaseDuration: 8s
+    Stacking: >
+      Multiple applications refresh duration AND can increase depth:
+      - First application: 1 rank suppressed for 8s
+      - Second application within window: 2 ranks suppressed for 8s (max depth)
+      - Further applications: refresh duration only (no deeper than 2)
+    Visual: "Crackling electricity arcing across enemy's head (stunned/dazed look)"
+
+  Recovery:
+    OnExpiry: >
+      When Unfocus expires, the enemy IMMEDIATELY re-evaluates targets using
+      its restored Strategy Rank. If casters are visible and a path exists,
+      the enemy will begin pathing toward them INSTANTLY. There is no grace
+      period. Madolt must reapply before expiry or lose control.
+    RecoverySpeed: "Instant. No ramp-up back to full intelligence."
+    TacticalImplication: >
+      Unfocus maintenance is a CONTINUOUS obligation. Unlike Force Targeting
+      (place wall, wall stays), Unfocus must be constantly refreshed. If
+      Madolt dies or is CC'd, all suppressed enemies recover simultaneously
+      and the backline gets swarmed. This is the cost of the suppression model.
+
+  Sources:
+    # These are Madolt's Unfocus application tools:
+    - Skill: "Arc Cleave (Combo 3 finisher)"
+      Depth: 1
+      Duration: 8s
+      Type: single_target
+      Notes: "Primary. Every combo cycle refreshes on main target."
+
+    - Skill: "Lightning Field (AoE GCD)"
+      Depth: 1
+      Duration: 6s
+      Type: aoe
+      Notes: "Shorter duration but hits EVERYTHING. Open arena crowd control."
+
+    - Skill: "EC Weapon Discharge (gauge spender)"
+      Depth: 2
+      Duration: 8s
+      Type: single_target
+      Notes: "Hard suppress. Makes Rank 3 enemies fully docile (→ Rank 1)."
+
+    - Skill: "Voltaic Counter (guard point counter)"
+      Depth: 1
+      Duration: 10s
+      Type: single_target
+      Notes: "Long duration. Reward for skilled defensive play."
+
+    - Skill: "Voltaic Parry (successful parry)"
+      Depth: 1
+      Duration: 12s
+      Type: single_target
+      Notes: "Longest duration. Reward for prediction-based play."
+
+    - Skill: "Overcharge activation"
+      Depth: 1
+      Duration: 6s
+      Type: aoe_10y
+      Notes: "AoE suppress on engagement. Tactical opening tool."
+
+    - Skill: "EC Shield Discharge / Cascade Discharge"
+      Depth: 2
+      Duration: "10-12s"
+      Type: aoe_cone
+      Notes: "Heavy AoE suppress. Full gauge payoff."
+
+  SuppressionExamples:
+    Rank2_Suppressed: >
+      Rank 2 enemy (paths to casters) + 1 Unfocus application =
+      behaves like Rank 1 (attacks nearest = Madolt). Simple. One combo
+      cycle keeps this enemy locked indefinitely.
+    Rank3_Suppressed: >
+      Rank 3 enemy (flanks, coordinates) + 2 Unfocus applications =
+      behaves like Rank 1 (fully docile). Requires EC Weapon Discharge
+      or stacking two separate applications quickly. Higher investment.
+    Rank4_Suppressed: >
+      Rank 4 enemy (ambushes, calls reinforcements) + 2 Unfocus =
+      behaves like Rank 2 (still seeks paths, but less coordinated).
+      NOT FULLY CONTROLLABLE by Unfocus alone. For full Rank 4 control,
+      need Adafold's Force Targeting OR Capacitor Pull containment.
+    Rank4_Limitation: >
+      This is the intended design: Unfocus has a ceiling. Rank 4 enemies
+      cannot be made fully stupid by one frontliner. You either need BOTH
+      tanks (Unfocus + Force), or you accept that Rank 4 enemies will still
+      make intelligent decisions (just slightly less coordinated).
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: CAPACITOR PULL (ELECTROMAGNETIC SUCTION)
+# ─────────────────────────────────────────────────────────────────────────────
+
+CapacitorPull:
+  Owner: "Madolt Warrior"
+  AttachedTo: "Electron Guard (stance) — active only while EG is toggled on"
+  Type: "Passive AoE pull field"
+  CorePrinciple: >
+    While Electron Guard is active, the Capacitor Lance generates an
+    electromagnetic field that physically DRAGS nearby enemies toward Madolt.
+    This solves "what if enemies are spread across the arena and Madolt
+    can't reach all of them?" — you don't chase. You PULL.
+
+  Mechanics:
+    Radius: 8y  # Enemies within 8y are affected
+    PullStrength: 1.5y_per_second  # Soft pull — enemies drift toward Madolt
+    SprintPrevention: true  # Enemies in field cannot sprint or dash away
+    Duration: "Continuous while Electron Guard is active"
+    Cost: "Part of Electron Guard's gauge drain (5%/10s)"
+
+  StrategyRankInteraction:
+    Rank1: "Pulled normally. Too stupid to resist or escape."
+    Rank2: "Pulled normally. Aware something is wrong but can't escape."
+    Rank3: "Can use dash/teleport abilities to escape (costs them a cooldown)."
+    Rank4: "Recognizes the field. Will retreat BEFORE entering 8y radius. Pull = 0.5y/s if caught (boss-tier resistance)."
+
+  SynergyWithUnfocus: >
+    Unfocus makes them stupid. Suction makes them close. Together:
+    enemies are suppressed AND pulled into melee simultaneously.
+    A suppressed enemy inside the Capacitor Pull field is functionally
+    soft-CC'd — it can still attack, but it can't leave and won't try to.
+    This IS the open-arena lockdown: suppress + pull = vortex.
+
+  SynergyWithDischarge: >
+    Enemies pulled into melee range = grouped for AoE Discharge skills.
+    Lightning Field hits everything in the pile. Cascade Discharge cones
+    through the stack. The pull creates the AoE VALUE for Madolt's kit.
+    Without pull: enemies spread = Discharge hits 1-2. With pull: enemies
+    stacked = Discharge hits 4-5. The damage difference is multiplicative.
+
+  Limitations:
+    - "Only active during Electron Guard (costs gauge to maintain)"
+    - "8y radius means distant enemies unaffected — must close gap first"
+    - "Rank 4 enemies resist heavily (0.5y/s) or avoid entirely"
+    - "Boss enemies: pull is cosmetic drift only, not functional lock"
+    - "Toggle off Electron Guard = field drops = enemies scatter immediately"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 5: WHY TWO FRONTLINER MODELS?
+# ─────────────────────────────────────────────────────────────────────────────
+
+DualFrontlinerDesign:
+  Question: "Why not just one tank type?"
+  Answer: >
+    Because procedurally generated maps produce BOTH types of geometry,
+    and no single control method works perfectly in both.
+
+  GeometryTypes:
+    Corridor:
+      Description: "Single-width passages, doorways, chokepoints, tunnels"
+      OptimalFrontliner: Adafold
+      Reason: >
+        Iron Body + shield = physical wall. ONE body blocks the ONLY path.
+        Absolute control with minimal effort or resource cost. Unfocus is
+        overkill here (enemies can't path around regardless of intelligence).
+      MadoltFallback: "Works but wastes suppress — enemies have nowhere to go anyway."
+
+    OpenArena:
+      Description: "Large rooms, multiple exits, branching paths, outdoor areas"
+      OptimalFrontliner: Madolt
+      Reason: >
+        Can't body-block 3 exits simultaneously. Instead: Capacitor Pull
+        drags enemies inward, Unfocus suppresses their flanking intelligence,
+        AoE Discharge punishes the pile. Controls the WHOLE room via field
+        effects, not physical positioning.
+      AdafoldFallback: "Can tether 1 priority target but others leak through."
+
+    Mixed:
+      Description: "Room with one corridor entrance + open interior"
+      OptimalFrontliner: "Both — Adafold holds the chokepoint, Madolt handles interior"
+      SoloFallback: >
+        Either tank CAN handle mixed geometry alone with more effort.
+        Adafold: tethers, zone denial, knockback reroute (compensates for open area).
+        Madolt: AoE suppress + pull (compensates for multiple paths with field control).
+
+  BothCanSolo: >
+    In party-split scenarios, EITHER frontliner handles content alone:
+    - Madolt: kills fast (high DPS), parries for sustain, suppresses threats.
+    - Adafold: outlasts everything (high mitigation), force-targets priority threats.
+    Different survival profiles, same outcome: corridor cleared, escort completed.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 6: RANK 1 BEHAVIOR (THE FFXIV FLOOR)
+# ─────────────────────────────────────────────────────────────────────────────
+
+Rank1Behavior:
+  Description: >
+    At Rank 1 content (all enemies at Strategy Rank 1), the targeting
+    system reduces to "attack whoever's closest." This is INTENTIONALLY
+    identical to FFXIV Normal difficulty:
+    - Frontliner stands in front → enemies attack frontliner
+    - No Force Targeting needed (enemies aren't trying to path around)
+    - No Unfocus needed (enemies are already attacking nearest = frontliner)
+    - Healer heals the frontliner. DPS hits the enemy. Done.
+
+  WhyThisExists: >
+    FFXIV retains casuals because this floor FEELS GOOD — smooth, rhythmic,
+    rewarding without demanding mastery. The mistake is making the floor the
+    ceiling. Our system uses Rank 1 as the intentional floor and builds
+    upward. Low-rank players cluster, mash, and clear. That's valid.
+    That's intended. The complexity reveals itself as content rank increases.
+
+  FrontlinerAtRank1:
+    Required: "Be in front. Press combo. Accept healer support."
+    NotRequired: "Parry, Force Targeting, Unfocus management, solo survival."
+    DesignNote: >
+      A Rank 1 frontliner who never parries, never uses Force Targeting,
+      and never applies Unfocus still clears Rank 1 content if they have
+      a healer and stand in front. This is correct behavior. The tools
+      exist for LATER, not for now.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 7: EXPLICIT — THERE IS NO ENMITY TABLE
+# ─────────────────────────────────────────────────────────────────────────────
+
+NoEnmityTable:
+  Statement: >
+    This game has NO enmity/threat/aggro number system. There is no hidden
+    number that skills add to. There is no "aggro meter" UI element. There
+    is no "enmity combo" that generates threat. NONE OF THIS EXISTS.
+
+  WhatExistsInstead:
+    - "Strategy Rank: determines WHAT the enemy wants to do"
+    - "Proximity: determines WHO the enemy targets by default (Rank 1-2)"
+    - "Force Targeting: PHYSICALLY PREVENTS the enemy from reaching preferred target"
+    - "Unfocus: SUPPRESSES the enemy's intelligence, making it target nearest by default"
+    - "Capacitor Pull: DRAGS enemies toward Madolt, making Madolt the nearest by force"
+
+  WhyNoNumbers: >
+    Enmity numbers create degenerate gameplay:
+    - "Provoke on cooldown" (press button, hold aggro, no thought)
+    - "DPS pulling aggro" (punishes good DPS for doing their job)
+    - "Shirk swaps" (arbitrary mechanical busywork with no fantasy)
+    - "Aggro meters" (watch number go up, not watch the fight)
+    Our system replaces all of this with SPATIAL and BEHAVIORAL control.
+    The question isn't "do I have enough enmity?" — it's "is the enemy
+    physically capable of reaching my backline?" That's answerable by
+    LOOKING AT THE GAME, not at a UI number.
+
+  DesignConsequences:
+    - "No 'pulling aggro' concept. DPS cannot accidentally steal enmity."
+    - "No 'tank stance' that generates bonus threat. Stance has real mechanical effects."
+    - "No 'enmity combo' vs 'damage combo' choice. All combos do BOTH damage and control."
+    - "Party never needs to 'wait for tank to establish aggro.' Positioning IS aggro."
+    - "Off-tanks don't need to 'build threat' on a target. They Force Target or Suppress it."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF FILE
+# ═══════════════════════════════════════════════════════════════════════════════
