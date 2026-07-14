@@ -1,1059 +1,1457 @@
-# ============================================================================
-# SPIRITCALLER / TIDEBINDER — Complete Class Specification
-# juice-yaml-library | github.com/marbleperfume/juice-yaml-library
-# ============================================================================
+# Classes/Healer/Spiritcaller_Complete.yaml
+# ══════════════════════════════════════════════════════════════════════════════
+# SPIRITCALLER (Tidebinder) — Dual-Entity Positional Healer
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Design lineage:
+#   Mythology: Drakol spirit-speakers (elemental communion, water worship),
+#              Water elemental bonds (animist tradition, NOT summoning),
+#              Polynesian wave-riders (ocean as living entity), Shinto kami
+#   Pikmin: Directing a secondary entity while managing your own survival
+#   Starcraft/RTS: Split-attention micro (controlling two units simultaneously)
+#   FFXIV SCH: Fairy companion with autonomous/directed healing
+#   WoW BM Hunter: Companion positioning matters (ANTI-REFERENCE — pet has HP,
+#     ours does NOT. Spirit cannot die.)
+#   GW2 Ranger: Companion modes (conceptual parallel only)
+#
+# Core identity: "Healer that ISN'T a caster"
+#   The Drakol is a MELEE FIGHTER with a trident. The healing comes from
+#   directing a Water Elemental spirit (the Slime) to positions around the
+#   battlefield. The player character does NOT cast heal spells. The player
+#   character FIGHTS, and manages their companion spirit via oGCD commands.
+#   This is RTS-in-an-action-game: split attention between your melee combat
+#   and your spirit's positioning/mode.
+#
+# Fantasy: A Drakol warrior bonded to a water elemental spirit.
+#   Lower Drakols commune with elemental spirits through ancestral tradition.
+#   The Water Slime is a SPIRIT ENTITY — not a creature, not a pet, not an
+#   animal. It is an elemental manifestation of water bonded to the Drakol's
+#   soul. It cannot be killed because it is not alive in a physical sense.
+#   It produces water that maintains the Drakol's biological moisture needs
+#   and can be directed to heal allies through water application.
+#
+# The Core Tension:
+#   The Water Slime maintains the Drakol's Moisture Gauge passively when nearby.
+#   High Moisture = damage reduction (wet skin deflects/absorbs). Low Moisture =
+#   vulnerability (dry skin = fragile). SENDING THE SLIME AWAY TO HEAL ALLIES
+#   CAUSES THE DRAKOL'S MOISTURE TO DECAY, LOSING PERSONAL DEFENSE.
+#   This is THE decision: keep Slime close (stay safe) vs send Slime far
+#   (heal others, lose your own DR). Every moment of healing output costs
+#   personal survivability.
+#
+# References:
+#   - Combat/BalanceTargets.yaml (all numeric targets)
+#   - Combat/AggroSystem.yaml (positioning interaction with Strategy Rank)
+#   - Combat/ClassMechanicModuleDesign.md (mechanic type taxonomy)
+#   - Roles/Healer_RoleMechanic.yaml (shared healer systems)
+# ══════════════════════════════════════════════════════════════════════════════
 
-header:
-  class_name: "Spiritcaller / Tidebinder"
-  race_lock: "Lower Drakols"
-  tier: "Experienced"
-  role: "Healer"
-  lock_type: "Biological"
-  last_updated: "2026-07-14"
-  design_reference: "The RTS-in-an-action-game class"
-  one_line: >
-    Dual-entity healer — a melee Drakol warrior directs a persistent Water Slime
-    companion for healing, scouting, and damage. Skill expression lives in
-    positioning TWO units optimally while neither entity is complete alone.
+Key: Classes.Healer.Spiritcaller
 
-# ============================================================================
-# SECTION 1: IDENTITY
-# ============================================================================
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1: CLASS IDENTITY
+# ─────────────────────────────────────────────────────────────────────────────
 
-identity:
-  race: "Lower Drakols"
-  
-  biological_lock_explanation: >
-    Lower Drakols generate water biologically (BonusSkill: GenerateWater).
-    They are the ONLY race with this skill. The Water Slime is a symbiotic
-    organism that has bonded with the Drakol since hatching — it feeds on
-    their generated water and exists as a permanent biological companion.
-    The slime is not summoned, not conjured, not temporary. It is BORN WITH
-    the Drakol. Remove the Drakol's water generation, remove the slime's
-    existence. No other race has this symbiote. No other race CAN have it.
+Identity:
+  Name: Spiritcaller
+  AlternateName: Tidebinder
+  Role: Healer
+  SubRole: Sustain Healer (Positional / Dual-Entity)
+  DamageType: physical  # Drakol fights with trident — physical damage dealer
+  ExecutionArchetype: Split-Attention Micro (RTS-in-Action-Game)
+  ExecutionTier: Experienced
+  # Experienced tier justified by:
+  # - Managing TWO entities simultaneously (Drakol melee + Slime positioning)
+  # - Constant distance-vs-safety tradeoff evaluation (Moisture decay math)
+  # - Mode-switching the Slime (Scout/Heal/Damage) based on field state
+  # - Melee DPS rotation WHILE issuing companion commands (oGCD command layer)
+  # - Terrain awareness (water puddle placement for cross-class synergy)
+  # - Moisture resource management (spending defense for offensive water skills)
+
+  Description: >
+    A melee-fighting healer who directs a bonded Water Elemental spirit (the
+    Water Slime) across the battlefield via oGCD commands. The Drakol fights
+    in melee with a trident, dealing physical damage through GCD combos. The
+    Water Slime is an invulnerable spirit entity that produces water, heals
+    allies in proximity, scouts ahead, or deals water damage to enemies —
+    depending on its current mode and position. The Slime passively maintains
+    the Drakol's Moisture Gauge when nearby, providing damage reduction through
+    wet skin. Sending the Slime far away to heal distant allies causes Moisture
+    to decay, creating a constant risk/reward calculation: personal safety vs
+    party healing reach.
+
+  CoreFantasy: >
+    You are a Drakol warrior with a trident in hand and a water spirit at your
+    side. You fight like a frontliner — thrusting, sweeping, impaling. But your
+    true power is the elemental bond. Your Water Slime flows where you direct it,
+    mending allies with cool water, drowning enemies in torrents, or scouting
+    ahead through terrain. When it's close, your skin glistens with moisture and
+    blows slide off your scales. When you send it far to save a dying ally, your
+    skin dries, your scales crack, and every hit lands harder against you. You
+    are the healer who bleeds for every heal delivered. The question is never
+    "can I heal them?" — it's "can I AFFORD to heal them right now?"
+
+  InputModality:
+    PrimaryFocus: slime_position_relative_to_party_and_self
+    SecondaryFocus: moisture_gauge_and_decay_rate
+    TertiaryFocus: melee_combo_state_and_enemy_positioning
+    QuaternaryFocus: terrain_puddle_coverage_and_cross_class_synergy
+    DecisionType: split_attention_positional
+    # Unlike Elementalist (reactive triage to HP) or Siren (bond maintenance timers),
+    # Spiritcaller watches SPATIAL RELATIONSHIPS — "where is my Slime? Where does
+    # it NEED to be? How long can I afford to keep it there before my Moisture
+    # hits critical?"
+
+  StatPriority:
+    Primary: STR  # Physical melee damage (trident). Drakol IS the damage dealer.
+    Secondary: MED  # MED amplifies Slime healing potency when directed to heal.
+    Tertiary: VIT  # HP pool matters because Moisture DR is multiplicative with max HP.
+    DumpStat: MAG  # Not a caster. Water skills scale from Moisture spent, not MAG.
+
+  DesignStatement: >
+    Spiritcaller is the healer for players who HATE casting. You never stand in
+    the back channeling heal spells. You're in melee, stabbing things with a
+    trident, issuing spirit commands between attacks like an RTS player micro-ing
+    two units. Your healing output depends on WHERE you put your spirit, not WHAT
+    buttons you press. The rotation is simple (melee combo + oGCD commands). The
+    DIFFICULTY is spatial — managing distance, evaluating risk, choosing when to
+    sacrifice your own defense for others' survival. At low skill, you keep the
+    Slime close and heal whoever's nearby. At high skill, you dance on the edge
+    of Moisture death, sending your Slime across the arena for clutch heals and
+    yanking it back just before your DR collapses.
+
+  FailureStates:
+    MoistureCritical:
+      Cause: "Sent Slime too far for too long. Moisture gauge depleted."
+      Cost: "DR gone. Drakol takes full damage. Death likely in melee range."
+      Recovery: "Recall Slime (immediate). 3-4s for Moisture to rebuild to safe DR."
+    SlimeMispositioning:
+      Cause: "Slime in wrong mode or wrong location when healing needed."
+      Cost: "Ally takes damage without healing. 2-4s travel time to reposition."
+      Recovery: "Flash Command (emergency teleport oGCD) if available. Otherwise wait."
+    OverspendingMoisture:
+      Cause: "Cast too many water skills (Moisture cost) while Slime is distant."
+      Cost: "Double drain — Slime absence + skill spending = rapid DR collapse."
+      Recovery: "Stop casting water skills. Recall Slime. Wait for regen."
+    MeleeDisengagement:
+      Cause: "Forced out of melee range (AoE, knockback, arena mechanic)."
+      Cost: "DPS drops to near-zero (no ranged GCDs except water skills at Moisture cost)."
+      Recovery: "Close gap. Use gap-closer (Tidal Rush). Accept temporary DPS loss."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1b: RACIAL LOCK — LOWER DRAKOL
+# ─────────────────────────────────────────────────────────────────────────────
+
+RacialLock:
+  Race: "Lower Drakol"
+  ParentCategory: Drakols
+  Subtype: Lower  # As opposed to Upper Drakols (different class access)
+  Enforcement: hard_lock  # Players MUST be Lower Drakol to play Spiritcaller.
+  BiologicalLock: true  # This is a BIOLOGICAL requirement, not cultural.
+  LoreJustification: >
+    Lower Drakols possess amphibious biology — their skin requires constant
+    moisture to maintain structural integrity and defensive properties. This
+    is not cultural preference but physiological necessity. Their ancestral
+    connection to water elemental spirits evolved alongside this biology:
+    the spirit bond maintains the moisture that keeps the Drakol alive.
+    Other races lack the amphibious skin that makes the Moisture mechanic
+    biologically meaningful. A human bonding a water spirit gains nothing
+    from being wet. A Drakol bonding a water spirit gains SURVIVAL.
+  NPCException: >
+    Non-Drakol Spiritcallers do not exist. The biology is the requirement.
+    This is not a learned tradition that could be taught to outsiders — it
+    is a symbiotic relationship that only functions with amphibious physiology.
+    No narrative exceptions.
+  RacialSynergy:
+    - "Amphibious skin — Moisture mechanic IS their biology (DR from wetness)"
+    - "Elemental communion — Lower Drakols speak to spirits (cultural+spiritual tradition)"
+    - "Aquatic affinity — natural swimmers, water terrain is home territory"
+    - "Scale structure — wet scales interlock for defense, dry scales separate and crack"
+    - "Spiritual sensitivity — can perceive/direct elemental spirits (other races cannot)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2: ROLE OBJECTIVE FUNCTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+RoleObjective:
+  Type: dual_objective
+  PrimaryMetric: healing_uptime_through_positioning
+  SecondaryMetric: potency_per_second_melee
+  Constraints:
+    - "party_hp >= survival_threshold AT all_damage_events"
+    - "moisture_gauge >= critical_threshold during active combat"
+    - "minimize: time_slime_idle (every second Slime isn't working = wasted potential)"
+  HealingModel:
+    FreeHealingBudget: "Slime passive proximity healing (when Slime near allies in Heal mode)"
+    PositionalHealCost: "Personal DR loss (Moisture decay from Slime distance)"
+    GCDHealCost: "Zero — Drakol has NO GCD heals. All healing is Slime-delivered."
+    OverhealPenalty: false  # Slime proximity healing is HoT — low overheal by design
+    HealingPriority: [slime_proximity_passive > slime_direct_command > water_puddle_standing > drakol_moisture_sacrifice]
+  TargetDPS:
+    WhileHealing: "55% of DPS reference"  # Melee uptime maintained, Slime handles healing
+    PureDPSMode: "70% of DPS reference"   # Slime in Damage mode, full melee combo uptime
+    # NOTE: Lower than other healers' DPS mode because melee + pet DPS is split
+    # across two entities. Total party contribution includes Slime damage output.
+  HealingSustain:
+    Normal: "50% party HP per minute (Slime in Heal mode, close range)"
+    Hard: "80% party HP per minute (Slime actively repositioned, Moisture sacrificed)"
+    Extreme: "110% party HP per minute (full Moisture sacrifice, Drakol near-dry)"
+  UniqueHealerProperty: >
+    Spiritcaller is the ONLY healer whose healing requires NO GCDS from the
+    player character. All healing is delegated to the Slime entity. This means
+    the Drakol's GCD timeline is 100% damage (melee combo). The "healing cost"
+    is paid in MOISTURE (personal defense) and ATTENTION (split focus), not in
+    GCD opportunity cost. This makes Spiritcaller the highest-potential-DPS
+    healer in raw numbers, but the most personally fragile when healing hard.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3: CLASS MECHANIC — DUAL-ENTITY MANAGEMENT + MOISTURE GAUGE
+# ─────────────────────────────────────────────────────────────────────────────
+
+ClassMechanic:
+  Type: dual_entity_positional_with_gauge
+  Name: "Spirit Bond (Dual-Entity Moisture System)"
+  Description: >
+    Two interlocking systems define Spiritcaller's gameplay:
+    1. DUAL-ENTITY: The Drakol (player character) fights in melee. The Water
+       Slime (spirit companion) is directed via oGCD commands to positions/modes.
+       They are two independent actors on the field — the player controls BOTH.
+    2. MOISTURE GAUGE: The Drakol's primary defensive resource. High = DR bonus.
+       Low = vulnerable. The Slime GENERATES Moisture when close. Distance DECAYS
+       Moisture. Water skills SPEND Moisture. This gauge IS the tension.
+
+  SpiritEntity:
+    Name: "Water Slime (Water Elemental)"
+    Nature: spirit  # NOT a pet. NOT a creature. An elemental spirit.
+    Killable: false  # CANNOT be killed. CANNOT be destroyed. It is a spirit.
+    HasHP: false  # No HP bar. No health. Immune to all damage.
+    AlwaysPresent: true  # Never needs summoning, resummoning, or recovery.
+    Targetable: false  # Enemies cannot target, attack, or interact with it.
+    PhysicalPresence: "Semi-corporeal. Visible as flowing water in a slime-shape."
+    DesignRationale: >
+      The Slime is an elemental spirit — a manifestation of water bound to the
+      Drakol's soul through ancestral communion. It has no physical body to destroy.
+      Fire does not hurt it (spirits are not physical). Swords do not cut it
+      (there is nothing to cut). It simply IS, always, as long as the bond exists.
+      This removes the "pet death" failure state entirely. The Spiritcaller's
+      vulnerability is MOISTURE LOSS from distance, not spirit destruction.
+      The companion is ALWAYS available — the cost is always positional, never
+      about recovering a destroyed asset.
+    # REMOVED: HP pool, fire vulnerability, summon recovery, destruction mechanics.
+    # These were in the previous version and are EXPLICITLY DELETED.
+
+    Modes:
+      Scout:
+        Behavior: "Slime moves to designated position. Reveals fog/stealth in radius."
+        HealingOutput: none
+        MoistureEffect: "Decays based on distance from Drakol"
+        CombatUse: "Pre-pull scouting, flank checking, vision control"
+        PassiveEffect: "Reveals hidden enemies/traps within 8y of Slime"
+        WaterProduction: "Leaves small water trail (cosmetic only in Scout mode)"
+      Heal:
+        Behavior: "Slime moves to designated position. Heals all allies within radius."
+        HealingOutput: "Proximity-based HoT. Closer to Slime = stronger heal."
+        HealingRadius: 8y  # Allies within 8y receive healing
+        HealingFalloff: "100% at 0-4y. 60% at 4-6y. 30% at 6-8y. 0% beyond 8y."
+        MoistureEffect: "Decays based on distance from Drakol (same as all modes)"
+        CombatUse: "Primary healing delivery. Position Slime near wounded allies."
+        PassiveEffect: "Creates water puddle at Slime's location (terrain interaction)"
+        WaterProduction: "Generates puddle (3y radius) that persists 10s after Slime leaves"
+        TickRate: "Every 3s (aligned with server tick)"
+      Damage:
+        Behavior: "Slime moves to designated position. Attacks nearby enemies."
+        HealingOutput: none
+        DamageOutput: "Water damage to enemies within 6y. Splash damage."
+        MoistureEffect: "Decays based on distance from Drakol (same as all modes)"
+        CombatUse: "DPS contribution when healing not needed. AoE situations."
+        PassiveEffect: "Applies Soaked debuff to enemies (terrain interaction setup)"
+        WaterProduction: "Creates water puddle at Slime's location"
+        TickRate: "Every 3s (damage pulses)"
+
+    Positioning:
+      MovementSpeed: "150% of Drakol's base movement speed"
+      CommandDelay: "0.3s (input to movement start)"
+      TravelBehavior: "Flows directly to target position (ignores most terrain)"
+      MaxRange: "40y from Drakol (beyond this, bond stretches — Moisture penalty doubles)"
+      BreakRange: "None — spirit bond does not break. Slime teleports to Drakol if >60y."
+      RepositionFrequency: "Can be redirected every oGCD window (every GCD cycle)"
+
+  MoistureGauge:
+    Name: "Moisture"
+    MaxValue: 100
+    MinValue: 0
+    DefaultState: 80  # Starts at 80% at combat start (Slime nearby assumed)
+    UIDisplay: "Water-droplet gauge on HUD. Blue = safe. Yellow = warning. Red = critical."
+
+    Generation:
+      SlimeProximity:
+        Range: "0-10y from Drakol"
+        Rate: "+8 Moisture per 3s (within range)"
+        Note: "Primary refill. Keep Slime close = stay wet."
+      SlimeNearby:
+        Range: "10-20y from Drakol"
+        Rate: "+3 Moisture per 3s (reduced generation)"
+        Note: "Slime still contributes, but not enough to sustain heavy spending."
+      WaterPuddleStanding:
+        Condition: "Drakol standing in any water puddle (Slime-generated or environmental)"
+        Rate: "+4 Moisture per 3s"
+        Note: "Alternative refill. Terrain-aware players maintain Moisture without Slime."
+      CombatRegen:
+        Condition: "Always (passive baseline)"
+        Rate: "+1 Moisture per 3s"
+        Note: "Trickle. Not enough alone. You NEED the Slime or puddles."
+
+    Decay:
+      SlimeDistant:
+        Range: "20-40y from Drakol"
+        Rate: "-5 Moisture per 3s"
+        Note: "Slime too far to maintain skin. Active drain on defense."
+      SlimeMaxRange:
+        Range: "40y+ from Drakol (bond stretched)"
+        Rate: "-10 Moisture per 3s (doubled penalty)"
+        Note: "Emergency range. You're sacrificing heavily for reach."
+      BaselineEvaporation:
+        Condition: "Always (ambient drying)"
+        Rate: "-2 Moisture per 3s"
+        Note: "Counteracts CombatRegen. Net zero if no Slime and no puddle."
+      EnvironmentPenalty:
+        Condition: "Hot/dry environments (desert, volcanic, indoor fires)"
+        Rate: "Additional -3 per 3s"
+        Note: "Environment matters. Spiritcaller is WEAKER in hot zones."
+
+    Spending:
+      WaterSkills: "Drakol water abilities cost Moisture (see individual skill costs)"
+      SpendingRange: "10-30 Moisture per skill (varies by power)"
+      SpendingDesign: >
+        Spending Moisture = spending your defense for offense/utility.
+        This is the second axis of tension: not only does Slime distance drain
+        Moisture, but your OWN offensive water casts drain it too. A Drakol
+        fighting aggressively with water skills AND directing Slime far away
+        will hit 0 Moisture FAST. The refill loop requires Slime proximity —
+        you have to bring it back to reload.
+
+    DREffect:
+      Thresholds:
+        100: "20% Damage Reduction (maximum wet skin)"
+        80: "16% DR (comfortable — default state)"
+        60: "12% DR (manageable)"
+        40: "8% DR (getting risky)"
+        20: "4% DR (nearly dry — danger zone)"
+        0: "0% DR + 10% INCREASED damage taken (Desiccated — dry skin CRACKS)"
+      LinearScaling: true  # DR scales linearly between thresholds
+      DesignNote: >
+        At 100 Moisture, the Drakol has 20% DR — significant for a healer in melee.
+        At 0 Moisture, the Drakol takes 10% MORE damage than baseline. The swing
+        from 20% DR to -10% increased damage is a 30% effective health difference.
+        This is MASSIVE. Managing Moisture is not optional — it's survival.
+        The Drakol is designed to be in melee (where they take hits), so DR from
+        Moisture is their primary survivability tool. Losing it = dying.
+
+    CriticalState:
+      Name: "Desiccated"
+      Trigger: "Moisture = 0"
+      Effect: "0% DR + 10% increased damage taken + visual crack overlay on character"
+      Duration: "Persists until Moisture > 20 (recovery threshold)"
+      Recovery: "Recall Slime + stand in puddle = ~6s to exit Desiccated state"
+      PsychologicalPressure: >
+        Desiccated state has LOUD visual/audio feedback. The player KNOWS they
+        messed up. Screen edges dry and crack. Character model shows cracked
+        scales. Audio plays a low warning tone. This is not subtle — it's
+        designed to create urgency and teach the distance management loop.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: RESOURCE SYSTEM — MOISTURE INTERACTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+ResourceSystem:
+  PrimaryResource: Moisture  # See MoistureGauge above for full details
+  SecondaryResource: none  # No mana, no MP. Moisture IS the resource.
+  TertiaryResource: none
+  # Spiritcaller has NO MANA. Their "cost" for abilities is:
+  # - GCD melee skills: FREE (no resource cost, just GCD commitment)
+  # - Water skills: MOISTURE cost (spending defense)
+  # - Slime commands: FREE (oGCD, no resource cost — but Moisture DECAYS from distance)
+  # This means the Spiritcaller never runs "out of resources" in the mana sense.
+  # They run out of SAFETY. Their resource IS their health buffer.
+
+  EconomyLoop:
+    Description: >
+      The resource loop is spatial, not numerical:
+      1. Slime nearby → Moisture regenerates → DR stays high → Drakol safe
+      2. Send Slime to heal → Moisture decays → DR drops → Drakol vulnerable
+      3. Cast water skills → Moisture spends → DR drops FASTER
+      4. Recall Slime → Moisture regenerates → DR recovers → Drakol safe again
+      5. Repeat cycle — the rhythm of extend/retract IS the gameplay
+    OptimalPlay: >
+      Expert players pulse the Slime: send out → heal burst → recall before
+      Moisture hits danger zone → regenerate → send out again. This creates
+      a rhythmic "breathing" pattern where healing comes in waves, synchronized
+      with the Drakol's Moisture tolerance.
+    SuboptimalPlay: >
+      Leaving Slime far away permanently = constant Moisture drain = eventual
+      death. Keeping Slime permanently close = zero healing reach = party dies.
+      Both extremes fail. The skill is in the OSCILLATION.
+
+  OffenseVsDefenseTradeoff:
+    Description: >
+      The Drakol has water-element combat skills (thrust enchantments, water
+      blasts, tidal waves). These cost MOISTURE to cast. This means:
+      - Using offensive water skills COSTS personal defense
+      - A Drakol who spams water attacks dries out and becomes fragile
+      - A Drakol who never uses water attacks is safer but deals less damage
+      - The Slime refills Moisture when close — so there's a "reload" window
+      This creates a spend/refill cycle WITHIN the Drakol's own actions,
+      independent of the Slime-positioning tension.
+    Interaction: >
+      Both tensions compound: if Slime is far (Moisture decaying) AND you're
+      casting water skills (Moisture spending), you drain TWICE as fast.
+      Expert play involves careful sequencing: cast water skills WHILE Slime
+      is close (offset spending with generation), then send Slime away with
+      a full gauge (bank Moisture before spending it on distance).
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 5: WEAPON — TRIDENT
+# ─────────────────────────────────────────────────────────────────────────────
+
+Weapon:
+  Name: Trident
+  Type: melee_polearm
+  DamageType: physical
+  Range: 4y  # Slightly longer than sword (polearm reach) but still melee
+  AttackSpeed: "Moderate (2.0s GCD alignment)"
+  DesignRationale: >
+    The Trident reinforces "healer that ISN'T a caster." The Drakol wields a
+    physical weapon and fights in melee. This is NOT a staff. NOT a wand. NOT
+    a book. It's a weapon for stabbing, sweeping, and impaling. The aquatic
+    theming connects to Drakol identity (tridents = ocean warriors) without
+    making the character feel like a mage. When people see a Spiritcaller in
+    combat, they should think "fighter with a spirit companion" not "healer
+    casting from the back."
+  ItemBaseline: >
+    The Trident provides: base physical damage, STR scaling, attack speed.
+    The CLASS replaces the item's generic effects with the Spiritcaller kit.
+    A Trident without the Spiritcaller class is just a polearm with basic
+    melee attacks. The class transforms it into the spirit-bonded weapon.
+  Aesthetic: >
+    Dragonbone haft wrapped in living coral. Tines shimmer with residual
+    water. The spirit bond is visible as a faint blue tether between the
+    trident's head and the Water Slime. When Moisture is high, the trident
+    drips. When Moisture is low, the tines dry and the coral dulls.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 6: BALANCE TARGETS
+# ─────────────────────────────────────────────────────────────────────────────
+
+BalanceTargets:
+  HealerBaseline: 65%  # Standard healer DPS target (ref BalanceTargets.yaml)
+  DPSWhileHealing: 55%  # Melee uptime partially interrupted by Slime management
+  PureDPSMode: 70%  # Slime in Damage mode, full melee combo uptime
+  # NOTE: Spiritcaller's "DPS while healing" is HIGHER than other healers because
+  # healing costs NO GCDs (Slime handles it). But the Moisture vulnerability
+  # means death risk is higher, which averages out over encounters.
+
+  GlobalCooldown:
+    Base: 2.0s
+    HasteCap: 1.4s
+  oGCDAnimationLock: 0.6s  # Standard for most oGCDs
+  SlimeCommandLock: 0.3s  # Slime commands have SHORTER lock (responsive micro)
+  WeaveModel: single_weave_only
+
+  PotencyBands:
+    BasicFiller: 100        # Trident Thrust (reference GCD)
+    ComboFinisher: 170-200  # Tidal Impale (3-hit combo ender)
+    WaterSkill_Small: 150   # Moisture-cost water attacks (spending defense)
+    WaterSkill_Large: 250-300  # Heavy Moisture-cost water attacks
+    SlimeDamage_PerTick: 50-70  # Slime in Damage mode (per 3s tick)
+    SlimeHeal_PerTick: 150-200  # Slime in Heal mode (per 3s tick, proximity scaled)
+    ClassUltimate: 600-700  # Tidal Convergence (see skills)
+
+  MoistureEconomy:
+    TimeToFull: "~20s from 0 to 100 with Slime at 0-10y range"
+    TimeToDepleted: "~30s from 100 to 0 with Slime at 30y+ and no water skills"
+    AggressiveDrain: "~15s from 100 to 0 with Slime far + water skill spam"
+    SafeWindow: "~12s at 80 Moisture before hitting danger zone (40) with Slime at 30y"
+    DesignNote: >
+      The 12s safe window at 80 Moisture means expert players can send
+      Slime away for roughly 4 GCDs worth of healing before needing to
+      evaluate recall. This is intentional — enough time to deliver meaningful
+      healing, not enough to forget about your own gauge.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 7: SKILL ROSTER — DRAKOL GCD ACTIONS (Melee Combo)
+# ─────────────────────────────────────────────────────────────────────────────
+
+Skills:
+  DrakolGCD:
+    # Philosophy: >
+    # The Drakol's GCD timeline is 100% melee damage. There are NO GCD heals.
+    # Healing is the Slime's job. The Drakol FIGHTS. The melee combo is simple
+    # by design — the complexity budget is spent on Slime management (oGCDs),
+    # not on a complicated rotation. This is "easy hands, hard brain" design.
+
+    BasicCombo:
+      - Name: "Trident Thrust"
+        ID: trident_thrust
+        ActionType: GCD
+        CastTime: 0s  # Instant
+        Recast: 2.0s
+        TargetType: single_enemy
+        DamageType: physical
+        Potency: 100  # Reference filler
+        Position: "Combo Step 1"
+        ComboFrom: null  # Starter
+        ComboInto: [barbed_sweep, rising_current]
+        MoistureCost: 0
+        Range: 4y
+        Description: >
+          Standard trident stab. Combo starter. No resource cost, no conditions.
+          The bread-and-butter GCD you press between Slime commands.
+        RankRequired: 1
+
+      - Name: "Barbed Sweep"
+        ID: barbed_sweep
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: enemy_cone
+        ConeAngle: 120_degrees
+        ConeRange: 4y
+        DamageType: physical
+        Potency: 120  # AoE option, slightly higher than filler
+        Position: "Combo Step 2 (AoE path)"
+        ComboFrom: [trident_thrust]
+        ComboInto: [tidal_impale, undertow_slam]
+        MoistureCost: 0
+        Range: 4y
+        Description: >
+          Wide trident sweep. AoE combo path. Hits all enemies in frontal cone.
+          Use when 3+ enemies present. Combos into finishers.
+        RankRequired: 1
+
+      - Name: "Rising Current"
+        ID: rising_current
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: single_enemy
+        DamageType: physical
+        Potency: 130  # Single-target option, higher base
+        Position: "Combo Step 2 (ST path)"
+        ComboFrom: [trident_thrust]
+        ComboInto: [tidal_impale, skewering_dive]
+        MoistureCost: 0
+        Range: 4y
+        CritCondition: "Positional — Rear: guaranteed critical hit"
+        CritNote: >
+          Crit is NOT RNG. It's positional. Hit the enemy's rear to crit.
+          This gives Spiritcaller a reason to care about enemy facing even
+          while managing the Slime — another attention-split layer.
+        Description: >
+          Upward trident thrust with lifting motion. Single-target combo path.
+          Rear positional for guaranteed crit. Combos into finishers.
+        RankRequired: 1
+
+    ComboFinishers:
+      - Name: "Tidal Impale"
+        ID: tidal_impale
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: single_enemy
+        DamageType: physical
+        Potency: 200  # Combo finisher — strong
+        Position: "Combo Step 3 (standard finisher)"
+        ComboFrom: [barbed_sweep, rising_current]
+        ComboInto: null  # Restarts combo
+        MoistureCost: 0
+        Range: 4y
+        BonusEffect: "If enemy > 50% HP: +25% damage (250p effective)"
+        BonusNote: >
+          >50% HP rule: enemies above half health take +25% bonus damage.
+          This is a SYSTEM RULE applied here. It means Spiritcaller front-loads
+          damage on healthy targets, consistent with all classes.
+        Description: >
+          Driving impale through the target. Standard combo finisher. High potency.
+          The >50% HP bonus makes it particularly strong as an opener.
+        RankRequired: 1
+
+      - Name: "Undertow Slam"
+        ID: undertow_slam
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: enemy_circle
+        CircleRadius: 5y
+        DamageType: physical
+        Potency: 170  # AoE finisher — slightly lower per target, more total
+        Position: "Combo Step 3 (AoE finisher)"
+        ComboFrom: [barbed_sweep]
+        ComboInto: null
+        MoistureCost: 0
+        Range: 4y
+        BonusEffect: "Creates 3y water puddle at impact point (lasts 15s)"
+        TerrainNote: "This is a FREE puddle — no Moisture cost. Reward for AoE path."
+        Description: >
+          Slam trident into ground, creating a shockwave and water splash.
+          AoE combo finisher. Bonus: creates a water puddle (terrain interaction)
+          at zero Moisture cost. The AoE combo path generates terrain value.
+        RankRequired: 1
+
+      - Name: "Skewering Dive"
+        ID: skewering_dive
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: single_enemy
+        DamageType: physical
+        Potency: 180  # Slightly lower than Tidal Impale but has gap-close
+        Position: "Combo Step 3 (mobility finisher)"
+        ComboFrom: [rising_current]
+        ComboInto: null
+        MoistureCost: 0
+        Range: 15y  # GAP CLOSER — lunges to target
+        BonusEffect: "Dash to target (gap closer). If target is Soaked: +40% potency (252p)"
+        TerrainSynergy: "Soaked debuff applied by Slime's Damage mode or water puddles"
+        Description: >
+          Leaping trident dive toward target. Gap closer AND combo finisher.
+          Bonus damage against Soaked enemies rewards coordinating with Slime
+          positioning — if Slime applied Soaked, this hits MUCH harder.
+        RankRequired: 2
+
+    WaterSkills:
+      # These are Drakol GCD actions that cost MOISTURE (spending defense for offense/utility).
+      # They are OPTIONAL — you can ignore them and just melee. But they add DPS/utility
+      # at the cost of personal safety. The tradeoff is explicit.
+
+      - Name: "Torrent Lance"
+        ID: torrent_lance
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: single_enemy
+        DamageType: water  # Water element (magical, but STR-scaled via Moisture conversion)
+        Potency: 180
+        MoistureCost: 15
+        Range: 15y  # RANGED — this is the Drakol's only ranged option
+        BonusEffect: "If target is Soaked: applies Waterlogged (3s, -10% enemy damage dealt)"
+        Description: >
+          Hurl a water spear at target. The Drakol's ONLY ranged GCD. Costs
+          Moisture — you're spending your skin's water to form the projectile.
+          Use when forced out of melee, or to apply Waterlogged debuff for
+          mitigation. Ranged flexibility at defense cost.
+        DesignNote: >
+          This gives Spiritcaller a ranged option when knocked back or during
+          movement phases, but at Moisture cost. It's not free — every ranged
+          GCD hastens the Desiccated state if Slime isn't nearby refilling.
+        RankRequired: 1
+
+      - Name: "Riptide Slash"
+        ID: riptide_slash
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: enemy_line
+        LineWidth: 4y
+        LineLength: 10y
+        DamageType: water
+        Potency: 150  # Per target hit (AoE line)
+        MoistureCost: 20
+        Range: melee_origin  # Originates from Drakol's position
+        BonusEffect: "Leaves water trail (puddle line, 4y wide, 15s duration)"
+        TerrainNote: "Creates linear puddle — terrain control at Moisture cost."
+        Description: >
+          Sweep trident in horizontal arc, releasing a blade of water forward.
+          Line AoE that leaves a puddle trail. Excellent for creating terrain
+          coverage, but costs significant Moisture. Best used when Slime is
+          close (offsetting the cost with proximity generation).
+        RankRequired: 1
+
+      - Name: "Geyser Strike"
+        ID: geyser_strike
+        ActionType: GCD
+        CastTime: 1.0s  # Short cast — commitment for power
+        Recast: 2.0s
+        TargetType: ground_target
+        TargetRadius: 5y
+        DamageType: water
+        Potency: 250
+        MoistureCost: 25
+        Range: 20y
+        BonusEffect: "Creates geyser puddle (5y, 20s). Enemies in puddle: Soaked applied per tick."
+        CritCondition: "If Drakol is standing in ANY puddle while casting: guaranteed crit"
+        Description: >
+          Call up a geyser at target location. High damage, ground-targeted,
+          creates long-lasting terrain. The cast time makes it a commitment —
+          you sacrifice your weave window. The crit condition rewards puddle
+          awareness (stand in your own terrain for crits).
+        RankRequired: 2
+
+      - Name: "Maelstrom"
+        ID: maelstrom
+        ActionType: GCD
+        CastTime: 1.5s  # Long cast — high commitment
+        Recast: 2.0s
+        TargetType: ground_target
+        TargetRadius: 8y
+        DamageType: water
+        Potency: 300  # HIGH — this is the Drakol's biggest single hit (non-ultimate)
+        MoistureCost: 30  # EXPENSIVE — nearly 1/3 of max gauge
+        Range: 25y
+        Cooldown: 30s  # Additional cooldown (can't spam)
+        BonusEffect: "Pulls enemies toward center (gravitational CC). Creates massive puddle (8y, 25s)."
+        Description: >
+          Summon a whirlpool at target location. Highest-potency water skill.
+          Pulls enemies inward (setup for party AoE). Creates massive terrain.
+          BUT: 30 Moisture cost is enormous. Using this while Slime is far away
+          is EXTREMELY risky (could hit Desiccated from a single cast).
+          Best used when Slime is close and Moisture is >80.
+        RankRequired: 3
+
+      - Name: "Tidal Rush"
+        ID: tidal_rush
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: self_dash
+        DashDistance: 15y
+        DamageType: water
+        Potency: 100  # Low damage — utility skill
+        MoistureCost: 10
+        Range: self
+        BonusEffect: "Dash through enemies, applying Soaked. Leaves water trail puddle."
+        Description: >
+          Dash forward in a burst of water. Gap closer / escape tool. Low damage
+          but applies Soaked to everything you pass through and creates terrain.
+          Minimal Moisture cost for a mobility tool. Use to reposition into melee
+          or escape danger zones.
+        RankRequired: 1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 8: SKILL ROSTER — SLIME oGCD COMMANDS (Spirit Direction)
+# ─────────────────────────────────────────────────────────────────────────────
+
+  SlimeCommands:
+    # Philosophy: >
+    # These are ALL oGCDs. The Slime is commanded between GCDs — you never stop
+    # attacking to direct your spirit. This is the "RTS micro" layer: weaving
+    # spirit commands between melee swings. The commands are FAST (0.3s lock)
+    # to feel responsive. The complexity is in WHEN and WHERE, not in execution.
+
+    MovementCommands:
+      - Name: "Direct Spirit"
+        ID: direct_spirit
+        ActionType: oGCD
+        AnimationLock: 0.3s  # Fast — responsive micro
+        Recast: 1.0s  # Can redirect frequently
+        Effect: "Command Slime to move to target ground position"
+        Range: 40y  # Anywhere within bond range
+        Description: >
+          Point-and-click ground target. Slime flows to that position. This is
+          the primary positioning tool — used constantly to adjust Slime location.
+          1.0s recast means you can reposition every other GCD cycle if needed.
+        RankRequired: 1
+
+      - Name: "Follow Ally"
+        ID: follow_ally
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 1.0s
+        Effect: "Command Slime to follow target party member (maintains 3y distance)"
+        Range: 40y
+        Description: >
+          Attach Slime to a party member. Slime tracks their movement, healing
+          them continuously in Heal mode. Set-and-forget for sustained single-target
+          healing. Useful on a frontliner who moves unpredictably.
+        RankRequired: 1
+
+      - Name: "Recall Spirit"
+        ID: recall_spirit
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 0.5s  # Very short — emergency recall
+        Effect: "Instantly recall Slime to Drakol's position (teleport, not travel)"
+        Bonus: "Grants +15 Moisture instantly on recall (emergency recovery)"
+        Description: >
+          EMERGENCY BUTTON. Teleports Slime directly to you (no travel time).
+          Grants immediate Moisture. Use when gauge is critical and you need
+          DR NOW. The 0.5s recast means you can't abuse it for teleport-heal-
+          teleport — after recall, you need to send it out again with Direct Spirit.
+        RankRequired: 1
+
+      - Name: "Flash Command"
+        ID: flash_command
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 30s  # Cooldown — not spammable
+        Effect: "Instantly teleport Slime to target position (no travel time)"
+        Range: 40y
+        Bonus: "Slime performs an immediate heal/damage pulse on arrival (150p)"
+        Description: >
+          Emergency reposition. Teleports Slime to a location instantly (normally
+          Slime has travel time). The arrival pulse makes it a clutch heal delivery
+          tool — Flash Command to dying ally = instant heal on arrival. 30s cooldown
+          prevents it from replacing careful pre-positioning.
+        RankRequired: 2
+
+    ModeCommands:
+      - Name: "Spirit Mode: Scout"
+        ID: mode_scout
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 2.0s  # Mode switches have slight delay to prevent spam-toggling
+        Effect: "Switch Slime to Scout mode (reveals hidden, no healing/damage)"
+        Description: >
+          Exploration mode. Slime reveals hidden enemies, traps, and provides
+          vision in fog. No healing, no damage. Used pre-combat or for scouting
+          flanks during positioning phases.
+        RankRequired: 1
+
+      - Name: "Spirit Mode: Heal"
+        ID: mode_heal
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 2.0s
+        Effect: "Switch Slime to Heal mode (proximity healing, puddle generation)"
+        HealingPerTick: "150-200p (3s tick, proximity scaled)"
+        PuddleGeneration: "Creates 3y puddle at Slime location (refreshes every 6s)"
+        Description: >
+          Primary healing mode. Slime heals all allies within 8y every 3s.
+          Also generates water puddles for terrain interaction. This is the
+          default combat mode for most encounters.
+        RankRequired: 1
+
+      - Name: "Spirit Mode: Damage"
+        ID: mode_damage
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 2.0s
+        Effect: "Switch Slime to Damage mode (attacks enemies, applies Soaked)"
+        DamagePerTick: "50-70p water damage (3s tick, 6y radius)"
+        DebuffApplication: "Applies Soaked to enemies in radius every tick"
+        PuddleGeneration: "Creates 3y puddle at Slime location (refreshes every 6s)"
+        Description: >
+          Offensive mode. Slime deals water damage and applies Soaked debuff.
+          Use in DPS-check phases or when healing isn't needed. Soaked debuff
+          enables Drakol's bonus damage on several skills (Skewering Dive,
+          Torrent Lance). Good synergy with melee combo.
+        RankRequired: 1
+
+    SpecialCommands:
+      - Name: "Swell Burst"
+        ID: swell_burst
+        ActionType: oGCD
+        AnimationLock: 0.6s  # Standard lock — this is powerful
+        Recast: 20s
+        Effect: "Slime pulses a burst heal at current location"
+        HealPotency: 350  # Strong single burst
+        Radius: 8y
+        Description: >
+          Emergency burst heal. Slime releases a concentrated water pulse,
+          healing all allies within 8y for 350p. The Slime must already be
+          positioned near the targets — this rewards PRE-POSITIONING.
+          If Slime is next to you (not near allies), you just healed yourself.
+          Position FIRST, then burst.
+        RankRequired: 1
+
+      - Name: "Torrent Wave"
+        ID: torrent_wave
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Recast: 25s
+        Effect: "Slime releases directional water wave from current position"
+        DamagePotency: 200
+        HealPotency: 150  # Heals allies AND damages enemies in the wave
+        WaveLength: 15y
+        WaveWidth: 6y
+        Direction: "Aimed from Slime toward targeted direction"
+        Description: >
+          Dual-purpose wave. Damages enemies and heals allies in its path.
+          Directional skill aimed FROM the Slime's current position. Positioning
+          the Slime between enemies and allies maximizes value (wave hits enemies
+          first, then reaches allies). Spatial puzzle.
+        RankRequired: 2
+
+      - Name: "Hydro Barrier"
+        ID: hydro_barrier
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Recast: 45s
+        Effect: "Slime creates water shield on nearest ally (or Drakol if Slime is close)"
+        ShieldPotency: 400  # Absorb shield based on MED
+        Duration: 10s
+        Description: >
+          Slime wraps an ally in a water barrier that absorbs damage.
+          Applied to the nearest ally within 8y of Slime. If Slime is next to
+          Drakol, shields Drakol (self-preservation option). If Slime is near
+          a frontliner, shields them. Position determines target.
+        RankRequired: 2
+
+      - Name: "Spirit Surge"
+        ID: spirit_surge
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Recast: 60s
+        Effect: "Slime doubles healing/damage output for 12s"
+        Duration: 12s
+        MoistureBurn: "+3 additional Moisture decay per 3s during Surge"
+        Description: >
+          Overclock the spirit bond. Slime output doubles for 12s (heal ticks
+          become 300-400p, damage ticks become 100-140p). BUT: the overclocked
+          bond drains additional Moisture. Using Surge while Slime is far away
+          compounds the drain dangerously. Best used with Slime nearby or
+          with high Moisture banked.
+        RankRequired: 2
+
+      - Name: "Tidal Convergence"
+        ID: tidal_convergence
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Recast: 180s  # 3-minute cooldown — class ultimate
+        Effect: "Slime and Drakol merge temporarily. All water production centered on Drakol."
+        Duration: 15s
+        MergeEffects:
+          - "Moisture locked at 100 (cannot decay during merge)"
+          - "Slime healing aura centered on Drakol (8y radius from DRAKOL)"
+          - "All water skills cost ZERO Moisture during merge"
+          - "Drakol gains +15% damage dealt"
+          - "Puddle generation doubled (terrain saturation)"
+        PostMerge: "Slime reappears at Drakol's position. Moisture resumes normal behavior."
+        Description: >
+          CLASS ULTIMATE. Spirit and Drakol merge into one entity for 15s.
+          During merge: maximum DR (Moisture locked at 100), free water skills,
+          healing centered on self, damage amp. This is the "I need to be
+          both healer AND fighter simultaneously RIGHT HERE" button. Solves
+          the distance dilemma for 15s by removing it entirely. 3-minute CD
+          means you get it once per major encounter phase.
+        DesignNote: >
+          This is USE-CASE driven, not burst-cadence. You don't save it for
+          a 3-minute alignment — you use it when the situation demands both
+          max healing and max defense simultaneously (transition phases,
+          unavoidable damage spikes, solo survival moments).
+        RankRequired: 3
+
+      - Name: "Cleansing Waters"
+        ID: cleansing_waters
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Recast: 15s
+        Effect: "Slime cleanses 1 debuff from nearest ally within 8y"
+        Priority: "Removes most recent debuff first. Cannot cleanse permanent debuffs."
+        Description: >
+          Debuff removal through water purification. Target is position-based
+          (nearest ally to Slime). If multiple allies need cleansing, reposition
+          Slime to the priority target before using. Another spatial decision.
+        RankRequired: 1
+
+      - Name: "Aqua Veil"
+        ID: aqua_veil
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 90s
+        Effect: "Slime creates a water curtain at current position. Allies passing through: +20 Moisture to Drakol, cleanse 1 debuff, heal 200p"
+        Duration: 8s
+        CurtainWidth: 10y
+        Description: >
+          Area denial / party support. Creates a wall of water that allies can
+          pass through for benefits. The +20 Moisture to Drakol is unique — allies
+          running through YOUR Slime's curtain refill YOUR gauge. Encourages
+          party coordination and creative Slime placement (put it between the
+          party's path and the safe zone during mechanic resolution).
+        RankRequired: 3
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 9: DRAKOL PERSONAL oGCDs (Non-Slime)
+# ─────────────────────────────────────────────────────────────────────────────
+
+  DrakolOGCDs:
+    # These are the Drakol's own oGCD abilities (not Slime commands).
+    # They provide personal utility, mitigation, and combat enhancement.
+
+    - Name: "Scale Hardening"
+      ID: scale_hardening
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Recast: 30s
+      Effect: "Drakol hardens scales. +10% DR for 8s (stacks with Moisture DR)."
+      Description: >
+        Personal mitigation. Stacks with Moisture DR for total up to 30% DR.
+        Use when you know a hit is coming and your Moisture is already low.
+        The safety net for moments when Slime is far and you can't recall.
+      RankRequired: 1
+
+    - Name: "Drakol Roar"
+      ID: drakol_roar
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Recast: 60s
+      Effect: "Intimidating roar. Applies Soaked to all enemies within 8y. +10% Moisture instantly."
+      Description: >
+        AoE Soaked application + minor Moisture recovery. Useful for setting up
+        Skewering Dive crits on packs without needing Slime in Damage mode.
+        The Moisture gain is small but can prevent Desiccated in emergencies.
+      RankRequired: 1
+
+    - Name: "Ancestral Bond"
+      ID: ancestral_bond
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Recast: 120s
+      Effect: "Strengthens spirit bond for 20s. Slime movement speed +100%. Moisture generation rate doubled."
+      Description: >
+        Utility window. Makes Slime much faster and Moisture regeneration much
+        stronger. Use during high-mobility phases where you need to reposition
+        Slime rapidly AND maintain Moisture. Doesn't increase healing output —
+        increases LOGISTICS efficiency.
+      RankRequired: 2
+
+    - Name: "Depth Pressure"
+      ID: depth_pressure
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Recast: 8s
+      Effect: "Next melee GCD deals +50% potency and applies Soaked (2 stacks) to target."
+      Description: >
+        Damage buff oGCD. Weave between melee GCDs for burst. Applies double
+        Soaked for Skewering Dive / Torrent Lance synergy. Standard damage oGCD
+        — use on cooldown in single-target, save for priority targets in multi.
+      RankRequired: 1
+
+    - Name: "Brine Armor"
+      ID: brine_armor
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Recast: 90s
+      Effect: "For 10s: damage taken converts to Moisture drain instead of HP loss (up to 40 Moisture)."
+      MoistureConversion: "Each hit converts damage to Moisture loss instead. 1% HP worth = 2 Moisture."
+      Cap: "Maximum 40 Moisture can be drained this way. Excess damage hits HP normally."
+      Description: >
+        Unique survival tool. For 10s, you take hits to your MOISTURE instead of
+        your HP (up to the 40-Moisture cap). This means high Moisture = effective
+        HP buffer. Synergizes with having Slime close (Moisture regenerating while
+        being consumed by damage). At high Moisture + Slime nearby, you're
+        functionally immortal for a few seconds.
+      RankRequired: 3
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 10: TERRAIN INTERACTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+TerrainInteractions:
+  WaterPuddles:
+    Sources:
+      - "Slime presence (Heal mode or Damage mode) — 3y puddle, refreshes every 6s"
+      - "Undertow Slam (combo finisher) — 3y puddle, 15s duration"
+      - "Riptide Slash (water GCD) — 4y line puddle, 15s duration"
+      - "Geyser Strike (water GCD) — 5y puddle, 20s duration"
+      - "Maelstrom (water GCD) — 8y puddle, 25s duration"
+      - "Tidal Rush (dash) — trail puddle, 15s duration"
+      - "Environmental sources (rain, rivers, fountains) — permanent"
+    PuddleProperties:
+      AllyEffects:
+        - "Spiritcaller standing in puddle: +4 Moisture per 3s (alternative Slime)"
+        - "All allies standing in puddle: minor regen (25p per 3s)"
+        - "Movement speed unaffected (not slippery — it's a thin film)"
+      EnemyEffects:
+        - "Enemies standing in puddle: Soaked debuff applied (per 3s)"
+        - "Soaked enemies: -10% movement speed, vulnerable to follow-up effects"
+        - "No direct damage from puddle standing (damage requires skills)"
+      PersistenceRules:
+        - "Puddles are persistent (duration-based, not tick-based)"
+        - "Multiple puddles can overlap (effects don't stack, but coverage compounds)"
+        - "Puddles can be evaporated by fire effects (cross-class interaction)"
+        - "Puddles can be frozen by ice effects (cross-class interaction)"
+
+  CrossClassSynergy:
+    FireInteraction:
+      Effect: "Fire skills hitting water puddles = STEAM (vision obscure 5s)"
+      SteamProperties:
+        - "Blocks line of sight for enemies (defensive)"
+        - "Allies unaffected (Spiritcaller water attunement grants vision through steam)"
+        - "Duration: 5s per fire application"
+      ExampleSynergy: "Elementalist Fireball into Spiritcaller puddle = smoke screen"
+    IceInteraction:
+      Effect: "Ice skills hitting water puddles = FROZEN GROUND (slip zone 8s)"
+      FrozenProperties:
+        - "Enemies crossing frozen puddle: 50% chance to fall prone (1.5s stun)"
+        - "Movement speed -50% on frozen ground for enemies"
+        - "Allies unaffected (Spiritcaller water attunement grants grip)"
+        - "Duration: 8s per ice application"
+      ExampleSynergy: "Elementalist Ice Shard into puddle = CC trap zone"
+    LightningInteraction:
+      Effect: "Lightning skills hitting water puddles = CONDUCTION (AoE damage)"
+      ConductionProperties:
+        - "All enemies standing in puddle take 80p lightning damage instantly"
+        - "Soaked enemies take +50% conduction damage (120p)"
+        - "Puddle is consumed (destroyed) by lightning"
+        - "Spiritcaller is IMMUNE to conduction (water attunement)"
+      ExampleSynergy: "Madolt Warrior Electron Shock into puddle = AoE burst + Spiritcaller safe"
+    WindInteraction:
+      Effect: "Wind skills hitting puddles = MIST CLOUD (HoT zone 10s)"
+      MistProperties:
+        - "Allies in mist: 50p HoT per 3s for 10s"
+        - "Enemies in mist: -15% accuracy (can't see clearly)"
+        - "Mist drifts with wind direction (dynamic positioning)"
+        - "Duration: 10s per wind application"
+    EarthInteraction:
+      Effect: "Earth skills hitting puddles = MUD (slow zone 12s)"
+      MudProperties:
+        - "Enemies in mud: -40% movement speed, cannot sprint/dash"
+        - "Allies unaffected (Spiritcaller water attunement)"
+        - "Duration: 12s per earth application"
+        - "Mud persists longer than most terrain conversions"
+
+  EnvironmentalWater:
+    NaturalSources:
+      - "Rain: Spiritcaller passive +2 Moisture per 3s (environmental bonus)"
+      - "Rivers/Lakes: Standing in natural water = +6 Moisture per 3s (strong)"
+      - "Fountains: Proximity grants +3 Moisture per 3s"
+      - "Underwater sections: Moisture locked at 100 (Drakol thrives underwater)"
+    DesertPenalty: "Dry environments: -3 Moisture per 3s (environmental drain)"
+    VolcanicPenalty: "Hot environments: -4 Moisture per 3s + puddles evaporate 50% faster"
+    CaveNeutral: "Underground: no bonus, no penalty (ambient humidity neutral)"
+
+  TerrainStrategy:
+    CorePrinciple: >
+      Spiritcaller is a TERRAIN ENGINEER. Over the course of a fight, they
+      saturate the battlefield with water puddles through normal play. This
+      terrain benefits the entire party (regen, Soaked on enemies) and enables
+      cross-class combos. The Spiritcaller doesn't just heal — they reshape
+      the arena's properties. A long fight with a good Spiritcaller means
+      the entire floor is covered in water, enabling chain lightning conduction,
+      ice slip-traps, steam screens, and guaranteed Drakol crits everywhere.
+    PositioningReward: >
+      Expert Spiritcallers pre-puddle critical areas (chokepoints, boss positions,
+      escape routes) before fights begin. Mid-fight, they route Slime paths to
+      maximize puddle coverage in useful locations. This is the LONG-TERM layer
+      of the class — not just "where is my Slime NOW" but "where SHOULD the
+      water be in 30 seconds?"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 11: SCENARIO FLOWS
+# ─────────────────────────────────────────────────────────────────────────────
+
+ScenarioFlows:
+  SingleTarget_Boss:
+    Description: "1 boss. Drakol melees. Slime heals party."
+    Priority:
+      1: "Position Slime in Heal mode near party stack point"
+      2: "Drakol engages boss in melee (Trident combo)"
+      3: "Monitor Moisture — Slime should be ~15-20y away (party usually behind boss)"
+      4: "At Moisture < 50: Recall Slime briefly (3-4s), refill, resend"
+      5: "Use Depth Pressure on cooldown for damage oGCD"
+      6: "Swell Burst for emergency party healing (boss AoE)"
+      7: "Tidal Convergence for transition phases (when party stacks and damage spikes)"
+    DPSOutput: "55-65% of reference (melee uptime good, water skills limited by Moisture)"
+    HealingOutput: "50-60% party HP/min (Slime sustained, periodic recalls reduce uptime)"
+    MoistureManagement: >
+      In single-target, the party usually stacks 15-20y behind the boss.
+      Slime at party = 15-20y from Drakol. Moisture decay is moderate (-5/3s)
+      but generation is still positive if Drakol stands in puddles (+4/3s from
+      puddle). Net: -1/3s decay. Very manageable — 100 to critical in ~50s.
+      Plenty of time before recalls are needed.
+
+  MultiTarget_TrashPull:
+    Description: "5-8 enemies. Frontliner gathers. Spiritcaller AoEs + heals."
+    Priority:
+      1: "Position Slime in Heal mode at party center"
+      2: "Open with Tidal Rush through pack (apply Soaked to all)"
+      3: "Barbed Sweep → Undertow Slam (AoE combo + free puddle)"
+      4: "Riptide Slash for puddle line across the pack"
+      5: "Switch Slime to Damage mode if healing not needed (Soaked + DPS)"
+      6: "Drakol Roar for mass Soaked if Slime is healing (can't damage-mode)"
+    DPSOutput: "60-70% of reference (AoE combo + Slime damage mode)"
+    HealingOutput: "40-50% party HP/min (Slime close to everyone = easy healing)"
+    MoistureManagement: >
+      In AoE, everyone is clustered. Slime near party = Slime near Drakol = 
+      Moisture is FINE. AoE is Spiritcaller's comfortable scenario — the distance
+      problem barely exists when everyone's stacked.
+
+  SplitParty:
+    Description: "Party split into two groups (common raid mechanic). Healing needed on BOTH."
+    Priority:
+      1: "Assign Slime to the group WITHOUT Drakol (they need spirit healing)"
+      2: "Drakol's group relies on puddle regen + Hydro Barrier shields"
+      3: "Drakol's Moisture WILL decay heavily (Slime far away)"
+      4: "Use Scale Hardening + Brine Armor during split phase"
+      5: "Recall Slime the INSTANT groups reunite (Moisture recovery priority)"
+    DPSOutput: "40-50% of reference (distracted, defensive)"
+    HealingOutput: "70-80% per group (split healing — Slime on one, puddles on other)"
+    MoistureManagement: >
+      THIS is the hard scenario. Slime at max range (30-40y) = -5 to -10/3s decay.
+      With no puddle available (split = different room/position) = no offset.
+      Drakol hits Desiccated in ~15-20s. MUST pre-bank Moisture to 100 before split.
+      Scale Hardening + Brine Armor covers the vulnerability window.
+      Expert play: pre-place puddles in YOUR group's position before the split
+      happens, giving you +4/3s offset during the mechanic.
+
+  SoloSurvival:
+    Description: "Drakol alone (party dead, or solo content)."
+    Priority:
+      1: "Keep Slime in Heal mode at YOUR position (0-5y)"
+      2: "Moisture stays at 80-100 permanently (Slime close)"
+      3: "Full melee combo uptime (you ARE the damage)"
+      4: "Use water skills freely (Slime refills faster than you spend)"
+      5: "You're a melee fighter with 20% DR and passive self-healing. Durable."
+    DPSOutput: "70% of reference (full melee combo + water skills)"
+    SurvivabilityNote: >
+      Solo Spiritcaller is TANKY. 20% DR from Moisture + passive self-heal from
+      Slime proximity + water skill utility. You can't heal others (Slime is on you)
+      but you can fight indefinitely against moderate threats. This is the "not a
+      squishy caster" payoff — solo Spiritcaller plays like a self-sufficient warrior.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 12: ANTI-PATTERNS AND FORBIDDEN DESIGN ELEMENTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+AntiPatterns:
+  ForbiddenMechanics:
+    - Name: "Freecure / RNG Procs"
+      Statement: "ZERO random procs. All effects are deterministic and player-controlled."
+      Enforcement: "No skill has a % chance to trigger anything. All conditions are positional/conditional."
+    - Name: "Fixed Rotation"
+      Statement: "There is no optimal fixed sequence. Slime positioning is REACTIVE to field state."
+      Enforcement: "If a player finds a fixed GCD sequence that works always, the encounter design has failed."
+    - Name: "2-Minute Burst Cycle"
+      Statement: "No skills align to a burst cadence. Tidal Convergence is USE-CASE driven (180s CD)."
+      Enforcement: "Convergence is not saved for party buff alignment — it's used when the situation demands it."
+    - Name: "Spirit Death / Summon Recovery"
+      Statement: "The Water Slime CANNOT die. CANNOT be destroyed. NO summon recovery mechanics."
+      Enforcement: "Spirit has no HP. Cannot be targeted. Cannot take damage. Is always present."
+    - Name: "Cast-from-Back Healer"
+      Statement: "Spiritcaller does NOT stand in the back casting. They are IN MELEE."
+      Enforcement: "No ranged filler GCDs (only Torrent Lance at Moisture cost). Must be in melee for DPS."
+    - Name: "Pet Has HP"
+      Statement: "The Slime is NOT a pet with a health bar. It is an invulnerable spirit."
+      Enforcement: "No HP pool. No fire vulnerability. No destruction mechanic. No recovery timer."
+    - Name: "Solo Healer Replaces Frontliner"
+      Statement: "Spiritcaller is NOT designed to solo-tank. DR helps survival, not threat/control."
+      Enforcement: "No aggro tools. No force-targeting. DR is personal survival, not tanking identity."
+    - Name: "Mana/MP Resource"
+      Statement: "Spiritcaller has NO mana. Moisture IS the resource."
+      Enforcement: "No MP bar. No mana management. All costs are Moisture-denominated."
+    - Name: "GCD Healing"
+      Statement: "The Drakol has ZERO GCD heals. Healing is exclusively Slime-delivered."
+      Enforcement: "No GCD in the kit heals allies. If you want to heal, command the Slime."
+
+  AntiPattern_PetDeath: >
+    EXPLICITLY REMOVED from previous version. The Water Slime is a spirit entity.
+    It does NOT have HP. It CANNOT be killed. There is NO "Slime destroyed = all
+    healing offline" vulnerability. There is NO fire damage vulnerability. There is
+    NO "summon recovery" downtime. The Slime is ALWAYS present. The cost of healing
+    is MOISTURE (positional/gauge), never spirit availability.
     
-  why_only_this_race:
-    - "GenerateWater is exclusive to Lower Drakols — no other race produces water biologically"
-    - "The slime is a symbiote bonded at hatching — cannot be acquired later in life"
-    - "The slime feeds on Drakol-generated water specifically — other water sources don't sustain it"
-    - "The bond is neurological — the Drakol can feel the slime's position and state innately"
-    - "Attempting to transplant the slime to another host kills it (wrong water chemistry)"
-    
-  class_builds_on_racial:
-    base_racial_feature: "Water Slime companion (all Lower Drakols have this)"
-    class_specialization: >
-      The Spiritcaller class represents a Drakol who has trained the
-      DIRECTION of their slime to combat-relevant precision. All Lower
-      Drakols have a slime — not all can command it in battle. The class
-      is the training, the slime is the biology. Untrained Drakols' slimes
-      act on basic instinct (hide, follow). Spiritcallers direct with intent.
-      
-  distinction_from_summoner_classes:
-    - "Summoners conjure temporary entities from nothing — the slime is permanent and alive"
-    - "Summoners lose their summon on death/dismiss — the slime cannot be dismissed, only destroyed temporarily"
-    - "Summoners cast spells TO the summon — the Spiritcaller directs via neurological bond (no casting)"
-    - "The slime has personality/self-preservation instinct — it is not an obedient construct"
-    - "If the Drakol stops directing, the slime defaults to self-preservation, not disappearing"
+    Previous version had: "Slime HP pool, fire kills Slime, must resummon."
+    Current version: "Slime is invulnerable spirit. Always present. Cost is Moisture."
+    This is a FUNDAMENTAL correction to the class design.
 
-# ============================================================================
-# SECTION 2: CORE MECHANIC
-# ============================================================================
+  AntiPattern_FixedRotation: >
+    Spiritcaller's melee combo IS simple and somewhat fixed (3-hit combo cycling).
+    That's intentional — the COMPLEXITY is in Slime management, not button sequences.
+    If someone says "the rotation is boring," the answer is: "your rotation is your
+    Slime's positioning, not your GCD sequence." The GCD combo is deliberately simple
+    to free mental bandwidth for the real decision-making layer (spatial micro).
 
-core_mechanic:
-  name: "Companion Direction"
-  
-  fundamental_concept: >
-    The player controls TWO entities with ONE input stream. The Drakol is
-    the primary character (moved directly, attacks directly). The Slime is
-    the secondary character (directed via commands that consume the Drakol's
-    GCD or oGCD windows). The skill expression is SPLIT ATTENTION — optimal
-    play requires managing both entities' positions, modes, and timing
-    simultaneously. Neither is complete alone.
-    
-  why_this_is_unique:
-    input_modality: "Companion direction — not spellcasting, not rotation, not stance-switching"
-    healer_fantasy: >
-      The healer that FIGHTS. The Drakol is in melee swinging weapons while
-      the slime handles healing delivery. Traditional healers sacrifice DPS
-      for healing throughput. The Spiritcaller sacrifices ATTENTION for
-      healing throughput — the DPS continues, but directing the slime
-      optimally requires mental bandwidth that competes with combat awareness.
-    rts_parallel: >
-      Like commanding a unit in an RTS while also playing an action game
-      with your main character. The cognitive load IS the skill ceiling.
-      Low-skill Spiritcallers leave the slime on autopilot and heal poorly.
-      High-skill Spiritcallers micro the slime between GCDs and heal brilliantly.
-      
-  the_drakol_half:
-    combat_style: "Melee/physical — conventional weaponry, no spellcasting"
-    role_in_duo: "Damage dealer, threat generator, frontline presence"
-    what_drakol_cannot_do_alone:
-      - "Cannot self-heal efficiently (needs slime or potions)"
-      - "Cannot scout ahead without committing body to danger"
-      - "Cannot provide party healing of any kind"
-      - "Cannot apply water-based CC (slime delivers all water effects)"
-    stats_utilized: "STR, STAM — physical fighter baseline"
-    
-  the_slime_half:
-    nature: "Semi-autonomous biological companion with three operational modes"
-    role_in_duo: "Healer, scout, supplemental damage dealer"
-    what_slime_cannot_do_alone:
-      - "Cannot generate its own water (needs Drakol's GenerateWater)"
-      - "Cannot make strategic decisions (defaults to instinct without direction)"
-      - "Cannot survive focused enemy attention for long (low HP pool)"
-      - "Cannot deal meaningful sustained damage (damage mode is supplemental, not primary)"
-    autonomy_spectrum:
-      directed: "Optimal — player issues commands, slime executes precisely"
-      autopilot: "Suboptimal — slime defaults to nearest-ally heal, no repositioning, no mode switches"
-      panicked: "Worst case — slime takes damage, self-preservation instinct overrides commands temporarily"
-      
-  action_economy:
-    drakol_gcd: "Standard 2.0s GCD for melee attacks"
-    slime_commands_cost: >
-      Slime direction commands are OGCD (off-global-cooldown) with their own
-      recast timers. They do NOT compete with the Drakol's melee GCD directly.
-      However, they compete for ATTENTION — issuing a slime command during a
-      dodge window or positioning moment creates cognitive pressure.
-    simultaneous_operation: >
-      Both entities act on independent timelines. The Drakol swings on GCD.
-      The slime heals/scouts/attacks on its own tick rate. Commands REDIRECT
-      the slime but don't pause it — the slime is always doing SOMETHING.
-    bandwidth_tax: >
-      The real cost of slime direction is not GCD — it's mental bandwidth.
-      Reading the slime's position, evaluating party HP, deciding whether
-      to redirect, AND fighting in melee simultaneously is the difficulty curve.
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 13: ITEM BASELINE COMPARISON
+# ─────────────────────────────────────────────────────────────────────────────
 
-# ============================================================================
-# SECTION 3: TRIGGER SYSTEM
-# ============================================================================
+ItemBaseline:
+  Principle: >
+    Items define the BASELINE. Classes REPLACE item functionality permanently.
+    A Trident without the Spiritcaller class is just a polearm with basic attacks.
+    The Spiritcaller class kit completely replaces the Trident's generic abilities
+    with the spirit-bond combat system.
 
-trigger_system:
-  design_philosophy: >
-    Triggers are RESPONSES TO STRATEGIC PROBLEMS, not rotation steps. The
-    Spiritcaller reacts to party state, enemy behavior, and map geometry —
-    never follows a fixed sequence. The slime's mode and position should
-    change because SOMETHING DEMANDED IT, not because a timer expired.
-    
-  slime_repositioning_triggers:
-    - trigger: "Ally drops below 50% HP outside slime's current heal range"
-      response: "Redirect slime to endangered ally (Triage Minor equivalent)"
-      urgency: "High — delayed redirection means ally needs potions"
-      
-    - trigger: "Party splits at a junction or across elevation"
-      response: "Decide which sub-group gets slime coverage"
-      urgency: "Medium — pre-emptive positioning before damage occurs"
-      
-    - trigger: "Enemy AoE telegraph appears on slime's current position"
-      response: "Move slime to safety (dead slime = no healing)"
-      urgency: "Critical — slime HP is limited, AoE can destroy it"
-      
-    - trigger: "Unexplored corridor or room ahead with unknown threats"
-      response: "Switch slime to Scout mode, send ahead"
-      urgency: "Low — strategic choice, not reactive"
-      
-    - trigger: "Current heal target is now full HP"
-      response: "Redirect slime to next-lowest ally or return to Drakol proximity"
-      urgency: "Low — efficiency optimization, not emergency"
-      
-    - trigger: "Enemy is fleeing at low HP into a space Drakol can't reach"
-      response: "Switch slime to Damage mode, pursue the target"
-      urgency: "Medium — opportunity cost (slime not healing while pursuing)"
-      
-  slime_mode_change_triggers:
-    - trigger: "Combat encounter begins — party taking damage"
-      response: "Switch from Scout/Idle to Heal mode"
-      decision: "Which ally gets first heal priority?"
-      
-    - trigger: "Combat ends — no immediate threats"
-      response: "Switch to Scout mode or return to passive follow"
-      decision: "Scout ahead or conserve water for next fight?"
-      
-    - trigger: "Single high-value target isolated and low HP"
-      response: "Switch to Damage mode for execute pressure"
-      decision: "Is the kill worth losing healing coverage for 3-5 seconds?"
-      
-    - trigger: "Party enters water terrain"
-      response: "Slime gains enhanced mode in native element"
-      decision: "Leverage water terrain bonus for healing throughput or damage amp?"
-      
-  drakol_combat_triggers:
-    - trigger: "Enemy enters melee range of Drakol"
-      response: "Engage with weapon combo (standard melee GCD)"
-      
-    - trigger: "Drakol's GenerateWater gauge is full"
-      response: "Feed slime (restores slime resource/HP, empowers next slime action)"
-      decision: "Feed now for efficiency or hold for emergency burst feed?"
-      
-    - trigger: "Slime is destroyed — Drakol is alone"
-      response: "Shift to survival mode, accelerate water generation for slime regrowth"
-      urgency: "Critical — party has no healer until slime recovers"
-      
-    - trigger: "Enemy targets the slime specifically"
-      response: "Decide: recall slime to safety behind Drakol, or interpose Drakol's body"
-      decision: "Drakol takes the hit to protect slime, or slime retreats losing heal uptime?"
+  TridentBaseline:
+    WithoutClass:
+      - "Basic 3-hit melee combo (100 → 120 → 150p)"
+      - "Generic thrust attack (ranged poke, 80p, 8y)"
+      - "Sweep attack (cone AoE, 90p)"
+      - "No companion. No water skills. No Moisture system."
+    WithSpiritcaller:
+      - "Full melee combo with positional crits and terrain generation"
+      - "Water skill suite (Moisture-cost ranged/AoE options)"
+      - "Water Slime companion (entire healing/support system)"
+      - "Moisture Gauge (defensive identity and resource management)"
+      - "Terrain engineering (puddle ecosystem)"
+    Comparison: >
+      The class transforms the Trident from a generic stabby-polearm into a
+      dual-entity combat system with terrain control, healing delegation, and
+      resource management. The weapon is the VEHICLE; the class is the ENGINE.
 
-# ============================================================================
-# SECTION 4: ABILITIES
-# ============================================================================
+  ComparedToOtherHealers:
+    Elementalist:
+      SharedTrait: "Water element healing"
+      Differentiation: "Elementalist casts water spells directly. Spiritcaller's SLIME delivers water healing."
+      PlayerExperience: "Elementalist = reactive caster. Spiritcaller = proactive positioner."
+    Siren:
+      SharedTrait: "Non-traditional healing (not direct heal spells)"
+      Differentiation: "Siren heals through drain-bonds on enemies. Spiritcaller heals through spirit positioning."
+      PlayerExperience: "Siren = plate-spinning timer management. Spiritcaller = spatial micro."
+    DesignNiche: >
+      Spiritcaller occupies the "physical melee healer" niche. The only healer
+      who uses STR as primary stat, wields a melee weapon, and has zero cast bars
+      on their healing. Players who want to heal but hate being a caster — this
+      is their class. The fantasy is "warrior who happens to have a healing spirit"
+      not "mage who happens to have a stick."
 
-abilities:
-  total_count: 15
-  split: "8 Drakol personal actions + 7 Slime direction commands"
-  
-  design_philosophy: >
-    Drakol abilities are conventional melee combat. Slime abilities are
-    DIRECTION commands — they tell the slime what to do, where, and how
-    intensely. The interaction between the two sets is where mastery lives.
-    A Drakol ability might CREATE an opportunity that a slime command EXPLOITS,
-    or a slime positioning might ENABLE a Drakol ability that needs the slime
-    as a relay point.
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 14: CRIT SYSTEM (DETERMINISTIC)
+# ─────────────────────────────────────────────────────────────────────────────
 
-  # --- DRAKOL PERSONAL COMBAT ACTIONS ---
-  
-  drakol_abilities:
-    - name: "Tidesweep"
-      performer: "Drakol"
-      type: "GCD — Melee Combo Starter"
-      trigger_condition: "Enemy within melee range"
-      effect: >
-        Wide horizontal slash with water-coated weapon. Deals physical damage
-        to all enemies in a 180° frontal arc. Generates 10 Water (resource for
-        slime). If slime is within 4m of any hit target, slime gains a free
-        heal tick on its current target.
-      item_replaced: "Soulfire Bomb (AoE damage consumable) — but with healing side-effect"
-      decision_created: >
-        Position Drakol NEAR the slime's current position to generate the
-        free heal tick, or position for optimal enemy coverage at the cost
-        of slime synergy?
-        
-    - name: "Undertow Strike"
-      performer: "Drakol"
-      type: "GCD — Melee Combo Finisher"
-      trigger_condition: "After 2 consecutive GCD attacks on same target"
-      effect: >
-        Downward slam that creates a brief water puddle (2m radius, 4s).
-        Enemies standing in puddle are slowed 20%. If slime moves THROUGH
-        the puddle, slime gains 30% movement speed for 3s (water highway).
-        Generates 15 Water.
-      item_replaced: "Thickglass Flask (speed reduction puddle) — but temporary and with slime synergy"
-      decision_created: >
-        Place the puddle where enemies are clustered (CC value) or where the
-        slime needs to travel (mobility value)? Can't optimize both unless
-        enemies happen to be between slime's current and desired position.
-        
-    - name: "Riptide Guard"
-      performer: "Drakol"
-      type: "GCD — Defensive"
-      trigger_condition: "Drakol takes damage exceeding 15% max HP in one hit"
-      effect: >
-        Defensive stance for 1 GCD. Reduces next incoming hit by 40%. If the
-        slime is attached TO the Drakol (returned to body), the damage
-        reduction becomes 55% and the slime absorbs the overflow as damage
-        to itself. Generates 5 Water from pain response.
-      item_replaced: "Ironhide Tincture (damage reduction consumable) — but conditional and slime-interactive"
-      decision_created: >
-        Recall slime to body for the defensive bonus (losing heal coverage on
-        allies) or tank the hit at lower mitigation to maintain party healing?
-        
-    - name: "GenerateWater (Passive/Active)"
-      performer: "Drakol"
-      type: "Passive generation + Active burst (oGCD)"
-      trigger_condition: "Passive: always ticking (3 Water/second). Active: player presses to dump current Water to slime"
-      effect: >
-        Passive: Drakol constantly generates Water resource (the slime's fuel).
-        Active (oGCD, 8s recast): Instantly transfers all stored Water to slime,
-        restoring slime HP proportional to Water spent AND empowering slime's
-        next action by 50% (heal heals more, damage hits harder, scout range
-        extends). Maximum Water storage: 100.
-      item_replaced: "No direct item analog — this IS the racial biology. Closest: White Gull (ingredient that enables other things)"
-      decision_created: >
-        Feed slime at 50 Water for consistent sustain, or hold to 100 for
-        an empowered burst? Holding risks slime running dry if fight
-        intensifies unexpectedly. Spending early means no burst available.
-        
-    - name: "Brackish Lunge"
-      performer: "Drakol"
-      type: "GCD — Gap Closer"
-      trigger_condition: "Enemy between 4m-12m from Drakol"
-      effect: >
-        Water-propelled dash to target enemy. Deals physical damage on arrival.
-        If dash path passes through the slime's position, slime is carried
-        along (free repositioning without spending a slime command). Generates
-        8 Water from exertion.
-      item_replaced: "Flashstep Cartridge (gap closer consumable)"
-      decision_created: >
-        Align the dash to pass through slime for free repositioning, or take
-        the optimal combat angle to the enemy? Misaligned dash = wasted
-        slime-carry opportunity.
-        
-    - name: "Surge Pulse"
-      performer: "Drakol"
-      type: "oGCD — Utility (12s recast)"
-      trigger_condition: "At least 1 enemy within 6m of Drakol"
-      effect: >
-        Releases a pulse of generated water from the Drakol's body. All enemies
-        within 6m are pushed 3m away AND marked Waterlogged for 6s (take 15%
-        more damage from slime attacks). Costs 25 Water. Does not generate Water.
-      item_replaced: "Concussion Charge (pushback consumable) — but with slime damage amp"
-      decision_created: >
-        Spend 25 Water on crowd control + slime damage amp, or save that Water
-        for slime healing fuel? The amp is only valuable if slime is in Damage
-        mode — worthless if slime is healing allies.
-        
-    - name: "Tidecaller's Resolve"
-      performer: "Drakol"
-      type: "oGCD — Self-buff (60s recast)"
-      trigger_condition: "Slime is destroyed OR Drakol drops below 30% HP"
-      effect: >
-        Drakol enters emergency state for 12s: Water generation rate triples
-        (9/s instead of 3/s), all melee attacks heal Drakol for 8% of damage
-        dealt, and slime regeneration timer (if destroyed) is halved. Cannot
-        be activated if slime is alive and Drakol is above 30%.
-      item_replaced: "Divine Blessing (emergency full heal consumable) — but conditional and temporary"
-      decision_created: >
-        If triggered by slime death: focus on killing to self-sustain, or
-        turtle and accelerate slime regrowth? If triggered by low HP: the
-        lifesteal incentivizes aggression when instinct says retreat.
-        
-    - name: "Drown Slam"
-      performer: "Drakol"
-      type: "GCD — Heavy (2.5s cast, interruptible)"
-      trigger_condition: "Target is Waterlogged (from Surge Pulse or slime Damage mode attacks)"
-      effect: >
-        Grabs a Waterlogged enemy and forces water into their airways. Deals
-        heavy physical damage + Suffocate debuff (enemy attack speed -25% for
-        8s). If slime is in Damage mode and within 4m, slime piles on
-        simultaneously (bonus 40% damage, Suffocate extended to 12s).
-      item_replaced: "Marrowchill Bomb (damage reduction debuff to enemies)"
-      decision_created: >
-        Commit to the 2.5s cast for a powerful debuff (losing 1+ GCDs of
-        normal damage and attention-to-slime), or maintain faster GCD rotation
-        with better slime oversight?
+CritSystem:
+  Principle: "Crit is NOT RNG. All critical hits have deterministic conditions."
+  SpiritcallerCritConditions:
+    - Skill: "Rising Current"
+      Condition: "Rear positional (hit enemy from behind)"
+      Result: "Guaranteed critical hit"
+    - Skill: "Geyser Strike"
+      Condition: "Drakol standing in any water puddle while casting"
+      Result: "Guaranteed critical hit"
+    - Skill: "Tidal Impale"
+      Condition: "Enemy above 50% HP"
+      Result: "+25% damage (functions as system-wide bonus, not crit)"
+    - Skill: "Skewering Dive"
+      Condition: "Target has Soaked debuff"
+      Result: "+40% potency bonus"
+    - Skill: "Slime Damage ticks"
+      Condition: "Target is standing in a water puddle AND has Soaked"
+      Result: "+50% tick damage"
+  DesignNote: >
+    All damage bonuses are CONDITIONAL, not random. The player earns crits through
+    positioning (rear), terrain awareness (standing in puddle), debuff setup
+    (Soaked application), and target health awareness (>50% rule). Every "big hit"
+    moment is earned, never lucky.
 
-  # --- SLIME DIRECTION COMMANDS ---
-  
-  slime_abilities:
-    - name: "Direct: Mend"
-      performer: "Slime"
-      type: "oGCD Command — Slime Heal Mode activation"
-      trigger_condition: "Slime is alive; target ally within slime's leash range (20m from Drakol)"
-      effect: >
-        Commands slime to attach to target ally and begin continuous healing.
-        Slime moves to ally (travel time based on distance), attaches, and
-        heals for 4% ally max HP per tick (1 tick per 2s). Slime remains
-        attached until redirected or target is full HP. Consumes 5 Water per
-        tick from Drakol's pool.
-      item_replaced: "Harmony Draught (3% HP/s regen for 12s) — but persistent, redirectable, no ally slot cost"
-      decision_created: >
-        Which ally gets the slime? Redirecting costs travel time (slime must
-        physically move). Pre-positioning slime near expected damage targets
-        reduces reaction time. Panic-redirecting across the arena wastes
-        2-4 seconds of healing.
-        
-    - name: "Direct: Surge Heal"
-      performer: "Slime"
-      type: "oGCD Command — Burst Heal (15s recast)"
-      trigger_condition: "Slime is in Heal mode, attached to an ally; Drakol has 40+ Water stored"
-      effect: >
-        Commands slime to expand and engulf the ally briefly, delivering a
-        burst heal of 25% target max HP instantly. Slime shrinks afterward
-        (halved heal rate for 4s while recovering volume). Costs 40 Water.
-        If empowered by GenerateWater active dump, burst heals 35% instead.
-      item_replaced: "Rejuvenation Flask (20% HP AoE burst) — but single-target, stronger, and costs Water"
-      decision_created: >
-        Burst now and accept 4s of weakened healing? Or sustain through the
-        damage with steady ticks and save the burst for a bigger spike?
-        The 40 Water cost means fewer ticks available after bursting.
-        
-    - name: "Direct: Scout"
-      performer: "Slime"
-      type: "oGCD Command — Slime Scout Mode activation"
-      trigger_condition: "Slime is alive; no active healing target critically injured (above 70% HP)"
-      effect: >
-        Commands slime to detach and explore ahead. Slime becomes translucent
-        (harder for enemies to detect at SR1-2, detectable at SR3+), moves at
-        150% Drakol speed, and provides vision in a 6m radius around itself.
-        Can fit through cracks, under doors, into water — anywhere water can
-        flow. Range limit: 30m from Drakol. Slime cannot heal while scouting.
-        Costs 2 Water/second while deployed in Scout mode.
-      item_replaced: "Scout Familiar Scroll (30s invisible scout) — but persistent, directable, and biological"
-      decision_created: >
-        Scouting means NO healing available. Is the information worth the
-        vulnerability? How far ahead is safe to send? Recalling from 30m
-        takes travel time — if combat starts while slime is scouting, party
-        has no healer for several seconds.
-        
-    - name: "Direct: Dissolve"
-      performer: "Slime"
-      type: "oGCD Command — Slime Damage Mode activation"
-      trigger_condition: "Slime is alive; target enemy within slime's leash range"
-      effect: >
-        Commands slime to engulf target enemy. Slime moves to target, attaches,
-        and deals continuous water/acid damage (2% target max HP per 2s tick
-        for enemies, capped at reasonable values for bosses). Target gains
-        Waterlogged debuff while engulfed. Slime takes retaliation damage from
-        the target's attacks (reduced by 50%). Consumes 4 Water per tick.
-      item_replaced: "Devil's Puffball (persistent area damage) — but single-target, mobile, and marks for Drakol combos"
-      decision_created: >
-        Slime in Damage mode means slime is NOT healing. The Waterlogged
-        debuff enables Drakol's Drown Slam and Surge Pulse synergy — but
-        is the damage combo worth losing healing? Only justified when party
-        damage intake is low or target is near death.
-        
-    - name: "Direct: Return"
-      performer: "Slime"
-      type: "oGCD Command — Instant recall (4s recast)"
-      trigger_condition: "Slime is alive and not attached to Drakol"
-      effect: >
-        Slime immediately stops current action and returns to Drakol at 200%
-        movement speed. Upon return, slime attaches to Drakol (provides passive
-        5% damage reduction to Drakol while attached, and regenerates slime HP
-        at 3% per second). Entering Return cancels all active modes.
-      item_replaced: "Retrograde Bead (recall to marked position) — but for the companion, not the player"
-      decision_created: >
-        Recall is the panic button and the reset. But every recall means
-        travel time to the NEXT assignment. Recalling to heal Drakol when an
-        ally needs healing is a selfish but sometimes necessary choice.
-        
-    - name: "Direct: Purify"
-      performer: "Slime"
-      type: "oGCD Command — Cleanse (20s recast)"
-      trigger_condition: "Slime is in Heal mode, attached to an ally who has a cleansable debuff"
-      effect: >
-        Slime flushes the attached ally's system, removing one cleansable
-        debuff (poison, slow, blind, burn — not stun/paralysis/sleep). Costs
-        20 Water. Heals 5% max HP as a side effect of the flush. If slime is
-        empowered, removes ALL cleansable debuffs instead of one.
-      item_replaced: "Desiccant Potion (removes Waterblight + cleanses) — but broader application and ally-targeted"
-      decision_created: >
-        Spend 20 Water on a cleanse or let the debuff run and conserve Water
-        for healing? Some debuffs (slow) are annoying but survivable. Others
-        (poison) will kill if not cleansed. Reading debuff severity is the skill.
-        
-    - name: "Direct: Wellspring"
-      performer: "Slime"
-      type: "oGCD Command — AoE Heal Installation (45s recast)"
-      trigger_condition: "Slime is alive; Drakol has 60+ Water stored"
-      effect: >
-        Commands slime to plant itself at current position and expand into
-        a healing puddle (4m radius, 10s duration). All allies standing in
-        the puddle receive 3% max HP per second. Slime is IMMOBILE and
-        VULNERABLE during this — cannot be redirected, takes double damage.
-        After 10s, slime contracts and must be recalled or redirected.
-        Costs 60 Water.
-      item_replaced: "Healing Specter (deployable healing zone) — but higher throughput, more vulnerable, and costs significant Water"
-      decision_created: >
-        Wellspring is the strongest AoE healing tool but makes the slime
-        a sitting target. Positioning must be perfect BEFORE activation.
-        If enemies shift to the puddle, slime dies. If allies leave the
-        puddle, healing is wasted. High reward, high commitment.
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 15: RANK PROGRESSION
+# ─────────────────────────────────────────────────────────────────────────────
 
-# ============================================================================
-# SECTION 5: COMPANION SYSTEM
-# ============================================================================
+RankProgression:
+  Rank1:
+    Description: "Core dual-entity loop. Basic combo + Slime modes + Moisture management."
+    SkillsAvailable:
+      GCD: [trident_thrust, barbed_sweep, rising_current, tidal_impale, undertow_slam, torrent_lance, riptide_slash, tidal_rush]
+      SlimeCommands: [direct_spirit, follow_ally, recall_spirit, mode_scout, mode_heal, mode_damage, swell_burst, cleansing_waters]
+      DrakolOGCD: [scale_hardening, drakol_roar, depth_pressure]
+    Complexity: "Moderate. Learn the Moisture loop. Learn Slime positioning basics."
+    CoreLoop: "Melee combo → weave Slime commands → manage Moisture → recall/resend cycle"
 
-companion_system:
-  slime_identity:
-    name: "Bonded Water Slime (unnamed — players may name theirs)"
-    nature: "Symbiotic aquatic organism, semi-sapient, emotionally bonded to Drakol"
-    visual: "Translucent blue-green amorphous blob, 0.5m diameter at rest, can stretch/compress"
-    personality: "Curious, protective of Drakol, skittish when damaged, eager when fed"
-    
-  slime_hp:
-    base_hp: "30% of Drakol's max HP (scales with Drakol's STAM)"
-    scaling: "If Drakol has 1000 HP, slime has 300 HP"
-    regeneration: >
-      Slime regenerates HP passively at 1% max/second when attached to Drakol
-      (Return mode). Does NOT regenerate while deployed in any active mode.
-      GenerateWater active dump restores slime HP proportional to Water spent
-      (1 Water = 1% slime max HP restored).
-    damage_taken_modifiers:
-      fire: "+50% damage taken (water evaporation)"
-      ice: "+25% damage taken (freezing disrupts structure)"
-      physical: "Normal damage"
-      water: "-50% damage taken (absorbed into mass)"
-      poison: "Immune (slime biology filters toxins)"
-      
-  slime_modes:
-    heal_mode:
-      description: "Slime attaches to an ally and heals continuously"
-      slime_position: "Attached to target ally's body (moves with them)"
-      tick_rate: "1 heal tick per 2 seconds"
-      throughput: "4% target max HP per tick (sustained), 25-35% burst via Surge Heal"
-      water_cost: "5 Water per tick"
-      vulnerability: "Slime shares space with ally — AoE hitting ally also hits slime"
-      autopilot_behavior: "Heals lowest-HP ally within 10m, switches targets at full HP"
-      
-    scout_mode:
-      description: "Slime detaches and explores independently"
-      slime_position: "Free-roaming within 30m leash of Drakol"
-      movement_speed: "150% of Drakol's movement speed"
-      detection: "Translucent — SR1-2 enemies ignore it; SR3+ enemies may attack it"
-      traversal: "Can fit through any gap water could flow through (cracks, grates, keyholes)"
-      vision_radius: "6m radius shared vision with Drakol"
-      water_cost: "2 Water per second while deployed"
-      autopilot_behavior: "Slowly orbits Drakol at 5m distance, providing no useful scouting"
-      limitation: "CANNOT heal, attack, or interact with allies/enemies while scouting"
-      
-    damage_mode:
-      description: "Slime engulfs an enemy, dealing continuous damage"
-      slime_position: "Attached to target enemy"
-      tick_rate: "1 damage tick per 2 seconds"
-      throughput: "2% target max HP per tick (moderate sustained, capped for bosses)"
-      water_cost: "4 Water per tick"
-      bonus_effect: "Target gains Waterlogged debuff (enables Drakol combo abilities)"
-      vulnerability: "Slime takes 50% of target's outgoing damage as retaliation"
-      autopilot_behavior: "Attacks nearest enemy to Drakol, no target prioritization"
-      limitation: "CANNOT heal while in Damage mode"
-      
-  slime_positioning_rules:
-    leash_range: "20m for Heal/Damage modes, 30m for Scout mode"
-    leash_violation: >
-      If Drakol moves beyond leash range, slime is forcibly pulled back
-      (interrupted from current action, takes 1.5s to travel back into range).
-      This counts as an involuntary Return — slime loses current mode and
-      must be re-commanded.
-    travel_speed:
-      base: "Same as Drakol movement speed"
-      scout_mode: "150% of Drakol speed"
-      return_command: "200% of Drakol speed"
-      through_water_terrain: "250% of base speed (native element acceleration)"
-    pathfinding: >
-      Slime can path through any space water flows — under doors, through
-      grates, across gaps, through water terrain. It CANNOT path through
-      sealed rooms or completely dry environments with no moisture path.
-      Vertical: can climb walls via adhesion (slow — 50% speed on vertical surfaces).
-      
-  slime_destruction:
-    what_kills_it: "HP reaches 0 from enemy attacks, environmental hazards (fire, extreme heat), or AoE damage"
-    immediate_consequences:
-      - "ALL healing from class ceases immediately"
-      - "Drakol loses access to ALL slime command abilities"
-      - "Party must use consumable healing until slime recovers"
-      - "Drakol's Tidecaller's Resolve becomes available (emergency self-sustain)"
-    visual_on_death: "Slime evaporates into steam — dramatic, clearly communicates to party that healing is offline"
-    
-  slime_recovery:
-    regeneration_method: >
-      Drakol's GenerateWater continuously feeds a regeneration pool. When
-      slime is destroyed, Water generated goes into a Regrowth gauge instead
-      of being spendable. When Regrowth gauge reaches 100, slime re-forms
-      at Drakol's feet at 50% HP.
-    base_recovery_time: "~33 seconds at passive generation (3 Water/s × 33s = 100)"
-    accelerated_recovery: "Tidecaller's Resolve triples generation (9/s) = ~11 seconds"
-    recovery_during_combat: "Drakol is functionally a mediocre melee DPS with no healing for the party"
-    recovery_outside_combat: "Same timer, but no pressure — party can wait safely"
-    slime_state_on_recovery: >
-      Re-forms at 50% HP, in Return mode (attached to Drakol). Must be
-      manually redirected to resume duties. Does NOT auto-resume previous mode.
+  Rank2:
+    Description: "Expanded toolkit. Precision commands + water skill expansion."
+    SkillsAdded:
+      GCD: [skewering_dive, geyser_strike]
+      SlimeCommands: [flash_command, torrent_wave, hydro_barrier, spirit_surge]
+      DrakolOGCD: [ancestral_bond]
+    Complexity: "High. Flash Command timing, Surge windows, Geyser crit optimization."
+    NewDecisions:
+      - "Flash Command timing (30s CD — when is the emergency?)"
+      - "Spirit Surge windows (doubled output vs accelerated Moisture drain)"
+      - "Geyser Strike crit condition (puddle positioning for guaranteed crits)"
+      - "Skewering Dive synergy (set up Soaked THEN gap-close for bonus damage)"
 
-# ============================================================================
-# SECTION 6: CC STAGE BUDGET
-# ============================================================================
+  Rank3:
+    Description: "Mastery. Ultimate ability + advanced defense + terrain mastery."
+    SkillsAdded:
+      GCD: [maelstrom]
+      SlimeCommands: [tidal_convergence, aqua_veil]
+      DrakolOGCD: [brine_armor]
+    Complexity: "Expert. Full dual-entity micro with Moisture economy mastery."
+    MasteryExpression:
+      - "Tidal Convergence timing (use-case driven, not cadence)"
+      - "Brine Armor synergy with high Moisture (effective HP multiplication)"
+      - "Aqua Veil placement (party pathing prediction + Moisture refill)"
+      - "Maelstrom cost management (30 Moisture is enormous — when can you afford it?)"
+      - "Pre-fight puddle mapping (saturate the arena before engagement)"
+      - "Cross-class terrain combo coordination (set up for Madolt/Elementalist)"
 
-cc_stage_budget:
-  role_context: >
-    As a Healer class, the Spiritcaller's CC budget is CONSERVATIVE. CC exists
-    to protect the healer and enable healing delivery — not to control
-    the battlefield like a Shaman or Siren. Water/slime effects provide
-    soft control (slows, terrain) rather than hard lockdown.
-    
-  stage_1_effects:
-    - name: "Undertow Strike puddle"
-      type: "Slow"
-      details: "2m radius, -20% movement speed, 4s duration"
-      application: "Created by Drakol's combo finisher — positional, not targeted"
-      budget_cost: "Low — requires melee combo to apply, short duration, small area"
-      
-    - name: "Waterlogged (from Dissolve/Surge Pulse)"
-      type: "Vulnerability mark, not CC directly"
-      details: "Target takes 15% more damage from slime; enables Drown Slam"
-      application: "Applied by slime Damage mode or Drakol's Surge Pulse"
-      budget_cost: "Negligible as CC — it's a damage enabler, not a control tool"
-      
-  stage_2_effects:
-    - name: "Drown Slam — Suffocate"
-      type: "Attack speed reduction"
-      details: "-25% attack speed for 8s (12s with slime assist)"
-      application: "Requires Waterlogged target + 2.5s cast time — high commitment"
-      budget_cost: "Medium — long cast time, conditional requirement, punishes the Spiritcaller's DPS and attention"
-      
-    - name: "Surge Pulse — Knockback"
-      type: "Displacement (interrupt)"
-      details: "3m pushback on all enemies within 6m"
-      application: "oGCD, 12s recast, costs 25 Water"
-      budget_cost: "Medium — Water cost means less healing fuel, situational use"
-      
-  stage_3_effects:
-    - name: "NONE"
-      type: "N/A"
-      details: >
-        The Spiritcaller has NO Stage 3 CC. This is intentional — hard
-        lockdown is the domain of Grappler (melee pin), Shaman (guaranteed
-        action suppression), and Siren (behavioral override). The healer's
-        job is to KEEP ALLIES ALIVE, not to disable enemies completely.
-        The Spiritcaller's CC enables survival (slows to create distance,
-        knockbacks to peel, attack speed reduction to lower incoming damage)
-        but never removes enemy agency entirely.
-      justification: >
-        A healer with Stage 3 CC AND persistent healing would be overpowered.
-        The budget tradeoff: the Spiritcaller has the strongest sustained
-        healing delivery system (persistent, non-magical, immune to silence)
-        in exchange for having the weakest CC among all classes that have any.
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 16: UI/UX FEEDBACK REQUIREMENTS
+# ─────────────────────────────────────────────────────────────────────────────
 
-# ============================================================================
-# SECTION 7: VULNERABILITY
-# ============================================================================
+UIFeedback:
+  MoistureGauge:
+    Position: "Prominent — center-bottom HUD (as important as HP)"
+    ColorCoding:
+      100-60: "Blue (safe range)"
+      60-40: "Yellow (caution)"
+      40-20: "Orange (danger)"
+      20-0: "Red (critical)"
+      0_Desiccated: "Cracked red + screen edge effects"
+    Animation: "Water droplet fills/drains. At 0: cracks appear on gauge frame."
+    Sound: "Subtle water-drip audio at 40 (warning). Harsh cracking at 20 (danger)."
 
-vulnerability:
-  primary_vulnerability:
-    name: "Slime Destruction = Healing Offline"
-    description: >
-      When the slime dies, the Spiritcaller loses ALL healing capability for
-      the party. There is no backup heal, no emergency cast, no "heal without
-      slime" option. The 33-second recovery window (11s with Resolve) is an
-      eternity in SR3+ combat. A party whose Spiritcaller's slime dies in a
-      boss phase is running on potions and prayers.
-    counterplay_for_enemies: >
-      Smart enemies (SR3+) target the slime directly. Fire damage is +50%
-      effective. The slime only has 30% of Drakol's HP. Focused fire from
-      2-3 enemies kills it in seconds. This is the PRIMARY way to "shut down"
-      a Spiritcaller — kill the symbiote.
-    counterplay_for_spiritcaller: >
-      Protect the slime via positioning (keep it behind Drakol, attached to
-      non-targeted allies), via Return (recall before lethal damage), and via
-      Wellspring timing (don't plant the slime in vulnerable positions).
-      
-  secondary_vulnerability:
-    name: "Positional Mismatch = Wasted Action Economy"
-    description: >
-      The slime has travel time. If it's healing the tank and the ranged DPS
-      gets spiked, the slime must physically traverse the arena to reach them.
-      Travel time = healing downtime. A poorly positioned slime wastes 2-4
-      seconds of potential healing every time it's redirected. In SR3+ content,
-      2-4 seconds of no healing can mean a death.
-    skill_expression: >
-      Expert Spiritcallers pre-position the slime based on predicted damage
-      patterns. They know which ally will take damage NEXT and send the slime
-      early. Novice Spiritcallers reactively chase damage and always arrive
-      late.
-      
-  tertiary_vulnerability:
-    name: "Attention Split = Suboptimal Everywhere"
-    description: >
-      The Drakol fighting means NOT directing the slime. The slime on autopilot
-      means suboptimal target selection, no mode switching, no pre-positioning.
-      A Spiritcaller who focuses entirely on their melee rotation heals poorly.
-      A Spiritcaller who focuses entirely on slime direction deals poor damage.
-      Neither extreme is correct — the skill is in balancing.
-    failure_mode: >
-      In high-pressure moments (Drakol taking damage while ally is dying while
-      enemies are swarming), the cognitive load peaks. This is where bad
-      Spiritcallers make errors: they freeze on slime commands, or they
-      autopilot their melee, or they panic-recall the slime. The class rewards
-      calm multi-tasking under pressure.
-      
-  vulnerability_matrix:
-    fire_damage: "Slime takes +50% — fire-heavy encounters are the Spiritcaller's nightmare"
-    silence_effects: "NO EFFECT — slime is not magical, commands are neurological, not vocal"
-    anti_healing_debuffs: "Reduced slime heal throughput (debuff applies to slime's output)"
-    displacement: "Knocking the Drakol away from slime can break leash range, forcing recall"
-    aoe_heavy_encounters: "Slime is always at risk — cannot dodge AoE independently (follows target)"
-    single_target_boss: "Slime has fewer positioning demands — class is EASIER in simple encounters"
+  SlimeIndicator:
+    Position: "Mini-map marker + world-space tether line from Drakol to Slime"
+    DistanceDisplay: "Numeric distance shown on tether (e.g., '23y')"
+    ModeIndicator: "Slime glows: Blue (Heal), Red (Damage), White (Scout)"
+    RadiusCircle: "Ground decal showing Slime's effective radius (8y heal, 6y damage)"
 
-# ============================================================================
-# SECTION 8: ITEM COMPLEMENTARITY
-# ============================================================================
+  MoistureDecayPreview:
+    Mechanic: "When targeting a position for Direct Spirit, UI shows PREDICTED Moisture decay rate"
+    Display: "Ghost line on Moisture gauge showing where gauge will be in 10s if Slime goes there"
+    Purpose: "Player can see the COST of a positioning decision before committing"
 
-item_complementarity:
-  design_principle: >
-    The Spiritcaller replaces healing items, scouting items, and water-utility
-    items as a premium class solution. But the class still USES items for things
-    the slime cannot do: self-healing for the Drakol, burst damage, hard CC,
-    and fire/elemental coverage.
-    
-  items_the_class_replaces:
-    - item: "Harmony Draught (3% HP/s regen, 12s)"
-      replaced_by: "Direct: Mend (4% per 2s, persistent, redirectable)"
-      premium_reason: "No duration limit, ally doesn't use their consumable slot, adaptive targeting"
-      
-    - item: "Rejuvenation Flask (20% HP AoE burst)"
-      replaced_by: "Direct: Surge Heal (25% single target) + Direct: Wellspring (3%/s AoE zone)"
-      premium_reason: "Repeatable (15s/45s recast vs single-use), higher magnitude, no aim required"
-      
-    - item: "Scout Familiar Scroll (30s invisible scout)"
-      replaced_by: "Direct: Scout (persistent, directable, biological)"
-      premium_reason: "No duration limit (Water cost sustains it), can be recalled and redeployed, traverses water"
-      
-    - item: "Healing Specter (deployable heal zone)"
-      replaced_by: "Direct: Wellspring (4m radius, 3%/s, 10s)"
-      premium_reason: "Higher throughput, doesn't require ally to stand in a fixed spot permanently"
-      
-    - item: "Desiccant Potion (cleanse)"
-      replaced_by: "Direct: Purify (cleanse + 5% heal)"
-      premium_reason: "Targets allies (not self-only), heals on cleanse, repeatable every 20s"
-      
-  items_the_class_still_needs:
-    - item: "Health Potions (self-healing)"
-      why: "Drakol cannot heal itself efficiently — slime healing self while attached is slow (1%/s regen only)"
-      
-    - item: "Stasis Pin / hard CC items"
-      why: "Class has NO Stage 3 CC — needs items for emergency lockdown situations"
-      
-    - item: "Fire-resistant consumables"
-      why: "Slime weakness to fire means fire-heavy encounters demand external protection"
-      
-    - item: "Ironhide Tincture / defensive consumables"
-      why: "Drakol is a melee fighter taking hits — no inherent damage reduction beyond Riptide Guard"
-      
-    - item: "Elemental damage consumables (Gold Pine Resin, etc.)"
-      why: "Drakol deals physical damage only — needs items for elemental coverage on resistant enemies"
-      
-  party_composition_item_savings:
-    description: >
-      A party with a Spiritcaller saves approximately 4-6 consumable slots
-      per party member that would otherwise go to healing items, plus 1-2
-      slots for scouting items. This frees those slots for offensive or
-      utility consumables, making the party more strategically flexible.
-    estimated_replacement_value: "6-8 consumable categories covered by one class"
-    
-  synergy_items:
-    - item: "Resonance Crystal (+15% healing received)"
-      synergy: "Amplifies slime healing output for allies standing in crystal radius"
-      
-    - item: "Conductance Gel (+40% lightning damage to Waterlogged targets)"
-      synergy: "Slime applies Waterlogged, party Elementalist detonates with lightning"
-      
-    - item: "Bogcrust Grenade (difficult terrain)"
-      synergy: "Combined with Undertow Strike puddle = heavily slowed enemies near Drakol"
+  DesiccatedState:
+    Visual: "Character model scales crack. Skin texture shifts from glossy to matte."
+    ScreenEffect: "Screen edges dry and crack (subtle overlay, not obscuring gameplay)"
+    Audio: "Low persistent warning tone. Crackling sounds on every hit taken."
+    Recovery: "When Moisture > 20: wet splash effect, scales re-seal, audio normalizes"
 
-# ============================================================================
-# SECTION 9: HIT/MISS ANALYSIS
-# ============================================================================
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 17: DESIGN PHILOSOPHY SUMMARY
+# ─────────────────────────────────────────────────────────────────────────────
 
-hit_miss_analysis:
-  what_constitutes_a_hit:
-    - scenario: "Slime is pre-positioned on the ally about to take a big hit"
-      result: "Immediate sustained healing, no travel time wasted, Surge Heal ready for spike"
-      feeling: "Predictive mastery — 'I knew that was coming and my slime was already there'"
-      
-    - scenario: "Drakol dashes through slime to reposition it while closing on an enemy"
-      result: "Free slime relocation + gap close + damage in one action"
-      feeling: "Efficiency elegance — 'I did three things in one GCD'"
-      
-    - scenario: "Slime scouts ahead, reveals ambush, party prepares before entering"
-      result: "Party avoids damage entirely through information advantage"
-      feeling: "Strategic superiority — 'We knew and they didn't'"
-      
-    - scenario: "Slime on Damage mode applies Waterlogged, Drakol follows with Drown Slam"
-      result: "Heavy damage + 12s Suffocate debuff, enabling easier healing afterward"
-      feeling: "Combo execution — 'My two halves worked together perfectly'"
-      
-    - scenario: "Wellspring placed at chokepoint where party is funneled during retreat"
-      result: "Entire party healed while falling back, slime survives because enemies can't reach it"
-      feeling: "Tactical foresight — 'I turned our retreat into a recovery'"
-      
-  what_constitutes_a_miss:
-    - scenario: "Slime is scouting when combat starts unexpectedly"
-      result: "3-5 seconds of zero healing while slime travels back, party takes unhealed damage"
-      feeling: "Punishment for greed — 'I shouldn't have sent it that far'"
-      
-    - scenario: "Slime planted as Wellspring, enemies immediately AoE the puddle"
-      result: "Slime takes double damage, dies. Healing offline for 33 seconds."
-      feeling: "Positioning failure — 'I put it in a terrible spot and it died'"
-      
-    - scenario: "Drakol focuses on melee combo, doesn't notice ally dropping low"
-      result: "Slime on autopilot heals wrong target (nearest, not lowest), ally dies"
-      feeling: "Attention failure — 'I was tunnel-visioning my damage and forgot to direct'"
-      
-    - scenario: "Slime recalled for Riptide Guard defensive bonus, ally dies while slime is in transit"
-      result: "Selfish play punished — saved Drakol but lost party member"
-      feeling: "Misread priority — 'I chose myself over the team and it cost us'"
-      
-    - scenario: "Leash range violated during chase, slime forcibly pulled back mid-heal"
-      result: "Heal interrupted, slime must be re-commanded, 2-3 seconds of nothing"
-      feeling: "Mechanical error — 'I ran too far without thinking about my slime'"
-      
-  skill_ceiling_expression:
-    novice: >
-      Leaves slime on autopilot 80% of the time. Occasionally redirects.
-      Healing is functional but reactive and often late. Drakol DPS is decent
-      because attention isn't split. Dies to slime destruction regularly because
-      slime is never pre-positioned to avoid AoE.
-    competent: >
-      Redirects slime regularly. Uses Surge Heal on spike damage. Scouts
-      between pulls. Heals correct targets most of the time. Occasionally
-      forgets to redirect during intense Drakol combat. Slime survives most
-      encounters. 70/30 split between healing and damage.
-    expert: >
-      Slime is always moving. Pre-positioned before damage occurs. Brackish
-      Lunge is used to reposition slime as often as to gap-close. Wellspring
-      placement is perfect. Drown Slam combos are executed without losing
-      healing uptime. Slime survives every encounter because expert knows
-      when to recall. The party barely notices they're taking damage.
+DesignSummary:
+  OneSentence: >
+    Spiritcaller is a melee-fighting healer who directs an invulnerable water
+    spirit across the battlefield, paying for healing reach with personal defense.
 
-# ============================================================================
-# SECTION 10: ANTI-PATTERNS
-# ============================================================================
+  ThreeKeyTensions:
+    1: "Slime Distance vs Personal Safety (healing reach costs Moisture/DR)"
+    2: "Water Skill Offense vs Defense (spending Moisture for damage/utility)"
+    3: "Slime Mode vs Situation (Heal vs Damage vs Scout — which mode is correct NOW?)"
 
-anti_patterns:
-  - name: "Permanent Autopilot"
-    description: >
-      Player treats slime as a passive effect (like an aura or regen buff)
-      and never issues commands. Slime heals nearest ally regardless of need.
-    why_its_bad: >
-      Defeats the entire purpose of the class. If autopilot is viable at all
-      difficulty levels, there's no reason for the command system to exist.
-      Autopilot must be NOTICEABLY worse than directed play.
-    design_prevention: >
-      Autopilot slime has no mode switching, no pre-positioning, no burst heal
-      access (Surge Heal requires manual activation), no cleansing, no scouting.
-      SR2+ content will kill parties whose healer is on autopilot because
-      autopilot doesn't respond to spike damage or priority targets.
-      
-  - name: "Slime-Only Gameplay (Drakol AFK)"
-    description: >
-      Player focuses entirely on slime direction and stops engaging in melee
-      combat. Drakol stands still or auto-attacks while player micromanages slime.
-    why_its_bad: >
-      The class is a DUAL-entity fantasy. The Drakol fighting is where Water
-      generation comes from (attacks generate Water). A stationary Drakol
-      generates minimal Water, starving the slime of fuel. Also: no Undertow
-      puddles, no Waterlogged applications, no Drown Slam combos.
-    design_prevention: >
-      Water generation is tied to Drakol combat actions. Melee hits generate
-      Water. Standing still only gets passive 3/s. Active combat gets 3/s +
-      per-hit generation. The slime's fuel IS the Drakol's aggression. Passive
-      play = anemic slime.
-      
-  - name: "Heal-Bot (Never Use Damage Mode)"
-    description: >
-      Player only ever uses slime for healing, never switches to Damage mode,
-      never uses Drown Slam combo, never applies Waterlogged.
-    why_its_bad: >
-      Reduces the class to a simpler design (just a heal companion) and removes
-      the strategic depth of mode-switching decisions. Also leaves Drakol's
-      combo potential (Drown Slam) permanently unused.
-    design_prevention: >
-      This is actually ACCEPTABLE in some content — pure healing demand
-      justifies permanent Heal mode. The anti-pattern is heal-bot in content
-      where party HP is full and slime could be contributing damage. The
-      Waterlogged debuff also benefits the ENTIRE PARTY's damage, making
-      Damage mode occasionally correct even in healer-primary content.
-      
-  - name: "Permanent Damage Mode (Never Heal)"
-    description: >
-      Player uses slime exclusively as a damage companion and expects the
-      party to self-heal with potions.
-    why_its_bad: >
-      Denies the party their healer. The class ROLE is Healer — parties
-      expecting healing from a Spiritcaller who never heals will fail.
-    design_prevention: >
-      Damage mode throughput (2% per tick) is deliberately lower than heal
-      throughput (4% per tick). The class is mathematically better at healing
-      than damage. A permanent-damage Spiritcaller is a mediocre DPS AND a
-      missing healer — worst of both worlds.
-      
-  - name: "Fixed Rotation Cadence"
-    description: >
-      Player develops a timer-based routine: "heal for 10s, then damage for
-      5s, then heal for 10s" regardless of party state.
-    why_its_bad: >
-      Violates the reactive design philosophy. The Game Juice Taste Design
-      explicitly rejects 2-minute cycle gameplay. The Spiritcaller should
-      respond to WHAT'S HAPPENING, not follow an internal clock.
-    design_prevention: >
-      Encounter design varies damage patterns. Sometimes 20s of sustained
-      damage demand permanent heal mode. Sometimes 5s of silence demand damage
-      mode. The trigger system is designed so the CORRECT answer changes based
-      on encounter phase, not on time elapsed.
-      
-  - name: "Slime as Sacrifice (Intentional Death for Tidecaller's Resolve)"
-    description: >
-      Player intentionally lets slime die to trigger Tidecaller's Resolve
-      (triple Water generation, lifesteal) for personal DPS boost.
-    why_its_bad: >
-      Exploits the emergency ability as a planned burst window. Turns the
-      vulnerability (slime death) into a benefit, removing the intended
-      punishment for slime mismanagement.
-    design_prevention: >
-      Tidecaller's Resolve provides SELF-sustain only (not party healing).
-      The 33s without party healing means allies still suffer. The lifesteal
-      is 8% of damage dealt — moderate, not dominant. It's survival, not
-      power. And the slime re-forms at 50% HP (needs feeding before full
-      effectiveness), so there's a lingering penalty after the Resolve window.
+  WhatMakesItUnique:
+    - "Only healer with ZERO GCD heals (all healing is companion-delivered)"
+    - "Only healer that uses STR and fights in melee as primary gameplay"
+    - "Only class with an invulnerable companion (can't be killed — cost is positional)"
+    - "Only healer whose personal defense IS their healing resource"
+    - "Terrain engineering as secondary class identity (puddle ecosystem)"
+    - "Cross-class combo enabler (water terrain for fire/ice/lightning/wind/earth reactions)"
 
-# ============================================================================
-# SECTION 11: OPEN QUESTIONS
-# ============================================================================
+  WhoIsThisFor:
+    IdealPlayer: >
+      Players who love RTS micro. Players who hate standing in the back casting.
+      Players who enjoy managing two entities simultaneously. Players who want to
+      FEEL like a warrior while FUNCTIONING as a healer. Players who enjoy spatial
+      puzzles over rotation optimization. Former FFXIV Scholar mains who wished the
+      fairy was more interactive. Former WoW Discipline Priests who wished they
+      could be in melee.
+    NotFor: >
+      Players who want a simple, reactive "see low HP, press heal" loop.
+      Players who dislike split-attention gameplay. Players who hate positional
+      requirements. Players who expect healers to be squishy casters with big numbers.
 
-open_questions:
-  high_priority:
-    - question: "How does slime direction input work in a real-time action game UI?"
-      context: >
-        The player is in melee combat. They need to target an ally for a
-        heal redirect without taking their eyes off the fight. What's the
-        input scheme? D-pad commands? Radial menu? Smart targeting? Auto-target
-        lowest HP ally on button press? Each has tradeoffs for skill expression.
-      options:
-        - "Smart targeting (press button, targets lowest HP ally within range) — easy but removes decision"
-        - "Manual targeting (aim reticle at ally) — hardest but highest control"
-        - "Cycle targeting (tap to cycle party members, confirm to redirect) — medium"
-        - "Contextual (different button per party slot) — predictable but requires memorization"
-      recommendation: >
-        Hybrid: Smart default (lowest HP) with manual override (hold + aim).
-        Low-skill players press button and slime goes to lowest. High-skill
-        players hold and pick a specific target for pre-positioning.
-        
-    - question: "What prevents the slime from being permanently killed by AoE in every encounter?"
-      context: >
-        If the slime is always near allies, and AoE hits allies, the slime
-        takes AoE damage constantly. With 30% of Drakol's HP, it might die
-        every encounter, making the recovery cycle the dominant experience.
-      options:
-        - "Slime has AoE damage reduction (takes 50% from AoE) — reduces problem numerically"
-        - "Slime is untargetable during Heal mode (attached = protected) — removes counterplay"
-        - "Slime can dodge AoE independently via autopilot (moves out of telegraphs) — adds AI complexity"
-        - "AoE damage to slime is reduced when attached to an ally (shared mitigation)"
-      recommendation: >
-        Slime takes 50% damage from AoE when attached to an ally (ally's body
-        partially shields it). Full damage when free-standing (Wellspring,
-        Scout mode, Damage mode on isolated target). This makes keeping the
-        slime attached safer and makes Wellspring/Damage mode the risky choices.
-        
-    - question: "How does slime healing interact with the Triage system?"
-      context: >
-        The Game Juice Design doc defines Triage Minor (ally hits 50% HP,
-        healer shifts to 50/50 DPS/Heal, gains movement speed). But the
-        Spiritcaller doesn't shift DPS/Heal ratio — the slime heals while
-        Drakol fights. Is Triage even relevant?
-      options:
-        - "Triage triggers Water generation boost (not DPS/Heal shift) — slime heals faster when triggered"
-        - "Triage triggers slime auto-redirect to the endangered ally (autopilot improvement when needed)"
-        - "Triage grants Drakol movement speed toward slime's target (enables physical protection)"
-        - "Triage is irrelevant for Spiritcaller — class already has its own urgency system"
-      recommendation: >
-        Triage triggers two things: (1) Drakol gains movement speed toward
-        the endangered ally (to body-block or reposition), (2) slime heal
-        rate increases by 50% for 6s on the triggered target. This gives
-        the Spiritcaller a Triage RESPONSE that's mechanically distinct from
-        caster healers but strategically equivalent.
-        
-    - question: "Can the slime heal the Drakol efficiently, or is self-healing intentionally weak?"
-      context: >
-        Design doc says "Healer can't heal themselves efficiently (needs potions
-        or party cover)." But the slime healing the Drakol is the slime healing
-        an ALLY (the Drakol IS an ally to the slime). Does this rule apply?
-      options:
-        - "Slime heals Drakol at full rate — exception because it's companion healing, not self-casting"
-        - "Slime heals Drakol at 50% rate — compromise, some self-sustain but potions still needed"
-        - "Slime cannot target Drakol at all — must heal other allies only"
-        - "Slime heals Drakol only when attached (Return mode) at reduced rate (1%/s passive)"
-      recommendation: >
-        Slime heals Drakol at 50% rate. The Spiritcaller CAN self-sustain
-        but inefficiently — diverting the slime to heal yourself means NOT
-        healing the party. This creates the intended decision: am I worth
-        healing, or should the party tank my death while I heal THEM?
-        
-  medium_priority:
-    - question: "Does the slime scale with gear, or only with Drakol stats?"
-      context: >
-        If slime scales with gear, Spiritcaller gearing is complex (Drakol
-        melee stats + slime healing stats). If only with Drakol stats,
-        gearing is simpler but slime power is less tunable.
-      options:
-        - "Slime scales with Drakol's STAM and water-generation-related stats only"
-        - "Dedicated 'companion enhancement' gear slot (like Grappler tentacle augments)"
-        - "Slime scales with weapon water damage (weapon choice matters for healing)"
-        
-    - question: "How does the slime interact with other Lower Drakols' slimes in a party?"
-      context: >
-        If two Spiritcallers are in a party, do their slimes interact?
-        Merge? Compete? Ignore each other?
-      options:
-        - "Slimes ignore each other — independent operations"
-        - "Slimes can merge briefly for a combined burst heal (coordination reward)"
-        - "Slimes compete for the same ally (can't both attach to one target)"
-        - "Two Spiritcallers in one party is so rare it doesn't need a system"
-        
-    - question: "What does the slime do during cutscenes, dialogue, and non-combat?"
-      context: >
-        The slime is always present. In town, in dialogue, in shops. It needs
-        ambient behavior that sells the bond without being disruptive.
-      options:
-        - "Slime rests on Drakol's shoulder/head — visual flavor, no gameplay"
-        - "Slime explores nearby objects curiously — ambient animation system"
-        - "Slime reacts to NPC conversations — emotional bond expression"
-        
-    - question: "Can enemies 'steal' or 'corrupt' the slime?"
-      context: >
-        If the slime is biological and semi-sapient, can an enemy curse it
-        to attack the Drakol? This would be terrifying and thematic but
-        potentially unfun.
-      options:
-        - "No — neurological bond is unbreakable, slime always loyal"
-        - "Yes, briefly — SR4 enemies can 'confuse' slime (heals enemies for 3-4s)"
-        - "Yes, corruption is a rare boss mechanic — slime must be 'cured' via GenerateWater burst"
-        
-  low_priority:
-    - question: "Does the slime have a growth/progression system separate from the Drakol?"
-      context: >
-        Does the slime get bigger, learn behaviors, unlock modes over time?
-        Or is it fully capable from class unlock?
-      
-    - question: "What happens to the slime if the Drakol is knocked unconscious but not dead?"
-      context: >
-        If the Drakol is KO'd, does the slime panic, try to revive, flee,
-        or continue last-issued orders?
-        
-    - question: "Can the slime interact with environmental water sources for bonus effects?"
-      context: >
-        Standing water, rivers, rain — does the slime benefit from ambient
-        water in the environment? This could make water-terrain encounters
-        significantly easier for the Spiritcaller.
-        
-    - question: "Is there a visual/audio language for slime state that party members can read?"
-      context: >
-        Allies need to know: is the slime coming to heal me? Is it in damage
-        mode? Is it low HP? Color changes? Sound cues? UI indicator?
+  DesignValidation:
+    CoreTensionTest: >
+      If a player says "I just keep the Slime near me all the time" — they're
+      failing as a healer (no one gets healed). If a player says "I just leave
+      the Slime far away all the time" — they're dead (Moisture gone). The class
+      FORCES oscillation. That oscillation IS the gameplay.
+    AntiDeathball: >
+      In content where the party is stacked (everyone within 10y), Spiritcaller
+      is EASY — Slime near party = near Drakol = no Moisture decay = free healing.
+      The class becomes HARD when the party is SPREAD (split mechanics, flanking,
+      spread stacks). Difficulty scales with party spread, not enemy damage.
+    SkillCeilingValidation: >
+      Low skill: Slime follows closest ally. Moisture dips occasionally. Healing is
+      adequate but not spectacular. DR drops sometimes.
+      High skill: Slime pulses in and out. Moisture oscillates 60-100 constantly.
+      Healing is excellent with perfect uptime. DR rarely drops below 60%.
+      Puddles cover the entire arena. Cross-class combos fire every 10s.
+      The GAP between floor and ceiling is in SPATIAL OPTIMIZATION, not APM.
 
-# ============================================================================
-# DESIGN VALIDATION NOTES
-# ============================================================================
-
-design_validation:
-  item_baseline_test:
-    can_party_without_class_succeed: true
-    items_used: "Harmony Draught, Rejuvenation Flask, Scout Familiar Scroll, Healing Specter"
-    class_clearly_better: true
-    reasons:
-      - "Slime never expires or runs out — items are single-use or duration-limited"
-      - "Slime adapts in real-time — items are fixed effect, fixed target"
-      - "Slime combines healing + scouting + damage in one entity — items are separate slots"
-      - "Slime is immune to silence/anti-magic — caster healers are not"
-      
-  role_distinction:
-    vs_siren: "Siren heals via vocalization while COMMANDING enemies. Spiritcaller heals via companion while FIGHTING in melee. Completely different input modality and attention distribution."
-    vs_wavecaller: "Wavecaller heals from range with sound and DIVES for damage (positional tension). Spiritcaller heals from companion and fights ALWAYS in melee (attention tension). Different axis of tradeoff."
-    vs_elementalist: "Elementalist heals with water magic (spellcasting, reactive element switching). Spiritcaller heals with biological companion (direction, not casting). Elementalist is flexible; Spiritcaller is persistent."
-    vs_shaman: "Shaman heals via Hex Drain (damage = healing). Spiritcaller heals via companion output (direct healing). Shaman healing is offensive; Spiritcaller healing is dedicated."
-    
-  fantasy_fulfillment:
-    core_fantasy: "Warrior with a living partner — two halves of one whole"
-    closest_reference: "Skirmisher + pet from action RPGs, but where the pet IS the healer role"
-    unique_feeling: "The pride of micro-managing perfectly. The RTS player's dream in an action game."
-    failure_feeling: "The frustration of juggling too much. The overwhelm when both halves need you simultaneously."
-    
-  anti_ffxiv_rotation_check:
-    fixed_burst_windows: "NONE — no 2-minute cycle, no burst phase"
-    fixed_rotation: "NONE — all actions are reactive to party state and enemy behavior"
-    resource_accumulation_cycle: >
-      Water generation is CONSTANT (3/s passive + per-hit), not cyclical.
-      Spending is reactive (heal when needed, burst when spiked, scout when
-      safe). There is no "build for 30s then dump" pattern — Water flows
-      continuously and is spent continuously.
-    what_replaces_rotation: >
-      Decision density comes from MODE SWITCHING and POSITIONING, not from
-      hitting buttons in sequence. The correct action at any moment depends
-      on: party HP, slime position, Water stored, enemy targeting, terrain,
-      and slime HP. This creates emergent complexity without fixed cadence.
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF DOCUMENT
+# ═══════════════════════════════════════════════════════════════════════════════

@@ -1,1280 +1,1314 @@
-# ============================================================================
-# COLONY — Complete Class Specification
-# juice-yaml-library
-# ============================================================================
-
-header:
-  class_name: Colony
-  race_lock: Harvesters (Linfree)
-  tier: Base
-  role: Support/DPS
-  lock_type: Biological
-  last_updated: 2026-07-14
-  design_identity: "The class that CHANGES THE MAP."
-  one_line: >
-    Other classes fight enemies. Colony changes the room itself — adding barriers,
-    removing paths, creating new routes, deploying traps. Self-sufficient through
-    infrastructure, not raw combat power.
-
-# ============================================================================
-# SECTION 1: IDENTITY
-# ============================================================================
-
-identity:
-  race: Harvesters
-  race_region: Linfree
-  biological_lock:
-    description: >
-      Harvesters ARE eusocial insects. Their phenotype is their body — not a spec
-      choice but a physical morphology determined at birth. Each phenotype has
-      organs, glands, and appendages that other phenotypes physically lack. The
-      colony structure is biology, not culture. One body cannot do what another
-      phenotype's body does.
-    why_locked: >
-      Builder caste has reinforced limbs and secretion glands that produce
-      construction resin. Flutter caste has functional wings and pollen sacs.
-      Nightfly caste has bioluminescent organs and dark-adapted compound eyes.
-      No other race has these structures. No training replicates them.
-    removal_test: "Remove the Harvester body → class ceases to exist entirely."
-
-  phenotypes:
-    count: 3
-    list:
-      - Builder
-      - Flutter
-      - Nightfly
-    throughline: >
-      You are one organism filling a colony role. Effective alone, designed to
-      synergize with other phenotypes. Each phenotype is a complete combat
-      expression — not a partial kit that requires others to function.
-
-  colony_behavior_solo: >
-    Even a single Harvester acts like a small colony. They don't fight like
-    individuals — they fight like an ECOSYSTEM. Builder creates the terrain,
-    then fights within it. Flutter creates debuff zones, then skirmishes through
-    them. Nightfly builds an information trap, then punishes those who stumble in.
-    The map IS the weapon. Setup IS the combat.
-
-  gather_role_separation:
-    description: >
-      GATHER is a racial/economic stat (Harvesters have GATHER 7). All Harvesters
-      gather resources regardless of combat phenotype. GATHER is always-active and
-      determines material acquisition during exploration. It is NOT a combat
-      ability and does NOT interact with phenotype-specific combat mechanics.
-    mechanical_note: >
-      A Builder in combat secretes construction resin from biological glands.
-      A Builder gathering collects ore, herbs, and monster materials. These are
-      separate systems using different biological processes.
-
-  harvester_racial_stats:
-    STR: 10
-    STAM: 10
-    SPD: 10
-    NTU: 10
-    MAGICCAP: 10
-    GATHER: 7
-    note: >
-      Balanced baseline — Harvesters are generalists physiologically.
-      Their specialization comes from phenotype organs, not raw stat skew.
-      MAGICCAP 10 = conditional caster access (phenotype-specific biological
-      "casting" is not traditional mana-based magic — it's organ secretion,
-      pollen release, and bioluminescent emission).
-
-# ============================================================================
-# SECTION 2: CORE MECHANIC
-# ============================================================================
-
-core_mechanic:
-  name: PHENOTYPE
-  principle: >
-    PHENOTYPE determines gameplay expression within one class. Three bodies,
-    three completely different combat loops, one strategic identity: "I change
-    the map before/during/after combat to gain advantage."
-
-  shared_foundation:
-    description: >
-      All Colony phenotypes share the core identity of MAP MANIPULATION. They
-      don't fight enemies directly as their primary loop — they change the
-      room's geometry, visibility, or traversal properties, then capitalize
-      on those changes. The map becomes their weapon, their defense, and their
-      contribution to the party.
-    self_sufficiency: >
-      Every phenotype must be able to fend for itself in solo play. Base tier
-      = accessible, every Harvester can fight. Self-sufficiency comes through
-      INFRASTRUCTURE — the Builder's walls protect them, the Flutter's clouds
-      debuff pursuers, the Nightfly's darkness hides them. Not raw combat
-      stats, but environmental advantage.
-
-  phenotype_expressions:
-
-    builder:
-      fantasy: "The Engineer — territory control through construction"
-      loop: >
-        Create physical structures → fight within/behind them → repair when
-        damaged → expand fortification as fight continues. The longer the
-        fight lasts, the MORE advantaged the Builder becomes (opposite of
-        most classes that deplete resources over time).
-      biological_basis: >
-        Reinforced forelimbs for rapid construction. Mandibular glands secrete
-        fast-hardening resin (chitin-calcium composite). Thorax cavity stores
-        pre-mixed construction material. Antennae detect structural stress
-        for targeted repair.
-      map_change: >
-        ADDS barriers, BLOCKS paths, CREATES cover, RAISES elevation.
-        After a Builder fights in a room, the room has MORE geometry than
-        when they arrived.
-      combat_expression:
-        primary: Area denial through construction
-        secondary: Repair and fortification maintenance
-        damage_model: >
-          Moderate direct damage. Builder fights by forcing enemies into
-          killzones created by barriers, not by raw DPS output. Enemies
-          funnel into chokepoints where Builder's attacks hit reliably.
-        defense_model: >
-          Barriers absorb incoming damage. Builder repairs them between
-          enemy attack waves. Self-sustaining through infrastructure upkeep.
-
-    flutter:
-      fantasy: "The Skirmisher — mobility + area debuff delivery"
-      loop: >
-        Take flight → identify engagement zone → drop pollen clouds / seed
-        bombs from above → reposition → enemies debuffed/slowed walk through
-        hazards → Flutter capitalizes with dive attacks on weakened targets.
-      biological_basis: >
-        Functional wings (4-wing insect configuration, rapid beat frequency).
-        Pollen sacs in abdomen produce CC-inducing spore clouds. Seed glands
-        generate hardened projectile seeds. Lighter exoskeleton than Builder
-        (trade armor for flight).
-      map_change: >
-        ADDS hazard zones, CREATES no-go areas through debuff clouds,
-        REMOVES safe paths by contaminating them with pollen. After a Flutter
-        fights in a room, the AIRSPACE is dangerous and ground paths are
-        debuff-laden.
-      combat_expression:
-        primary: Aerial pollen CC delivery + seed-drop damage
-        secondary: Scouting and information gathering from altitude
-        damage_model: >
-          Moderate-to-good DPS through seed projectiles and dive attacks.
-          Damage is reliable because enemies are pre-debuffed by pollen
-          (slowed targets are easier to hit, CC'd targets can't dodge).
-        defense_model: >
-          Evasion through flight. Flutter is hard to pin down — stays airborne,
-          repositions constantly. But if grounded (wings damaged, CC'd while
-          airborne), extremely vulnerable. Lighter exoskeleton = less tankiness.
-
-    nightfly:
-      fantasy: "The Ambush Predator — vision manipulation and information control"
-      loop: >
-        Deploy bioluminescent lures → create darkness zones → navigate the
-        darkness (sees through own darkness) → enemies drawn to lures stumble
-        into traps → Nightfly strikes from concealment with ambush damage bonus.
-      biological_basis: >
-        Bioluminescent organs (thorax-mounted, controllable intensity/color).
-        Dark-adapted compound eyes (functional in zero-light conditions).
-        Chemical glands produce darkness-inducing pheromone mist (absorbs light).
-        Sensory antennae detect vibration/heat through darkness (doesn't need
-        sight to locate targets).
-      map_change: >
-        REMOVES visibility, ADDS deceptive light sources, CREATES information
-        asymmetry. After a Nightfly fights in a room, the room is DARKER —
-        visibility is reduced for everyone except the Nightfly, and light
-        sources cannot be trusted.
-      combat_expression:
-        primary: Vision denial + lure-based enemy manipulation + ambush damage
-        secondary: Trap deployment and information warfare
-        damage_model: >
-          High burst from ambush (first strike from concealment bonuses).
-          Lower sustained DPS in open combat. Nightfly NEEDS darkness setup
-          to reach full damage potential. In well-lit, open areas with no
-          setup time, damage output drops significantly.
-        defense_model: >
-          Invisibility through darkness. Enemies can't target what they can't
-          see. But Nightfly darkness is not true stealth — it's environmental.
-          Enemies with dark vision, tremorsense, or who destroy the darkness
-          source strip Nightfly's defense entirely.
-
-# ============================================================================
-# SECTION 3: TRIGGER SYSTEM (Per Phenotype)
-# ============================================================================
-
-trigger_system:
-  design_philosophy: >
-    Colony triggers are ENVIRONMENTAL, not enemy-state-based. Other classes
-    trigger off enemy HP thresholds (Reaver), enemy actions (Siren), or
-    personal resource bars (Elementalist). Colony triggers off MAP STATE —
-    what structures exist, what zones are active, what positions are occupied.
-    The Colony reads the ROOM, not the enemy.
-
-  builder_triggers:
-    - trigger: structure_damaged
-      description: >
-        When an active construction takes damage, Builder gains Repair Impulse —
-        next action can be instant-repair (no GCD cost) OR retaliatory strike
-        at the attacker (damage bonus from "defending territory").
-      decision: "Repair the wall or punish the enemy who hit it?"
-
-    - trigger: enemy_enters_killzone
-      description: >
-        When an enemy enters a space flanked by 2+ Builder constructions,
-        Builder gains Fortification Bonus — attacks in that zone deal bonus
-        damage and have increased accuracy (funneled target, nowhere to dodge).
-      decision: "Attack now for bonus damage, or wait for more enemies to enter the killzone?"
-
-    - trigger: construction_count_threshold
-      description: >
-        At 3+ active constructions, Builder enters Entrenched state — passive
-        damage reduction while within 5m of any construction. At 5+, gains
-        Citadel state — constructions regenerate HP slowly without manual repair.
-      decision: "Spend time building more (delayed payoff) or fight now with partial fortification?"
-
-    - trigger: ally_behind_construction
-      description: >
-        When an ally takes cover behind a Builder construction, that ally gains
-        a brief defensive bonus. Builder gains Colony Instinct — bonus action
-        speed for next construction placement (reward for protecting colony members).
-      decision: "Build where allies need cover, or build to funnel enemies?"
-
-  flutter_triggers:
-    - trigger: pollen_cloud_contact
-      description: >
-        When an enemy enters a pollen cloud, Flutter gains Pollination Mark on
-        that target — Flutter's seed attacks against marked targets deal bonus
-        damage and have tracking (seeds home slightly toward pollen-coated targets).
-      decision: "Use the mark for personal DPS, or let the cloud do CC work for allies?"
-
-    - trigger: altitude_advantage
-      description: >
-        While airborne AND above enemies by 3+ meters, Flutter gains Aerial
-        Superiority — seed-drop attacks gain AoE splash, pollen deployment
-        covers wider area. Maintained only while above the engagement.
-      decision: "Stay high for AoE advantage, or dive down for single-target burst?"
-
-    - trigger: enemy_slowed_by_pollen
-      description: >
-        When an enemy is at -30% speed or worse from pollen effects, Flutter
-        gains Harvest Window — can execute a Dive Strike (descend + melee hit
-        + immediate re-ascend) with bonus damage.
-      decision: "Dive for the burst kill, or maintain altitude safety and let DoT finish them?"
-
-    - trigger: multiple_clouds_active
-      description: >
-        At 3+ pollen clouds simultaneously active, Flutter enters Bloom State —
-        clouds link together, creating connected hazard corridors. Enemies
-        moving between clouds take continuous tick damage from ambient pollen.
-      decision: "Place clouds for individual CC, or position them for corridor denial?"
-
-  nightfly_triggers:
-    - trigger: enemy_approaches_lure
-      description: >
-        When an enemy paths toward a bioluminescent lure, Nightfly gains
-        Predator's Patience — damage bonus scaling with how long they wait
-        before striking (patience rewarded). Bonus caps at 3s of waiting.
-      decision: "Strike immediately for small bonus, or wait for maximum ambush damage?"
-
-    - trigger: enemy_enters_darkness
-      description: >
-        When an enemy enters a Nightfly darkness zone, they gain Disoriented
-        (accuracy reduction, cannot target Nightfly specifically). Nightfly
-        gains Shadow Step — free repositioning within the darkness zone
-        (teleport to any point inside without GCD cost).
-      decision: "Reposition for better ambush angle, or strike from current position?"
-
-    - trigger: lure_destroyed
-      description: >
-        When an enemy destroys a bioluminescent lure (attacks the light source),
-        the lure detonates — brief flash blinds nearby enemies (2s). Nightfly
-        gains Flash Opportunity — next attack is guaranteed critical (backstab
-        equivalent, enemies are facing the flash, not the Nightfly).
-      decision: "Place lures to attract, or place lures as sacrificial flash traps?"
-
-    - trigger: complete_darkness_achieved
-      description: >
-        When all light sources in a 10m radius are suppressed (either by
-        Nightfly darkness zones or environmental destruction), Nightfly
-        enters Apex Predator state — movement speed +30%, all attacks are
-        ambush attacks (bonus damage), completely undetectable by SR1-2 enemies.
-      decision: "Invest time suppressing all light for Apex state, or use partial darkness for quicker setups?"
-
-# ============================================================================
-# SECTION 4: ABILITIES
-# ============================================================================
-
-abilities:
-  total_count: 16
-  distribution:
-    shared: 5
-    builder_exclusive: 4
-    flutter_exclusive: 4
-    nightfly_exclusive: 3
-    # Total: 5 + 4 + 4 + 3 = 16
-
-  shared_abilities:
-    - name: Colony Sense
-      phenotype_availability: [Builder, Flutter, Nightfly]
-      trigger_condition: "Always active (passive)"
-      effect: >
-        Detect allied Harvesters within 30m regardless of LoS. See outline of
-        other Harvesters' constructions/clouds/darkness through walls. Gain
-        +10% action speed when within 10m of another Harvester of a DIFFERENT
-        phenotype.
-      cc_stage: null
-      item_replaced: "Hexcage Lantern (partial — detection function only)"
-      decision_created: >
-        Position near different-phenotype Harvesters for speed bonus, or spread
-        out for wider map coverage?
-
-    - name: Chitin Shell
-      phenotype_availability: [Builder, Flutter, Nightfly]
-      trigger_condition: "Activated (defensive cooldown)"
-      effect: >
-        Harden exoskeleton for 4s — 50% damage reduction, cannot use offensive
-        abilities during shell. All phenotypes have a basic exoskeleton layer.
-        Breaks early if player uses any offensive action. Cooldown: 25s.
-      cc_stage: null
-      item_replaced: "Ironhide Tincture (similar trade: defense for offense loss)"
-      decision_created: >
-        Shell now for survival, or risk taking the hit to maintain offensive
-        pressure? Breaking shell early wastes the cooldown.
-
-    - name: Mandible Strike
-      phenotype_availability: [Builder, Flutter, Nightfly]
-      trigger_condition: "Melee range, GCD action"
-      effect: >
-        Basic melee attack using mandibles. Moderate damage. All Harvesters have
-        functional mandibles regardless of phenotype. If target is affected by
-        ANY Colony environmental effect (inside construction killzone, pollen
-        cloud, or darkness zone), damage +25%.
-      cc_stage: null
-      item_replaced: "No direct replacement — baseline combat capability"
-      decision_created: >
-        Move into melee range for Mandible Strike bonus damage (risky) or stay
-        at range with phenotype-specific tools (safer but less personal DPS)?
-
-    - name: Pheromone Signal
-      phenotype_availability: [Builder, Flutter, Nightfly]
-      trigger_condition: "Activated, 20s cooldown"
-      effect: >
-        Emit a pheromone burst that marks a 3m area for 10s. Allied Harvesters
-        who see the mark gain +15% effectiveness on their next phenotype ability
-        used within the marked area. Non-Harvester allies gain minor speed boost
-        (+10%) while inside the marked area.
-      cc_stage: null
-      item_replaced: "Pheromone Tag (partial — attention manipulation for allies, not enemies)"
-      decision_created: >
-        Mark where YOU plan to build/deploy, or mark where your ally Harvester
-        should act? Communication tool — wrong marks waste the cooldown.
-
-    - name: Exoskeletal Regrowth
-      phenotype_availability: [Builder, Flutter, Nightfly]
-      trigger_condition: "Below 40% HP, 60s cooldown"
-      effect: >
-        Shed damaged exoskeleton plates and regrow fresh ones over 5s. Restores
-        30% max HP total (6% per second). Movement speed -20% during regrowth.
-        Interruptible — taking damage above 10% max HP in one hit cancels the
-        regrowth and wastes the cooldown.
-      cc_stage: null
-      item_replaced: "Harmony Draught (slow predictable heal, single target)"
-      decision_created: >
-        Heal now while exposed (needs cover/construction/darkness to be safe),
-        or keep fighting at low HP and rely on environmental protection?
-
-  builder_exclusive_abilities:
-    - name: Resin Wall
-      phenotype_availability: [Builder]
-      trigger_condition: "GCD action, resource: Resin (see resource section)"
-      effect: >
-        Secrete a barrier (3m wide, 2m tall) from mandibular glands. Barrier
-        hardens in 0.5s (near-instant vs Barricade Foam's 2s). Blocks movement
-        and projectiles. HP-based (8 hits to destroy). Selectively permeable —
-        allies can pass through (colony pheromone recognition), enemies cannot.
-        Maximum 4 walls active simultaneously. Duration: permanent until destroyed.
-        Costs 20 Resin.
-      cc_stage: "Stage 1 (movement denial — blocks paths but doesn't stop attacks at range)"
-      item_replaced: "Quartzwall Capsule, Barricade Foam"
-      decision_created: >
-        Where to place the wall? Block enemy approach (defensive) or funnel
-        enemies into a killzone (offensive)? Each wall costs Resin — can't
-        spam infinitely.
-
-    - name: Structural Repair
-      phenotype_availability: [Builder]
-      trigger_condition: "Target: any damaged Builder construction within 5m"
-      effect: >
-        Channel for 1.5s — restores 50% of target construction's max HP.
-        Can be used on Resin Walls, Fortification Nodes, or allied Builder
-        constructions. Repair Impulse trigger (from structure_damaged) makes
-        this instant-cast once per trigger.
-      cc_stage: null
-      item_replaced: "No item equivalent — items are consumed, not repaired"
-      decision_created: >
-        Repair the damaged wall (maintain position) or let it fall and build
-        a new one in a better position (adapt to enemy movements)?
-
-    - name: Fortification Node
-      phenotype_availability: [Builder]
-      trigger_condition: "GCD action, 15s cooldown, costs 30 Resin"
-      effect: >
-        Deploy a hardened installation (1m radius pillar). Allies within 4m
-        of the node gain +15% damage reduction. Node has significant HP (12 hits
-        to destroy). If placed adjacent to a Resin Wall, the wall gains +50%
-        HP and the node's defensive aura extends along the wall's full length.
-        Maximum 2 nodes active.
-      cc_stage: null
-      item_replaced: "Witherfield Totem (defensive installation concept), Shield Generator"
-      decision_created: >
-        Place node for standalone defensive aura, or specifically adjacent to
-        walls for the HP + extended aura combo? Node placement commits the
-        Builder's position — nodes can't be moved.
-
-    - name: Collapse Trigger
-      phenotype_availability: [Builder]
-      trigger_condition: "Target: any Builder construction at 30%+ HP remaining"
-      effect: >
-        Deliberately collapse a construction — it explodes outward in a 4m radius,
-        dealing heavy damage to all enemies in range and applying 3s stagger
-        (enemies reset current action). The construction is destroyed.
-        Enemies that were using the construction as cover are caught in the blast.
-      cc_stage: "Stage 2 (action interruption via stagger)"
-      item_replaced: "Concussion Charge (directional blast + displacement)"
-      decision_created: >
-        Sacrifice infrastructure for burst damage. A wall that has served its
-        purpose becomes a weapon — but once collapsed, that position is no longer
-        fortified. Offensive vs defensive resource management.
-
-  flutter_exclusive_abilities:
-    - name: Pollen Veil
-      phenotype_availability: [Flutter]
-      trigger_condition: "Airborne, GCD action"
-      effect: >
-        Release pollen cloud below (4m radius on ground, persists 15s). Enemies
-        inside suffer -25% movement speed and -15% accuracy. Pollen coats enemies
-        (Pollination Mark trigger — marked for 10s after leaving cloud). Flutter
-        regenerates pollen over 8s after deployment. Maximum 3 clouds active.
-      cc_stage: "Stage 1 (slow + accuracy reduction — doesn't stop attacks)"
-      item_replaced: "Lockjaw Spore, Scatterlung Phial"
-      decision_created: >
-        Deploy cloud on enemy cluster (immediate CC value) or pre-place on a
-        path enemies will take (predictive denial)? Three clouds can create
-        corridors of denial or be spread for coverage.
-
-    - name: Seed Barrage
-      phenotype_availability: [Flutter]
-      trigger_condition: "Airborne, GCD action, targets below"
-      effect: >
-        Launch hardened seeds downward in a 2m radius area. Moderate damage per
-        seed (3 seeds per barrage). Against Pollination Marked targets, seeds
-        have slight homing (+20% accuracy) and deal +15% damage. Ground-targetable.
-      cc_stage: null
-      item_replaced: "Charcoal Pine Bundle (ranged poke from non-ranged class)"
-      decision_created: >
-        Fire at marked targets for bonus damage (requires Pollen Veil setup),
-        or fire at uncoated targets for immediate but reduced damage?
-
-    - name: Wingbeat Gust
-      phenotype_availability: [Flutter]
-      trigger_condition: "Airborne, GCD action, 12s cooldown"
-      effect: >
-        Powerful wingbeat creates a downward gust (6m cone below). Enemies in
-        cone are pushed 3m away from Flutter AND existing pollen clouds in the
-        cone expand by 1m radius for 5s. If used directly above a pollen cloud,
-        the cloud is DISPERSED into a wider area (double radius, half duration).
-      cc_stage: "Stage 1 (displacement — push, not disable)"
-      item_replaced: "Concussion Charge (push/displacement)"
-      decision_created: >
-        Use gust to push enemies INTO clouds (combo), push them AWAY for safety,
-        or disperse a cloud for wider but shorter coverage? Spatial awareness
-        determines optimal use.
-
-    - name: Dive Pollinate
-      phenotype_availability: [Flutter]
-      trigger_condition: "Airborne + Harvest Window trigger active (enemy at -30% speed)"
-      effect: >
-        Descend rapidly onto a slowed target — melee impact deals heavy damage
-        (150% of normal attack). On hit, immediately coat target in concentrated
-        pollen — Pollination Mark becomes Saturated Mark (+30% damage from ALL
-        sources for 5s, not just Flutter). Flutter automatically re-ascends
-        after strike (1s ground time).
-      cc_stage: null
-      item_replaced: "Brittlemark Chalk (vulnerability application)"
-      decision_created: >
-        Dive for personal burst + party-wide vulnerability mark (risky — 1s
-        ground time is exploitable), or stay airborne and keep seed-barraging
-        safely? Dive is the highest-value single action but has a window of danger.
-
-  nightfly_exclusive_abilities:
-    - name: Lure Beacon
-      phenotype_availability: [Nightfly]
-      trigger_condition: "GCD action, 10s cooldown per beacon"
-      effect: >
-        Deploy a bioluminescent lure at target location (15m range). Lure emits
-        attractive light — SR1-2 enemies within 8m path toward it (compulsory).
-        SR3 enemies are drawn toward it but can resist after 3s. SR4 enemies
-        recognize and destroy it immediately. Lure persists 20s or until
-        destroyed. If destroyed by enemy attack, triggers Flash detonation (2s
-        blind, 3m radius). Maximum 3 lures active.
-      cc_stage: "Stage 1 (movement manipulation — forces pathing, doesn't disable)"
-      item_replaced: "Hollowform Decoy, L.U.R.E. (Deep Rock), Alluring Skull"
-      decision_created: >
-        Place lure to ATTRACT enemies into a trap/killzone, or place it as a
-        sacrificial flash-bomb (expecting enemies to attack it)? Placement IS
-        the skill expression — wrong position wastes the beacon.
-
-    - name: Darkness Shroud
-      phenotype_availability: [Nightfly]
-      trigger_condition: "GCD action, costs 25 Luminescence (see resource section)"
-      effect: >
-        Emit pheromone mist that absorbs light in a 5m radius for 12s. All
-        non-Nightfly entities inside suffer -60% vision range (Stage 1 CC).
-        Nightfly sees normally inside own darkness. Allies with Colony Sense
-        (other Harvesters) suffer only -30% vision reduction. Extinguishes
-        torches and light sources within the zone. Maximum 2 darkness zones active.
-      cc_stage: "Stage 1 (vision reduction — enemies can still attack blindly)"
-      item_replaced: "Blindveil Powder, Numbsense Spike"
-      decision_created: >
-        Create darkness around enemies (they can't see your approach) or around
-        yourself (they can't target you at range)? Darkness placement determines
-        who benefits from the information asymmetry.
-
-    - name: Trap Lattice
-      phenotype_availability: [Nightfly]
-      trigger_condition: "GCD action, 20s cooldown, requires darkness zone or dim light"
-      effect: >
-        Deploy an invisible trap web in a 3m area (must be in existing darkness
-        zone or area with no bright light). First enemy to cross triggers: rooted
-        2s + damage over time (adhesive bioluminescent threads that burn on
-        contact). Trap is invisible to SR1-3 enemies while in darkness. SR4
-        detects and avoids. Trap persists until triggered or 30s. Maximum 2 traps.
-      cc_stage: "Stage 2 (root — can't move but can still attack/use abilities)"
-      item_replaced: "Rattletrap Mine, Webspinner Sac, Bear Trap"
-      decision_created: >
-        Place trap on the lure's approach path (combo: lure draws enemy into trap),
-        or place trap on escape route (combo: enemies fleeing darkness hit the
-        trap)? Requires predicting enemy movement.
-
-# ============================================================================
-# SECTION 5: PHENOTYPE SYSTEM
-# ============================================================================
-
-phenotype_system:
-  permanence: CHARACTER_CREATION_LOCKED
-  rationale: >
-    Phenotype is BODY TYPE. Builder has reinforced limbs and secretion glands.
-    Flutter has wings. Nightfly has bioluminescent organs. These are not swappable
-    any more than a human can swap their skeleton. Phenotype is chosen at character
-    creation and is permanent for that character.
-  
-  implications:
-    - "Players who want multiple phenotypes create multiple Harvester characters"
-    - "Each phenotype is individually simple enough for Base tier (one combat loop per body)"
-    - "The '3 classes in 1' framing is from the DESIGNER perspective, not the player's — each player experiences ONE phenotype as their class"
-    - "Rerolling phenotype is equivalent to rerolling a class in other games"
-
-  accessibility_at_base_tier:
-    description: >
-      Each individual phenotype is mechanically simple. Base tier = accessible.
-      Builder: build wall, repair wall, fight behind wall. Flutter: fly, drop
-      pollen, shoot seeds. Nightfly: place lure, create darkness, ambush.
-      The DEPTH comes from placement decisions and environmental reading,
-      not from mechanical complexity or long combo chains.
-    skill_floor: "Low — one phenotype, one loop, clear feedback"
-    skill_ceiling: "Medium-High — optimal placement, multi-structure combos, phenotype synergy in parties"
-
-  multi_harvester_party_interaction:
-    description: >
-      When multiple Harvesters of DIFFERENT phenotypes are in a party, Colony
-      Synergy emerges. This is not a bonus system that requires specific comps —
-      it's emergent from how their map modifications interact.
-    
-    synergy_examples:
-      builder_plus_flutter: >
-        Builder walls funnel enemies into corridors. Flutter drops pollen
-        clouds into those corridors. Enemies are forced through debuff zones
-        with no alternative path. Builder's killzone trigger activates more
-        often because enemies MUST enter the funnel.
-      
-      builder_plus_nightfly: >
-        Builder creates enclosed spaces. Nightfly fills them with darkness.
-        Enemies entering Builder's fortified zone are blind. Nightfly has
-        safe ambush territory created by Builder's infrastructure. Builder's
-        walls prevent enemies from fleeing the darkness.
-      
-      flutter_plus_nightfly: >
-        Flutter's pollen clouds (visible hazards) force enemies to path around
-        them — into Nightfly's darkness zones. Nightfly's lures draw enemies
-        OUT of safe (cloud-free) paths into trapped areas. Flutter marks targets
-        with pollen, Nightfly gets bonus ambush damage on coated targets
-        (pollen makes them easier to detect via scent in darkness).
-      
-      all_three: >
-        Builder creates the maze. Flutter fills corridors with hazards.
-        Nightfly removes visibility throughout. Enemies enter a dark, walled,
-        pollen-filled killzone with no escape routes, no vision, no safe
-        paths. THE ROOM IS THE WEAPON.
-
-    same_phenotype_stacking:
-      description: >
-        Multiple Builders stack differently than Builder+Flutter. Two Builders
-        create FASTER fortification (more walls, faster Entrenched/Citadel
-        thresholds) but don't create information asymmetry or debuff fields.
-        Two Flutters create overwhelming pollen coverage but lack walls to
-        funnel enemies through it. Same-phenotype parties are viable (more of
-        one thing) but mixed-phenotype parties are synergistically emergent.
-      rule: >
-        Construction limits are PER-BUILDER (each Builder can have 4 walls).
-        Two Builders = 8 walls. This scales the strategy, not just the numbers.
-
-# ============================================================================
-# SECTION 6: CC STAGE BUDGET
-# ============================================================================
-
-cc_stage_budget:
-  class_role_context: "Support class — CC through terrain/environment, not direct disable"
-  
-  primary_cc_stage: 1
-  primary_expression: >
-    Movement denial, speed reduction, vision reduction — all delivered through
-    TERRAIN/ENVIRONMENTAL effects rather than direct debuffs. Enemies are not
-    "stunned" — they're walled off, slowed by pollen, blinded by darkness.
-    Stage 1 CC applied broadly and persistently (environmental effects don't
-    have duration limits in the same way targeted debuffs do — they persist
-    as long as the structure/cloud/zone exists).
-  
-  secondary_cc_stage: 2
-  secondary_expression: >
-    Situational Stage 2 through specific ability combos: Collapse Trigger
-    (stagger/interrupt), Trap Lattice (root), Lure Beacon flash detonation
-    (brief blind on destruction). Stage 2 is never spammable — it requires
-    setup, resource expenditure, or sacrifice of infrastructure.
-  
-  stage_3_access: NONE
-  stage_3_reasoning: >
-    Colony does not provide stuns, paralysis, or complete disables. The class
-    controls WHERE enemies can go and WHAT they can see, not WHETHER they can
-    act. This is a deliberate design boundary: Colony makes enemies LESS
-    EFFECTIVE by degrading their environment, not by removing their agency.
-    Stage 3 CC is reserved for dedicated control classes (Grappler Melee
-    stance, Shaman) that sacrifice something significant to achieve it.
-  
-  cc_budget_breakdown:
-    builder:
-      stage_1: "Resin Wall (movement blocking — persistent), Fortification Node (positional)"
-      stage_2: "Collapse Trigger (stagger interrupt — sacrifices infrastructure)"
-    flutter:
-      stage_1: "Pollen Veil (slow + accuracy reduction — persistent cloud), Wingbeat Gust (push)"
-      stage_2: null
-    nightfly:
-      stage_1: "Darkness Shroud (vision reduction — persistent zone), Lure Beacon (movement manipulation)"
-      stage_2: "Trap Lattice (root — requires setup in darkness)"
-
-  persistence_advantage: >
-    Colony's CC is PERSISTENT rather than burst. A Stasis Pin freezes one enemy
-    for 3s. A Resin Wall blocks a corridor INDEFINITELY. The total CC value
-    over an encounter is high because it doesn't expire — but the INTENSITY at
-    any single moment is low (Stage 1). This makes Colony the long-fight CC
-    champion but weak in "I need this enemy disabled RIGHT NOW" emergencies.
-
-# ============================================================================
-# SECTION 7: VULNERABILITY
-# ============================================================================
-
-vulnerability:
-  core_weakness: "Squishy without infrastructure. Setup-dependent. If caught before preparation, fragile."
-  
-  shared_vulnerabilities:
-    - name: Setup Dependency
-      description: >
-        Every Colony phenotype needs TIME and SPACE to establish their map
-        modifications. In ambushes, surprise encounters, or rapid-spawn
-        scenarios where enemies engage before the Colony has built/deployed/
-        darkened, the Harvester is fighting as a mediocre combatant with no
-        environmental advantage.
-      counterplay: >
-        Enemies that engage IMMEDIATELY (fast aggro, short-distance spawns)
-        deny the Colony its preparation. Rush-down strategies hard-counter
-        all phenotypes.
-
-    - name: Infrastructure Destruction
-      description: >
-        Everything the Colony builds can be destroyed. Walls have HP. Clouds
-        dissipate. Darkness zones are temporary. Lures are destructible.
-        SR3+ enemies actively target installations. SR4 enemies prioritize
-        destroying Colony infrastructure over attacking players.
-      counterplay: >
-        Focus-firing constructions strips the Colony of its advantages
-        progressively. Unlike a stat buff that simply exists, Colony's power
-        is TARGETABLE and REMOVABLE by intelligent enemies.
-
-    - name: Raw Combat Inferiority
-      description: >
-        Without environmental support, Colony's raw DPS and survivability are
-        below-average for a Base tier class. Mandible Strike + Chitin Shell
-        are functional but not competitive with dedicated DPS or tank classes
-        in a straight fight. The Harvester body is designed for TOOL USE,
-        not brawling.
-      counterplay: >
-        Force the Colony out of prepared positions. If a Builder is displaced
-        from their walls, they're fighting at a significant deficit until they
-        can rebuild.
-
-  phenotype_specific_vulnerabilities:
-    builder:
-      - name: "TIME to Fortify"
-        description: >
-          Builder needs multiple GCDs to establish meaningful fortification.
-          A single wall takes 1 GCD. An effective killzone requires 2-3 walls
-          + positioning. Against fast-engaging enemies, Builder may only have
-          1 wall up when combat starts — insufficient for killzone triggers.
-        window: "First 3-5 GCDs of an encounter (before Entrenched state)"
-        
-      - name: "Positional Commitment"
-        description: >
-          Builder's constructions don't move. If the fight shifts to another
-          part of the room (enemies break through, reinforcements from behind),
-          the Builder's entire investment is in the WRONG PLACE. Must rebuild
-          from scratch in the new position.
-        window: "Mid-fight repositioning forced by enemy spawn changes"
-
-    flutter:
-      - name: "Exposed While Airborne"
-        description: >
-          Flight provides evasion from melee but EXPOSES Flutter to ranged
-          attacks. Airborne = no cover, no walls to hide behind, visible
-          from all angles. Anti-air enemies (ranged SR3+, flying enemies)
-          threaten Flutter in its "safe" state. Flutter's lighter exoskeleton
-          means ranged hits hurt MORE than they would against a Builder.
-        window: "Always while airborne — Flutter trades ground-safety for air-mobility"
-        
-      - name: "Grounding = Death Sentence"
-        description: >
-          If Flutter's wings are damaged or it's hit by a grounding effect
-          while airborne, it falls. On the ground, Flutter has the worst
-          survivability of all three phenotypes — lightest exoskeleton, no
-          construction defense, pollen sacs are short-range ground deployments
-          (designed for aerial release). A grounded Flutter is a sitting duck.
-        window: "Any time wings are disabled or enemy has anti-air CC"
-
-    nightfly:
-      - name: "Enemy Pathing Cooperation Required"
-        description: >
-          Traps only work if enemies WALK INTO THEM. Lures only work if enemies
-          PATH TOWARD THEM. Against enemies that don't move (stationary ranged),
-          enemies immune to lure compulsion (SR4), or enemies with alternate
-          pathing (flying, burrowing, teleporting), Nightfly's entire setup
-          may go untriggered.
-        window: "Against non-pathing enemies, flying enemies, teleporters"
-        
-      - name: "Light Counters Everything"
-        description: >
-          Nightfly's power is darkness. Any ability, item, or environmental
-          feature that produces bright light in Nightfly's darkness zone
-          NULLIFIES the darkness (at minimum disrupts it, at maximum destroys
-          the zone entirely). Parties that bring torches, enemies with fire
-          attacks, or well-lit environments all reduce Nightfly's effectiveness
-          before combat even begins.
-        window: "Brightly lit environments, fire-using enemies, torch items"
-
-      - name: "Setup Investment + Single-Trigger"
-        description: >
-          Trap Lattice takes a GCD to deploy and only triggers ONCE. If the
-          enemy that triggers it is a weak add rather than the priority target,
-          the trap is wasted. Lure placement + darkness creation + trap
-          positioning = 3+ GCDs of setup for one ambush. If the ambush kills
-          a minion instead of the boss, the investment is poorly spent.
-        window: "High-priority-target scenarios where trap triggers on wrong enemy"
-
-# ============================================================================
-# SECTION 8: ITEM COMPLEMENTARITY
-# ============================================================================
-
-item_complementarity:
-  design_principle: >
-    Colony REPLACES construction/fortification, CC cloud, and lure/trap
-    consumable categories through biological capability. But Colony also
-    BENEFITS from items that compensate for phenotype-specific vulnerabilities
-    or accelerate setup.
-
-  items_colony_replaces:
-    builder:
-      - item: Quartzwall Capsule
-        why_class_is_better: "Unlimited walls (resin-gated, not item-gated), ally-permeable, repairable, permanent duration"
-      - item: Barricade Foam
-        why_class_is_better: "0.5s harden (vs 2s), higher HP, permanent, repairable"
-      - item: Thornveil Seed
-        why_class_is_better: "Non-combustible, instant placement, repairable, no growth time"
-      - item: Shield Generator (partial)
-        why_class_is_better: "Fortification Node provides persistent defensive aura without bubble limitations"
-    flutter:
-      - item: Lockjaw Spore
-        why_class_is_better: "Unlimited pollen (regenerating sacs), mobile deployment (aerial), variable area"
-      - item: Scatterlung Phial
-        why_class_is_better: "Pollen Veil does slow AND accuracy reduction in one cloud, aerial delivery"
-      - item: Springboard Disc
-        why_class_is_better: "Flutter HAS WINGS — doesn't need an installation for vertical mobility"
-    nightfly:
-      - item: Hollowform Decoy
-        why_class_is_better: "Lure Beacons are reusable (bioluminescent organs recharge), have flash-detonation secondary, compel pathing not just aggro"
-      - item: Blindveil Powder
-        why_class_is_better: "Darkness Shroud is selective (Nightfly sees through own darkness), larger area, longer duration, extinguishes light sources"
-      - item: Rattletrap Mine
-        why_class_is_better: "Trap Lattice is invisible in darkness, redeployable, roots instead of just slowing"
-
-  items_that_complement_colony:
-    builder:
-      - item: Flashstep Cartridge
-        reason: "Emergency escape when positioned behind walls that get destroyed — Builder needs mobility it lacks naturally"
-      - item: Conductance Gel
-        reason: "Apply vulnerability to enemies funneled into killzones — amplifies Builder's damage in prepared positions"
-    flutter:
-      - item: Stoneskin Scroll
-        reason: "Emergency survivability if grounded — Flutter's biggest vulnerability is ground time"
-      - item: Berserker's Draught
-        reason: "Amplify Dive Pollinate burst damage during the Harvest Window — maximize the risky dive payoff"
-    nightfly:
-      - item: Sycophant Incense
-        reason: "Additional pathing manipulation stacks with Lure Beacons — funnel enemies into traps from multiple angles"
-      - item: Fogmind Censer
-        reason: "Reduce enemy SR by one rank — makes lures compulsory for SR3 enemies (treats them as SR2 for lure resistance)"
-
-  colony_items_that_help_allies:
-    description: >
-      Colony's map modifications benefit the ENTIRE party, not just the Colony
-      player. Builder walls provide cover for ranged allies. Flutter pollen
-      slows enemies chasing the healer. Nightfly darkness hides the entire
-      party (reduced effectiveness for non-Nightflies, but still significant).
-      The party doesn't need to bring as many defensive/CC items because Colony's
-      biological infrastructure replaces them persistently.
-    
-    party_item_budget_savings:
-      - "Ranged DPS: fewer escape items needed (Builder walls block enemy advance)"
-      - "Healer: fewer defensive items (Flutter pollen slows enemies targeting backline)"  
-      - "Frontline: fewer CC items (Nightfly traps root enemies, Flutter slows them)"
-      - "Everyone: fewer scouting items (Flutter aerial recon, Nightfly lure-detection)"
-
-# ============================================================================
-# SECTION 9: HIT/MISS ANALYSIS
-# ============================================================================
-
-hit_miss_analysis:
-  hits:
-    - aspect: "Map modification as class identity"
-      why_it_works: >
-        No other class CHANGES THE ROOM. Siegebreaker walks through walls.
-        Elementalist transmutes terrain temporarily. Colony BUILDS new terrain
-        that persists. This is a unique design space that no other class
-        occupies or could occupy without biological construction capability.
-      validation: "Unique strategic niche with no overlap"
-
-    - aspect: "Biological regeneration = no consumable drain"
-      why_it_works: >
-        Builder's resin glands refill. Flutter's pollen sacs regenerate.
-        Nightfly's bioluminescent organs recharge. Over a long dungeon, Colony
-        never runs out of its core capability. This solves the attrition
-        problem perfectly — the body IS the inventory.
-      validation: "Directly addresses 'extended content item budget' problem from class_item_baselines"
-
-    - aspect: "Each phenotype is individually simple"
-      why_it_works: >
-        Base tier requires accessibility. Builder: build, repair, fight behind
-        walls. Flutter: fly, drop clouds, shoot seeds. Nightfly: lure, darken,
-        ambush. Each loop has 3-4 actions. The PLACEMENT decisions add depth
-        without adding mechanical complexity. A new player understands their
-        phenotype immediately.
-      validation: "Base tier accessibility maintained despite 3-phenotype system"
-
-    - aspect: "Phenotype synergy is emergent, not scripted"
-      why_it_works: >
-        No ability says "if allied Flutter has pollen cloud, gain X." The synergy
-        comes from PHYSICS — walls funnel enemies into clouds naturally, darkness
-        hides traps naturally. Players discover combos through spatial reasoning,
-        not through reading tooltip synergy lists. This is discoverable, not mandatory.
-      validation: "Chain reaction design principle from Game_Juice_Taste_Design"
-
-    - aspect: "Vulnerability is clear and exploitable"
-      why_it_works: >
-        The Colony's weakness (setup time, infrastructure destruction, raw combat
-        inferiority) is instantly understandable by enemies and players alike.
-        Counter-strategy is obvious: engage before they're ready, destroy their
-        stuff, force them to fight without infrastructure. Clean design.
-      validation: "Every strength has a corresponding weakness — no dominant strategy"
-
-  misses:
-    - aspect: "Nightfly lure compulsion may feel like Siren overlap"
-      risk: >
-        Siren COMMANDS enemies. Nightfly LURES enemies. The distinction (command
-        = forced specific actions vs. lure = attracted pathing toward light)
-        must remain mechanically crisp. If Lure Beacon's compulsion feels too
-        close to Siren's behavioral override, one needs redesign.
-      mitigation: >
-        Lure compulsion is PASSIVE and PATHING-ONLY (enemies walk toward light,
-        that's it). Siren command is ACTIVE and ACTION-SPECIFIC (enemy must
-        attack ally X with ability Y). The difference is specificity and control.
-        Lure is "come here." Siren is "do this specific thing." Keep these
-        distinct in implementation.
-
-    - aspect: "Builder in open-field encounters has reduced value"
-      risk: >
-        If encounters happen in wide-open fields with no chokepoints, Builder's
-        walls are less impactful (enemies go around). Builder may feel underpowered
-        in certain map geometries that favor Flutter/Nightfly.
-      mitigation: >
-        Builder CREATES chokepoints even in open fields — that's the point. Two
-        walls angled toward each other create a funnel in open space. Map design
-        should include SOME rooms where Builder excels (corridors, defensive
-        positions) but Builder must also function (less optimally) in open areas
-        by manufacturing their own geometry.
-
-    - aspect: "Flutter altitude may create camera/UI problems"
-      risk: >
-        A character that spends most of combat airborne in a co-op game may
-        cause camera issues, party cohesion problems, and "where is our Flutter?"
-        confusion in dense encounters.
-      mitigation: >
-        Flutter altitude is MODEST — insect-scale flight (3-5m above ground),
-        not Strix-level high altitude. Camera stays on the ground plane with
-        Flutter visible as slightly elevated. Not a bird-of-prey circling at
-        30m — a large dragonfly hovering at rooftop height.
-
-    - aspect: "Nightfly may degenerate in brightly-lit environments"
-      risk: >
-        If level design includes many well-lit areas, Nightfly's Darkness Shroud
-        is spent suppressing AMBIENT light rather than creating tactical darkness.
-        Nightfly becomes a "fight the environment to reach baseline" class rather
-        than "build advantages on top of neutral starting points."
-      mitigation: >
-        Procgen levels should include lighting variance. Dark areas are Nightfly's
-        NATIVE ADVANTAGE (Apex Predator state achievable without resource cost).
-        Bright areas require resource investment but are still functional. Level
-        design must not make all areas uniformly bright.
-
-# ============================================================================
-# SECTION 10: ANTI-PATTERNS
-# ============================================================================
-
-anti_patterns:
-  - pattern: "Infinite Construction Spam"
-    description: >
-      If Builder can place unlimited walls with no resource gate, they trivialize
-      every encounter by walling off all enemies permanently. The room becomes
-      a prison with no gameplay.
-    prevention: >
-      Resin resource system (Builder generates Resin passively at ~5/s, walls cost
-      20, nodes cost 30). Maximum active construction count (4 walls, 2 nodes).
-      Constructions have HP and can be destroyed. Builder must MAINTAIN, not just
-      build-and-forget.
-    resource_system:
-      name: Resin
-      generation: "5 per second passively (biological secretion)"
-      maximum_pool: 100
-      wall_cost: 20
-      node_cost: 30
-      implication: >
-        At combat start: 100 Resin = 5 walls OR 3 walls + 1 node. Then 1 new
-        wall every 4s from passive regen. This creates a BUILD CURVE — Builder
-        starts with a burst of construction, then maintains/expands at a
-        sustainable rate. Not infinite, but never "out" permanently.
-
-  - pattern: "Flutter Perma-Airborne No Counterplay"
-    description: >
-      If Flutter can stay airborne indefinitely with no cost or threat, ground
-      enemies can never interact with them. Flutter becomes an invulnerable
-      turret that drops pollen and seeds risk-free.
-    prevention: >
-      Flight stamina system. Flutter has a Wingbeat meter (depletes while airborne,
-      regenerates on ground). Landing is required periodically (5-8s airtime before
-      forced landing for 2-3s rest). Anti-air attacks exist (ranged enemies, flying
-      enemies, some abilities target airborne specifically). Grounding effects
-      exist and are DANGEROUS for Flutter specifically.
-    resource_system:
-      name: Wingbeat
-      maximum: 100
-      depletion_rate: "~15/s while airborne (6-7s maximum airtime)"
-      regeneration_rate: "~35/s while grounded (3s to full from empty)"
-      implication: >
-        Flutter alternates: 6s airborne (deploy clouds, shoot seeds) → 3s grounded
-        (regenerate wings, melee if needed, reposition). This rhythm creates
-        vulnerability windows that enemies can exploit. Flutter is NOT permanently
-        safe — it has predictable ground time.
-
-  - pattern: "Nightfly Permanent Invisibility"
-    description: >
-      If Nightfly can maintain permanent darkness with no cost, they become
-      effectively invisible forever — no enemy can target them, all attacks
-      are ambush-bonused, there's no counterplay.
-    prevention: >
-      Luminescence resource (Nightfly's bioluminescent organs have a "fuel"
-      that depletes when creating darkness and regenerates in light or over time).
-      Darkness zones have durations (12s). Maximum 2 zones active. Light sources
-      counter darkness (fire attacks, torches, certain enemy abilities DISPEL
-      darkness zones). SR3+ enemies have tremorsense or other non-visual detection
-      that partially bypasses darkness.
-    resource_system:
-      name: Luminescence
-      maximum: 100
-      darkness_cost: 25
-      regeneration: "8/s passively, 15/s when in bright light (absorbing light to recharge)"
-      implication: >
-        Nightfly can deploy 4 darkness zones from full pool (100/25 = 4), but
-        maximum 2 active simultaneously. After deploying 2, must wait for regen
-        before next. The "recharges faster in light" mechanic creates an
-        interesting tension: Nightfly NEEDS light to power their darkness
-        production. Pure darkness environment = slower recharge. Bright
-        environment = faster recharge but harder to maintain darkness against
-        ambient light. There's a sweet spot.
-
-  - pattern: "2-Minute Burst Cycle Disguised as Construction"
-    description: >
-      If Builder's optimal play is "build for 90 seconds, then trigger Collapse
-      on all structures simultaneously for mega-burst," Colony becomes a
-      2-minute burst class with extra steps. This violates the anti-burst-cycle
-      design principle.
-    prevention: >
-      Collapse Trigger is single-target (one construction per use), has a cooldown
-      (15s), and DESTROYS the collapsed structure. Collapsing all structures
-      simultaneously is impossible. The incentive is to MAINTAIN infrastructure
-      for persistent value, with Collapse as a situational sacrifice (one wall
-      becomes a bomb) — not as the accumulated payoff.
-    validation: >
-      Builder's DPS curve should be FLAT-TO-INCREASING over time (more structures
-      = more killzone damage bonuses = more consistent DPS), not accumulate-then-
-      burst. Collapse is a tactical tool, not a rotation capstone.
-
-  - pattern: "Colony Makes All Other CC Classes Redundant"
-    description: >
-      If Colony's persistent Stage 1 CC (walls, clouds, darkness) is so
-      effective that enemies never reach the party, why bring a Shaman for
-      targeted debuffs or a Grappler for hard CC?
-    prevention: >
-      Colony's CC is ENVIRONMENTAL (affects areas, not targets). It doesn't
-      reduce enemy damage output, doesn't silence abilities, doesn't disable
-      actions. An enemy behind a Builder wall is BLOCKED but still casting
-      ranged attacks. An enemy in pollen is SLOWED but still hitting whoever
-      it can reach. An enemy in darkness is BLINDED but still flailing and
-      dealing damage to anything it contacts. Colony controls WHERE enemies are,
-      not WHAT they can do. Shaman controls what they can do. Grappler disables
-      them entirely. Different CC axes, not competing solutions.
-
-  - pattern: "Phenotype Choice Is a Trap (One Is Always Best)"
-    description: >
-      If one phenotype is universally superior (e.g., Builder always the best
-      because walls are always useful), the 3-phenotype system is decorative
-      and players never pick the other two.
-    prevention: >
-      Map variance is the key. Different map geometries favor different phenotypes:
-      tight corridors favor Builder (natural chokepoints to wall off). Open areas
-      favor Flutter (aerial advantage, wide pollen coverage). Dark/indoor areas
-      favor Nightfly (less ambient light to fight against). Procgen level design
-      MUST include variety in these dimensions. No single phenotype dominates
-      ALL map types.
-
-# ============================================================================
-# SECTION 11: OPEN QUESTIONS
-# ============================================================================
-
-open_questions:
-  high_priority:
-    - question: "How does Builder's Resin Wall interact with SR4 enemy prioritization?"
-      context: >
-        SR4 enemies prioritize destroying installations. If Builder's walls are
-        installations, SR4 enemies tear them down immediately. Does this make
-        Builder useless at SR4, or does the "repair faster than they destroy"
-        gameplay create an engaging tug-of-war?
-      possible_answers:
-        - "SR4 enemies destroy walls but Builder repairs are instant when trigger-buffed — creates action-economy battle"
-        - "SR4 content requires Builder to use walls as SACRIFICE (Collapse Trigger) rather than persistent defense"
-        - "Advanced Builder abilities (not in Base tier) provide indestructible short-duration constructions"
-
-    - question: "Does Flutter's aerial state interact with Strix (Featherin DPS) in confusing ways?"
-      context: >
-        Both Flutter and Strix use flight. Flutter is a support/skirmisher at
-        Base tier, Strix is a dive-bomber DPS at Experienced tier. Do they step
-        on each other's design space?
-      possible_answers:
-        - "Flutter = hovering insect (low altitude, persistent), Strix = soaring raptor (high altitude, dive-commit). Different flight models entirely."
-        - "Flutter's flight is LATERAL movement (hover, strafe, reposition). Strix's flight is VERTICAL movement (gain altitude, dive). Orthogonal."
-        - "Mechanical distinction: Flutter has stamina-limited hover. Strix has unlimited flight but must COMMIT to dive. Different risk profiles."
-
-    - question: "How does Nightfly's darkness interact with Shaman's Awareness Reduction?"
-      context: >
-        Shaman's Fogmind Censer reduces enemy SR by one rank. Nightfly's darkness
-        reduces enemy vision. If stacked, do enemies become completely helpless?
-        Is Nightfly+Shaman too powerful together?
-      possible_answers:
-        - "Darkness affects vision RANGE. SR reduction affects decision QUALITY. Different axes — stacking is strong but not broken."
-        - "Diminishing returns on combined vision/awareness reduction above a threshold"
-        - "Design principle 25 (three axes of impairment) explicitly permits stacking — it's intended to be strong when two specialists coordinate"
-
-    - question: "What is the Harvester's GATHER 7 actual mechanical interaction with combat?"
-      context: >
-        GATHER is racial/economic and separate from combat class. But in a procgen
-        dungeon with gatherable resources (Design Principle: Resupply Pods /
-        terrain interaction), does GATHER 7 give Colony a mid-dungeon advantage
-        in resource acquisition that affects combat indirectly?
-      possible_answers:
-        - "GATHER determines quantity/quality of materials found at resource nodes — better materials = better craftable consumables mid-run"
-        - "GATHER is purely economic (post-run rewards) and has zero combat/dungeon interaction"
-        - "GATHER enables Colony to find rare resource nodes that other races miss — information advantage, not combat advantage"
-
-  medium_priority:
-    - question: "Can Builder construct on walls/ceilings, or only on floor?"
-      context: >
-        If construction is floor-only, Builder's map modification is 2D (barriers
-        on a plane). If Builder can construct on walls or ceilings, possibilities
-        expand dramatically (ceiling drops, wall-mounted platforms, overhead cover).
-      design_implication: "Floor-only is simpler and more readable. Multi-surface is more versatile but harder to communicate."
-
-    - question: "Does Flutter's Pollination Mark interact with non-Colony fire abilities?"
-      context: >
-        Pollen is traditionally flammable. If Pyrien fire attacks ignite pollen
-        clouds, this creates a Colony+Pyrien chain reaction. Is this intended?
-      design_implication: "Chain reactions are explicitly desired (Layer 3). Pollen flammability should be a DISCOVERABLE synergy, not mandatory."
-
-    - question: "How does Nightfly's flash-detonation interact with allied Nightflies?"
-      context: >
-        If two Nightflies are present and one's lure detonates, does the flash
-        disrupt the OTHER Nightfly's darkness zone? Colony Sense provides partial
-        protection (-30% vision reduction instead of -60%), but flash is different
-        from sustained darkness.
-      design_implication: "Friendly fire from flash should NOT blind allied Nightflies — Colony pheromone recognition should prevent it."
-
-    - question: "What happens to Builder constructions when the Builder disconnects/dies?"
-      context: >
-        In co-op, if the Builder player disconnects or is incapacitated, do their
-        constructions persist? Decay? Become indestructible? Become un-repairable?
-      design_implication: "Constructions should persist but become unrepairable — they slowly decay without the Builder's pheromone maintenance signal."
-
-    - question: "Is there a 'construction memory' that lets Builder rebuild destroyed walls faster?"
-      context: >
-        If a wall is destroyed, does rebuilding in the same location cost less
-        Resin or build faster? This would reward positional commitment and make
-        Builder's vulnerability (wall destruction) less punishing.
-      design_implication: "Possible — 'foundation remnants' that reduce rebuild cost by 30% for 10s after destruction. Rewards same-position rebuilding."
-
-  low_priority:
-    - question: "Can other races interact with Colony constructions?"
-      context: >
-        Can a non-Harvester ally stand on a Builder's elevated platform? Can they
-        hide in Nightfly's darkness (with reduced effectiveness)? Can they benefit
-        from Flutter's pollen marks?
-      current_answer: >
-        Yes — Colony's map modifications affect EVERYONE. Allies pass through walls
-        (friendly pheromone recognition). All allies get cover from constructions.
-        Darkness affects allies at -30% (Colony Sense mitigation for Harvesters,
-        -60% for non-Harvesters). Pollen affects allies' accuracy too (but at
-        reduced rate? Or is pollen species-selective?).
-
-    - question: "Phenotype cosmetic differentiation — how visually distinct are the three?"
-      context: >
-        If all Harvesters look similar, players can't tell phenotypes apart in
-        combat. Party composition planning requires visual identification.
-      current_answer: >
-        Builder: heavy, bulky limbs, visible mandibular glands, resin-stained
-        forelimbs. Flutter: wings (obvious), lighter frame, visible pollen sacs.
-        Nightfly: bioluminescent patterns visible on thorax, larger compound eyes,
-        darker coloration. Phenotype should be instantly readable from silhouette.
-
-    - question: "Does the Colony class have ANY traditional casting or is everything organ-based?"
-      context: >
-        MAGICCAP 10 = conditional caster access. But Colony abilities are all
-        biological (secretion, pollen release, bioluminescence). Is there ANY
-        mana cost in the Colony kit, or is everything resource-system-based
-        (Resin, Wingbeat, Luminescence)?
-      current_answer: >
-        No mana. All Colony resources are biological: Resin (Builder), Wingbeat
-        (Flutter), Luminescence (Nightfly). The MAGICCAP 10 means Harvesters
-        COULD access conditional caster classes (if any existed for them), but
-        Colony itself uses zero traditional magic. The class is pure biology.
-
-# ============================================================================
-# RESOURCE SYSTEMS SUMMARY
-# ============================================================================
-
-resource_systems:
-  builder:
-    resource_name: Resin
-    max_pool: 100
-    passive_generation: "5/s (biological secretion, always active in combat)"
-    combat_start: "Full (100 — Builder enters combat with glands pre-loaded)"
-    costs:
-      resin_wall: 20
-      fortification_node: 30
-      structural_repair: 0 (free, but requires channel time)
-      collapse_trigger: 0 (costs the construction itself, not Resin)
-    design_intent: >
-      Builder can burst-build at combat start (5 walls from full pool), then
-      sustains at ~1 wall per 4s. The pool creates a PACING curve: initial
-      burst of fortification → maintenance/expansion phase → occasional
-      emergency rebuild when structures are destroyed.
-
-  flutter:
-    resource_name: Wingbeat
-    max_pool: 100
-    depletion_rate: "~15/s while airborne"
-    regeneration_rate: "~35/s while grounded"
-    costs:
-      pollen_veil: "Deployable only while airborne (wingbeat depletion IS the cost)"
-      seed_barrage: "Deployable only while airborne (same)"
-      wingbeat_gust: "12s cooldown (no additional resource cost)"
-      dive_pollinate: "Requires Harvest Window trigger (conditional)"
-    design_intent: >
-      Flutter alternates 6-7s airborne → 3s grounded. This creates a rhythm
-      with predictable vulnerability windows. Ability deployment is gated by
-      airborne state, not by a separate resource — being in the air IS the
-      resource being spent. Ground time forces Flutter to either melee
-      (Mandible Strike) or reposition for next ascent.
-
-  nightfly:
-    resource_name: Luminescence
-    max_pool: 100
-    passive_generation: "8/s (baseline organ recharge)"
-    enhanced_generation: "15/s in bright light (absorbing photons to fuel darkness production)"
-    costs:
-      darkness_shroud: 25
-      lure_beacon: 0 (cooldown-gated, 10s per beacon)
-      trap_lattice: 0 (cooldown-gated, 20s, requires darkness)
-    design_intent: >
-      Nightfly spends Luminescence to create darkness, then operates WITHIN
-      darkness using cooldown-gated abilities (lures, traps). The "recharges
-      faster in light" mechanic creates a cycle: Nightfly ventures into light
-      to recharge → deploys darkness → operates within darkness → darkness
-      fades → recharges again. This prevents permanent darkness while giving
-      Nightfly agency over when darkness exists.
-
-# ============================================================================
-# CROSS-REFERENCES
-# ============================================================================
-
-cross_references:
-  related_documents:
-    - path: "artifacts/new_locked_classes_qual.md"
-      section: "Colony (Section 6)"
-      relationship: "Source qualitative context — strategic identity, phenotype definitions, open questions"
-    - path: "artifacts/class_item_baselines.md"
-      section: "Colony — Item Baseline"
-      relationship: "Source item replacement tables, strategic problems solved, class advantage"
-    - path: "artifacts/unified_item_catalog.md"
-      sections: ["Terrain Creation", "Installation/Traps", "CC/Debuff"]
-      relationship: "Item catalog that Colony phenotypes replace as premium alternatives"
-    - path: "artifacts/Game_Juice_Taste_Design.md"
-      sections: ["Layer 1: Strategy", "Design Override Principles", "Layer 3: Chain Reactions"]
-      relationship: "Design philosophy, anti-burst-cycle rules, chain reaction framework"
-
-  related_classes:
-    - class: Shaman
-      interaction: "Colony controls WHERE enemies are (terrain). Shaman controls WHAT enemies can do (debuffs). Complementary, not competing."
-    - class: Siegebreaker
-      interaction: "Siegebreaker IS the moving wall. Builder MAKES walls. Siegebreaker breaks Colony's walls. Natural tension."
-    - class: Strix
-      interaction: "Strix flies high and dives. Flutter flies low and hovers. Different flight models, different altitudes, different purposes."
-    - class: Grappler
-      interaction: "Grappler Ink stance creates vision denial zones (overlap with Nightfly darkness). Distinction: ink is permanent terrain, darkness is temporary pheromone."
-    - class: Elementalist
-      interaction: "Elementalist transmutes terrain temporarily. Builder creates terrain permanently. Elementalist might transmute Builder's walls (future chain reaction?)."
-
-  design_principles_referenced:
-    - "#1: NO 2-minute burst cycle — Colony DPS is flat-to-increasing, not burst"
-    - "#3: Consumables/items define BASELINE — Colony is premium replacement for terrain/trap/CC items"
-    - "#17: Map variance is highest-variance strategic element — Colony CREATES map variance"
-    - "#18: Classes REPLACE consumable effects — each phenotype replaces a specific item category"
-    - "#22: Lore = economy — Harvesters gather raw materials (GATHER 7), economic role preserved"
-    - "#24: Crit is NOT RNG — Nightfly ambush damage is POSITIONAL (from concealment), not random"
-    - "#31: Items define baseline, classes REPLACE"
+# Classes/Support/Colony_Complete.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+# COLONY (Harvesters) — Map-Shaping Support / Phenotype Specialist
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Design lineage:
+#   Biology: Eusocial insects (ants, bees, termites) — caste specialization,
+#            superorganism identity, biological construction, pheromone communication
+#   Builder: Starcraft Zerg (creep/structure), Orcs Must Die (trap/barrier placement),
+#            Fortnite (real-time construction under pressure), DFO Creator (terrain gen)
+#   Flutter: Pharah/Mercy (aerial dominance), Singed (trail CC), Teemo (area denial),
+#            Monster Hunter Palamute (mobile support), aerial bombers
+#   Nightfly: Anglerfish (bioluminescent lure), Evelynn (darkness predator),
+#             DFO Shadow Dancer (vision manipulation), Shaco (trap + darkness)
+#
+# Core identity: "The class that CHANGES THE MAP"
+#   Colony doesn't fight in the space — Colony RESHAPES the space.
+#   Barriers appear where open paths were. Routes open where walls stood.
+#   Pollen clouds deny areas. Lures redirect enemy pathing.
+#   Self-sufficient through INFRASTRUCTURE, not raw combat power.
+#   Every Colony player permanently alters the encounter geometry.
+#
+# Fantasy: You are one specialized organ of a greater organism.
+#   A Builder IS the skeleton — providing structure and protection.
+#   A Flutter IS the circulatory system — fast, distributed, carrying payload.
+#   A Nightfly IS the nervous system — sensing, signaling, luring.
+#   Solo: you are a complete (if small) organism.
+#   Together: multiple Harvesters become something greater than any individual.
+#
+# SPECIAL tier justification:
+#   Three phenotypes = three completely different games within one class.
+#   Each phenotype has its own mastery path, unique decision framework,
+#   and distinct moment-to-moment gameplay. A Builder main learning Flutter
+#   is learning a NEW CLASS, not switching specs. The knowledge gate is
+#   understanding your phenotype DEEPLY — not surface complexity, but
+#   the deep interactions between your biology and the encounter geometry.
+#   Deceptively complex: each phenotype LOOKS simple but rewards mastery
+#   with exponentially better encounter control.
+#
+# References:
+#   - Combat/BalanceTargets.yaml (all numeric targets)
+#   - Combat/AggroSystem.yaml (Colony installation interaction with SR targeting)
+#   - Combat/ClassMechanicModuleDesign.md (mechanic type taxonomy)
+#   - Class–Item Baselines.md (Colony consumable replacement table)
+#   - New Locked Classes (Qual Specs).md (Colony qualitative context)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Support.Colony
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  PART A: SHARED CORE (All Phenotypes)                                    ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1: CLASS IDENTITY
+# ─────────────────────────────────────────────────────────────────────────────
+
+Identity:
+  Name: Colony
+  AlternateName: null
+  Role: Support
+  SubRole: "Map-Shaping Specialist (Terrain Manipulation / Area Denial / Vision Control)"
+  DamageType: physical  # Biological — secretion acid, seed projectiles, bioluminescent burns
+  ExecutionArchetype: "Phenotype-Divergent Infrastructure"
+  ExecutionTier: Special
+  # Special tier justified by:
+  # - THREE completely different gameplay loops within one class frame
+  # - Each phenotype is its own mastery path (Builder ≠ Flutter ≠ Nightfly)
+  # - Knowledge gate: understanding phenotype-specific map interactions deeply
+  # - Deceptive complexity: each LOOKS straightforward but optimizes infinitely
+  # - Multi-Harvester party synergy creates emergent strategies no single player can execute
+
+  Phenotypes:
+    Builder:
+      Shorthand: "Construction / Denial / Fortification"
+      GameFeel: "Orcs Must Die meets Fortnite — real-time construction that reshapes encounter geometry"
+    Flutter:
+      Shorthand: "Aerial Mobility / Pollen CC / Seed Bombardment"
+      GameFeel: "Singed meets Pharah — trail denial from above, impossible to pin down"
+    Nightfly:
+      Shorthand: "Bioluminescent Lures / Darkness / Trap Chains"
+      GameFeel: "Evelynn meets Shaco — information asymmetry predator"
+
+  Description: >
+    Colony is three classes wearing one name. Each Harvester phenotype
+    produces a fundamentally different gameplay experience united by one
+    principle: you change the MAP, not just the enemies on it. Builders
+    add walls, platforms, and barriers that physically restructure encounters.
+    Flutters blanket areas with pollen clouds and seed-drops from above.
+    Nightflies manipulate vision — creating darkness for enemies while seeing
+    perfectly, deploying bioluminescent lures that redirect pathing. Colony
+    doesn't out-DPS the problem. Colony makes the problem walk into a kill
+    box it built, blinded it, and trapped it inside.
+
+  CoreFantasy: >
+    You are one organ of a superorganism. Your body IS your toolkit —
+    secretion glands, pollen sacs, bioluminescent organs, wings. You never
+    run out because your body regenerates what it deploys. Other classes
+    bring weapons. You bring ARCHITECTURE.
+
+  InputModality:
+    PrimaryFocus: encounter_geometry_and_enemy_pathing
+    SecondaryFocus: deployment_positioning_and_timing
+    TertiaryFocus: resource_regeneration_pacing
+    DecisionType: strategic_preparation_and_reactive_adaptation
+
+  StatPriority:
+    Primary: NTU  # Environmental awareness — reads terrain + enemy pathing
+    Secondary: DEX  # Precision — placement accuracy for deployments
+    Tertiary: SPD  # Deployment speed — faster GCD = more infrastructure per window
+    DumpStat: MAG  # No magic. Purely biological/physical effects.
+    # Harvesters have: STR 8, STA 10, DEX 12, SPD 10, NTU 14, MAG 4, MAGICCAP 6
+
+  DesignStatement: >
+    Colony justifies Special tier through BREADTH. Each phenotype is a
+    complete mastery path. The knowledge gate isn't mechanical difficulty —
+    it's "you need to deeply understand ONE phenotype's interaction with
+    procedurally generated encounter geometry." The deception: each phenotype
+    LOOKS simple but optimizes infinitely when you start reading enemy AI
+    pathing and manipulating it through terrain. Colony is the only class
+    where understanding ENEMY BEHAVIOR matters more than your own rotation.
+
+  FailureStates:
+    InfrastructureIgnored:
+      Cause: "Deployments placed where enemies don't path"
+      Cost: "GCDs + Biomass spent on zero-value construction"
+      Recovery: "Read enemy pathing, redeploy. But deployments on cooldown = dead time."
+      Severity: "HIGH — Colony's power IS deployment. Wasted deployment = wasted class."
+    OvercommitConstruction:
+      Cause: "All GCDs on infrastructure, zero on personal safety"
+      Cost: "Colony dies. Deployments persist briefly then decay without maintenance."
+      Severity: "MODERATE — deployments persist, but unmaintained they expire."
+    ResourceOverdraw:
+      Cause: "Deploying faster than biological regeneration rate"
+      Cost: "Forced 12-15s recovery with no deployment available"
+      Severity: "MODERATE — predictable downtime, punishes spam."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1b: RACIAL LOCK — HARVESTERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+RacialLock:
+  Race: Harvesters
+  ParentCategory: Linfree
+  Enforcement: hard_lock
+  BiologicalLock: eusocial_insect_phenotype
+  LockJustification: >
+    Colony IS Harvester biology. Each phenotype = different body plan.
+    Builder: reinforced chitin + secretion glands. Flutter: full wings +
+    pollen sacs. Nightfly: bioluminescent organs + dark-adapted compound eyes.
+    Phenotype is determined at maturation (character creation). Permanent.
+    A Builder cannot grow wings. A Flutter cannot produce construction resin.
+
+  RacialFlight:
+    Description: >
+      ALL Harvesters can fly. Racial trait, not class-granted. Wing morphology
+      differs by caste: Builder (short, powerful, heavy-lift, 80% ground speed),
+      Flutter (long, agile, aerial combat, 120% ground speed), Nightfly (broad,
+      silent, stealth flight, 100% ground speed).
+    Mechanics:
+      FlightCeiling: "12y above ground plane"
+      FlightStamina: "Unlimited — biological, not magical"
+      CombatFlight: "All phenotypes act while airborne. GCDs cast from any elevation."
+    Gameplay: >
+      Flight provides vertical axis to ALL Colony gameplay. Builders construct
+      from elevation. Flutters fight from the air. Nightflies approach from above
+      in darkness. The vertical dimension is Colony's home field.
+
+  RacialSynergy:
+    - "Eusocial biology — phenotype IS body plan. Lock is absolute."
+    - "Wings provide flight to ALL phenotypes — vertical axis is racial"
+    - "Biological regeneration — glands/sacs/organs all regrow. Colony never runs out."
+    - "Compound eyes — 270° vision. Harder to flank. (NTU 14 racial)"
+    - "Pheromone communication — Colony-to-Colony coordination is passive"
+    - "Chitin exoskeleton — moderate natural armor (STA 10)"
+    - "GATHER racial role — all Harvesters gather materials regardless of combat phenotype"
+
+  PhenotypeSelection:
+    Timing: character_creation
+    Permanence: permanent
+    Justification: "Body type. Anatomical reality, not spec choice. Players wanting another phenotype create a new Harvester character."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2: ROLE OBJECTIVE FUNCTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+RoleObjective:
+  Type: map_shaping_and_area_denial
+  PrimaryMetric: encounter_geometry_manipulation_value
+  SecondaryMetric: enemy_pathing_disruption
+  TertiaryMetric: damage_dealt_through_infrastructure
+
+  DamageModel:
+    DirectDamageBudget: "35% of DPS reference"
+    InfrastructureDamage: "25% additional through traps/constructions/deployments"
+    TotalCombatContribution: "60% of DPS reference (support class)"
+    ContributionType: >
+      Colony's value is NOT personal DPS. It's PARTY DPS ENABLED through
+      geometry control. Builder funnels 8 enemies into a chokepoint for
+      Elementalist AoE. Colony enables multiplicative party value.
+
+  SupportModel:
+    HealingProvided: "Minimal — Chitin Mend (emergency self-heal only)"
+    CCProvided: "Stage 1-2 via terrain/pollen/darkness. Stage 3 via trap chains (Nightfly)."
+    TankingProvided: "Indirect — barriers absorb hits (structures have HP pools)"
+    UtilityProvided: "EXTREME — scouting, pathing control, vision denial, escape routes, fortification"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3: CLASS MECHANIC — BIOMASS SYSTEM
+# ─────────────────────────────────────────────────────────────────────────────
+
+ClassMechanic:
+  Type: biological_resource_regeneration
+  Name: "Biomass"
+  Description: >
+    Shared resource across all phenotypes. Represents biological material
+    the body produces (resin/pollen/enzyme). Regenerates passively. Cannot
+    be externally refilled. Gates deployment FREQUENCY, not capability.
+
+  BiomassPool:
+    Maximum: 100
+    RegenRate: "5/s base. 7/s airborne (+40%). 6/s stationary (+20%)."
+    RegenBonus_MultiHarvester: "+10% per additional Colony in party"
+    DepletionState: "At 0: cannot deploy new infrastructure. Recovery: 12-15s to 30 (minimum threshold)."
+
+  BiomassSpending:
+    SmallDeployment: "15-25 Biomass"
+    MediumDeployment: "30-45 Biomass"
+    LargeDeployment: "50-70 Biomass"
+    Maintenance: "3 Biomass per 5s per active deployment"
+
+  SecondaryResource_Pheromone:
+    Name: "Pheromone Charge"
+    Maximum: 3
+    Generation: "1 per 20s passive. +1 when deployment interacts with enemy."
+    PhenotypeUse:
+      Builder: "Structures gain 2× HP + selective permeability (allies pass through)"
+      Flutter: "Pollen gains Stage 2 CC upgrade (confusion added to slow)"
+      Nightfly: "Lures become irresistible — forced pathing for 4s"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: SHARED SKILLS (All Phenotypes)
+# ─────────────────────────────────────────────────────────────────────────────
+
+SharedSkills:
+  Movement:
+    - Name: "Lift Off"
+      ID: colony_lift_off
+      ActionType: oGCD
+      Recast: 1.0s
+      Effect: "Toggle flight. Airborne: +40% Biomass regen, immune to ground AoE. Grounded: faster base movement."
+      BiomassCost: 0
+
+    - Name: "Dart"
+      ID: colony_dart
+      ActionType: oGCD
+      Recast: 8s
+      Effect: "10y dash (15y if airborne + 2s reduced aggro). Ignores own constructions."
+      BiomassCost: 5
+
+    - Name: "Hover"
+      ID: colony_hover
+      Type: passive
+      Effect: "Airborne + stationary = +60% total Biomass regen. Movement cancels."
+
+  Survival:
+    - Name: "Chitin Mend"
+      ID: colony_chitin_mend
+      ActionType: GCD
+      CastTime: 1.5s
+      Cooldown: 30s
+      Potency: 400  # Self-heal only
+      BiomassCost: 20
+      Effect: "Emergency self-heal. Long CD + Biomass cost = real sacrifice."
+
+    - Name: "Chitin Harden"
+      ID: colony_chitin_harden
+      ActionType: oGCD
+      Recast: 45s
+      Effect: "15% damage reduction, 8s. Cannot fly during (wings retracted)."
+      BiomassCost: 10
+
+    - Name: "Shed Chitin"
+      ID: colony_shed_chitin
+      ActionType: oGCD
+      Recast: 90s
+      Effect: "Drop decoy shell (30% max HP, 10s). 50% chance enemies attack shell for 3s. +30% speed 4s."
+      BiomassCost: 15
+      RankRequired: 2
+
+  Utility:
+    - Name: "Pheromone Mark"
+      ID: colony_pheromone_mark
+      ActionType: oGCD
+      Recast: 15s
+      Range: 25y
+      Effect: "Mark enemy 20s. Visible in darkness. +5% deployment damage. +50% Pheromone gen from interactions."
+      BiomassCost: 5
+
+    - Name: "Colony Signal"
+      ID: colony_signal
+      ActionType: oGCD
+      Recast: 60s
+      Range: 30y
+      Effect: "Invisible pheromone waypoint (45s). Colony members see it. Deployments within 5y gain +10% duration. Max 2."
+      BiomassCost: 0
+
+    - Name: "Antennae Sweep"
+      ID: colony_antennae_sweep
+      ActionType: oGCD
+      Recast: 20s
+      Effect: "Detect all enemies in 30y. Shows movement direction + pathing target for 6s. Silhouettes through walls."
+      BiomassCost: 0
+
+  SharedPassives:
+    - Name: "Biological Regeneration"
+      Effect: "Deployments within 15y regen 5% max HP per 10s. Leaving range pauses regen."
+    - Name: "Compound Vision"
+      Effect: "270° vision arc. Immune to side-angle backstab crits (only true-rear <30° counts)."
+    - Name: "Pheromone Network"
+      Effect: "Colony party members share deployment vision. +10% Biomass regen per Colony member."
+    - Name: "Infrastructure Instinct"
+      Effect: "Visual/audio alert 2s before enemy reaches your deployment (SR-dependent targeting awareness)."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 5: SHARED BALANCE TARGETS
+# ─────────────────────────────────────────────────────────────────────────────
+
+BalanceTargets:
+  DPSRole: "35% direct + 25% infrastructure = 60% total"
+  GlobalCooldown:
+    Base: 2.0s
+    HasteCap: 1.4s
+  oGCDAnimationLock: 0.6s
+  WeaveModel: single_weave_only
+
+  EnemyHP50Rule:
+    Effect: "Enemies above 50% HP take +25% damage from ALL sources (system-wide, applies to ENEMIES)."
+    ColonyImplication: "Infrastructure damage benefits. Front-load deployments while enemies are healthy."
+
+  CritSystem:
+    Rule: "Crit is NOT RNG. Positional/conditional."
+    ColonyCritConditions:
+      ElevationCrit: "4y+ above target — all direct attacks. Flight = consistent crit access."
+      InfrastructureCrit: "Enemy touching 2+ Colony deployments — deployment damage crits."
+      CCStateCrit: "Enemy affected by Colony CC — direct attacks crit."
+    CritMultiplier: 1.4
+
+  ResourceTiming:
+    TimeToFirstDeployment: "0s (start at 100 Biomass)"
+    TimeToMaxInfrastructure: "30-40s"
+    BiomassRecoveryFromEmpty: "12-15s to minimum threshold"
+    SustainableDeployRate: "1 medium per 8-10s"
+
+  Survivability:
+    EffectiveHP: "85% of frontliner baseline"
+    DesignNote: "Survives through flight + positioning + deployments-as-shields, not raw tankiness."
+
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  PART B: BUILDER PHENOTYPE                                               ██
+# ██  Construction / Denial / Fortification / Area Shaping                    ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BUILDER SECTION 1: PHENOTYPE IDENTITY
+# ─────────────────────────────────────────────────────────────────────────────
+
+BuilderPhenotype:
+  Identity:
+    Name: "Colony — Builder"
+    PhenotypeRole: "Terrain Engineer / Barrier Specialist / Chokepoint Creator"
+    GameFeel: >
+      Orcs Must Die meets Fortnite construction. Place physical structures
+      that persist, have HP pools, block movement, redirect pathing, and can
+      be repaired/upgraded mid-fight. Builder doesn't fight enemies — Builder
+      makes the ROOM fight for them.
+
+    CoreLoop: >
+      1. Read enemy pathing (Antennae Sweep)
+      2. Deploy barriers to DENY optimal enemy paths
+      3. Create funnels that force enemies through chokepoints
+      4. Reinforce/repair structures under attack
+      5. Adapt as enemy AI repath (SR2+ enemies repath around walls)
+      6. Leverage elevation (fly up, construct elevated platforms)
+
+    PowerBudget:
+      DirectDPS: "25% of DPS reference (lowest phenotype)"
+      InfrastructureValue: "40% through funnel + chokepoint party DPS amplification"
+      TotalContribution: "65% of DPS reference"
+
+    FlightIntegration: >
+      Builder uses flight for ELEVATED CONSTRUCTION. Fly up, build platforms,
+      drop barriers from above. Heavy-lift wings (80% flight speed) carry
+      material to elevation. Builder airborne = crane mode.
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # BUILDER SECTION 2: PHENOTYPE MECHANICS
+  # ───────────────────────────────────────────────────────────────────────────
+
+  Mechanics:
+    ConstructionSystem:
+      MaxActiveStructures: 8
+      StructureHP: "Small: 500 / Medium: 1200 / Large: 2500 / Pheromone-enhanced: 2×"
+      StructureCollision: "Blocks ALL movement by default. Pheromone-enhanced = selective (allies pass)."
+      StructureDecay: "60s base. Maintenance (3 Biomass/5s) extends +5s. Without maintenance: decays over 15s."
+
+    RepairSystem:
+      Rate: "200 HP per GCD (1.5s cast)"
+      Cost: "10 Biomass per repair GCD"
+      Range: 15y
+
+    UpgradeSystem:
+      Base: "Raw structure. Blocks. Has HP. Decays."
+      Reinforced: "+50% HP. +5s decay per maintenance tick. 15 Biomass."
+      Fortified: "+100% HP. 10% damage reflect. 25 Biomass."
+      Pheromone: "Selective permeability. 1 Pheromone Charge (not Biomass)."
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # BUILDER SECTION 3: SKILL ROSTER
+  # ───────────────────────────────────────────────────────────────────────────
+
+  Skills:
+    Construction:
+      - Name: "Secrete Wall"
+        ID: builder_secrete_wall
+        ActionType: GCD
+        CastTime: 1.5s
+        Range: 15y
+        BiomassCost: 25
+        Effect: "4m-wide, 3m-tall resin wall. 1200 HP. Blocks movement + projectiles. 60s duration."
+        ElevationBonus: "Airborne cast: wall drops from above, 80p to enemies in landing zone."
+        CritCondition: "Drop-damage crits from 4y+"
+        RankRequired: 1
+
+      - Name: "Resin Pillar"
+        ID: builder_resin_pillar
+        ActionType: GCD
+        CastTime: 2.0s
+        Range: 15y
+        BiomassCost: 40
+        Effect: "2m-wide, 6m-tall pillar. 2500 HP. Elevated platform on top. Line-of-sight block."
+        ElevationBonus: "Standing ON pillar: next Secrete Wall costs -10 Biomass."
+        RankRequired: 1
+
+      - Name: "Bridge Span"
+        ID: builder_bridge_span
+        ActionType: GCD
+        CastTime: 2.0s
+        Range: 15y
+        BiomassCost: 35
+        Effect: "Horizontal platform connecting two points (max 6m span). 800 HP. Creates NEW traversable path."
+        RankRequired: 2
+
+      - Name: "Seal Path"
+        ID: builder_seal_path
+        ActionType: GCD
+        CastTime: 1.0s
+        Range: 15y
+        BiomassCost: 20
+        Effect: "Fill doorway/corridor (max 3m wide) with resin. 800 HP. Faster + cheaper than wall for existing geometry."
+        RankRequired: 1
+
+      - Name: "Excavate"
+        ID: builder_excavate
+        ActionType: GCD
+        CastTime: 2.0s
+        Cooldown: 25s
+        Range: 10y
+        BiomassCost: 30
+        Effect: >
+          Dissolve existing terrain (3m radius). Creates pit (2m deep, 100p + 2s root on fall)
+          or hole in walls (2m diameter). Destructible terrain only. Removed terrain regenerates after 45s.
+        CritCondition: "Pit damage crits if enemy was running (momentum)"
+        RankRequired: 2
+
+      - Name: "Fortify Structure"
+        ID: builder_fortify_structure
+        ActionType: GCD
+        CastTime: 1.5s
+        Range: 15y
+        BiomassCost: 15
+        Effect: "Repair 300 HP + apply Fortified upgrade. If already Fortified: 500 HP repair instead."
+        RankRequired: 1
+
+    Offense:
+      - Name: "Resin Spike"
+        ID: builder_resin_spike
+        ActionType: GCD
+        CastTime: 1.2s
+        Range: 15y
+        Potency: 130
+        BiomassCost: 10
+        Effect: "Projectile. Adjacent to Colony structure: 180p. BETWEEN two structures: 220p."
+        CritCondition: "Elevation (4y+). Also crits if target touching 2+ structures."
+        RankRequired: 1
+
+      - Name: "Collapse Structure"
+        ID: builder_collapse_structure
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 15s
+        Range: 20y
+        BiomassCost: 0  # Costs the structure
+        Effect: >
+          Destroy own structure. 4m AoE damage = structure remaining HP × 0.5.
+          Enemies hit slowed 30% for 4s. Fortified wall (2400 HP) = 1200p AoE.
+        CritCondition: "Crits if target touching another Colony structure (sandwich)"
+        RankRequired: 2
+
+      - Name: "Resin Snare"
+        ID: builder_resin_snare
+        ActionType: GCD
+        CastTime: 1.0s
+        Cooldown: 12s
+        Range: 15y
+        Potency: 60
+        BiomassCost: 15
+        Effect: "3m sticky resin, 15s. -40% speed. If enemy stays 3s: root 2s (hardens). Stage 1→root."
+        RankRequired: 1
+
+    Ultimate:
+      - Name: "Architect's Domain"
+        ID: builder_architects_domain
+        ActionType: GCD
+        CastTime: 3.0s
+        Cooldown: 180s  # NOT 2 minutes
+        Range: 20y
+        BiomassCost: 80
+        Effect: >
+          Instantly construct FORTRESS: 4 walls + 2 pillars + bridges (12m × 12m).
+          All Fortified tier + selective permeability. 8000 total HP. 45s duration.
+          Does NOT count toward 8-cap. After 45s: degrades to individual structures
+          (Builder keeps 4 within cap).
+        RankRequired: 3
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # BUILDER SECTION 4: ROTATION PHILOSOPHY
+  # ───────────────────────────────────────────────────────────────────────────
+
+  RotationPhilosophy:
+    Overview: >
+      Builder has NO rotation. Builder has a CONSTRUCTION PLAN adapting to
+      geometry and enemy behavior. Priority: Deploy (early) → Reinforce (mid) →
+      Damage with Resin Spike (ongoing) → Collapse for burst (opportunistic) →
+      Rebuild as enemies repath (reactive).
+
+    NO_Fixed_Cadence: >
+      No "deploy wall every 12s." Read the field. Open corridor = Seal it NOW.
+      Wall at 30% HP = Fortify or let break and rebuild behind? 4 enemies
+      clustered on wall = Collapse for AoE. Every GCD is a decision.
+
+    CoreTensions:
+      BuildOrFight: "GCD on infrastructure (future value) vs. attack (immediate value)"
+      RepairOrReplace: "10 Biomass repair vs. 25 Biomass fresh wall"
+
+  FailureStates:
+    WallsInWrongPlace:
+      Cause: "Structures placed without reading enemy pathing"
+      Cost: "25-40 Biomass per misplaced structure"
+      Severity: "HIGH — Builder's value IS placement accuracy."
+    BlockingAllies:
+      Cause: "Non-Pheromone wall between allies and enemies"
+      Cost: "Party DPS stops"
+      Severity: "HIGH — Builder's biggest noob mistake."
+    StructureCascadeCollapse:
+      Cause: "All structures expire simultaneously (left maintenance range)"
+      Cost: "Entire encounter geometry reverts. 6-8 GCDs to rebuild."
+      Severity: "EXTREME"
+
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  PART C: FLUTTER PHENOTYPE                                               ██
+# ██  Aerial Scouting / Pollen CC / Seed Bombardment / Mobility               ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLUTTER SECTION 1: PHENOTYPE IDENTITY
+# ─────────────────────────────────────────────────────────────────────────────
+
+FlutterPhenotype:
+  Identity:
+    Name: "Colony — Flutter"
+    PhenotypeRole: "Aerial Skirmisher / Pollen Deployer / Area Denial Bomber"
+    GameFeel: >
+      Singed meets Pharah meets crop duster. ALWAYS in the air, ALWAYS moving,
+      ALWAYS dropping CC clouds and seed bombs on enemies below. Untouchable
+      through mobility. The ground is lava — Flutter only lands when forced.
+
+    CoreLoop: >
+      1. Take flight immediately (Flutter starts and stays airborne)
+      2. Identify enemy clusters or high-value paths
+      3. Deploy pollen clouds along enemy movement vectors
+      4. Seed-bomb enemies entering pollen zones (combo damage)
+      5. Kite — enemies below cannot reach you easily
+      6. Leverage 120% flight speed for hit-and-run
+
+    PowerBudget:
+      DirectDPS: "40% of DPS reference (seed bombs = real damage)"
+      InfrastructureValue: "25% through pollen CC enabling party DPS"
+      TotalContribution: "65% of DPS reference"
+
+    FlightIntegration: >
+      Flutter IS flight. 120% flight speed (fastest phenotype), superior
+      maneuverability, multiple skills REQUIRE airborne. Flutter grounded = 40%
+      effectiveness. Flutter airborne = 100%. Designed to NEVER LAND.
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # FLUTTER SECTION 2: PHENOTYPE MECHANICS
+  # ───────────────────────────────────────────────────────────────────────────
+
+  Mechanics:
+    PollenSystem:
+      PollenTypes:
+        Slow: "Yellow. -40% movement, 5s. Stage 1. Default/cheapest."
+        Confuse: "Purple. 25% action failure, 4s. Stage 2. +5 Biomass vs. Slow."
+        Paralyze: "Red. 2s full paralysis, then 15s immunity. Stage 3. +15 Biomass."
+      TypeSwitch: "Instant toggle, 3s internal CD."
+      CloudDuration: "12s (drifts downward at 0.5m/s)"
+      CloudRadius: "3m per puff (4m if deployed from 6y+)"
+      MaxActiveClouds: 6
+      Drift: "Deploy at 4-6y above targets for optimal ground coverage in 1-2s."
+
+    SeedSystem:
+      SeedTypes:
+        Impact: "150p single-target. Standard damage."
+        Scatter: "80p in 3m AoE. Cluster punish."
+        Root: "60p + 2s root (vine erupts). Utility."
+      Ammo: "4 seeds max. Regen 1 per 8s (Biomass-fueled passively, not directly spent)."
+      ComboBonus: "+30% damage to enemies in ANY Flutter pollen. (150p → 195p)"
+
+    AerialCombatAdvantage:
+      - "+10% potency vs. grounded targets from above (gravity assist)"
+      - "Immune to ground-targeted AoE"
+      - "Melee enemies cannot reach without gap-closers"
+      - "Pollen from altitude covers wider area (expands during drift)"
+      - "Seed trajectory from altitude = faster travel time"
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # FLUTTER SECTION 3: SKILL ROSTER
+  # ───────────────────────────────────────────────────────────────────────────
+
+  Skills:
+    PollenDeployment:
+      - Name: "Pollen Puff"
+        ID: flutter_pollen_puff
+        ActionType: GCD
+        CastTime: 0s  # Instant — never stops moving
+        BiomassCost: 15
+        Effect: "Drop pollen cloud at current position. Drifts down. Current type. 12s, 3m radius."
+        ElevationBonus: "From 6y+: expands to 4m"
+        RankRequired: 1
+
+      - Name: "Pollen Trail"
+        ID: flutter_pollen_trail
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 8s
+        BiomassCost: 25
+        Effect: "4s continuous pollen trail behind flight path. 2m wide, 10s persist. Up to 12m coverage."
+        RankRequired: 1
+
+      - Name: "Pollen Storm"
+        ID: flutter_pollen_storm
+        ActionType: GCD
+        CastTime: 1.5s
+        Cooldown: 25s
+        Range: 20y
+        BiomassCost: 45
+        Effect: "6m radius cloud. +50% CC effectiveness (Slow: -60%, Confuse: 40%, Para: 3s). 15s. Counts as 2 clouds."
+        RankRequired: 2
+
+      - Name: "Concentrated Burst"
+        ID: flutter_concentrated_burst
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 15s
+        Range: 15y
+        BiomassCost: 20
+        Potency: 50
+        Effect: "Single-target pollen pellet. Guaranteed application, can't miss. No cloud, just direct CC."
+        CritCondition: "Crits if target already has different pollen type (cross-reaction)"
+        RankRequired: 1
+
+    SeedAttacks:
+      - Name: "Seed Drop"
+        ID: flutter_seed_drop
+        ActionType: GCD
+        CastTime: 0s
+        AmmoCost: 1
+        Potency: 150
+        Effect: "Drop bomb below. Travel time by height. 80p AoE splash. In pollen: 195p primary."
+        CritCondition: "From 4y+. Also crits if target in 2+ pollen zones."
+        RankRequired: 1
+
+      - Name: "Scatter Seed"
+        ID: flutter_scatter_seed
+        ActionType: GCD
+        CastTime: 0s
+        AmmoCost: 1
+        Range: 15y
+        Potency: 80  # Per target
+        Effect: "Mid-air burst, 4m AoE. Max 8 targets. In pollen: 104p each."
+        CritCondition: "Crits if 4+ enemies hit"
+        RankRequired: 1
+
+      - Name: "Root Seed"
+        ID: flutter_root_seed
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 18s
+        AmmoCost: 1
+        Range: 15y
+        Potency: 60
+        Effect: "Vine erupts: 2s root. In pollen slow: extends to 3s. Stage 1 CC."
+        CritCondition: "Crits if enemy was moving when rooted"
+        RankRequired: 2
+
+      - Name: "Seed Barrage"
+        ID: flutter_seed_barrage
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 35s
+        AmmoCost: 3
+        Range: 15y
+        Potency: "120p × 3 seeds (360p total, 468p in pollen)"
+        Effect: "Rapid-fire 3 seeds at area (0.5s apart). 3m AoE each. Dumps magazine."
+        CritCondition: "Each seed checks individually"
+        RankRequired: 3
+
+    Mobility:
+      - Name: "Tailwind"
+        ID: flutter_tailwind
+        ActionType: oGCD
+        Recast: 20s
+        BiomassCost: 10
+        Effect: "+50% flight speed, 6s. Pollen Trail becomes free. Seed travel time halved."
+
+      - Name: "Updraft"
+        ID: flutter_updraft
+        ActionType: oGCD
+        Recast: 30s
+        BiomassCost: 5
+        Effect: "Instant rise to ceiling (12y). 3s Thermal buff: pollen duration doubled (24s)."
+
+      - Name: "Divebomb"
+        ID: flutter_divebomb
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 20s
+        Potency: 200
+        BiomassCost: 15
+        Effect: "Vertical dive to ground target. 3m AoE + 3m knockback. From 8y+: 280p. Grounds Flutter (must Lift Off again)."
+        CritCondition: "Always crits from ceiling (12y)"
+        RankRequired: 2
+
+    Ultimate:
+      - Name: "Swarm Cloud"
+        ID: flutter_swarm_cloud
+        ActionType: GCD
+        CastTime: 2.0s
+        Cooldown: 180s
+        Range: 25y
+        BiomassCost: 70
+        Effect: >
+          10m radius cloud cycling ALL pollen types over 20s: Slow (0-7s) →
+          Confuse (7-14s) → Paralyze (14-20s). Escalating, unavoidable CC.
+          Seed damage in cloud: +50% (vs normal +30%). Cannot be resisted —
+          only leaving the area avoids it.
+        RankRequired: 3
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # FLUTTER SECTION 4: ROTATION PHILOSOPHY
+  # ───────────────────────────────────────────────────────────────────────────
+
+  RotationPhilosophy:
+    Overview: >
+      Flutter's "rotation" is an AERIAL PATROL PATTERN. Fly over, drop pollen,
+      seed-bomb targets in pollen, reposition. Priority: Maintain flight → Deploy
+      pollen on vectors → Seed into pollen zones → Manage altitude → Reload patience.
+
+    NO_Fixed_Cadence: >
+      Pollen production is continuous, seeds regen on timer. No "save for burst."
+      Optimal play is CONSTANT DEPLOYMENT: pollen every 2-4s, seeds every
+      opportunity a target is in pollen. DPS is a STREAM, not bursts.
+
+    CoreDecisions:
+      HeightManagement: "Higher = safer + wider pollen + crit. Lower = faster seeds + risky."
+      PollenTypeSelection: "Many weak → Slow. Few dangerous → Confuse. One priority → Paralyze."
+      AmmoManagement: "Constant dropping (sustain) vs. save for Barrage (burst on priority target)."
+
+  FailureStates:
+    Grounded:
+      Cause: "Knockdown or forgetting flight"
+      Cost: "40% effectiveness. All aerial bonuses lost. Vulnerable."
+      Severity: "HIGH — Flutter is designed airborne."
+    SeedDumping:
+      Cause: "All 4 seeds fired without pollen setup"
+      Cost: "23% less damage (no combo). 24-32s with 0-1 seeds."
+      Severity: "MODERATE"
+    PollenMisplacement:
+      Cause: "Pollen where enemies don't path"
+      Cost: "15-45 Biomass wasted, no CC/combo value"
+      Severity: "HIGH"
+
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  PART D: NIGHTFLY PHENOTYPE                                              ██
+# ██  Bioluminescent Lures / Darkness Control / Trap Chains / Vision Manip    ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NIGHTFLY SECTION 1: PHENOTYPE IDENTITY
+# ─────────────────────────────────────────────────────────────────────────────
+
+NightflyPhenotype:
+  Identity:
+    Name: "Colony — Nightfly"
+    PhenotypeRole: "Vision Manipulator / Lure Predator / Trap Architect"
+    GameFeel: >
+      Anglerfish meets Evelynn meets Shaco. Controls WHAT ENEMIES CAN SEE.
+      Deploys darkness to blind them. Deploys bioluminescent lures to redirect.
+      Sets traps along forced paths. Fights by controlling INFORMATION —
+      enemies act on false data, walking into prepared kill zones.
+
+    CoreLoop: >
+      1. Deploy darkness zones (enemy detection → 2m)
+      2. Place bioluminescent lures (attract enemies to specific points)
+      3. Set traps along lure-path
+      4. Watch enemies stumble through darkness toward light, through traps
+      5. Detonate trap chains on trigger
+      6. Remain invisible within own darkness (Nightfly sees through it)
+
+    MomentToMoment: >
+      PREDATORY PATIENCE. Set up kill zone BEFORE enemies arrive. Watch them
+      walk into it. Every kill is premeditated. Nothing reactive. Everything
+      planned 15 seconds ago.
+
+    PowerBudget:
+      DirectDPS: "30% of DPS reference (lowest direct damage)"
+      InfrastructureValue: "35% through trap damage + lure-forced positioning"
+      TotalContribution: "65% of DPS reference"
+
+    FlightIntegration: >
+      SILENT APPROACH + ELEVATED TRAP PLACEMENT. Broad, silent wings (no
+      turbulence). 100% flight speed. Flies ABOVE darkness zones looking
+      down — sees everything while enemies below see nothing. Elevated
+      traps harder to detect (enemies don't look up).
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # NIGHTFLY SECTION 2: PHENOTYPE MECHANICS
+  # ───────────────────────────────────────────────────────────────────────────
+
+  Mechanics:
+    DarknessSystem:
+      DarknessZone:
+        Radius: "5m base"
+        Duration: 20s
+        EnemyEffect: "Detection range → 2m (functionally blind)"
+        AllyEffect: "Normal vision if Pheromone-marked. Otherwise also blinded."
+        NightflyEffect: "Full vision always (dark-adapted compound eyes)"
+        MaxZones: 4
+      StrategyRankInteraction:
+        SR1: "Completely fooled. Random pathing. Attack only within 2m."
+        SR2: "Attempt to leave darkness (path toward light). Blinded while inside."
+        SR3: "Target darkness zones for destruction."
+        SR4: "May use non-visual detection. Darkness partially effective."
+
+    LureSystem:
+      AttractRange: "8m (enemies in darkness path toward nearest light)"
+      Duration: 15s
+      BiomassCost: 20
+      MaxLures: 3
+      SREffectiveness:
+        SR1_2: "Forced pathing (irresistible)"
+        SR3: "4s attraction before recognition"
+        SR4: "2s attraction"
+      PheromoneEnhanced: "Irresistible to SR3 for 4s, SR4 for 2s"
+      Placement: >
+        Lure placement IS Nightfly's primary skill expression. Lure at end
+        of corridor = enemies path down corridor. Lure behind trap = enemies
+        walk THROUGH trap. Lure on ledge = enemies cluster below.
+
+    TrapSystem:
+      SetupTime: "1 GCD (2.0s)"
+      Duration: 45s
+      MaxTraps: 5
+      TriggerRadius: "1m (2m if chain-triggered)"
+      Rearm: "Single-use. Must redeploy."
+      Visibility: "Invisible in darkness. Lit areas: 50% detect (SR2), 80% (SR3), 100% (SR4)."
+      Chaining: >
+        Traps within 3m of triggered trap gain expanded 2m radius for 3s.
+        Place 2.5m apart in line → guaranteed sequential chain detonation.
+        5-trap chain in corridor = DEVASTATING.
+      TrapTypes:
+        Snare: "Root 3s + 80p. Containment."
+        Burst: "200p AoE (3m) + 6s acid puddle (40p/s). Total potential: 440p. Damage."
+        Flash: "Blind 4s (Stage 3 — worse than darkness, 0m detection). Disable."
+        Alarm: "Reveals 10m for 8s + Pheromone Mark triggering enemy + 1 Pheromone Charge. Intel."
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # NIGHTFLY SECTION 3: SKILL ROSTER
+  # ───────────────────────────────────────────────────────────────────────────
+
+  Skills:
+    Darkness:
+      - Name: "Devour Light"
+        ID: nightfly_devour_light
+        ActionType: GCD
+        CastTime: 1.5s
+        Range: 20y
+        BiomassCost: 30
+        Effect: "5m darkness zone, 20s. Enemies: 2m detection. Traps inside: invisible at any SR."
+        ElevationBonus: "From altitude: 6m radius"
+        RankRequired: 1
+
+      - Name: "Eclipse"
+        ID: nightfly_eclipse
+        ActionType: GCD
+        CastTime: 2.0s
+        Cooldown: 30s
+        Range: 20y
+        BiomassCost: 50
+        Effect: "10m darkness, 25s. Enemies inside: +5% damage taken (disoriented). Counts as 2 zones."
+        RankRequired: 2
+
+      - Name: "Creeping Dark"
+        ID: nightfly_creeping_dark
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 15s
+        BiomassCost: 20
+        Effect: "Darkness expands from point, 1m/s for 8s (final: 8m radius). No visual warning. 15s after full size."
+        RankRequired: 2
+
+    Lures:
+      - Name: "Anglerlight"
+        ID: nightfly_anglerlight
+        ActionType: GCD
+        CastTime: 1.0s
+        Range: 20y
+        BiomassCost: 20
+        Effect: "Lure at location, 8m attract range, 15s. SR1-2: forced pathing. SR3: 4s. SR4: 2s."
+        ElevationBonus: "On elevated surface: enemies cluster below, unable to reach"
+        RankRequired: 1
+
+      - Name: "Dancing Lights"
+        ID: nightfly_dancing_lights
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 20s
+        Range: 20y
+        BiomassCost: 35
+        Effect: "3 lures in LINE (5m apart). Enemies follow breadcrumb trail. 10m guided path over ~8s."
+        RankRequired: 2
+
+      - Name: "Abyssal Beacon"
+        ID: nightfly_abyssal_beacon
+        ActionType: GCD
+        CastTime: 1.5s
+        Cooldown: 40s
+        Range: 25y
+        BiomassCost: 40
+        PheromoneChargeCost: 1
+        Effect: >
+          Supreme lure. IRRESISTIBLE to SR1-3 for 6s, SR4 for 3s. 12m attract.
+          Enemies reaching beacon: 2s stun (Stage 3). Flash on expire: 150p in 3m.
+        CritCondition: "Flash crits against enemies that were in darkness (light shock)"
+        RankRequired: 3
+
+    Traps:
+      - Name: "Snare Web"
+        ID: nightfly_snare_web
+        ActionType: GCD
+        CastTime: 1.5s
+        Range: 15y
+        BiomassCost: 15
+        Potency: 80
+        Effect: "Root 3s on trigger. Invisible in darkness. 45s persist."
+        CritCondition: "Crits if enemy was running"
+        RankRequired: 1
+
+      - Name: "Blight Pod"
+        ID: nightfly_blight_pod
+        ActionType: GCD
+        CastTime: 1.5s
+        Range: 15y
+        BiomassCost: 20
+        Potency: 200
+        Effect: "200p burst (3m AoE) + 6s acid puddle (40p/s). Total: 440p per enemy in puddle."
+        CritCondition: "Burst crits if enemy is in darkness"
+        RankRequired: 1
+
+      - Name: "Flashbang Cocoon"
+        ID: nightfly_flashbang_cocoon
+        ActionType: GCD
+        CastTime: 1.5s
+        Cooldown: 20s
+        Range: 15y
+        BiomassCost: 25
+        Potency: 60
+        Effect: "4s blind (Stage 3, 0m detection, worse than darkness) in 4m radius."
+        CritCondition: "Crits against enemies already in darkness"
+        RankRequired: 2
+
+      - Name: "Alarm Thread"
+        ID: nightfly_alarm_thread
+        ActionType: GCD
+        CastTime: 1.0s
+        Range: 20y
+        BiomassCost: 10
+        Effect: "Intel trap. Trigger: reveals 10m for 8s + Pheromone Marks triggerer + generates 1 Pheromone Charge."
+        RankRequired: 1
+
+    DirectCombat:
+      - Name: "Luminous Strike"
+        ID: nightfly_luminous_strike
+        ActionType: GCD
+        CastTime: 1.2s
+        Range: 15y
+        Potency: 140
+        BiomassCost: 10
+        Effect: "Bioluminescent bolt. In darkness: 196p (+40%). Pheromone Marked: +20%. Both: 235p."
+        CritCondition: "From 4y+ OR in darkness + marked"
+        RankRequired: 1
+
+      - Name: "Bioflash"
+        ID: nightfly_bioflash
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 12s
+        Range: "5m PBAoE"
+        Potency: 100
+        BiomassCost: 15
+        Effect: "Flash: 100p + 2s vision impair (-50%). In darkness: 2s full blind instead."
+        CritCondition: "Guaranteed crit against enemies in darkness"
+        RankRequired: 1
+
+    Ultimate:
+      - Name: "Predator's Maze"
+        ID: nightfly_predators_maze
+        ActionType: GCD
+        CastTime: 3.0s
+        Cooldown: 180s
+        Range: 25y
+        BiomassCost: 80
+        Effect: >
+          12m darkness + 5 Blight Pods (auto-placed) + 3 Anglerlight lures
+          (zone edges, draw inward) + 2 Snare Webs (midpoints). Complete
+          kill corridor. Total potential per enemy (full path): ~800p.
+          25s duration. Doesn't count toward individual caps.
+        RankRequired: 3
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # NIGHTFLY SECTION 4: ROTATION PHILOSOPHY
+  # ───────────────────────────────────────────────────────────────────────────
+
+  RotationPhilosophy:
+    Overview: >
+      SETUP SEQUENCE then MAINTENANCE: Darkness → Lures in darkness → Traps
+      along lure paths → Observe → Luminous Strike survivors → Refresh expiring.
+
+    NO_Fixed_Cadence: >
+      Traps trigger on ENEMY TIMING, not player timing. Nightfly sets up,
+      enemy decides when. No "press this at 30s" — "I set traps 30s ago
+      and they just triggered."
+
+    CoreDecisions:
+      DarknessFirst_vs_TrapsFirst: "Enemies watching? → Blind first. Enemies not here yet? → Trap first."
+      LurePlacement: "End of trap chain (gauntlet) vs. cluster point (AoE detonation). Corridors = end. Open areas = cluster."
+      TrapEconomy: "Full field (75-125 Biomass, huge burst) vs. mixed deployment (darkness + lure priority for sustained control)."
+
+  FailureStates:
+    TrapsMissed:
+      Cause: "Traps where enemies don't path / lure not drawing through traps"
+      Cost: "15-25 Biomass per missed trap. 45s wasted."
+      Severity: "HIGH — Nightfly damage IS traps."
+    DarknessOnAllies:
+      Cause: "Darkness without Pheromone Marking allies"
+      Cost: "PARTY BLINDED. DPS drops. Communication breaks."
+      Severity: "EXTREME — actively harms party more than enemies."
+    SR4Counterplay:
+      Cause: "SR4 enemies detect traps, resist lures, destroy darkness"
+      Cost: "Entire toolkit at 50%+ reduced effectiveness"
+      Severity: "MODERATE — still contributes via Pheromone Marks and detection utility."
+
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  PART E: COMBINED — Anti-Patterns / Item Baselines / System Rules        ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E1: ANTI-PATTERNS
+# ─────────────────────────────────────────────────────────────────────────────
+
+AntiPatterns:
+  Explicit:
+    - Pattern: "Treating Colony as a DPS class"
+      Problem: "Colony is 60% contribution support. Party DPS ENABLED is the metric, not personal DPS."
+      Fix: "Measure by geometry reshaped, not damage dealt."
+
+    - Pattern: "Free deployment expectation"
+      Problem: "Biomass gates frequency. Spam-all-at-once → 12-15s empty."
+      Fix: "Pace to regen rate. Deploy-wait-deploy rhythm. Keep 30+ reserve."
+
+    - Pattern: "Ignoring enemy pathing"
+      Problem: "Infrastructure only works WHERE ENEMIES GO."
+      Fix: "Antennae Sweep BEFORE deploying. Deploy on vectors, not wishes."
+
+    - Pattern: "2-minute burst alignment"
+      Problem: "NO 2-minute cycle. Ultimates are 180s. No 120s party buff window."
+      Fix: "Deploy continuously. Ultimates at phase transitions, not arbitrary timers."
+
+    - Pattern: "Fixed rotation"
+      Problem: "Colony has no rotation. It has a DEPLOYMENT PLAN responding to geometry."
+      Fix: "Every deployment is a spatial decision. If it feels on-rails, you're ignoring the map."
+
+    - Pattern: "RNG crit fishing"
+      Problem: "Crit is NOT RNG. Elevation + overlap + CC state = deterministic."
+      Fix: "Maintain flight. Layer deployments. Attack CC'd targets. Position check, not roll."
+
+    - Pattern: "Neglecting flight"
+      Problem: "Grounded Colony = 60-70% potential. Missing regen bonus, crit, ground AoE immunity."
+      Fix: "Default state is AIRBORNE. Land only for specific reasons."
+
+    - Pattern: "Flutter on the ground voluntarily"
+      Problem: "Flutter at 40% effectiveness grounded. Entire phenotype assumes permanent flight."
+      Fix: "If Flutter and grounded voluntarily: something is wrong. Get airborne."
+
+    - Pattern: "Nightfly skipping darkness setup"
+      Problem: "Without darkness: traps 50-100% detected by SR2+, lures ignored by SR3+."
+      Fix: "ALWAYS darkness first. It's foundation, not optional."
+
+    - Pattern: "Solo phenotype in multi-Harvester party"
+      Problem: "Uncoordinated Colony players deploy conflicting infrastructure."
+      Fix: "Communicate via Colony Signal. Builder→Flutter→Nightfly chain."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E2: ITEM BASELINE COMPARISON
+# ─────────────────────────────────────────────────────────────────────────────
+
+ItemBaseline:
+  Philosophy: "Items define baseline. Class REPLACES permanently. Colony's body IS the inventory."
+
+  BuilderReplaces:
+    - Item: "Quartzwall Capsule"
+      Advantage: "Unlimited, selective permeability, repairable, variable shapes, upgradeable."
+    - Item: "Barricade Foam"
+      Advantage: "60s+ duration (maintenance extended), instant hardening, unlimited."
+    - Item: "Thornveil Seed"
+      Advantage: "Instant deployment, non-combustible, variable size."
+
+  FlutterReplaces:
+    - Item: "Springboard Disc"
+      Advantage: "HAS WINGS. Permanent unlimited flight > 45s fixed installation."
+    - Item: "Lockjaw Spore"
+      Advantage: "Mobile delivery, unlimited regen, 3 pollen types, aerial deployment."
+    - Item: "Flashstep Cartridge"
+      Advantage: "Tailwind/Dart/120% flight speed. Constant mobility > single-use dash."
+
+  NightflyReplaces:
+    - Item: "Hexcage Lantern"
+      Advantage: "Anglerlight ATTRACTS + reveals. Alarm Thread reveals + marks. Active manipulation > passive detection."
+    - Item: "Blindveil Powder"
+      Advantage: "20s zones at 20y range. Nightfly sees through own darkness. Superior every axis."
+    - Item: "Rattletrap Mine"
+      Advantage: "Invisible in darkness, chain-triggerable, 4 types, organs regenerate."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E3: AGGRO SYSTEM INTERACTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+AggroInteraction:
+  ColonyThreatProfile: "Low personal threat. Infrastructure generates separate threat."
+  StructureThreat:
+    SR1: "Ignore deployments, attack nearest player."
+    SR2: "Path around, don't target."
+    SR3: "May target for destruction if blocking pathing."
+    SR4: "Prioritize deployment destruction."
+  FlightThreat: "Airborne = reduced threat from melee-only. Ranged + SR3+ still target airborne."
+  DesignNote: "SR3-4 destroying infrastructure is Colony's PRIMARY high-content challenge."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E4: >50% HP RULE
+# ─────────────────────────────────────────────────────────────────────────────
+
+EnemyHP50Rule:
+  Rule: "Enemies above 50% HP take +25% damage from ALL sources."
+  ColonyInteractions:
+    Builder: "Collapse Structure vs. >50% HP: e.g., Fortified wall 2400 HP × 0.5 × 1.25 = 1500p. Front-load collapses."
+    Flutter: "Seeds in pollen vs. >50%: 150 × 1.3 × 1.25 = 244p per seed. Opening burst significantly stronger."
+    Nightfly: "Blight Pod vs. >50%: 250p burst + 300p puddle = 550p total. Traps set pre-fight benefit most."
+  Implication: "Colony's front-loaded infrastructure strategy REWARDED by this rule. Deploy early, deploy aggressively."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E5: RANK PROGRESSION
+# ─────────────────────────────────────────────────────────────────────────────
+
+RankProgression:
+  Rank1:
+    Name: "Worker"
+    BiomassMax: 100
+    StructureCap: 6
+    SharedUnlocks: ["Lift Off", "Dart", "Hover", "Chitin Mend", "Chitin Harden", "Pheromone Mark", "Colony Signal", "Antennae Sweep"]
+    BuilderUnlocks: ["Secrete Wall", "Resin Pillar", "Seal Path", "Fortify Structure", "Resin Spike", "Resin Snare"]
+    FlutterUnlocks: ["Pollen Puff", "Pollen Trail", "Concentrated Burst", "Seed Drop", "Scatter Seed", "Tailwind"]
+    NightflyUnlocks: ["Devour Light", "Anglerlight", "Snare Web", "Blight Pod", "Alarm Thread", "Luminous Strike", "Bioflash"]
+
+  Rank2:
+    Name: "Specialist"
+    BiomassMax: 120
+    StructureCap: 8
+    BonusPassive: "Deployment cast times -0.3s"
+    SharedUnlocks: ["Shed Chitin"]
+    BuilderUnlocks: ["Bridge Span", "Excavate", "Collapse Structure"]
+    FlutterUnlocks: ["Pollen Storm", "Root Seed", "Updraft", "Divebomb"]
+    NightflyUnlocks: ["Eclipse", "Creeping Dark", "Dancing Lights", "Flashbang Cocoon"]
+
+  Rank3:
+    Name: "Architect / Stormcaller / Abyssweaver"
+    BiomassMax: 150
+    StructureCap: 10
+    BonusPassive: "Pheromone Charge generation +50%"
+    BuilderUnlocks: ["Architect's Domain"]
+    FlutterUnlocks: ["Seed Barrage", "Swarm Cloud"]
+    NightflyUnlocks: ["Abyssal Beacon", "Predator's Maze"]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E6: COLONY SYNERGY (Multi-Harvester Party)
+# ─────────────────────────────────────────────────────────────────────────────
+
+ColonySynergy:
+  CrossPhenotypeCombos:
+    BuilderPlusFlutter:
+      Name: "Funnel and Gas"
+      Effect: "Builder walls force chokepoints → Flutter pollen at exits → GUARANTEED exposure, no escape."
+    BuilderPlusNightfly:
+      Name: "Sealed Darkness"
+      Effect: "Builder seals exits → Nightfly fills with darkness/traps/lures → 100% trap trigger rate."
+    FlutterPlusNightfly:
+      Name: "Blind Sky"
+      Effect: "Nightfly darkens ground → Flutter bombs from above → enemies can't see incoming seeds."
+    AllThree:
+      Name: "Colony Protocol"
+      Effect: >
+        Builder maze + Nightfly darkness + Flutter bombardment = party IS the
+        dungeon enemies are trapped in. Complete superorganism expression.
+
+  PheromoneNetworkScaling:
+    OneColony: "Base regen. No synergy."
+    TwoColony: "+10% regen each. Shared vision. Cross-mark benefits."
+    ThreeColony: "+20% regen each. All combos. Colony Protocol achievable."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E7: PROCGEN MAP INTERACTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+ProcgenInteraction:
+  PhenotypePreferences:
+    Builder: "EXCELS: corridors, multi-room, elevation. STRUGGLES: massive open arenas."
+    Flutter: "EXCELS: open-air, tall ceilings, vertical elements. STRUGGLES: low ceilings, cramped indoors."
+    Nightfly: "EXCELS: indoor/rooms, corridors, many doors. STRUGGLES: open outdoor, ambient lighting."
+  Adaptation: >
+    Colony MUST read procgen map before deciding strategy. First 5-10s =
+    Antennae Sweep + map assessment. No other class benefits as much from
+    understanding the MAP before engaging ENEMIES.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E8: BALANCE VALIDATION
+# ─────────────────────────────────────────────────────────────────────────────
+
+BalanceValidation:
+  - "First deployment within 2 GCDs: PASS (starts at 100 Biomass)"
+  - "Sustained 1 medium per 10s: PASS (5/s = 50/10s, medium = 30-45)"
+  - "Recovery from empty ≤ 15s: PASS (30 Biomass ÷ 5/s = 6s base)"
+  - "60% total contribution: REQUIRES SIMULATION (encounter-dependent)"
+  - "Each phenotype solo-viable Rank 1: PASS (damage + heal + CC)"
+  - "Airborne = 15-20% more than grounded: PASS (crit + regen + safety)"
+  - "No 120s burst alignment: PASS (180s ultimates, odd-timer CDs)"
+  - "Zero RNG: PASS (deterministic crit, deterministic regen, timer seeds)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E9: CONSTRAINTS (SYSTEM COMPLIANCE)
+# ─────────────────────────────────────────────────────────────────────────────
+
+Constraints:
+  GCD: "2.0s base, 1.4s cap — COMPLIANT"
+  Crit: "NOT RNG (elevation + overlap + CC state) — COMPLIANT"
+  HP50Rule: "Applies to ENEMIES (+25% above 50%) — COMPLIANT"
+  ItemBaseline: "Items define baseline, class REPLACES permanently — COMPLIANT"
+  NoBurstCycle: "NO 2-minute burst, NO fixed cadence — COMPLIANT"
+  ZeroFreecure: "Zero RNG procs — COMPLIANT"
+  WeaveModel: "Single-weave only — COMPLIANT"
+  SpecialTier: "Knowledge gate via phenotype depth — CONFIRMED"
+  BiologicalLock: "Hard lock to Harvesters (Linfree) — CONFIRMED"
+  RacialFlight: "Harvesters fly, leveraged by class — CONFIRMED"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E10: OPEN QUESTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+OpenQuestions:
+  - "Structure collision + procgen: snap-to-grid? Free placement? Overlap rules?"
+  - "SR4 destruction rate: if immediate, Colony is unplayable at high content. Needs tuning."
+  - "Nightfly darkness + allies without Pheromone Mark: must allies stay out of zones?"
+  - "Flutter minimum ceiling for functional flight: map gen must guarantee minimum."
+  - "3 Colony party: balanced or crowd other classes for slots?"
+  - "Builder walls vs. SR2 AI: infinite path calc if all paths blocked? Need fallback behavior."
+  - "GATHER role: background gathering during combat? Separate system? Economic party value?"
+  - "Phenotype permanence: 3 characters per Colony main = feature (commitment) or burden (alt mgmt)?"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF COLONY_COMPLETE.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
