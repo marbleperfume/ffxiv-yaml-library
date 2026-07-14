@@ -1,0 +1,569 @@
+# Combat/BalanceTargets.yaml
+# ══════════════════════════════════════════════════════════════════════════════
+# BALANCE TARGETS — Master Combat Tuning Reference
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# This file defines the numerical targets that ALL class designs must validate
+# against. If a class spec contradicts a number here, THIS FILE WINS.
+#
+# Design Philosophy:
+#   - Cooldowns are USE-CASE driven (tactical decisions), NOT timer-alignment
+#   - There is NO burst cadence, NO party-buff-stacking window, NO shared timer
+#   - Each class operates on its own resource economy independently
+#   - "Burst" happens when the SITUATION demands it, not when a clock says to
+#   - Tanks are FRONTLINERS (damage-first, survive by killing or parrying)
+#
+# Authority: DESIGN_OVERRIDE.md > this file > individual class specs > LLM.md
+# ══════════════════════════════════════════════════════════════════════════════
+
+Key: Combat.BalanceTargets
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1: GLOBAL COMBAT TIMING
+# ─────────────────────────────────────────────────────────────────────────────
+
+GlobalTiming:
+  GCD:
+    Base: 2.0s
+    HasteCap: 1.4s  # Absolute floor — cannot go below this regardless of gear/buffs
+    DesignNote: >
+      2.0s base is faster than FFXIV (2.5s) but still allows comfortable
+      single-weave windows. The 1.4s cap prevents the game from becoming
+      an APM test at endgame — the ceiling is decision quality, not speed.
+
+  oGCD:
+    AnimationLock: 0.6s  # Standard for all oGCDs unless noted
+    WeaveModel: single_weave_only
+    DesignNote: >
+      Single-weave ONLY. No double-weaving, no triple-weaving. This is a
+      deliberate constraint: each GCD window has exactly ONE oGCD slot.
+      This prevents ping-dependent optimization and keeps the skill
+      expression in DECISION quality (which oGCD?) not execution speed.
+      Exception: 0.3s lock oGCDs (like Voltaic Parry) allow tighter
+      reactive use without eating into the next GCD.
+
+  CastTimes:
+    Instant: 0s  # Most GCDs
+    Short: 1.0s  # Commitment GCDs (weaker than instant for trade-off)
+    Long: 1.5s  # High-commitment GCDs (strong payoff, sacrifice weave window)
+    Full: 2.0s  # Ultimate-tier (class ultimates, major heals)
+    DesignNote: >
+      Cast time = commitment level. Longer cast = stronger effect but
+      you sacrifice mobility AND your oGCD weave slot. High-commitment
+      skills are intentional friction — not all power should be free.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2: POTENCY REFERENCE BANDS
+# ─────────────────────────────────────────────────────────────────────────────
+
+PotencyBands:
+  BaseFiller: 100  # THE reference GCD. All potency is relative to this.
+  ComboFinisher: 150-200  # End of a 3-hit combo chain
+  GaugeSpender_Small: 200-300  # 50% gauge / equivalent resource cost
+  GaugeSpender_Large: 400-500  # Full gauge / major resource investment
+  ClassUltimate: 600-800  # Rank 3 ultimate (180s+ CD or equivalent gating)
+  HealGCD: 200-300  # Per tick or per cast (healer GCD heal)
+  HealOGCD: 150-400  # Range based on cooldown length
+  DoT_PerTick: 60-100  # Per 3s tick (ground-targeted or applied)
+
+  DesignNote: >
+    These bands exist to prevent power creep between classes. A "big hit"
+    from any class should fall in GaugeSpender_Large (400-500p). No class
+    gets a 900p button — that's reserved for environmental/item effects.
+    ClassUltimate (600-800p) is gated behind Rank 3 + long CD + resource cost.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3: ROLE BASELINES
+# ─────────────────────────────────────────────────────────────────────────────
+
+RoleBaselines:
+  DPS: 100%  # Full DPS reference. All other roles measured against this.
+
+  Frontliner:  # Formerly "Tank" — damage-first characters who control enemies
+    Baseline: 85%
+    Range: "80-87%"
+    DesignNote: >
+      "Tank" at 85% means frontliners deal 85% of a pure DPS class's output.
+      These are NOT passive punching bags. They are damage dealers who ALSO
+      control enemy behavior (via Force Targeting or Unfocus). The 15% DPS
+      tax pays for their control/survivability toolkit. A frontliner who
+      never uses their control tools is just a worse DPS — the tax is
+      justified ONLY because the tools create party value.
+    MadoltSpecific: "80-87% (ceiling depends on guard point / parry execution)"
+    AdafoldSpecific: "82-85% (consistent floor, lower variance)"
+
+  Healer:
+    Baseline: 65%
+    PureDPSMode: 80%  # When zero healing is needed (low-rank content)
+    DesignNote: >
+      Healers at 65% during triage. At 80% when free to DPS (Rank 1 content
+      where nothing threatens the party). The 65→80% swing is the "healer
+      DPS optimization" skill expression: minimize healing GCDs to maximize
+      damage GCDs. In easy content, healers ARE DPS with a panic button.
+
+  ClassDPSBand: "±12% max deviation between any two DPS classes"
+  DesignNote_Band: >
+    No DPS class should exceed 12% above or below the median DPS reference.
+    Tighter than FFXIV's ~15-20% spread. This prevents "meta picks" from
+    feeling mandatory. A 12% gap is noticeable on a spreadsheet but not
+    decisive in whether you clear content.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: TIME TO KILL (TTK) TARGETS
+# ─────────────────────────────────────────────────────────────────────────────
+
+TTK:
+  Trash: "5-8s (full party, Rank 1 content)"
+  Elite: "20-30s (full party, Rank 2 content)"
+  DungeonBoss: "2-3 minutes (full party)"
+  RaidBoss: "8-10 minutes (full party, target clear time)"
+
+  SoftEnrage:
+    Trigger: "30s past target TTK"
+    Effect: "+10% boss damage per 30s beyond target"
+    Stacking: "Additive. At 90s over = +30%. At 150s over = +50%."
+    Intent: >
+      Soft enrage prevents infinite stalling. If the party is dealing enough
+      damage to stay within target TTK ±30s, they never see enrage. If DPS
+      is catastrophically low, the fight becomes impossible gradually — not
+      a sudden wall. This is forgiving for low-rank content (Rank 1 players
+      will be 15-20s over and only see +10%) but punishing for raid content
+      where every second matters.
+
+  SoloTTK:
+    Trash: "8-12s (frontliner solo, Rank 2 content)"
+    Elite: "45-60s (frontliner solo, Rank 2 content)"
+    DesignNote: >
+      Solo frontliners kill slower but CAN clear. This is the "push the
+      corridor alone" scenario. TTK extends because party DPS isn't there,
+      but parry/sustain keeps you alive through the longer fight.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 5: PARTY SCALING
+# ─────────────────────────────────────────────────────────────────────────────
+
+PartyScaling:
+  EnemyHP:
+    Solo: 1.0x
+    Duo: 1.6x
+    Trio: 2.1x
+    FullParty_4: 2.6x
+    DesignNote: >
+      SUBLINEAR scaling. A 4-person party does NOT face 4x HP — they face
+      2.6x. This means parties are MORE efficient than solo (by design).
+      Solo is viable but slower. Parties are rewarded with faster clears,
+      not punished with proportional scaling.
+
+  EnemyDamage:
+    Solo: 1.0x
+    Duo: 1.0x  # Damage doesn't scale with party size
+    Trio: 1.0x
+    FullParty_4: 1.0x
+    DesignNote: >
+      Enemy damage is CONSTANT regardless of party size. A trash mob hits
+      the same whether you're solo or in a group of 4. This means parties
+      are SAFER (more HP pools, healer present) but enemies aren't hitting
+      harder to compensate. Solo is harder because you take ALL the hits.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 6: GEAR & PROGRESSION
+# ─────────────────────────────────────────────────────────────────────────────
+
+Gear:
+  PowerGain:
+    FreshToiBiS: "30-40%"  # Total power increase from fresh 0 gear to BiS
+    DesignNote: >
+      A BiS character deals 30-40% more damage than a fresh character at
+      the same rank. This is enough to FEEL meaningful without making
+      undergeared players completely irrelevant in party content.
+
+  DiminishingReturns:
+    Model: square_root
+    SoftCap: "Defined per stat. Above soft cap: each point gives sqrt(excess) value."
+    Intent: >
+      Square-root DR means overinvesting in one stat has rapidly diminishing
+      returns. This naturally diversifies gearing (can't just stack one stat)
+      and keeps old content relevant (you can't out-stat Rank 3 content by
+      farming Rank 1 indefinitely — DR kicks in).
+
+  SyncDown: false  # NO LEVEL SYNC. DR handles old content naturally.
+  DesignNote_NoSync: >
+    No sync-down mechanic. Players are NEVER reduced in power when entering
+    old content. Instead, diminishing returns ensure that overgearing provides
+    comfort (faster clears, larger margin) but not infinite power. A BiS
+    player in Rank 1 content kills fast and is safe, but isn't one-shotting
+    raid bosses from 3 ranks ago.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 7: GAUGE & RESOURCE TIMING
+# ─────────────────────────────────────────────────────────────────────────────
+
+GaugeTiming:
+  FirstSpend:
+    Target: "12-16s from combat start"
+    WithOpenerCD: "6-8s (if a CD grants immediate gauge)"
+    DesignNote: >
+      Players should have their FIRST meaningful resource decision within
+      12-16 seconds of pulling. Not instant (that removes buildup) but not
+      30+ seconds (that's boring). Opener CDs that grant immediate gauge
+      exist to create an early decision point.
+
+  FullGauge:
+    Target: "30-40s from combat start (pure ST, no delays)"
+    Realistic: "36-45s (with mechanics, movement, oGCD weaving)"
+    DesignNote: >
+      Full gauge in ~35-40s means a 3-minute boss fight sees 4-5 full gauge
+      cycles. Enough to feel rhythmic without being metronome-rigid. Each
+      cycle's SPEND decision matters because you only get 4-5 of them.
+
+  OvercapPunishment:
+    Model: "Gauge stops at max. Generation wasted."
+    Visual: "Warning indicator at 80-90% gauge (class-specific)"
+    Intent: >
+      Overcapping is the primary execution failure. Spending at 80% when
+      appropriate > holding for 100% and wasting generation. This is the
+      "always be spending" pressure that keeps gameplay active.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 8: >50% HP RULE
+# ─────────────────────────────────────────────────────────────────────────────
+
+OverFiftyRule:
+  Name: ">50% HP Incoming Damage Amplification"
+  Effect: "Players above 50% HP take +25% incoming damage"
+  Threshold: 50%
+  Amplification: 25%
+  AppliesToOvershield: false  # Overshield does NOT count as HP for this rule
+
+  Intent: >
+    This rule pushes aggressive play across ALL roles:
+    - You WANT to hover around 50% HP, not sit at full
+    - Chip damage is relevant (can't ignore small hits at full HP)
+    - Creates natural triage threshold for healers (heal TO 50%, not to full)
+    - Rewards Shaman's overshield model (overshield doesn't trigger the rule)
+    - Makes the >50% HP state RISKY, not safe — inverts the normal "full HP = safe" assumption
+
+  HealerImplication: >
+    Healers should NOT top players to full HP. Healing to 50-60% is optimal.
+    Over-healing actually makes teammates MORE VULNERABLE (they take +25%
+    on the next hit). This creates a skill expression: knowing WHEN to heal
+    and HOW MUCH. Spam healing is actively counterproductive.
+
+  FrontlinerImplication: >
+    Frontliners who take hits down to 40-50% HP are in the SAFE ZONE.
+    Being at full HP means taking 25% MORE from the next hit. Good
+    frontliners deliberately eat small hits to stay below 50%. Parry
+    restoring 5% HP is tuned to keep you NEAR 50%, not rocket you to full.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 9: STRATEGY RANK (ENEMY AI) MODIFIERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+StrategyRank:
+  Scale: "1-4 (confirmed)"
+  Description: >
+    Strategy Rank is an AI BEHAVIOR SET, not a stat multiplier. It determines
+    HOW enemies act, not how HARD they hit. A Rank 4 trash mob is weak but
+    smart — it dies fast when caught but is hard to catch. A Rank 1 boss is
+    strong but dumb — it hits hard but never flanks.
+
+  Ranks:
+    Rank1:
+      Behavior: "Attack whoever's closest. No tactics. No pathfinding."
+      PlayerExpectation: "Cluster and mash. FFXIV Normal execution."
+      EnemyExamples: "Trash mobs, wildlife, ambient hostiles"
+      FrontlinerRequirement: "Just be in front. Existing is sufficient."
+      ContentDesign: >
+        Low dead time. Telegraphed danger (ground markers, cast bars).
+        Enemies attack on rhythm. GCD rolls continuously. This IS the
+        FFXIV Normal floor — smooth, rhythmic, rewarding without mastery.
+
+    Rank2:
+      Behavior: "Seek shortest open path to casters/squishies. Path around obstacles."
+      PlayerExpectation: "Frontliner awareness. Notice enemies trying to bypass."
+      EnemyExamples: "Dungeon elites, pack leaders, trained soldiers"
+      FrontlinerRequirement: "Active control. Force Targeting or Unfocus needed."
+      ContentDesign: >
+        Enemy tells exist but are faster. Positionals matter. Tank is
+        visibly doing SOMETHING. Healer may need to spot-heal. Party
+        starts noticing the system under the hood.
+
+    Rank3:
+      Behavior: "Flank, coordinate, retreat when low HP, target installations."
+      PlayerExpectation: "Strategic play. Positioning decisions. Summon placement."
+      EnemyExamples: "Boss adds, veteran enemies, elite squads"
+      FrontlinerRequirement: "Mastery. Parry for survival. Deliberate tool use."
+      ContentDesign: >
+        Enemy tells are READ, not telegraphed (Monster Hunter feel).
+        Gauge decisions matter. Splitting becomes advantageous when the
+        party is skilled enough. Every class axis starts engaging.
+        Shaman summons get targeted — placement becomes a puzzle.
+
+    Rank4:
+      Behavior: "Call reinforcements, set ambushes, destroy deployables, exploit splits."
+      PlayerExpectation: "Full system engagement. All tools load-bearing."
+      EnemyExamples: "Bosses, named NPCs, raid encounters"
+      FrontlinerRequirement: "Everything simultaneously. Parry, suppress, position, control."
+      ContentDesign: >
+        Procgen geometry matters. Summon HP matters. Every class axis
+        engaged simultaneously. DRG Hazard 5 feel — the full system sings
+        or you wipe. Frontliners who can't parry die. Healers who over-heal
+        trigger >50% rule and kill teammates. DPS who cheese at range get
+        pushed by advancing enemies.
+
+  RankIsNotDifficulty: >
+    A Rank 4 enemy with 100 HP is still a Rank 4 enemy — it will try to
+    ambush, flank, and destroy your summons. It just dies in one hit when
+    you catch it. Conversely, a Rank 1 enemy with 50,000 HP is a damage
+    sponge that stands still and hits whoever's closest. Rank = behavior.
+    HP/damage = stat budget. These are INDEPENDENT axes.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 10: PARRY TIMING REFERENCE
+# ─────────────────────────────────────────────────────────────────────────────
+
+ParryTiming:
+  Window: 0.75s  # Tentative. Based on League of Legends reaction standard.
+  Status: tentative
+  DesignNote: >
+    0.75s before an attack lands — player must activate parry within this
+    window for it to count. Tight enough to demand prediction on fast
+    enemies (Rank 3+ with quick tells), wide enough to be achievable at
+    real-world pings (50-150ms). Based on League of Legends reaction
+    timing as a proven standard for competitive online games.
+    ADJUST AFTER PLAYTESTING with real netcode.
+
+  OnSuccess:
+    DamageNegated: 100%
+    HPRestored: "5% max HP"
+    GaugeGenerated: 15  # Madolt-specific (more than guard block = 10)
+    UnfocusApplied: "1 rank suppression, 12s"
+    EnablesVoltaicCounter: true
+    DesignNote: >
+      Successful parry is the FULL REWARD: damage negated, HP back, gauge,
+      suppress, AND counter follow-up. This is why parry is the skill ceiling
+      — it gives everything. A Madolt who parries every big hit is self-
+      sustaining, gauge-positive, and suppress-maintaining simultaneously.
+
+  OnFailure:
+    RecoveryLock: 0.6s  # Can't act for 0.6s (whiffed and exposed)
+    DamageTaken: "Normal (no mitigation, no bonus — just the lockout)"
+    DesignNote: >
+      Failed parry = 0.6s vulnerability. Not catastrophic on a single miss,
+      but in Rank 3+ content where enemies chain attacks, that 0.6s means
+      eating the next hit raw. Punishes spam-parrying without being lethal
+      on a single failure.
+
+  ScalingWithEnemySpeed:
+    SlowEnemy: "Tells last 1.5-2.0s. Parry window is generous relative to tell = free."
+    MediumEnemy: "Tells last 0.8-1.2s. Parry requires attention but not mastery."
+    FastEnemy: "Tells last 0.3-0.6s. Parry demands prediction (tell < window = must predict start)."
+    DesignNote: >
+      Enemy attack speed IS the difficulty lever for parry. Slow enemies =
+      reaction-based (anyone can do it). Fast enemies = prediction-based
+      (you must read the pattern and pre-input). No number changes needed
+      to scale difficulty — just animation speed.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 11: SIMULATION PASS/FAIL CRITERIA
+# ─────────────────────────────────────────────────────────────────────────────
+
+SimulationCriteria:
+  Description: >
+    Every class spec must pass ALL of these criteria in a simulated
+    combat scenario before being considered balanced. Failure on ANY
+    criterion = redesign required.
+
+  Criteria:
+    - Id: gauge_first_spend
+      Name: "Gauge reaches first spend threshold"
+      Target: "12-16s from combat start"
+      FailIf: ">20s to first meaningful gauge spend"
+      Severity: CRITICAL
+
+    - Id: gauge_full
+      Name: "Gauge reaches full"
+      Target: "30-40s from combat start"
+      FailIf: ">50s or <20s to full gauge (too slow or too fast)"
+      Severity: CRITICAL
+
+    - Id: dps_output
+      Name: "DPS within role band"
+      Target: "Within ±12% of role baseline over 5-minute sim"
+      FailIf: "Any class >12% above or below median for its role"
+      Severity: CRITICAL
+
+    - Id: ttk_trash
+      Name: "Trash dies in target window"
+      Target: "5-8s (full party, Rank 1)"
+      FailIf: "Trash takes >12s in full party OR <3s (trivial)"
+      Severity: HIGH
+
+    - Id: ttk_boss
+      Name: "Boss dies near target TTK"
+      Target: "8-10 min (full party, Rank 4 raid boss)"
+      FailIf: "Boss dies <6 min (undertuned) or >12 min (overtuned)"
+      Severity: HIGH
+
+    - Id: gauge_overcap
+      Name: "Gauge overcap rate acceptable"
+      Target: "<10% of potential generation wasted in optimal play"
+      FailIf: ">15% gauge wasted even in optimal sim (generation too fast)"
+      Severity: MEDIUM
+
+    - Id: survival_solo
+      Name: "Frontliner survives solo at Rank 2"
+      Target: "Frontliner can clear Rank 2 elite solo with parry + mitigation"
+      FailIf: "Frontliner dies to Rank 2 elite even with perfect parry execution"
+      Severity: HIGH
+
+    - Id: healer_dps_mode
+      Name: "Healer achieves 80% DPS in easy content"
+      Target: "Healer deals 80% of DPS reference when zero healing needed"
+      FailIf: "Healer <70% DPS output with no healing requirements"
+      Severity: MEDIUM
+
+    - Id: hp_rule_interaction
+      Name: ">50% HP rule doesn't cause death spirals"
+      Target: "Player at 51% HP survives standard 2-hit combo from target content"
+      FailIf: "Player at 51% HP dies to any standard (non-TB) 2-hit sequence"
+      Severity: CRITICAL
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 12: CC & COMBAT CONTROL NOTES
+# ─────────────────────────────────────────────────────────────────────────────
+
+CCNotes:
+  Charm_Siren:
+    Stage1_Effect: "Enemy deprioritization — Siren becomes harder to target"
+    Mechanic: >
+      At Charm Stage 1, affected enemies deprioritize the Siren in their
+      targeting logic. They don't stop attacking entirely, but the Siren
+      drops lower in the AI's target priority list. This makes Siren harder
+      to focus down in multi-enemy scenarios without being full CC immunity.
+    AllyAggroDraw: >
+      Allies receiving Charm aura (via Siren proximity/buff) draw INDIRECT
+      aggro from charmed enemies. Charmed enemies drift toward the charmed
+      ally — the Siren heals through the redirected damage. This is the
+      Siren's healing loop: Charm redirects damage to allies the Siren is
+      already passively healing via drain economy. The healer heals through
+      it, not around it.
+    DesignImplication: >
+      Charm converts enemy attention into a resource the Siren can manage.
+      Stage 1 = soft self-peel. Allies under Charm aura become pseudo-tanks
+      that the Siren sustains. This is why Siren scales with battlefield
+      presence (more targets in range = more Charm vectors = more sustain
+      throughput).
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 13: HEALER STAT ARCHITECTURE (MAG / MED SPLIT)
+# ─────────────────────────────────────────────────────────────────────────────
+
+HealerStatArchitecture:
+  Description: >
+    Healer power is split between two independent stats: MAG and MED.
+    This creates divergent healer identities — proactive vs reactive,
+    offensive vs defensive — with meaningful stat investment decisions.
+
+  StatDefinitions:
+    MAG:
+      Controls:
+        - "Barrier strength (damage absorption shields)"
+        - "Damage output (offensive spells)"
+      DesignIntent: >
+        Proactive/offensive stat. Better teams don't need heals → MAG healer
+        thrives in good groups. Also controls DPS output — a MAG-invested
+        healer is a better damage dealer when healing pressure is low.
+        Barrier is preventive: applied BEFORE damage lands.
+
+    MED:
+      Controls:
+        - "Direct healing (HP restoration)"
+        - "Drain/sustain scaling"
+      DesignIntent: >
+        Reactive/defensive stat. Heals actual HP damage that already happened.
+        Drain and sustain effects scale with MED. Pure healing stat with NO
+        damage scaling — investing in MED makes you a better healer but not
+        a better DPS.
+
+  HealerArchetypes:
+    Elementalist_Tryll:
+      Character: "Tryll"
+      BarrierHealRatio: "100:0 → shifts under pressure"
+      PrimaryStat: "MAG (13) / MED (13) split"
+      Behavior: >
+        Barriers proactively. When barriers break, forced into expensive
+        reactive healing. CC becomes survival tool. Triage progression:
+        Triage Over → burst sustain → mana crash → manaless phase.
+      DesignPhilosophy: >
+        Mediocre on purpose. The MAG 13 / MED 13 split makes Elementalist
+        genuinely mediocre at both barriers AND healing until forced to
+        commit to one mode. Ramp = situation deteriorating. If Tryll is
+        ramping, things are going WRONG. Good groups never see Tryll's
+        full kit because barriers hold and the Elementalist stays in
+        damage mode.
+
+    Siren_Cantor_Merryin:
+      Character: "Merryin"
+      BarrierHealRatio: "80:20 stable passive"
+      PrimaryStat: "MED primary"
+      Behavior: >
+        Constant passive healing through Charm drain economy. Scales with
+        battlefield presence — more targets in range = more sustain
+        throughput. Stable throughput curve (no ramp, no crash).
+      DesignPhilosophy: >
+        The crowd healer. Siren's sustain increases linearly with the
+        number of enemies/allies in Charm range. Isolated = weak.
+        Surrounded = strongest healer in the game. Positioning IS the
+        skill expression — stand where the most bodies are.
+
+    Shaman_Soue:
+      Character: "Soue"
+      BarrierHealRatio: "0:variable (Invested vs Harvested state)"
+      PrimaryStat: "Dependent on Invested/Harvested choice"
+      Behavior: >
+        Heals by SACRIFICING enemy debuffs (Harvested state). Not a primary
+        healer — offtank/DPS with healing as an option. Choosing to heal
+        means choosing NOT to maintain offensive pressure on the target.
+      DesignPhilosophy: >
+        The sacrifice healer. Every heal costs offensive momentum. Shaman
+        doesn't have a "free" healing mode — Harvesting debuffs to heal
+        removes the debuff from the enemy, reducing party DPS. This creates
+        a genuine cost/benefit calculation every time healing is needed.
+
+  DesignPrinciples:
+    - "Barrier healer (MAG) thrives proactively, deteriorates reactively"
+    - "Drain healer (MED) thrives in chaos/crowds, deteriorates in isolation"
+    - "Sacrifice healer (Shaman) heals at cost of offensive pressure"
+    - "MAG also influences damage output → barrier healers are better DPS in good groups"
+    - "MED has no damage scaling → pure healing stat, drain stat"
+    - "Tryll's MAG 13 / MED 13 split makes Elementalist genuinely mediocre at both until forced to commit"
+
+  BalanceImplication: >
+    The MAG/MED split means healer balance isn't one-dimensional. A healer
+    stacking MAG is optimizing for: (1) stronger barriers, (2) better DPS,
+    (3) weaker reactive heals. A healer stacking MED is optimizing for:
+    (1) stronger direct heals, (2) better drain sustain, (3) zero DPS gain.
+    Content difficulty determines which stat investment pays off — easy
+    content rewards MAG (barriers hold, DPS matters), hard content rewards
+    MED (barriers break, raw healing saves lives).
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 14: WHAT THIS FILE DOES NOT CONTAIN
+# ─────────────────────────────────────────────────────────────────────────────
+
+Exclusions:
+  - "No party-buff-alignment windows. Cooldowns are use-case driven."
+  - "No 'optimal burst timing' relative to other players' CDs."
+  - "No multiplicative buff stacking on shared timers."
+  - "No 120s/180s/360s LCM alignment math."
+  - "No 'raid DPS contribution from buff uptime' calculations."
+  - >
+    If a class spec references 'aligning with party buffs' or 'burst window
+    timing relative to team cooldowns,' that spec is WRONG and must be revised
+    to use-case framing. Skills are pressed when the SITUATION demands, not
+    when a clock says to.
+
+# ══════════════════════════════════════════════════════════════════════════════
+# END OF FILE
+# ══════════════════════════════════════════════════════════════════════════════
