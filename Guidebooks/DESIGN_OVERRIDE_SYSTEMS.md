@@ -274,5 +274,58 @@ DESIGN_OVERRIDE.md itself follows the same chain logic. When this file exceeds *
 
 ---
 
+## 25. Resource Gating > Cooldowns (No Long CDs)
+
+**Identity-defining skills are NEVER gated by long cooldowns (90s/120s/180s).** They are gated by RESOURCE COST — gauge, materials, field state, or consumables that the player actively earns through play.
+
+### Why Cooldowns Fail
+
+- 180s CD = 3 minutes where the class has no access to its defining power
+- Player forgets the skill exists between uses → class identity is forgettable
+- RPG encounter balance can't assume "maybe they used it 2 min ago"
+- Opportunities permanently shut down by one bad timing → feels punishing, not strategic
+- **Racially bound classes suffer double:** boring class = boring race
+
+### Correct Pattern: Resource Gating
+
+| Gate Type | How It Works | Example |
+|-----------|--------------|---------|
+| Gauge cost | Powerful skill drains gauge earned through combat actions | Reaver Frenzy (HP-gated, earned by fighting) |
+| Material cost | Consumable resource (MonsterBone, Biomass, etc.) | Shaman summon deployment |
+| Field state | Skill unlocks when battlefield conditions are met | Colony: terrain placed → big skill available |
+| Escalation | Resource builds FASTER under pressure | Intensity-scaled gauge gen in hard fights |
+
+### Key Principles
+
+1. **Normal play emphasizes repetition or retreat to earn power.** The cycle of setup → payoff → reset → setup keeps the identity PRESENT. Never "wait 3 minutes."
+
+2. **Intensity scales resource generation.** Bigger fights = more gauge = more access to powerful tools. The game REWARDS you for being in hard content with MORE of your class identity, not less. Avoid the pitfall of farming weak mobs for gauge to spend on bosses.
+
+3. **Setup IS the resource.** For Colony, terrain placed = gauge accruing. For Shaman, hexes maintained = Harvest available. The preparatory actions ARE the gating — the payoff comes FROM the setup, not despite it.
+
+4. **Stage 3 CC as resource-gated power** (not just burst damage). A Colony Nightfly's paralysis dust on retreat lets the party turn around and rain hell. This is IMMENSELY powerful precisely BECAUSE it's Stage 3. It's earned through positioning and resource, never trivially available on a timer.
+
+5. **Never permanently shut down.** A missed opportunity costs time/resources to rebuild, NOT a 3-minute lockout. Player can retreat, re-earn, re-attempt. The punishment is inefficiency, not inaccessibility.
+
+6. **Class identity present in EVERY engagement.** Player is always either USING the thing that makes their class/race special, or BUILDING TOWARD it. Zero dead-identity windows.
+
+### Anti-Patterns
+
+- ❌ 180s/120s/90s cooldowns on identity-defining skills
+- ❌ Building gauge on weak enemies to spend on strong ones
+- ❌ Spike-and-forget identity (3 strong hits then filler for 2 min — ToS Featherfoot problem)
+- ❌ Opportunities permanently shut down by one bad timing
+- ❌ "Ultimate" skills that exist outside normal play flow
+
+### Correct Anti-Example: ToS Featherfoot
+
+Featherfoot spews debuffs for 3 strong Kundela Slash hits, then goes back to Blood Sucking or other class rotations. The class identity (curse damage) only exists for ~10s every 30-40s. The rest is filler from a different class. This makes the identity forgettable. Colony/Shaman/any race-locked class CANNOT have this problem — the race will look boring.
+
+### Short Cooldowns Are Fine
+
+Tactical cooldowns (5-15s) that gate individual skill FREQUENCY without removing class identity are acceptable. The rule targets cooldowns long enough to create "dead identity" windows where the player has no access to what makes their class special.
+
+---
+
 *Last updated: 2026-07-14*
-*Source conversation: Healer identity session + file structure reform*
+*Source conversation: Healer identity session + file structure reform + resource gating principle*
