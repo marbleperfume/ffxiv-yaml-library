@@ -1309,6 +1309,174 @@ OpenQuestions:
   - "GATHER role: background gathering during combat? Separate system? Economic party value?"
   - "Phenotype permanence: 3 characters per Colony main = feature (commitment) or burden (alt mgmt)?"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E11: DESIGN NOTES — CORRECTION LOG
+# ─────────────────────────────────────────────────────────────────────────────
+
+DesignNotes:
+  TierChange_BaseToSpecial:
+    Previous: "Base tier (Class List — Qual Context.md, entry #6)"
+    Current: "SPECIAL tier"
+    Justification: >
+      Colony was listed as Base because each individual phenotype LOOKS simple
+      on the surface (place walls / drop pollen / set traps). The upgrade to
+      Special tier recognizes that:
+      1. Three phenotypes = three completely different games. A Builder main
+         learning Flutter is learning a NEW CLASS, not switching specs.
+      2. Each phenotype's mastery curve extends infinitely through spatial
+         reasoning + enemy AI prediction + procgen map adaptation.
+      3. Multi-Harvester party coordination requires understanding ALL
+         phenotypes and their interactions — a knowledge gate beyond Base.
+      4. Phenotype permanence (biological body type) means character-level
+         commitment that warrants deeper investment.
+      Special tier = "almost a different game." Colony IS almost a different
+      game three times over.
+
+  FlightCorrection:
+    Previous: "Flight implied but not mechanically defined"
+    Current: "ALL Harvesters fly. Flight is RACIAL. Colony gameplay LEVERAGES it."
+    Details: >
+      The Harvester race has wings — all phenotypes can fly. This was always
+      implied by Flutter having "aerial" in its description but never explicitly
+      designed into the shared mechanics. CORRECTION: Flight is now a shared
+      racial trait with phenotype-specific wing morphology that creates different
+      flight behaviors:
+      - Builder: 80% speed, heavy-lift, crane mode construction from above
+      - Flutter: 120% speed, agile, permanent aerial combat stance
+      - Nightfly: 100% speed, silent, stealth approach from above
+      Flight affects: Biomass regen (+40% airborne), crit access (elevation
+      condition), ground AoE immunity, deployment angles, and survivability.
+      Flutter in particular is redesigned to be a PERMANENT FLIGHT class that
+      never lands voluntarily.
+
+  DocumentStructure:
+    Previous: "Single mixed document (hard to sift through)"
+    Current: "SHARED CORE → BUILDER → FLUTTER → NIGHTFLY → COMBINED"
+    Justification: >
+      Each phenotype section is self-contained. A Builder player reads
+      Part A (shared) + Part B (Builder) and has complete information.
+      They never encounter Flutter or Nightfly mechanics unless they
+      choose to read those sections. Combined section (Part E) covers
+      cross-cutting concerns all phenotypes share.
+
+  SystemRuleCompliance:
+    GCD: "2.0s base confirmed. All GCD skills use 2.0s recast. 1.4s cap acknowledged."
+    Crit: >
+      Zero RNG. Colony crit conditions are SPATIAL: elevation (4y+ above target),
+      infrastructure overlap (enemy touching 2+ deployments), CC state (enemy in
+      Colony CC). These are all player-controlled positions, not dice rolls.
+    HP50Rule: >
+      Applied to ENEMIES. Enemies above 50% HP take +25% damage from all sources.
+      Colony implication: front-load infrastructure damage. Deploy aggressively
+      while enemies are healthy. First half of fight = maximum Colony damage value.
+    ItemBaseline: >
+      Items define what the world CAN do. Class replaces permanently. Colony's
+      biological systems (secretion glands, pollen sacs, bioluminescent organs)
+      are the PERMANENT replacement for entire consumable categories. The premium:
+      regeneration. Items run out. Colony's body doesn't.
+    NoBurstCycle: >
+      Zero 2-minute windows. Colony ultimates are 180s. No ability aligns to
+      120s. Colony's power is CONTINUOUS deployment, not periodic burst. The
+      game has no shared party buff timer to align with.
+    ZeroFreecure: >
+      No RNG procs anywhere in Colony's kit. Biomass regenerates at fixed rates.
+      Seeds regenerate on timers. Pheromone Charges generate from deterministic
+      triggers. Nothing in Colony is random.
+
+  RelationToOtherClasses: >
+    Colony occupies unique design space: map-shaping support. Comparisons:
+    - Shaman: Places totems (installations) but doesn't BUILD terrain.
+    - Elementalist: Creates elemental zones (effects) but not physical structures.
+    - Machinist: Deploys turrets but doesn't reshape pathing.
+    - Adafold: Body-blocks (collision tank) but doesn't CREATE new collision.
+    Colony is the ONLY class where encounter geometry itself changes.
+
+  DesignAncestry: >
+    Original qual context (New Locked Classes doc) established:
+    - Three phenotypes from eusocial insect biology
+    - Each phenotype = different body plan (permanent)
+    - Colony identity as "effective alone, synergizes when grouped"
+    - Biological lock (hardest lock type — body IS class)
+    This document makes those design intentions MECHANICALLY CONCRETE
+    without contradicting any established qualitative decisions.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E12: VISUALIZATION HOOKS
+# ─────────────────────────────────────────────────────────────────────────────
+
+VisualizationHooks:
+  BiomassDisplay:
+    Type: "Segmented bar (organic texture — resin/pollen/enzyme coloring by phenotype)"
+    Position: "Below HP bar"
+    Segments: "Each 25 Biomass = one segment (4 segments at base, 5 at Rank 2, 6 at Rank 3)"
+    RegenVisual: "Segments fill organically (liquid rising, not linear tick)"
+
+  PheromoneChargeDisplay:
+    Type: "3 orbs (insect wing coloring — iridescent)"
+    Position: "Adjacent to Biomass bar"
+    FullVisual: "Orbs pulse rhythmically when charge available"
+
+  DeploymentTracker:
+    Type: "Count icons (structure silhouettes for Builder, cloud puffs for Flutter, trap icons for Nightfly)"
+    Position: "Party frame adjacent"
+    ActiveCount: "X / Max displayed. Decaying deployments flash."
+
+  FlightStateIndicator:
+    Type: "Wing icon (unfolded = airborne, folded = grounded)"
+    Position: "Character nameplate"
+    BonusDisplay: "Airborne shows +40% regen text briefly on takeoff"
+
+  CritFeedback:
+    ElevationCrit: "Downward arrow impact visual (gravity-assisted strike)"
+    InfrastructureCrit: "Resonance ripple between contacted structures"
+    CCStateCrit: "Target glow intensifies on crit hit (exploiting weakness)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION E13: BIOMASS ECONOMY — DETAILED MATH
+# ─────────────────────────────────────────────────────────────────────────────
+
+BiomassEconomy:
+  RegenScenarios:
+    Grounded_Moving: "5/s base = 50 per 10s"
+    Grounded_Stationary: "6/s (+20%) = 60 per 10s"
+    Airborne_Moving: "7/s (+40%) = 70 per 10s"
+    Airborne_Hovering: "8/s (+60%) = 80 per 10s"
+    Airborne_Hovering_2Colony: "8.8/s (+60% + 10% party) = 88 per 10s"
+    Airborne_Hovering_3Colony: "9.6/s (+60% + 20% party) = 96 per 10s"
+
+  SpendingProfiles:
+    BuilderTypical: >
+      Phase 1 (0-15s): 3 walls + 1 pillar = 25+25+25+40 = 115 Biomass.
+      Starts at 100, hits 0 at ~12s (spending faster than regen).
+      Recovery: 6-8s hovering to reach 50 Biomass for next deployment.
+      Phase 2 (15-40s): Maintenance (3/5s × 4 structures = 2.4/s) + 1 repair
+      per 10s (10 Biomass) + 1 Resin Spike per 10s (10 Biomass).
+      Net drain in Phase 2: ~4.4/s spending vs. 7/s airborne regen = SUSTAINABLE.
+      Steady state: Builder is net-positive at 4 structures while airborne.
+    FlutterTypical: >
+      Constant pollen: 1 Puff per 4s = 15/4s = 3.75/s pollen spending.
+      Airborne regen: 7/s. Net positive: +3.25/s while deploying pollen.
+      Pollen Storm every 25s: 45/25s = 1.8/s amortized.
+      Total Flutter spending: ~5.5/s amortized vs. 7/s regen = SUSTAINABLE.
+      Seeds are FREE (ammo system, not Biomass). Flutter sustains indefinitely.
+    NightflyTypical: >
+      Setup phase (0-20s): 2 darkness (60) + 2 lures (40) + 3 traps (55) = 155 Biomass.
+      EXCEEDS starting 100 by 55. Must regen 55 during setup = 8s at 7/s.
+      Practical: Setup takes 10 GCDs (20s). During 20s: 140 Biomass regenerated.
+      Total available during setup: 100 + 140 = 240. Spending: 155. Surplus: 85.
+      Nightfly setup is COMFORTABLE. The bottleneck is GCDs, not Biomass.
+      Maintenance: 3/5s × 7 deployments = 4.2/s vs. 7/s regen = SUSTAINABLE.
+
+  DesignInsight: >
+    Builder runs out EARLY (front-loads expensive structures) then stabilizes.
+    Flutter never runs out (cheap continuous deployment matches regen).
+    Nightfly has comfortable setup but expensive REPLACEMENT if traps trigger
+    (rebuilding 5 triggered traps = 95 Biomass in rapid succession).
+    Each phenotype has a DIFFERENT resource pressure pattern:
+    - Builder: burst-spend → sustain
+    - Flutter: sustain → sustain (steady state from moment 1)
+    - Nightfly: moderate-spend → idle → burst-replace (when traps trigger)
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # END OF COLONY_COMPLETE.yaml
 # ═══════════════════════════════════════════════════════════════════════════════

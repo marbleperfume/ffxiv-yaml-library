@@ -1,0 +1,397 @@
+# Classes/Wavecaller/Wavecaller_Complete_Part1.yaml
+# ══════════════════════════════════════════════════════════════════════════════
+# WAVECALLER — Part 1 of 2 (Identity → Triggers)
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# "The aggressive healer who wants to fight but SHOULD be healing. The constant
+# push/pull between 'I could dive and kill that thing' vs 'my team needs me back
+# here' IS the class fantasy. No other healer has this identity."
+#
+# Sound magic = HEALING (fast, AoE, possibly no LoS since sound propagates).
+# Water portal dive = DAMAGE (generate portal → dive through → smash → emerge).
+#
+# IDENTITY: Dolphin/orca/killer whale — physical, fast, playful-violent predator.
+# NOT enchantment/lure/song-charm. AVOID ALL SIREN TERMINOLOGY.
+# No "charm", no "enchant", no "lure", no "allure".
+#
+# WEAPON: Harpoon — aquatic hunter identity. Base melee polearm.
+#
+# NOT Jaguar from ToS — not spam CC forcing standstills.
+# NOT rotation-based — dive decisions are contextual, never scripted.
+# NOT whale-sized — humanoid, cute (Shylily-esque), teeth are VISUAL only.
+#
+# RIFT DIVE IS NOT EXTREME RISK — the "risk" is ignoring your team (their HP
+# drops while you DPS). Not personal death.
+#
+# PUNISHMENT BASED ON IGNORANCE — fails from misreading when to heal vs dive
+# (Position × Action × Time). Not mechanical overwhelm.
+#
+# HEALERS CANNOT REPLACE THE FRONTLINE — explicit, no exceptions.
+#
+# Balance Ref: Combat/BalanceTargets.yaml
+# Last Updated: 2026-07-14
+# ══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Wavecaller
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# THIS IS PART 1 OF 2. Sections 5-13 are in Wavecaller_Complete_Part2.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HEADER
+# ─────────────────────────────────────────────────────────────────────────────
+
+Header:
+  ClassName: Wavecaller
+  Race: Jumpers
+  RaceCategory: Linfree
+  Tier: Experienced
+  Role: Healer / DPS
+  SubRole: MED-primary (direct healing + drain)
+  LockType: Biological
+  Weapon: "Harpoon (trident-style polearm — aquatic hunter identity)"
+  LastUpdated: 2026-07-14
+  DesignPhase: qualitative_complete
+  Status: awaiting_quantitative_pass
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SYSTEM RULES (MUST COMPLY)
+# ─────────────────────────────────────────────────────────────────────────────
+
+SystemRules:
+  GCD:
+    Base: "2.0s"
+    Cap: "1.4s"
+    WeavePolicy: "Single-weave ONLY (one oGCD per GCD window)"
+  Crit:
+    RNG: false
+    Model: "Positional/conditional only — no random crits. Crit from meeting specific
+      positional or situational conditions (e.g., striking targets above 50% HP,
+      post-dive momentum strikes)."
+  DamageBonus:
+    GreaterThan50HP: "+25% damage to enemies above 50% HP"
+    Description: "Encourages early burst, rewards targeting healthy enemies, aligns with
+      Wavecaller's dive-and-burst pattern."
+  Items:
+    Principle: "Items define baseline. Class abilities permanently replace item functionality."
+  BurstCycle:
+    Forbidden: "NO 2-minute burst cycle. NO fixed cadence. Dive timing is entirely contextual."
+  Procs:
+    Forbidden: "ZERO Freecure. ZERO RNG procs. All resource generation is deterministic."
+  HealerRole:
+    CannotReplaceFrontline: "EXPLICIT — Healers CANNOT replace the frontline. No exceptions.
+      Wavecaller diving into melee does NOT make them a tank. If the frontline dies,
+      the party wipes."
+  HealerSchools:
+    MAG: "Barriers + damage (NOT Wavecaller)"
+    MED: "Direct healing + drain (Wavecaller IS this)"
+    WavecallerAlignment: "MED-primary. Healing is direct HP restoration via sound vibration.
+      No barriers. When Wavecaller heals, HP goes UP. Period."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1: IDENTITY
+# ─────────────────────────────────────────────────────────────────────────────
+
+Identity:
+  Name: Wavecaller
+  Role: Healer
+  SubRole: Burst DPS (opportunistic melee via portal dive)
+  DamageType: physical (harpoon strikes + dive impact) + water elemental (portal effects)
+  HealingType: sound (biological vocalization — NOT magic casting)
+  Weapon: "Harpoon/trident polearm — aquatic hunter identity, used post-dive for follow-up strikes"
+  ExecutionArchetype: "Positional Tension + Opportunity Assessment + Healing Debt Management"
+
+  AnimalIdentity:
+    Core: "Dolphin / Orca / Killer Whale"
+    Traits:
+      - "Physical — damage is kinetic impact and harpoon strikes, not magic"
+      - "Fast — portal dives are rapid, hit-and-run, breach-and-strike"
+      - "Playful-violent predator — enjoys the hunt, treats combat as play"
+      - "Social — communicates through sound, heals through sound (pod behavior)"
+      - "Intelligent aggression — knows WHEN to strike, not just HOW"
+    ExplicitlyNOT:
+      - "NOT enchantment/lure/song-charm (no siren behavior)"
+      - "NOT passive/reactive (actively hunts opportunities)"
+      - "NOT graceful-ethereal (physical, kinetic, FAST)"
+      - "NOT brooding/dark (playful, energetic, competitive)"
+    BannedTerminology:
+      - "charm"
+      - "enchant"
+      - "lure"
+      - "allure"
+      - "siren"
+      - "seduce"
+      - "mesmerize"
+      - "bewitch"
+      - "captivate"
+      - "enthrall"
+
+  RacialBiology:
+    Species: Jumpers
+    Category: Linfree
+    BodyType: "Humanoid, compact, streamlined — athletic swimmer's build"
+    Aesthetic: >
+      Cute aquatic humanoid — Shylily-esque. NOT whale-sized. Small athletic
+      humanoid with aquatic features (fin ears, sleek skin, subtle gill lines,
+      webbed digits). Teeth are visible as visual identity marker but have ZERO
+      mechanical function — purely aesthetic species flavor. Overall impression:
+      "cute predator" — dolphin's perpetual smile hiding rows of teeth.
+    KeyOrgans:
+      VocalApparatus: >
+        Produces tissue-repair frequencies via acoustic resonance. NOT magic —
+        physics. Vocal cords vibrate at frequencies that accelerate cell regeneration
+        and stabilize metabolic shock. Other races can sing. Jumper vocalization
+        HEALS. Sound propagates through obstacles because that's what sound DOES.
+      PortalGlands: >
+        Biological organs (forearms/torso) secreting hyper-pressurized water that
+        tears localized spatial rifts. The "portal" is a water-pressure phenomenon
+        — not magic teleport. Body generates water AND pressure to punch through space.
+      AquaticAdaptation: >
+        Webbed digits, pressure-resistant musculature, hydrodynamic body. Built to
+        survive portal transit velocity that would pulverize other races. On LAND
+        without water exposure, physiology dehydrates — movement slows, healing
+        drops. Water is biological fuel.
+      HydrationDependence: >
+        Semi-permeable skin, portal glands need water saturation, vocal apparatus
+        resonates best when hydrated. Extended dry-land time degrades ALL systems.
+        Tracked via Hydration Gauge.
+
+  BiologicalLockJustification: >
+    Remove the Jumper body, remove the class. No other race has: vocal cords for
+    tissue-repair frequencies + portal glands for spatial rifts + aquatic body for
+    transit survival + hydration-dependent biology. The lock is "this body DOES this"
+    not "this race LEARNED this."
+
+  DesignStatement: >
+    Wavecaller is THE AGGRESSIVE HEALER. Their body wants to fight. Sound healing is
+    effortless — open your mouth, your voice heals. But the portals call. You can SEE
+    the enemy. The harpoon is IN YOUR HAND. The portal is RIGHT THERE. "Can I dive?"
+    is never the question — "SHOULD I dive?" always is. The push/pull tension between
+    biological aggression and team responsibility IS the Wavecaller.
+
+  MeleePattern:
+    Style: "Hit-and-run diving (dolphin breach → strike → splash back)"
+    ExplicitlyNOT: "NOT camping in melee. NOT sustained melee presence."
+    Description: >
+      Modeled on dolphin/orca hunting: breach (portal emerge) → strike with explosive
+      force (harpoon impact) → splash back (return portal). Each dive is a discrete
+      INCURSION. Staying too long is a FAILURE STATE. The harpoon enables 1-3 quick
+      strikes during the emergence window.
+    TypicalDiveSequence:
+      - "Generate portal (GCD)"
+      - "Dive through (committed movement)"
+      - "Emerge with impact damage (automatic)"
+      - "1-2 harpoon strikes (Breaching Strike GCDs)"
+      - "Return portal OUT (Return Tide oGCD)"
+      - "Resume healing from safe position"
+    MaxRecommendedMeleeTime: "2-4 GCDs (4-8 seconds at base GCD)"
+
+  DistinctionFromOtherHealers:
+    vs_Elementalist: "Elementalist heals from safety with no positional sacrifice. Wavecaller is TEMPTED to abandon safe position. No such temptation exists for Elementalist."
+    vs_Shaman: "Shaman heals as BYPRODUCT of offense (Hex Drain). Never stops attacking to heal. Wavecaller must CHOOSE: heal OR attack. Cannot do both."
+    vs_Siren: "Siren heals while COMMANDING — voice does two things at once. Wavecaller's heal/damage are MUTUALLY EXCLUSIVE positionally."
+    vs_Spiritcaller: "Spiritcaller delegates healing to Water Slime companion. Wavecaller has no companion — YOU are healer AND diver."
+
+  InputModalityShift:
+    Primary: "Party HP bars — can they survive 4s without heals?"
+    Secondary: "Hydration Gauge — am I hydrated enough to heal effectively?"
+    Tertiary: "Enemy positioning — which targets are portal-diveable?"
+    Quaternary: "Own position — optimal healing range or stranded in melee?"
+    Quinary: "Pressure Charge gauge — can I dive OR escape?"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2: HYDRATION GAUGE
+# ─────────────────────────────────────────────────────────────────────────────
+
+HydrationGauge:
+  Name: "Hydration"
+  Range: "0-100"
+  Description: >
+    Tracks water exposure. Jumper biology is aquatic — skin, portal glands, and
+    vocal apparatus all require moisture. High hydration = thriving (full healing,
+    normal speed). Low hydration = suffering on land (healing reduced, movement
+    SLOWED — not rooted). This IS the land penalty mechanic.
+
+  Effects:
+    High_80_100:
+      Label: "Saturated"
+      HealingPotency: "100%"
+      MovementSpeed: "100%"
+      PortalGeneration: "Normal"
+    Medium_40_79:
+      Label: "Damp"
+      HealingPotency: "85%"
+      MovementSpeed: "95%"
+      PortalGeneration: "Normal"
+    Low_15_39:
+      Label: "Parched"
+      HealingPotency: "65%"
+      MovementSpeed: "80% (SLOWED — clearly noticeable, NOT rooted)"
+      PortalGeneration: "-50%"
+    Critical_0_14:
+      Label: "Desiccated"
+      HealingPotency: "40%"
+      MovementSpeed: "60% (severely SLOWED — NOT rooted, can still act)"
+      PortalGeneration: "Halted"
+
+  DrainRate:
+    OnDryLand: "-3 per 10s"
+    InCombatOnLand: "-5 per 10s"
+
+  RestoreMethods:
+    WaterPortalTransit: "+25 per transit (Rift Dive and Return Tide both rehydrate)"
+    Submerging: "+15/s while submerged in water terrain"
+    WaterProximity: "+2 per 5s within 5m of water terrain"
+    SlimeProximity: "+1 per 5s within 5m of Water Slime ally (Spiritcaller synergy)"
+    RainWeather: "+3 per 10s during rain"
+    SelfDrench: "Tidemark ability: +30 instant (costs GCD)"
+
+  DesignIntent: >
+    SLOWED on land, NOT rooted. Weakened on land, NOT useless. Water portals serve
+    double duty: damage delivery AND hydration maintenance. Diving is not ONLY damage
+    — it's SELF-MAINTENANCE. A Wavecaller who never dives paradoxically dehydrates
+    faster. Biology rewards aggression. Role demands restraint. Tension is structural.
+
+  InteractionWithHealing: >
+    Water conducts sound better than air. When hydrated (80-100), sound healing is
+    at full power and maximum range. Water portals enable easier healing by keeping
+    hydration high. Land = harder healing. Water = thriving.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3: CORE MECHANIC — DUAL DELIVERY SYSTEM
+# ─────────────────────────────────────────────────────────────────────────────
+
+CoreMechanic:
+  Type: dual_delivery_positional_tension
+  Name: "Resonance & Rift"
+  Description: >
+    Two opposed delivery systems compete for the Wavecaller's position. Sound healing
+    is strongest at RANGE (10-25m, stationary, hydrated). Water portal dive damage
+    requires MELEE (0-3m, harpoon range). Cannot optimize both simultaneously.
+    THE AGGRESSIVE HEALER wants to fight but should be healing. This push/pull IS the class.
+
+  DeliverySystem_Sound:
+    Name: "Resonance (Sound/Healing)"
+    Function: "HEALING — fast, AoE, possibly no LoS since sound propagates"
+    Properties:
+      - "AoE propagation — heals multiple allies within acoustic range"
+      - "Possible no-LoS — sound through walls at 70% effectiveness"
+      - "Strongest stationary at range (sustained vocalization)"
+      - "Enhanced by high Hydration"
+      - "Interrupted by taking damage (biological disruption)"
+      - "Fast application — near-instant delivery"
+      - "MED-school: Direct HP restoration, not barriers"
+    SoundInterrupt_CC:
+      Stage: "Stage 2 (Interrupt)"
+      Speed: "FASTER than Shaman's Bone Spirit (5s CD vs 10s CD)"
+      Persistence: "LESS persistent (active use each time vs set-and-forget)"
+    OptimalPosition: "15-20m behind frontline, stationary"
+
+  DeliverySystem_Water:
+    Name: "Rift (Water Portal/Damage)"
+    Function: "DAMAGE — generate portal → dive through → smash → emerge"
+    Properties:
+      - "Portal generation requires Pressure Charge resource"
+      - "Impact damage on EMERGENCE"
+      - "Physical damage — melee-coded, scales with velocity"
+      - "Harpoon follow-up strikes (1-3 hits) during brief melee window"
+      - "Portal transit REHYDRATES (+25 per transit)"
+      - "One-way by default — return costs additional resource"
+      - "Portal lingers 2.5s (enemies can follow through)"
+      - "Dive is COMMITTED — trajectory locked on entry"
+    MeleePattern: "Hit-and-run: emerge → harpoon strikes → return portal → resume healing"
+    OptimalCondition: "High-value target, party HP stable, return available, Hydration above 40"
+
+  TheTension:
+    Core: >
+      Diving means: in melee (dangerous), healing degraded (Cold resonance), resource
+      spent (escape costs more), party unhealed (HP dropping).
+      Staying means: safe but zero damage, kill opportunities wasted, Hydration draining.
+      No default mode. Correct answer changes every 5-10 seconds.
+
+    RiftDiveRisk:
+      Statement: >
+        RIFT DIVE IS NOT EXTREME RISK. The dive itself is safe — aquatic body handles
+        transit. The "risk" is IGNORING YOUR TEAM. Their HP drops while you DPS.
+        Not personal death — THEIR deaths through your healing absence.
+      ForcingAttacks: >
+        Staying longer / using Maelstrom Entry is available and powerful but trades
+        team safety for personal damage. The more you commit, the longer they suffer.
+
+    SkillExpression: >
+      Expert Wavecallers read party HP TRAJECTORY (projected 3-4s ahead), identify
+      safe windows, execute breach-strike-splash, return before debt becomes fatal.
+      Best players look like they never stop healing AND never stop diving.
+
+  PunishmentPhilosophy:
+    Based_On: "IGNORANCE — misreading when to heal vs dive"
+    Framework: "Position × Action × Time"
+    Description: >
+      Punishment is NEVER mechanical overwhelm. Buttons are simple. GCD is standard.
+      What kills is misreading: Where am I? What should I do? How long can my team
+      survive? All information is visible. All failures are knowledge failures.
+    ExplicitlyNOT:
+      - "NOT mechanical overwhelm"
+      - "NOT APM-gated (single-weave, standard GCD)"
+      - "NOT RNG-dependent"
+      - "NOT rotation failure (no rotation exists)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: TRIGGER SYSTEM
+# ─────────────────────────────────────────────────────────────────────────────
+
+TriggerSystem:
+  Description: >
+    Wavecaller's "mode" is determined by POSITION. At range = heal mode.
+    In melee = damage mode. Triggers are encounter-driven, never automatic.
+
+  HealModeTriggers:
+    - Trigger: "Party member drops below 60% HP"
+      Response: "Retreat to range, begin vocalization"
+    - Trigger: "Multiple allies taking simultaneous damage"
+      Response: "Find safe position, commit to extended heal sequence"
+    - Trigger: "Portal resource depleted"
+      Response: "Stay at range, heal, wait for recovery"
+    - Trigger: "Boss entering high-damage phase"
+      Response: "Pre-position at optimal range"
+    - Trigger: "Hydration dropping below 40"
+      Response: "Position near water OR plan a dive (transit rehydrates)"
+    - Trigger: "Vocal disruption from recent damage"
+      Response: "Stay safe, recover vocalization"
+
+  DamageDiveTriggers:
+    - Trigger: "Isolated enemy at low HP (1-2 dive kill)"
+      Response: "Check party HP → if stable → breach-strike-splash"
+    - Trigger: "Party HP stable at 80%+ (no healing demand)"
+      Response: "Identify target → execute → return before HP drops"
+    - Trigger: "Enemy above 50% HP (+25% damage bonus window)"
+      Response: "Prioritize early dives for maximum bonus"
+    - Trigger: "Backline caster threatening party"
+      Response: "Portal dive for guaranteed interrupt → kill or retreat"
+    - Trigger: "Frontliner has target locked down"
+      Response: "Free damage window → dive disabled target → return before disable ends"
+    - Trigger: "Hydration low, need portal transit"
+      Response: "Dive serves double purpose: damage + rehydration"
+    - Trigger: "Boss vulnerable (break state)"
+      Response: "All-in dive for maximum contribution"
+
+  EncounterPressureForcing:
+    ForcesHealMode:
+      - "Sustained party-wide damage"
+      - "Anti-melee mechanics"
+      - "Healer-check phases"
+      - "Portal resource depleted"
+      - "Hydration critical (healing degraded)"
+    ForcesDamageMode:
+      - "DPS check phases"
+      - "Priority add spawns"
+      - "Backline threats only melee solves"
+      - "Break windows requiring full party burst"
+      - "Hydration critical (must dive to rehydrate via transit)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ▼ CONTINUES IN: Wavecaller_Complete_Part2.yaml
+# ▼ PICK UP AT: Section 5 (Abilities) → Section 13 (Open Questions)
+# ▼ GAP: Sections 5-13 NOT in this file.
+# ═══════════════════════════════════════════════════════════════════════════════
