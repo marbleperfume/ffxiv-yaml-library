@@ -1,0 +1,717 @@
+# Classes/Shaman/Shaman_Design.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+# SHAMAN — DPS (Curse) / Secondary Healer (Triage via Harvest)
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "Curse-and-summon DPS whose moment-to-moment identity is a single question:
+# Do I keep this enemy neutered, or sacrifice my debuffs to save my tank?
+# Invested Hex stacks cripple enemies (-25% accuracy/speed, +25% Shaman damage).
+# Harvested Hex stacks heal the party but release the enemy back to full power.
+# You cannot have both. The encounter decides which matters more RIGHT NOW."
+#
+# ToS Reference: Sadhu + Bokor + Featherfoot + Warlock (thematic basis)
+# FFXIV Shape: Summoner (pet management) × Red Mage (triage utility)
+# Identity: DPS who builds survivability THROUGH aggression. Not a tank.
+#           Not a healer. A damage dealer whose healing costs offensive pressure.
+#
+# GOVERNING DOCUMENTS:
+#   DESIGN_OVERRIDE.md (wins all conflicts)
+#   DESIGN_OVERRIDE_SYSTEMS.md §23 (split format)
+#   elementalist_shaman_rework.md (Invested/Harvested redesign — SOURCE OF TRUTH)
+#   Game_Juice_Taste_Design.md (hierarchy)
+#   class_item_baselines.md (item floor)
+#
+# Balance Ref: Combat/BalanceTargets.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Shaman
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1: CLASS IDENTITY
+# ─────────────────────────────────────────────────────────────────────────────
+
+Identity:
+  Name: Shaman
+  Role: DPS
+  SubRole: Secondary Healer (Triage via Harvest — NOT primary healer)
+  DamageType: magical (dark)
+  ExecutionArchetype: Resource Management + Reactive + Summon Maintenance + Dual-State Decision
+  # Five simultaneous axes of execution:
+  # 1. Invested vs Harvested decision (keep enemy weak OR heal party — NEVER both)
+  # 2. Bone economy (run-length budget, persistent summons with real HP)
+  # 3. Hex stack management (application rate, target selection, stack count)
+  # 4. Summon maintenance (positioning, HP monitoring, redeployment timing)
+  # 5. Spatial reading (where to place Floating Bone, when to reposition)
+  InputModalityShift:
+    Primary: "Reading enemy threat level vs party HP — the Invest/Harvest decision"
+    Secondary: "Watching enemy HP/cast bars (curse timing, interrupt decisions)"
+    Tertiary: "Monitoring summon HP (are they about to die? Reposition?)"
+    Quaternary: "Bone reserve planning across the entire run (not per-fight)"
+    Quinary: "Party HP for triage threshold detection"
+  DesignStatement: >
+    Shaman is a curse-and-summon DPS whose core identity is a real-time
+    resource-allocation DECISION: maintain Hex stacks on enemies (Invested state:
+    enemy is crippled, Shaman deals amplified damage) OR consume those stacks to
+    heal allies (Harvested state: enemy returns to full capability, party is healed).
+    These states are mutually exclusive at any given moment. The encounter —
+    not an internal timer — determines which state is correct.
+    
+    Bone allocation between Bone Spirit (persistent interrupt sentry) and Floating
+    Bone (persistent curse engine) is the secondary decision layer. Summons are
+    DEPLOYED ASSETS with real HP — they hold corridors, control zones, and can be
+    destroyed by intelligent enemies. MonsterBone is a RUN-LENGTH BUDGET: spending
+    one is a commitment that echoes across the entire dungeon run.
+    
+    The class punishes passive play and rewards calculated aggression: you must
+    curse enemies FIRST to enable healing LATER. A Shaman who hasn't been
+    offensive cannot heal. A Shaman who heals loses all offensive pressure.
+    This IS the class.
+  ToSLineage:
+    - Sadhu: "Spirit Ascension — levitate + damage amp (Prana-inspired)"
+    - Bokor: "Bone Spirit summon — persistent focused interrupt sentry"
+    - Featherfoot: "Hex system — stack-based curse amplification + drain"
+    - Warlock: "Dark Theurgy, Mastema, Invocation — heavy dark magic + summon upgrade"
+  # NOTE: Miko influence is in FUNCTION only (cleanse, channel heal, burst heal).
+  # Skill NAMES use bone/spirit/curse theming exclusively.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1b: RACIAL LOCK — SOUE
+# ─────────────────────────────────────────────────────────────────────────────
+
+RacialLock:
+  Race: Soue
+  ParentCategory: Wanderers
+  Enforcement: hard_lock  # Players MUST be Soue to play Shaman. No exceptions.
+  LoreJustification: >
+    The bone/spirit Shaman tradition developed in total isolation within the
+    Soue's magic forest. It was not adapted from other peoples' martial or
+    arcane traditions — it grew from the Soue's unique relationship with the
+    forest's hazards and their mastery of magic. Their isolation from other
+    races is the in-world reason this tradition belongs to them specifically.
+  NPCException: >
+    Non-Soue Shaman NPCs may exist as narrative edge cases (adopted into a
+    Soue community, taught as a diplomatic gesture, etc.) but this path is
+    NEVER available to players. An NPC Shaman who isn't Soue is a story beat,
+    not a gameplay option.
+  RacialSynergy:
+    - "Soue are naturally stealthy — synergizes with pre-fight Bone farming (approach undetected)"
+    - "Exceptional hearing — lore justification for Shaman's enemy-HP/cast-bar reading priority"
+    - "Masters of magic — the bone/spirit tradition IS their magical expression"
+    - "Forest isolation — summon-and-hold-ground playstyle mirrors defending forest territory"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2: ROLE OBJECTIVE FUNCTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+RoleObjective:
+  CoreObjective: >
+    Maximize enemy debuff uptime (Invested state) while healing ONLY when
+    encounter pressure demands it (Harvested state). Every Harvest sacrifices
+    offensive output — minimize Harvests, maximize Investments, and read the
+    encounter to know which decision saves the run.
+  ItemBaseline: >
+    The Shaman replaces the ENTIRE debuff/CC item catalog as a persistent,
+    scaling, adaptive solution:
+    - Scatterlung Phial (accuracy debuff, single-use) → Hex stacks (-25% accuracy, sustained)
+    - Thickglass Flask (speed puddle) → Hex stacks (-25% move speed, follows target)
+    - Witherfield Totem (debuff zone, 25s) → Floating Bone (debuff zone, PERMANENT)
+    - Lockjaw Spore (area CC) → Dark Theurgy (AoE Hex application)
+    - Drainwick Candle (life drain) → Hex Drain (party healing from enemy curses)
+    - Hollowform Decoy (aggro redirect) → Bone Spirit (interrupt denial, different function)
+  WinCondition: "Enemy at 5 stacks (neutered) AND party alive AND Bones in reserve"
+  LossCondition: "Forced to Harvest repeatedly (enemy recovers, DPS collapses, run stalls)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3: CLASS MECHANIC — INVESTED vs HARVESTED DUAL-STATE
+# ─────────────────────────────────────────────────────────────────────────────
+
+ClassMechanic:
+  Type: dual_state_curse_resource
+  Name: "Invested/Harvested Hex System"
+  CoreTension: >
+    "Do I keep this enemy neutered, or sacrifice debuffs to save my tank?"
+    This question has NO default answer. The encounter state determines
+    the correct choice at every moment. No rotation solves it. Only
+    encounter reading does.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # HEX STACKS — The Dual-State Resource
+  # ─────────────────────────────────────────────────────────────────────────
+  HexSystem:
+    Name: "Hex Stacks"
+    Type: enemy_debuff_stacking
+    MaxStacks: 5
+    Duration: "30s per stack (refreshed on new stack application)"
+    Application:
+      - Source: "Floating Bone aura (1 stack per 5s, passive, no Shaman GCD)"
+      - Source: "Effigy GCD (1 stack per cast, active)"
+      - Source: "Dark Theurgy GCD (1 stack to all enemies in AoE, active)"
+    Consumption:
+      - Consumer: "Hex Drain oGCD — HARVESTS stacks for party healing"
+      - Consumer: "Curse Explosion GCD — SACRIFICES all stacks for burst damage"
+    
+    # ─────────────────────────────────────────────────────────────────────
+    # STATE 1: INVESTED (Stacks Maintained on Enemy)
+    # ─────────────────────────────────────────────────────────────────────
+    InvestedState:
+      Description: >
+        Hex stacks REMAIN on the enemy. The enemy suffers progressive debuffs.
+        The Shaman's damage to that target is amplified. This is the OFFENSIVE
+        state — the enemy gets weaker, the Shaman gets stronger.
+      StackEffects:
+        1_Stack:
+          EnemyDebuff: "-5% accuracy (Impairment Axis: Accuracy)"
+          ShamanDamageAmp: "+5% Shaman damage to this target"
+        2_Stacks:
+          EnemyDebuff: "-10% accuracy, -10% move speed"
+          ShamanDamageAmp: "+10% Shaman damage to this target"
+        3_Stacks:
+          EnemyDebuff: "-15% accuracy, -15% move speed, -10% attack speed"
+          ShamanDamageAmp: "+15% Shaman damage to this target"
+        4_Stacks:
+          EnemyDebuff: "-20% accuracy, -20% move speed, -15% attack speed"
+          ShamanDamageAmp: "+20% Shaman damage to this target"
+        5_Stacks:
+          EnemyDebuff: "-25% accuracy, -25% move speed, -20% attack speed, 10% action skip chance"
+          ShamanDamageAmp: "+25% Shaman damage to this target"
+      DesignNote: >
+        At 5 stacks, the enemy is basically neutered: missing 1/4 of attacks,
+        moving at 3/4 speed, attacking 20% slower, and occasionally skipping
+        actions entirely. Combined with the Shaman's +25% damage amp, this is
+        an ENORMOUS combat advantage. The value of maintaining Investment is
+        extremely high — which makes the cost of Harvesting proportionally painful.
+    
+    # ─────────────────────────────────────────────────────────────────────
+    # STATE 2: HARVESTED (Stacks Consumed for Healing)
+    # ─────────────────────────────────────────────────────────────────────
+    HarvestedState:
+      Description: >
+        Hex stacks are CONSUMED from the enemy. ALL debuffs on that enemy are
+        removed. The enemy returns to full accuracy, full speed, full attack rate.
+        In exchange, the party receives healing proportional to stacks consumed.
+        This is the DEFENSIVE state — the party survives but the enemy recovers.
+      HealingOutput:
+        1_Stack_Harvested: "150 HP restored to lowest-HP ally"
+        2_Stacks_Harvested: "300 HP restored to lowest-HP ally"
+        3_Stacks_Harvested: "450 HP + 150 HP overshield on target ally"
+        4_Stacks_Harvested: "600 HP + 225 HP overshield on target ally"
+        5_Stacks_Harvested: "750 HP + 300 HP overshield + cleanse 1 debuff from target ally"
+      PostHarvestConsequence: >
+        Enemy returns to ZERO stacks: full accuracy, full speed, full attack
+        rate, zero action skip, zero Shaman damage amp. Rebuild takes 10-25s
+        (Floating Bone passive) or 8-12s (Effigy acceleration). During rebuild,
+        enemy is fully operational and Shaman has no amp/crit conditions.
+      DesignNote: >
+        Harvesting is healing through SACRIFICE. You don't just "cast a heal" —
+        you GIVE UP combat control of an enemy. The enemy that was neutered
+        is now fully operational. If the Shaman Harvests at a bad time
+        (boss about to use a big attack, enemy about to reach the backline),
+        the team can suffer MORE than if they'd just let the tank stay at 55%.
+    
+    # ─────────────────────────────────────────────────────────────────────
+    # STATE 3: CURSE EXPLOSION (Sacrifice for Burst — Rarely Optimal)
+    # ─────────────────────────────────────────────────────────────────────
+    CurseExplosionState:
+      Description: >
+        CONSUMES all Hex stacks for burst damage. Same consequence as Harvest
+        (enemy returns to full power) but provides DAMAGE instead of healing.
+        This is the EXECUTE state — used only when the burst will KILL the target
+        or when debuffs are no longer needed (target nearly dead anyway).
+      WhenOptimal:
+        - "Enemy is at <15% HP and burst will kill (execute threshold)"
+        - "Enemy is about to die from other damage (stacks would be wasted)"
+        - "Multiple targets need stacks transferred (explode current, move to next)"
+      WhenSuboptimal:
+        - "Enemy has 60%+ HP (you lose debuffs for inadequate burst)"
+        - "Tank is taking heavy damage (you need those debuffs for accuracy reduction)"
+        - "Fight has significant remaining duration (rebuilding costs 15-25s)"
+      DesignNote: >
+        Curse Explosion is the TRAP option for players who import
+        build→spend rotation mentality. "I have 5 stacks, therefore I should
+        Explode." NO. 5 maintained stacks = -25% enemy accuracy + +25% your
+        damage. Exploding throws away BOTH for a single burst. Only correct
+        at execute range or when tactically forced (target switching, etc.).
+
+    # ─────────────────────────────────────────────────────────────────────
+    # DECISION FRAMEWORK (What Replaces Rotation)
+    # ─────────────────────────────────────────────────────────────────────
+    DecisionFramework:
+      AtEveryMoment: >
+        "This enemy has N Hex stacks. They're [debuff level]. My [ally] is at
+        [X]% HP. Do I HARVEST (lose debuffs, heal ally, enemy recovers) or
+        INVEST more (enemy gets weaker, ally stays wounded)?"
+      Factors:
+        - "Ally HP vs incoming damage (will they die before I can rebuild?)"
+        - "Enemy threat level (is this the BIGGEST threat? Losing debuffs = danger)"
+        - "Time to rebuild (Floating Bone nearby = 25s rebuild; Floating Bone destroyed = longer)"
+        - "Other healing sources available (Elementalist present? Potions available?)"
+        - "Boss phase timing (is a dangerous phase coming that needs enemy debuffed?)"
+        - "Bone reserves (Bone Salve emergency available? Or already spent?)"
+      NeverSolvable: >
+        Party composition × encounter state × resource level determines answer.
+        No rotation solves this. Context is everything.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # BONE ECONOMY (Run-Length Budget)
+  # ─────────────────────────────────────────────────────────────────────────
+  BoneEconomy:
+    Resource:
+      Name: MonsterBone
+      Type: quest_item
+      StorageSlot: "Quest Item (separate from inventory)"
+      MaxCapacity: 8
+      BudgetScope: "ENTIRE RUN — not per-fight. Spending is a commitment."
+    Generation:
+      MonsterKill_Elite: "Guaranteed 1 Bone drop"
+      MonsterKill_Trash: "30% chance of 1 Bone drop (Bone Scavenge passive, 15y range)"
+      SkillGeneration:
+        Name: "Bone Harvest"
+        Type: oGCD
+        Cooldown: 60s
+        BonesGenerated: 2
+        Description: "Primary bone source in boss fights / instanced content."
+    ConsumptionSinks:
+      - "Summon Bone Spirit: 1 Bone (persistent interrupt sentry)"
+      - "Bone Pointing (new deploy): 1 Bone (persistent curse engine)"
+      - "Bone Salve: 1 Bone (emergency instant heal)"
+      - "Spirit Channel: CONSUMES Bone Spirit (indirect 1 Bone + re-summon cost)"
+      - "Spirit Ascension: 2 Bones (premium — ground immunity + damage amp)"
+    EconomicScenarios:
+      EasyContent_Rank1_2:
+        SummonDestructionRate: "Nearly zero (enemies ignore installations)"
+        BoneConsumption: "Initial deployment only (2 Bones for both summons)"
+        NetEconomy: "Massively positive. Bones stockpile. Luxury spending available."
+      MediumContent_Rank3:
+        SummonDestructionRate: "Floating Bone every ~60-90s, Bone Spirit every ~90-120s"
+        BoneConsumption: "~1.5 Bones per minute (replacement)"
+        NetEconomy: "Slightly positive. Occasional Spirit Channel still possible."
+      HardContent_Rank4:
+        SummonDestructionRate: "Floating Bone every ~20-30s, Bone Spirit every ~45-60s"
+        BoneConsumption: "~3-4 Bones per minute (heavy replacement)"
+        NetEconomy: "NEGATIVE. Must triage which summon to maintain."
+        TriageDecision: >
+          When Bones run low: Floating Bone (curse engine = Hex stacks = healing
+          potential AND damage amp) takes priority over Bone Spirit (interrupt)
+          UNLESS the encounter has must-interrupt mechanics.
+      RaidBoss_8min:
+        BoneHarvestTotal: "16 Bones (8 × 2 per Harvest)"
+        EstimatedDestructions: "6-10 (AoE phases destroy both summons)"
+        SpiritChannelBudget: "2-4 uses max"
+        SpiritAscensionBudget: "1-2 uses (2 Bones each = 2-4 Bones)"
+        NetBudget: "Tight. 16 - 6-10 replacement - 2-4 Channel - 2-4 Ascension = 0-6 reserve"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # SUMMON: BONE SPIRIT (Persistent Interrupt Sentry)
+  # ─────────────────────────────────────────────────────────────────────────
+  BoneSpirit:
+    Name: "Bone Spirit"
+    SummonCost: 1_MonsterBone
+    SummonAction: "GCD (2.0s cast, appears at Shaman's feet)"
+    Persistence: "PERMANENT until destroyed or dismissed"
+    HP: "25% of Shaman's max HP (scales with Shaman's VIT/gear)"
+    Behavior:
+      Default: "Follows Shaman (5y behind, auto-attacks Shaman's target)"
+      Commanded: "HOLD POSITION (stays at designated location, acts as sentry)"
+    AutoAttack:
+      Potency: 50
+      Rate: "Every 3.0s"
+      Range: "8y"
+    InterruptMechanic:
+      Description: >
+        Auto-interrupts ANY enemy that begins casting within 8y of its
+        position. Automatic — no Shaman input required. One interrupt
+        per 10s (cooldown on the spirit, not the Shaman).
+      InterruptRange: 8y
+      InterruptCooldown: 10s
+      InterruptReliability: "100% on non-boss casts. Boss casts: interrupts if interruptible."
+      CCStage: "Stage 2 (Interrupt)"
+    Destruction:
+      DestroyedBy: "Enemy attacks (physical/magical). AoE splash."
+      OnDeath: "10s re-summon delay before a new Bone Spirit can be called."
+      ReSummonCost: "1 MonsterBone"
+    StrategyRankTargeting:
+      Rank1_2: "Ignore Bone Spirit (don't target installations)"
+      Rank3: "30% chance to target Bone Spirit if in range"
+      Rank4: "PRIORITIZE destroying installations (will path to kill)"
+    DesignNote: "Easy content: free forever. Hard content: positioning puzzle."
+
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # SUMMON: FLOATING BONE (Persistent Curse Engine)
+  # ─────────────────────────────────────────────────────────────────────────
+  FloatingBone:
+    Name: "Floating Bone"
+    SummonCost: 1_MonsterBone
+    SummonAction: "GCD (2.0s cast, appears at targeted location within 15y)"
+    Persistence: "PERMANENT until destroyed or dismissed (NO TIMER)"
+    HP: "15% of Shaman's max HP (frailer — ranged installation)"
+    Behavior:
+      Default: "Stationary at placed location."
+      Repositioning: "Bone Pointing GCD can reposition (no Bone cost, just a GCD)"
+    AuraEffect:
+      Description: "Applies 1 Hex stack per 5s to all enemies within 10y."
+      Range: 10y
+      HexApplicationRate: "1 stack per 5s per enemy in range"
+      MaxHexFromBone: "Caps at 5 (global Hex cap)"
+    DamageAura:
+      Potency: 30
+      TickRate: 3.0s
+      DamageType: "magical (dark)"
+    Destruction:
+      DestroyedBy: "Enemy attacks, AoE splash, intentional targeting by Rank 3+"
+      OnDeath: "No re-summon delay. Costs 1 MonsterBone to re-deploy."
+    StrategyRankTargeting:
+      Rank1_2: "Ignore Floating Bone entirely"
+      Rank3: "50% chance to target if within melee range"
+      Rank4: "ACTIVELY SEEK AND DESTROY. Will path to kill."
+    DesignNote: "Place once in easy content. Spatial puzzle in hard content."
+
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # INVOCATION (Greater Summon Upgrade)
+  # ─────────────────────────────────────────────────────────────────────────
+  Invocation:
+    Description: >
+      Upgrades ALL active summons to Greater versions for 25s.
+      Use-case driven — not a burst cadence. Used when summons need to
+      survive AoE phases, or when accelerated Hex buildup is critical.
+    Duration: 25s
+    Cooldown: 120s
+    GreaterBoneSpirit:
+      HP: "40% of Shaman max HP"
+      AutoAttackPotency: 80
+      InterruptCooldown: 6s
+    GreaterFloatingBone:
+      HP: "25% of Shaman max HP"
+      HexRate: "1 stack per 2.5s (doubled)"
+      AuraPotency: 50
+    UseCases: ["Summons survive AoE phase", "Doubled Hex rate for rapid rebuild",
+               "Extra HP vs SR4 hunters", "Enhanced summon DPS contribution"]
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # SPIRIT ASCENSION (Use-Case Driven, NOT Burst Window)
+  # ─────────────────────────────────────────────────────────────────────────
+  SpiritAscension:
+    Description: >
+      Shaman levitates — immune to ground AoE, melee attacks, movement
+      restrictions. Deals 20% more damage. Lasts 15s. Costs 2 MonsterBone.
+      The Bone cost is STEEP. This is NOT used on cooldown.
+    Duration: 15s
+    Cooldown: 120s
+    ResourceCost: 2_MonsterBone
+    Effects:
+      - "Immune to ground-targeted AoE"
+      - "Cannot be targeted by melee attacks (elevated above range)"
+      - "CAN be targeted by ranged/magical attacks"
+      - "All damage dealt +20% (Prana buff)"
+      - "Movement speed +30%"
+    UseCases:
+      - "Boss covers floor in persistent AoE → Ascend for safety"
+      - "Need to cross gap/chasm in procgen map → levitate"
+      - "Corridor of melee enemies → immune while dealing damage"
+      - "Critical DPS window where 20% amp makes the difference"
+    AntiPattern: "Never use on cooldown — 2-Bone cost + 120s CD = premium decision."
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: SUMMON POSITIONING SYSTEM
+# ─────────────────────────────────────────────────────────────────────────────
+
+SummonPositioning:
+  Philosophy: >
+    Both summons are DEPLOYABLE ASSETS with positional strategy. Their
+    effectiveness depends on WHERE they are placed relative to enemies,
+    allies, and map geometry. Deployment is CONTINUOUS spatial adaptation —
+    NOT a pre-fight setup ritual. Repositioning throughout encounters is
+    the correct playstyle.
+
+  BoneSpiritPositioning:
+    DefaultMode: "Follow Shaman (5y behind, attacks Shaman's target)"
+    HoldMode: "Stays at commanded location. Acts as sentry."
+    HoldBehavior:
+      - "Auto-attacks any enemy within 8y"
+      - "Interrupts any enemy casting within 8y (10s CD)"
+      - "Does NOT move to chase enemies (holds position absolutely)"
+      - "Does NOT return to Shaman until commanded"
+    BestPositions:
+      Corridor: "At intersection/chokepoint — interrupts anything casting in the passage"
+      BossFight: "Behind boss (avoids frontal cleaves) or at Shaman's location"
+      PartySplit: "Left behind at junction (rear guard for other group)"
+    WorstPositions:
+      - "In boss's frontal cleave (dies to incidental damage)"
+      - "In center of AoE-heavy room (dies to AoE)"
+      - "Far from any enemies (wastes interrupt capability)"
+
+  FloatingBonePositioning:
+    Mode: "Always stationary. Placed by Bone Pointing GCD."
+    Repositioning: "Bone Pointing GCD (free reposition, just costs a GCD)"
+    BestPositions:
+      CorridorEntrance: "Curses everything that enters. Enemies walk into Hex zone."
+      BehindParty: "Safe from melee enemies. Ranged/AoE still threatens."
+      ElevatedLedge: "If map geometry allows — unreachable by melee enemies."
+      NearBoss: "Maximizes Hex application. Risky (AoE destroys it)."
+    WorstPositions:
+      - "In melee range of Rank 3+ enemies (actively targeted)"
+      - "In predictable boss AoE zones (destroyed every pattern)"
+      - "Far from any enemies (no Hex application = no Invest/Harvest fuel)"
+
+  StrategyRankAggroTable:
+    Rank1: "Ignore all installations. Only attack players."
+    Rank2: "Ignore installations unless directly pathing through them."
+    Rank3: "30% Spirit targeting / 50% Floating Bone targeting (if in range)"
+    Rank4: "PRIORITIZE DESTROYING installations. Will path specifically to kill."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 5: TRIGGER SYSTEM (What Replaces Rotation)
+# ─────────────────────────────────────────────────────────────────────────────
+
+TriggerSystem:
+  Philosophy: >
+    Instead of "deploy → build Hex → explode → rebuild," the Shaman responds
+    to ENCOUNTER STATE. Every action is triggered by something happening in
+    the encounter — not by an internal timer completing.
+  
+  Triggers:
+    - Condition: "Enemy begins casting"
+      Response: "Bone Spirit auto-interrupt (if deployed in range) OR Nerve Curse"
+      ItemReplaced: "Stupor Bell (single-use interrupt)"
+    
+    - Condition: "Enemy closing on backline (SR2+ pathing)"
+      Response: "Invested Hex stacks slow enemy (-25% speed at 5 stacks)"
+      ItemReplaced: "Thickglass Flask (puddle that enemy walks out of)"
+    
+    - Condition: "New corridor/room entered"
+      Response: "Reposition Floating Bone to new chokepoint"
+      ItemReplaced: "Witherfield Totem (single-use, 25s duration, destroyable)"
+    
+    - Condition: "Multiple enemies spawning simultaneously"
+      Response: "Dark Theurgy (AoE Hex) + Floating Bone positioned at spawn"
+      ItemReplaced: "Lockjaw Spore (area CC, limited)"
+    
+    - Condition: "Party HP dropping (Triage Minor triggered: ally ≤50%)"
+      Response: "Hex Drain: HARVEST stacks → heal party (enemy recovers)"
+      ItemReplaced: "Rejuvenation Flask (heals once). Hex Drain heals proportional to investment."
+    
+    - Condition: "SR3+ enemies targeting installations"
+      Response: "Reposition summons (free GCD) OR accept destruction + re-deploy"
+    
+    - Condition: "Boss entering dangerous phase (visible wind-up)"
+      Response: "Spirit Ascension (ground immunity + 20% damage amp)"
+    
+    - Condition: "Bone reserves low (≤2 remaining)"
+      Response: "Conservative play — Effigy filler, no summon redeployment"
+    
+    - Condition: "Boss above 50% HP (+25% damage bonus)"
+      Response: "Maintain Investment (double-dip: +25% Hex amp × +25% HP rule)"
+    
+    - Condition: "Ally needs emergency heal, no dedicated healer"
+      Response: "HARVEST stacks (enemy recovers, party heals)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 6: ROTATION PHILOSOPHY (Adaptive, NOT Fixed Cadence)
+# ─────────────────────────────────────────────────────────────────────────────
+
+RotationPhilosophy:
+  CoreStatement: >
+    There is NO fixed rotation. Shaman's GCD priority is determined by
+    SUMMON STATUS × HEX STACKS × BONE RESERVES × PARTY HEALTH × ENEMY STATE.
+    The "rotation" is a decision tree that changes every GCD based on
+    encounter state. The skill expression is READING ALL FIVE AXES
+    simultaneously and making the correct action choice.
+  
+  DecisionTree:
+    Step1: "Are summons alive and positioned? → If no: re-deploy (highest priority)"
+    Step2: "Does an enemy have 5 Hex stacks? → MAINTAIN (Invested). Use Mastema for damage."
+    Step3: "Is an ally dying? → HARVEST (sacrifice debuffs to heal). Resume Investing ASAP."
+    Step4: "Is the target nearly dead (<15% HP)? → Curse Explosion (burst to finish)"
+    Step5: "None of the above? → Effigy (build Hex stacks, weave Hex Drain for overshield)"
+  
+  WhatItIsNot:
+    - "NOT 'Effigy x5 → Curse Explosion → repeat'"
+    - "NOT 'deploy at start → never reposition'"
+    - "NOT 'Harvest on cooldown for overshield'"
+    - "NOT 'Spirit Channel whenever available'"
+    - "NOT 'align Invocation with party burst windows'"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 7: ANTI-PATTERNS (What This Class Does NOT Do)
+# ─────────────────────────────────────────────────────────────────────────────
+
+AntiPatterns:
+  ExplicitViolations:
+    - Pattern: "Fixed burst windows"
+      Reality: >
+        Curse Explosion is used when the target needs to DIE, not when a
+        timer completes. Spirit Ascension is used when the ground is lethal,
+        not every 120s.
+    
+    - Pattern: "'Build to 5 stacks then spend' on a timer"
+      Reality: >
+        Maintaining 5 stacks IS the sustained DPS state. Exploding them is a
+        conscious SACRIFICE. The tension is: maintain (Investment) vs. drain
+        (Harvest) vs. explode (Execute). No timer decides this.
+    
+    - Pattern: "Rotation order (1-2-3-4-5-repeat)"
+      Reality: >
+        Effigy is filler. Dark Theurgy when enemies cluster. Mastema when
+        stacks are high and you want damage without consuming. Bone Salve
+        when someone's dying. These respond to STATE, not SEQUENCE.
+    
+    - Pattern: "'Setup phase → payoff phase' cadence"
+      Reality: >
+        Bone deployment is CONTINUOUS spatial adaptation. You reposition
+        throughout fights. There is no "deploy at start, then DPS."
+    
+    - Pattern: "Bone Harvest alignment (60s timer = rotation anchor)"
+      Reality: >
+        Generation is fixed (60s CD). SPENDING is variable (some fights burn
+        4 bones/minute in SR4, others burn 0 in SR1). The timer doesn't create
+        a cadence because consumption is encounter-dependent.
+    
+    - Pattern: "Passive overshield farming"
+      Reality: >
+        OLD system allowed maintaining Hex forever and farming overshield.
+        NEW system: Hex Drain CONSUMES stacks (Harvested state). You choose
+        between Investment (damage amp + debuff) and Harvest (healing).
+        Cannot have both simultaneously.
+    
+    - Pattern: "2-minute burst cycle"
+      Reality: "SYSTEM RULE VIOLATION. No 2-minute burst cycle exists in this game."
+    
+    - Pattern: "Freecure / RNG procs"
+      Reality: "SYSTEM RULE VIOLATION. Zero RNG procs. All decisions are deliberate."
+    
+    - Pattern: "Curse maturation timer (old system)"
+      Reality: >
+        DEPRECATED. The old curse-maturation system created a build→spend cadence.
+        Replaced by Invested/Harvested dual-state. Stacks don't "mature" — they
+        persist at their applied count until Harvested or until duration expires.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 8: VULNERABILITY WINDOWS
+# ─────────────────────────────────────────────────────────────────────────────
+
+VulnerabilityWindows:
+  Description: >
+    The Shaman is NOT overpowered because every advantage has a structural cost.
+  
+  Vulnerabilities:
+    - Source: "Harvest REMOVES enemy debuffs"
+      Effect: "Enemy you spent 15-25s debuffing returns to full capability."
+    - Source: "MonsterBone is finite (run-length budget)"
+      Effect: "Every heal/burst/ascension drains run-long reserves. Cascading cost."
+    - Source: "2.5s cast times (Soue slow identity)"
+      Effect: "Committed during casts. AoE during cast = eat it or cancel."
+    - Source: "Summon destruction at SR3+"
+      Effect: "Constant management of loss. Bones drain for replacement."
+    - Source: "No self-healing from Harvest"
+      Effect: "Hex Drain heals ALLIES only. Self-defense = maintaining Investment."
+    - Source: "Triage = DPS sacrifice"
+      Effect: "Ancestral Rite: 4s zero damage. Bone Salve: costs 1 Bone."
+    - Source: "Cannot heal without cursed enemies"
+      Effect: "Between encounters: zero healing capability. Items or dedicated healer required."
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 9: HEALER IDENTITY DISTINCTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+HealerIdentity:
+  HealingMechanism: >
+    Shaman heals through AGGRESSION → SACRIFICE. The offensive action
+    (applying Hex stacks to enemies) IS the prerequisite for healing.
+    More aggressive Hex application = more Harvest potential later.
+    A passive Shaman cannot heal because they have no stacks to Harvest.
+  
+  ComparisonToElementalist:
+    Elementalist: "Terrain zones (Water), mana-gated, AoE strong, can heal without enemies"
+    Shaman: "Drain from cursed enemies, Hex-stack-gated, single-target strong, REQUIRES enemies"
+  
+  WhyBothCanCoexist: >
+    Elementalist covers sustained AoE maintenance healing (Water saturation).
+    Shaman covers spike damage recovery (5-stack Harvest is massive single-target).
+    Different TIMING profiles: Elementalist = "always-on, moderate" healer;
+    Shaman = "expensive, powerful, intermittent" healer who pays in DPS pressure.
+  
+  SystemRule_CannotReplaceFrontline: >
+    Solo Shaman is NOT designed to replace frontline. Harvesting debuffs to
+    heal removes offensive pressure, enemy recovers, and the Shaman enters
+    a death spiral of constant Harvesting with no Investment building.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 10: DESIGN NOTES
+# ─────────────────────────────────────────────────────────────────────────────
+
+DesignNotes:
+  WhatShamanIS:
+    - "A DPS whose healing costs offensive power (not mana, not cooldowns — POWER)"
+    - "A deployment class who controls space through persistent installations"
+    - "A real-time decision engine (Invest vs Harvest vs Explode at every moment)"
+    - "A strategic thinker managing Bone economy across entire dungeon runs"
+    - "A self-sustaining solo operator (Investment = enemy can't hit you accurately)"
+    - "A zone controller using Floating Bone for passive area cursing"
+
+  WhatShamanIsNOT:
+    - "NOT a primary healer (Harvesting is a sacrifice, not a duty)"
+    - "NOT a burst DPS with party alignment (no cadence, no coordination windows)"
+    - "NOT a 'set and forget' pet class (summons require spatial management in SR3+)"
+    - "NOT reliant on party buffs or timing alignment"
+    - "NOT a disposable-summon throwaway class (summons are persistent ASSETS)"
+    - "NOT a class with a 'correct rotation' (encounter state determines actions)"
+
+  ItemComplementarity:
+    Description: "Even WITH a Shaman in the party, these items retain value:"
+    ScatterlungPhial: >
+      Provides INSTANT -30% accuracy for 12s before Hex builds. Shaman's
+      debuff requires 15-25s investment to reach -25%.
+    ThickglassFlask: >
+      Immediate -50% speed at a specific location. Shaman's speed curse
+      builds over time and follows target — different tactical use.
+    StasisPin: >
+      3s total freeze (Stage 3). Shaman has ZERO Stage 3 CC. For total
+      lockdown, the party needs items or another class.
+    HollowformDecoy: >
+      Aggro redirect. Bone Spirit interrupts, not redirects. Different function.
+    WitcherfieldTotem: >
+      If Floating Bone is destroyed and Bones depleted, party covers the gap
+      with Witherfield Totems. Worse but functional. Item-as-fallback design.
+
+  CCBudget:
+    Summary: "Shaman has ZERO Stage 3 CC. Maximum is Stage 2 (Silence + Interrupt)."
+    Table:
+      - "Hex stacks at 5 (passive): Indirect Stage 1 (10% action skip, probabilistic)"
+      - "Floating Bone aura (passive): Stage 1 (speed reduction via Hex)"
+      - "Spirit Vine Barrier: Stage 1 (root on contact, enemies can still attack)"
+      - "Nerve Curse (oGCD, 20s): Stage 2 (Silence, 4s)"
+      - "Bone Spirit auto-interrupt: Stage 2 (Interrupt, 10s CD)"
+      - "Dark Theurgy ground zone: Stage 1 (slow via ground effect)"
+    Assessment: >
+      Zero Stage 3 CC. Stage 2 is limited to single-target Silence + sentry
+      Interrupt. Stage 1 is plentiful (Hex debuffs, terrain effects). Appropriate
+      for a DPS/healer hybrid — sustained attrition pressure, not hard lockdown.
+      If the party needs Stage 3, they bring a Grappler or use Stasis Pin items.
+
+  ImpairmentAxisContribution:
+    Unfocus: "None — Shaman doesn't suppress AI (that's Madolt's job)"
+    Accuracy: "PRIMARY — Hex stacks provide -5% to -25% accuracy scaling"
+    Darkness: "None — Shaman doesn't affect vision (that's Nightfly Colony/Grappler Ink)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 11: FIRE DEGENERATION MITIGATION
+# ─────────────────────────────────────────────────────────────────────────────
+
+FireDegenerationMitigation:
+  KnownProblem: >
+    On flat, featureless maps with no environmental demands, Shaman degenerates
+    to "Effigy spam + Curse Explosion cycle" — no geometry to exploit with
+    deployments, no spatial decisions.
+  Solutions:
+    HexStackCap: "Cap at 5 → incentivizes Harvest/Explode decision at max stacks"
+    HP50Interaction: "Below 50%: amp less efficient → natural Harvest/Execute transition"
+    EncounterGeometry: "Spawn changes + chokepoint shifts force deployment adaptation"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ▼ CONTINUES IN: Shaman_Skills.yaml
+# ▼ PICK UP AT: Section 1 (GCD Skill Roster)
+# ═══════════════════════════════════════════════════════════════════════════════
