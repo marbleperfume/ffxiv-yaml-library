@@ -1,0 +1,1123 @@
+# ============================================================================
+# SIREN / CANTOR — Complete Class Specification
+# juice-yaml-library
+# ============================================================================
+
+header:
+  class_name: "Siren / Cantor"
+  race_lock: Merryin
+  tier: Experienced
+  role: "Healer / CC"
+  lock_type: Biological
+  last_updated: "2026-07-14"
+  design_status: "Full Spec — Ready for Quantitative Pass"
+
+# ============================================================================
+# SECTION 1: IDENTITY
+# ============================================================================
+
+identity:
+  race: Merryin (Depth Dead)
+  
+  lore_justification: |
+    Merryin vocal cords contain layered cartilage membranes that produce
+    overlapping harmonic frequencies simultaneously — not one note at a time
+    but three to five stacked tones in a single vocalization. These frequencies
+    interface directly with neurological attention pathways in most sentient
+    creatures. Other races can sing. Merryin singing OVERWRITES COGNITION.
+    
+    The biological mechanism is not "a good voice." It is a predator adaptation
+    from the Depth Dead's lightless ocean trenches, where sound replaced vision
+    as the primary sense. Merryin ancestors used compulsion-frequency harmonics
+    to herd prey toward feeding grounds. The Cantor class refines this innate
+    predator biology into battlefield command.
+    
+    Remove the Merryin throat — remove the class. No prosthetic, no enchantment,
+    no training replicates the layered membrane structure. A Tryll studying
+    Merryin music theory produces beautiful compositions. A Merryin vocalizing
+    those same compositions produces irresistible compulsion.
+  
+  strategic_role_summary: |
+    The Siren is the "I force you to do X" class. It does not suppress, degrade,
+    or debuff. It COMMANDS. Enemies are forced into specific actions against
+    their will — moving to designated positions, attacking designated targets,
+    activating abilities at suboptimal times, or ceasing action entirely.
+    
+    Simultaneously, the same vocalization system heals allies through harmonic
+    resonance — frequencies that accelerate tissue repair and stabilize biological
+    systems. One voice, two outputs: compulsion for enemies, restoration for allies.
+    
+    The Siren replaces the entire Attention Manipulation item category (Pheromone
+    Tag, Rivalmark Dust, Compulsion Chime, Sycophant Incense, Taunt Cracker,
+    Hollowform Decoy) as a persistent, precision, scaling class solution.
+    Additionally replaces baseline healing items (Harmony Draught, Resonance
+    Crystal) through integrated vocalization healing.
+
+  distinctions:
+    vs_shaman: |
+      Shaman DEGRADES enemies (lower accuracy, lower speed, lower damage).
+      Siren COMMANDS enemies (forces specific actions). Shaman makes enemies
+      less dangerous passively. Siren makes enemies do what YOU want actively.
+      A Shaman-debuffed enemy still chooses its own actions (worse). A Siren-
+      commanded enemy does not choose at all.
+    vs_elementalist: |
+      Elementalist REACTS to environmental demands by switching elements.
+      Siren DICTATES by overwriting enemy decisions. Elementalist answers
+      problems as they arise. Siren prevents problems by controlling what
+      enemies do before they become threats.
+    vs_adafold: |
+      Adafold BLOCKS physically — collision-based containment, body as wall.
+      Siren REDIRECTS cognitively — no physical barrier needed. Adafold says
+      "you can't go there." Siren says "you WILL go HERE."
+    vs_wavecaller: |
+      Both are voice-based healers. Wavecaller voice HEALS allies directly
+      (sound as medicine). Siren voice COMMANDS enemies and heals as a
+      secondary harmonic effect. Wavecaller's tension is positional (range vs
+      dive). Siren's tension is target allocation (who to command vs who to heal).
+
+# ============================================================================
+# SECTION 2: CORE MECHANIC — ATTENTION OVERRIDE
+# ============================================================================
+
+core_mechanic:
+  name: "Attention Override"
+  
+  primary_system: |
+    The Siren's vocalization produces two simultaneous frequency layers:
+    
+    COMPULSION LAYER (enemy-facing):
+    Frequencies that interface with neurological attention systems. When a
+    Siren vocalizes a command, the target's action queue is OVERWRITTEN.
+    The enemy does not choose to comply — their motor systems execute the
+    commanded action as though it were their own decision. This is not
+    charm (they don't like you), not confusion (they don't act randomly),
+    not fear (they don't flee). They execute YOUR specified action with
+    full competence, just aimed where YOU want.
+    
+    RESONANCE LAYER (ally-facing):
+    The same vocalization carries undertone frequencies that stimulate
+    cellular regeneration in allied biological systems. Allies within
+    hearing range receive passive healing proportional to the Siren's
+    vocalization intensity. This is not a separate action — it is an
+    inherent property of any Siren vocalization. Every command heals.
+    Every heal can carry a command.
+  
+  how_command_works:
+    action_override: |
+      Commands specify: WHO does WHAT to WHOM/WHERE.
+      - "Attack [target]" — enemy uses its basic attack against specified entity
+      - "Move [direction/position]" — enemy paths to specified location
+      - "Use [ability]" — enemy activates a specific ability (even if suboptimal)
+      - "Cease" — enemy's action queue clears, standing idle for duration
+      
+      The precision scales with ability investment. Basic commands are binary
+      (attack/move). Advanced commands specify exact ability, exact target,
+      exact timing.
+    
+    vs_confusion: |
+      Confusion = random behavior. The enemy might do anything.
+      Command = specified behavior. The enemy does exactly what you dictate.
+      A confused enemy might attack its ally or might attack you. A commanded
+      enemy attacks EXACTLY the target you specified, with EXACTLY the action
+      you chose. The Siren is a puppeteer, not a scrambler.
+    
+    sr_interaction:
+      SR1: "Full override — commands execute immediately, full duration"
+      SR2: "Full override — commands execute immediately, full duration"
+      SR3: "Partial resistance — command duration reduced by 30%, complex commands (specific ability + specific target) may simplify to basic commands (attack nearest)"
+      SR4: "Contested override — Siren must maintain vocalization (channeled) for command to persist. SR4 enemies can 'break free' if the Siren takes damage or moves during channel. Boss-tier: only sub-optimal action forcing, not full puppeteering"
+  
+  healing_through_harmony:
+    mechanism: |
+      Every Siren vocalization carries healing undertones as an inherent
+      property. The healing is not a CHOICE to heal vs command — both happen
+      simultaneously on every vocalization. The decision is in INTENSITY
+      ALLOCATION: how much vocal power goes to command strength vs healing
+      throughput.
+      
+      Base state: 70% command potency / 30% healing throughput
+      Triage Minor (ally ≤50% HP within 30y): shifts to 50% / 50%
+      Triage Over (emergency burst): shifts to 20% / 80% — commands weaken
+      significantly but healing spikes. Costs maximum Resonance. Recovery
+      mode follows (lower output both channels until Resonance regenerates).
+    
+    triage_minor_trigger: "Any party member drops below 50% HP within 30y"
+    triage_minor_effect: |
+      Healing throughput doubles (from 30% to 50% of vocal intensity).
+      Command potency drops to 50% (reduced duration, simplified commands).
+      Siren gains +20% movement speed toward injured ally.
+      Ratio persists until all allies above 50% HP.
+    
+    triage_over_trigger: "Siren manually activates when party survival demands burst healing"
+    triage_over_effect: |
+      Healing output spikes to maximum (80% intensity).
+      Commands nearly cease (20% potency — only basic movement nudges work).
+      Costs all current Resonance.
+      Recovery mode: 8 seconds of reduced output (both channels at 60%)
+      while Resonance regenerates from zero.
+    
+    no_self_heal: |
+      The Siren CANNOT efficiently heal itself through its own harmonics.
+      Hearing your own voice does not produce the same resonance effect as
+      receiving another's vocalization. The Siren needs potions, ally healing,
+      or the Hex Drain-style mechanic (Parasitic Aria — see abilities) for
+      self-sustain.
+
+# ============================================================================
+# SECTION 3: TRIGGER SYSTEM
+# ============================================================================
+
+trigger_system:
+  philosophy: |
+    Siren abilities activate in response to ENCOUNTER CONDITIONS, not internal
+    timers or rotation sequences. The Siren reads the battlefield and selects
+    the appropriate command for the CURRENT situation. There is no "opener,"
+    no "burst phase," no "filler rotation." Every vocalization is a response
+    to a strategic demand.
+  
+  trigger_categories:
+    enemy_positioning:
+      description: "Enemy is in a dangerous position or needs to be relocated"
+      triggers:
+        - "Enemy approaching ally backline"
+        - "Enemy in advantageous elevation/cover"
+        - "Enemies clustered for ally AoE opportunity"
+        - "Enemy needs to be moved into hazard terrain"
+    
+    enemy_action:
+      description: "Enemy is about to do something dangerous or wasteable"
+      triggers:
+        - "Enemy charging a high-damage ability"
+        - "Enemy about to heal itself or ally"
+        - "Multiple enemies coordinating focus fire"
+        - "Enemy in a vulnerable position but not being attacked by allies"
+    
+    ally_health:
+      description: "Party members need healing support"
+      triggers:
+        - "Ally drops below 50% HP (Triage Minor auto-engages)"
+        - "Multiple allies taking sustained damage"
+        - "Ally isolated from party and taking damage"
+        - "Party-wide damage spike incoming"
+    
+    resource_management:
+      description: "Siren's own sustainability demands"
+      triggers:
+        - "Resonance approaching critical low (commands weakening)"
+        - "Siren needs self-healing (HP below safe threshold)"
+        - "Extended fight requiring conservation"
+    
+    opportunity:
+      description: "Moment where a command creates outsized value"
+      triggers:
+        - "Enemy above 50% HP (party can exploit +25% damage vulnerability)"
+        - "Two enemies near each other (forced infighting opportunity)"
+        - "Boss about to phase (force premature ability to waste it)"
+        - "Enemy isolated from its group (forced walk into party)"
+
+# ============================================================================
+# SECTION 4: ABILITIES (15 total)
+# ============================================================================
+
+abilities:
+
+  # --- COMMAND ABILITIES (Enemy-facing, CC component) ---
+
+  - name: "Imperative March"
+    category: Command
+    trigger_condition: "Enemy in dangerous position OR enemy needs to be moved into hazard/ally AoE zone"
+    effect: |
+      Single target. Commanded enemy paths to a Siren-designated location
+      (within 12m of target's current position) at normal movement speed.
+      Enemy cannot attack or use abilities while marching. Duration: until
+      arrival or 4 seconds (whichever comes first). Enemy retains aggro
+      table but physically relocates.
+    cc_stage: 1
+    replaces_item: "Sycophant Incense (paths enemy toward location, but incense is stationary, 3m radius, 10s, resistible by SR3)"
+    decision: "WHERE do I move this enemy? Into terrain hazard? Into ally AoE? Away from backline? Each destination creates different value."
+    resource_cost: "15 Resonance"
+    gcd: "2.0s base"
+    range: "20m (voice carries)"
+    notes: "Movement command — lowest commitment. Enemy arrives then resumes normal AI. Does not force any specific action after arrival."
+
+  - name: "Compelled Strike"
+    category: Command
+    trigger_condition: "Enemy near ally you want protected OR enemy near another enemy you want damaged"
+    effect: |
+      Single target. Commanded enemy uses its BASIC ATTACK against a
+      Siren-designated target (enemy or ally entity within the commanded
+      enemy's attack range). If designated target is out of range, commanded
+      enemy moves to range then attacks. One forced attack action.
+      
+      The attack uses the commanded enemy's full damage stats — this is
+      their own attack, just aimed by you.
+    cc_stage: 2
+    replaces_item: "Rivalmark Dust (forces two enemies to attack each other, but only works on pairs, breaks if you hit either, no target control)"
+    decision: "WHO do I force to attack WHOM? Force tank-type enemy to hit squishy enemy? Force ranged enemy to waste attack on high-armor target? Force enemy to hit its own healer?"
+    resource_cost: "25 Resonance"
+    gcd: "2.0s base"
+    range: "20m"
+    notes: "Forced attack redirection. Key distinction from Pheromone Tag: you specify EXACTLY who attacks whom, not just 'aggro priority shift.'"
+
+  - name: "Premature Aria"
+    category: Command
+    trigger_condition: "Enemy charging a high-value ability OR boss about to use devastation attack"
+    effect: |
+      Single target. Commanded enemy immediately activates its NEXT QUEUED
+      ABILITY, forcing it to fire NOW regardless of optimal timing. The
+      ability fires at its current facing/position — likely hitting nothing
+      or hitting suboptimal targets. If the ability was being charged, it
+      fires at current charge level (not full).
+      
+      The ability goes on its normal cooldown after forced activation.
+      This effectively wastes one enemy ability use.
+    cc_stage: 2
+    replaces_item: "Compulsion Chime (forces next ability to fire immediately, but single-use consumable, 1.5s activation time, cannot choose WHICH ability)"
+    decision: "WHEN to force the activation? Too early and the enemy recovers before your window. Too late and the ability was already optimal. Timing is the skill."
+    resource_cost: "35 Resonance"
+    gcd: "2.0s base"
+    range: "20m"
+    notes: "The 'waste their cooldown' ability. Against bosses with phase-transition abilities, this can force the ability pre-phase, wasting it entirely. High-value but high Resonance cost."
+
+  - name: "Discordant Chorus"
+    category: Command
+    trigger_condition: "Multiple enemies coordinating — focus fire on one ally, pack formation, flanking maneuver"
+    effect: |
+      AoE (8m radius centered on Siren). All enemies in radius receive
+      conflicting commands — each enemy targets a DIFFERENT entity (including
+      other enemies in the group). Duration: 6 seconds. During this time,
+      enemies cannot coordinate, cannot focus fire, and may attack each other.
+      
+      Target selection per enemy is semi-random weighted by proximity —
+      Siren does not individually designate each target (too many). The
+      CHAOS is the point. Commands conflict with each other, creating
+      behavioral interference.
+    cc_stage: 2
+    replaces_item: "Rivalmark Dust (only 2 enemies) + Taunt Cracker (only forces movement, 3s) + Befuddlement Smoke (loses coordination but doesn't force new targets)"
+    decision: "Using this means the Siren CANNOT issue precise single-target commands for 6 seconds (vocal cords producing the chorus). Trading precision for coverage."
+    resource_cost: "50 Resonance"
+    gcd: "2.0s base (then 6s of maintained vocalization — Siren can move but cannot use other Command abilities during)"
+    range: "8m radius (centered on self)"
+    notes: "The AoE command. Self-centered means the Siren must position near the enemy cluster. Creates vulnerability through proximity requirement."
+
+  - name: "Siren's Beckon"
+    category: Command
+    trigger_condition: "Enemy in cover/elevation/advantageous position that party cannot easily reach OR enemy fleeing"
+    effect: |
+      Single target. Commanded enemy is irresistibly drawn toward the Siren
+      at 150% normal movement speed. Enemy moves directly toward Siren,
+      ignoring cover, elevation advantage, and ally proximity. Duration:
+      until enemy reaches Siren or 5 seconds.
+      
+      The enemy CAN attack while being drawn (if targets are in range during
+      movement) but CANNOT stop moving toward the Siren.
+    cc_stage: 1
+    replaces_item: "Taunt Cracker (forces movement toward point for 3s only, AoE not single-target, cannot sustain)"
+    decision: "Drawing the enemy TO YOU means accepting melee proximity with that enemy. Is the positional advantage worth the personal danger? Who else is near you?"
+    resource_cost: "20 Resonance"
+    gcd: "2.0s base"
+    range: "25m"
+    notes: "Pull without physical displacement. The enemy WALKS to you willingly. Countered by allies intercepting the drawn enemy en route."
+
+  - name: "Paralytic Cadence"
+    category: Command
+    trigger_condition: "High-priority enemy that must be completely stopped — party needs time to reposition, heal, or set up"
+    effect: |
+      Single target. Channeled (Siren must maintain vocalization). Commanded
+      enemy's motor systems lock — full body paralysis through compulsion
+      override. Enemy cannot move, attack, or use abilities for channel
+      duration (up to 5 seconds).
+      
+      CONSTRAINT: Siren must remain stationary and continue vocalizing.
+      If Siren takes damage, moves, or is interrupted, command breaks
+      immediately. Siren CANNOT heal allies during this channel (all vocal
+      intensity dedicated to paralysis override).
+    cc_stage: 3
+    replaces_item: "Stasis Pin (total freeze 3s, but single-use, requires projectile accuracy, no reapplication)"
+    decision: "Full stop on one enemy but Siren is stationary, non-healing, and interruptible. Party loses their healer AND their CC controller for the duration. Is the lockdown worth the team cost?"
+    resource_cost: "40 Resonance + 10/second maintained"
+    gcd: "N/A (channeled — locks out all other actions)"
+    range: "15m (must maintain LoS — line of hearing)"
+    notes: "The Stage 3 commit. ENORMOUS team cost. No healing, no movement, vulnerable to interruption. The Siren becomes a single-purpose disable tool. Party must protect the channeling Siren."
+
+  - name: "Fugue State"
+    category: Command
+    trigger_condition: "Enemy above 50% HP that party wants to burst down (exploit +25% damage rule) OR enemy that needs to stand still for ally skill shots"
+    effect: |
+      Single target. Enemy enters cognitive fugue — standing motionless,
+      taking no actions, for 3 seconds. NOT paralysis (motor systems
+      functional) — the enemy's DECISION CENTER is overwhelmed by
+      conflicting compulsions and cannot resolve to any action.
+      
+      Enemy takes +25% damage during fugue (stacks with >50% HP rule for
+      potential +50% total damage bonus on enemies above half health).
+      
+      Fugue breaks if enemy takes damage exceeding 15% of their max HP
+      in a single hit (shock overrides the compulsion).
+    cc_stage: 3
+    replaces_item: "Stasis Pin (3s freeze, but no damage bonus, no conditional break mechanic)"
+    decision: "Fugue enables massive burst but breaks on big hits. Do allies coordinate many small hits (maintain fugue, full duration +25%) or one big hit (breaks fugue early but deals enormous single strike)? Party coordination required."
+    resource_cost: "45 Resonance"
+    gcd: "2.0s base"
+    range: "20m"
+    notes: "The setup ability. Pairs with >50% HP rule for devastating burst windows. But the damage-break threshold means careless allies end it prematurely. Communication skill."
+
+  - name: "Redirect Volley"
+    category: Command
+    trigger_condition: "Ranged enemy shooting at backline OR enemy about to use targeted ability on vulnerable ally"
+    effect: |
+      Single target (reactive). When a commanded enemy begins an attack
+      action, the Siren can instantly redirect that attack to a different
+      target within the enemy's attack range. The attack still fires — but
+      at a Siren-designated target instead of the enemy's chosen target.
+      
+      Can redirect to: another enemy (friendly fire), terrain (wasted), or
+      a high-mitigation ally (tank absorbs what would have killed a squishy).
+      
+      Must be activated within 0.5s of the enemy's attack initiation
+      (reactive timing window). Fails if Siren is not watching the enemy.
+    cc_stage: 2
+    replaces_item: "Pheromone Tag (redirects aggro priority but cannot redirect individual attacks mid-action)"
+    decision: "Requires watching enemy attack patterns in real-time. Redirect to enemy (damage them), redirect to tank (safe but no bonus), redirect to terrain (wasted safely)? Split-second choice."
+    resource_cost: "20 Resonance"
+    gcd: "Off-GCD (reactive, 0.5s window)"
+    range: "20m"
+    notes: "The reactive micro-skill ability. High ceiling — expert Sirens redirect every dangerous attack. Low floor — missing the 0.5s window means it doesn't fire. Positional/conditional crit: redirected attack that hits another enemy in the back = guaranteed crit."
+
+  # --- HEALING ABILITIES (Ally-facing, resonance) ---
+
+  - name: "Sustaining Hymn"
+    category: Healing
+    trigger_condition: "Party taking sustained damage, no emergency — standard healing maintenance"
+    effect: |
+      Passive aura (always active while Siren is vocalizing any command).
+      All allies within 20m receive baseline healing equal to 2% of Siren's
+      magic power per GCD. This is the "free" healing that accompanies every
+      command vocalization.
+      
+      During Triage Minor: increases to 4% per GCD.
+      During Triage Over: increases to 8% per GCD for burst, then drops to
+      1.5% during recovery mode.
+      
+      Does NOT require a separate GCD — happens automatically on any
+      vocalization (command or healing ability).
+    cc_stage: "N/A"
+    replaces_item: "Harmony Draught (3% HP/s for 12s, single target, consumed by ally). Sustaining Hymn is multi-target, permanent, no consumable cost."
+    decision: "No direct decision — but the Siren must BE VOCALIZING for this to function. Silence effects, stagger, or choosing to move silently all disable this passive."
+    resource_cost: "None (inherent to vocalization)"
+    gcd: "N/A (passive — triggers on any other ability use)"
+    range: "20m radius"
+    notes: "The baseline healing. Always on. The decision is maintaining vocalization — every moment spent NOT casting is a moment allies don't heal."
+
+  - name: "Resonant Mending"
+    category: Healing
+    trigger_condition: "Single ally taking heavy damage, needs focused healing beyond passive aura"
+    effect: |
+      Single target. Siren directs focused harmonic frequencies at one ally,
+      providing burst healing equal to 15% of target's max HP over 3 seconds
+      (delivered in 3 pulses of 5% at 1-second intervals).
+      
+      While directing Resonant Mending, the Siren's command abilities are
+      reduced to 70% potency (vocal intensity split between healing focus
+      and command output).
+      
+      Conditional enhancement: If Siren is within 8m of the target,
+      physical proximity amplifies resonance — healing increases to 20%
+      max HP over 3 seconds.
+    cc_stage: "N/A"
+    replaces_item: "Resonance Crystal (+15% healing received in 4m radius, but requires installation, provides NO healing on its own, destroyable)"
+    decision: "Do I focus-heal this ally (reducing my command potency) or trust the passive aura to keep them alive while I maintain full command strength? Proximity bonus rewards risky forward positioning."
+    resource_cost: "30 Resonance"
+    gcd: "2.0s base (then 3s of healing delivery, can still use commands at reduced potency)"
+    range: "20m (8m for enhanced version)"
+    notes: "The focused heal. Not a dedicated healing stance — commands still work, just weaker. The 8m bonus creates positional decision: safe at range, stronger up close."
+
+  - name: "Chorus of Mending"
+    category: Healing
+    trigger_condition: "Party-wide damage event — AoE attack landed, multiple allies injured simultaneously"
+    effect: |
+      AoE healing burst. All allies within 20m receive immediate healing
+      equal to 10% of their max HP, plus a 6-second regeneration effect
+      (2% max HP per second).
+      
+      During the 6-second regeneration, the Siren's Resonance regeneration
+      rate is halved (sustaining the harmonic requires ongoing vocal
+      commitment even after the initial burst).
+      
+      Conditional: If 3+ allies are below 50% HP when cast, the burst
+      increases to 15% max HP (Triage Minor state amplifies the harmony).
+    cc_stage: "N/A"
+    replaces_item: "Rejuvenation Flask (20% HP AoE burst, but single-use, 2m radius, requires aim). Chorus is 20m radius, repeatable, no aim required."
+    decision: "Powerful party heal but halves Resonance regen for 6 seconds — meaning fewer commands available during recovery. Use too early and you lack command resources. Use too late and allies die."
+    resource_cost: "60 Resonance"
+    gcd: "2.0s base"
+    range: "20m radius (centered on Siren)"
+    notes: "The big AoE heal. Expensive. The Resonance regen penalty creates a vulnerability window — enemies commanded BEFORE this ability need to stay commanded on their own momentum (duration-based) because the Siren can't refresh commands cheaply."
+
+  - name: "Parasitic Aria"
+    category: Healing (Self)
+    trigger_condition: "Siren taking damage, needs self-sustain without relying on ally healer or potions"
+    effect: |
+      Single target (enemy). The Siren's vocalization drains vitality from
+      a commanded enemy, transferring HP from enemy to Siren. Drains 5% of
+      enemy's current HP per second for 4 seconds (total 20% of enemy's
+      current HP transferred to Siren as healing).
+      
+      The targeted enemy must already be under one of the Siren's commands
+      (any active command effect). Cannot drain an uncommanded enemy.
+      
+      Drain rate is based on enemy's CURRENT HP — meaning it's strongest
+      at fight start and weakens as enemy's HP drops. Draining an enemy
+      below 50% HP transitions them into the +25% damage taken zone.
+    cc_stage: "N/A"
+    replaces_item: "No direct item equivalent — this is the Siren's version of Shaman's Hex Drain (healer self-sustain through enemy interaction)"
+    decision: "Requires an active command on the target. Do I use my command budget to set up self-healing, or use those commands for team utility? Self-preservation vs team contribution."
+    resource_cost: "25 Resonance"
+    gcd: "2.0s base"
+    range: "20m (target must be under active Siren command)"
+    notes: "The self-heal. Gated behind having an active command — forces the Siren to maintain at least one enemy under control to access self-sustain. Creates ecosystem dependency."
+
+  # --- UTILITY ABILITIES (Battlefield awareness and enhancement) ---
+
+  - name: "Echolocation Pulse"
+    category: Utility
+    trigger_condition: "Party needs information — unknown room, enemies behind walls, ambush suspected"
+    effect: |
+      The Siren emits a subsonic pulse that maps all entities within 30m
+      through walls, floors, and obstacles (sound propagates through solid
+      matter). Returns: enemy count, approximate positions, and whether
+      enemies are stationary or moving.
+      
+      Does NOT reveal enemy types, HP, or abilities — only presence and
+      position. Information persists on party HUD for 8 seconds.
+      
+      Also reveals destructible terrain, traps, and interactable objects
+      within pulse range.
+    cc_stage: "N/A"
+    replaces_item: "Hexcage Lantern (reveals enemies through walls in 5m, 30s, but installation-based, destroyable, shorter range). Echolocation is instant, wider range, no installation."
+    decision: "The pulse alerts SR3+ enemies to the Siren's presence and approximate location. Using it reveals THEM but also reveals YOU. Information costs stealth."
+    resource_cost: "10 Resonance"
+    gcd: "2.0s base"
+    range: "30m sphere"
+    notes: "Scouting tool. Sound-based, so affected by sound-dampening terrain (underwater = enhanced range, vacuum = no function). The 'reveals you too' mechanic prevents spam-scouting."
+
+  - name: "Harmonic Shield"
+    category: Utility
+    trigger_condition: "Ally about to take a specific large hit OR Siren anticipates burst damage on a target"
+    effect: |
+      Single target (ally). The Siren layers a resonant frequency around
+      one ally that disrupts incoming sonic/magical attacks. For 4 seconds,
+      target receives 25% damage reduction against the NEXT instance of
+      damage taken.
+      
+      Only absorbs ONE hit — the first damage instance within 4 seconds
+      receives the reduction, then the shield dissipates.
+      
+      Conditional: If the shielded ally is standing within 8m of the Siren,
+      the reduction increases to 35% (proximity amplification).
+    cc_stage: "N/A"
+    replaces_item: "No direct single item equivalent — closest is Shield Generator concept (team bubble), but Harmonic Shield is single-target, reactive, short-window"
+    decision: "Single target, single hit. Predicting WHICH ally takes the next big hit and applying proactively. Wrong target = wasted. Right target = ally survives a lethal."
+    resource_cost: "20 Resonance"
+    gcd: "Off-GCD (can weave between commands)"
+    range: "20m (8m for enhanced)"
+    notes: "The proactive defense tool. Off-GCD means it doesn't compete with commands for action economy — but it does compete for Resonance budget."
+
+  - name: "Fortissimo"
+    category: Command (Enhanced)
+    trigger_condition: "Critical moment — boss phase transition, enemy about to complete objective, party needs one enemy GONE from the fight"
+    effect: |
+      Single target. The Siren's most powerful command. The targeted enemy
+      is compelled to FLEE the battlefield at maximum movement speed for
+      8 seconds. The enemy runs directly away from the Siren, ignoring all
+      other stimuli. Will run off ledges, into hazards, through ally
+      formations — pure flight response.
+      
+      After 8 seconds (or if the enemy leaves the encounter area), the
+      enemy returns with 15% damage resistance for 10 seconds (adrenaline
+      from the forced flight hardens their resolve — they're ANGRY).
+      
+      Cannot be used on the same target within 30 seconds of the previous
+      Fortissimo (target develops temporary vocal resistance).
+    cc_stage: 3
+    replaces_item: "No item equivalent for duration + forced exit. Closest: Taunt Cracker (3s movement) + Smoke Ball (escape from encounter) combined conceptually."
+    decision: "Removes one enemy from the fight for 8 seconds — enormous value. But they return tougher. And the 30s same-target cooldown means you can't perma-exile. WHICH enemy deserves the exile? The one your party struggles with most, or the one that enables the others?"
+    resource_cost: "70 Resonance"
+    gcd: "2.0s base"
+    range: "15m"
+    notes: "The ultimate single-target command. Extremely expensive (70 Resonance from ~120 max pool). Cannot be used frivolously. The return-with-resistance mechanic prevents it from being a 'delete enemy' button."
+
+  - name: "Lullaby"
+    category: Command
+    trigger_condition: "Out of combat — party needs to bypass a group of enemies without fighting, or needs time to set up before engagement"
+    effect: |
+      AoE (10m radius). All enemies within range are commanded into sleep
+      — motionless, unaware, non-threatening. Duration: 12 seconds or until
+      ANY damage is dealt to ANY sleeping target (all wake on first damage
+      to any one of them).
+      
+      Requires 3 seconds of uninterrupted vocalization to activate (cannot
+      be used in active combat — enemies will interrupt during the 3s wind-up).
+      
+      Sleeping enemies are treated as unaware for the purposes of ambush
+      bonuses and positional advantages.
+    cc_stage: 3
+    replaces_item: "Phantom Echo (3s invisibility) + Numbsense Spike (prevents detection, 15s). Lullaby is stronger (full sleep) but only works pre-combat."
+    decision: "Sleep enables perfect ambush setup OR complete bypass. But the 3s activation means it's pre-combat only. And all-wake-on-damage means the party gets ONE opening strike before full engagement. Optimize that one strike."
+    resource_cost: "40 Resonance"
+    gcd: "N/A (3s channel, pre-combat only)"
+    range: "10m radius (centered on Siren)"
+    notes: "The utility-CC hybrid. Cannot be used in combat (3s channel). Enables stealth gameplay, ambush setup, or complete avoidance. Breaking it poorly (accidental damage) wastes the entire setup."
+
+# ============================================================================
+# SECTION 5: SATURATION / RESOURCE SYSTEM
+# ============================================================================
+
+resource_system:
+  resource_name: "Resonance"
+  
+  description: |
+    Resonance represents the Siren's vocal stamina — the sustained energy
+    available in the layered cartilage membranes. Vocalization expends
+    Resonance. Rest and specific recovery actions restore it. Resonance
+    is NOT mana (magical energy) — it is physical throat capacity, like
+    a singer's breath support and vocal cord elasticity.
+  
+  pool:
+    maximum: 120
+    starting_combat: 120 (full — Siren enters fresh)
+    regeneration_rate: "8 Resonance per GCD (passive, while vocalizing anything — even basic attacks generate some)"
+    enhanced_regeneration: "12 per GCD when no Command abilities are active on any enemy (voice resting from compulsion work)"
+    recovery_mode: "4 per GCD for 8 seconds after Triage Over (vocal strain from maximum output)"
+  
+  spending_rates:
+    low_cost: "10-20 Resonance (utility, basic commands)"
+    medium_cost: "25-45 Resonance (standard commands, focused healing)"
+    high_cost: "50-70 Resonance (AoE commands, ultimate abilities)"
+    maintained_cost: "10/second (Paralytic Cadence channel)"
+  
+  sustainability_model: |
+    At base regeneration (8/GCD on 2.0s GCD = 4 Resonance/second):
+    - Low-cost abilities: sustainable indefinitely (spend 10-20, regen 8/GCD)
+    - Medium-cost abilities: sustainable at ~1 per 3 GCDs (spend 25-45, need 3-6 GCDs to recover)
+    - High-cost abilities: requires 6-9 GCDs of recovery (15-18 seconds between uses)
+    - Fortissimo (70): requires nearly full pool — cannot be used back-to-back
+    
+    The Siren's "rotation" is naturally varied by resource pressure.
+    Sustaining many commands simultaneously drains faster than commanding
+    one enemy at a time. Multi-command states burn 2-3x the Resonance
+    of single-command states.
+  
+  what_limits_command_frequency: |
+    1. RESONANCE BUDGET: Each command costs resource. More commands = faster depletion.
+    2. ACTIVE COMMAND CAP: Maximum 3 simultaneous commands on different enemies.
+       Beyond 3, oldest command drops (vocal bandwidth limit — can only maintain
+       3 independent frequency patterns simultaneously).
+    3. TARGET RESISTANCE: Same target commanded repeatedly within 30s develops
+       partial resistance (command duration reduced by 20% per reapplication).
+       Encourages cycling targets rather than perma-locking one enemy.
+    4. HEALING TRADE-OFF: Every Resonance spent on commands is Resonance NOT
+       available for emergency healing (Chorus of Mending costs 60 — that's
+       two medium commands sacrificed).
+  
+  depletion_consequences: |
+    At 0 Resonance:
+    - No commands can be issued (vocal cords exhausted)
+    - Sustaining Hymn passive healing STOPS (no vocalization possible)
+    - Siren is limited to basic attacks and movement for 4-6 seconds
+      until minimum threshold (20 Resonance) regenerates
+    - Any active commands on enemies expire immediately (no maintenance)
+    
+    This is the Siren's "out of gas" state. EXTREMELY dangerous.
+    Party loses their healer AND their controller simultaneously.
+
+# ============================================================================
+# SECTION 6: CC STAGE BUDGET
+# ============================================================================
+
+cc_stage_budget:
+  role_context: |
+    As a Healer/CC hybrid, the Siren should have moderate-to-high CC access.
+    The CC is the offensive component of the kit — it's HOW the Siren
+    contributes beyond healing. The budget should emphasize Stage 2 (specific
+    action control — the Siren's identity) with limited Stage 3 access
+    (full disable is high-commitment and rare).
+  
+  budget_map:
+    stage_1:
+      count: 3
+      abilities:
+        - name: "Imperative March"
+          justification: "Forces movement only — enemy can still act after arriving. Lowest override level."
+        - name: "Siren's Beckon"
+          justification: "Forces movement toward Siren — enemy can still attack en route. Movement-only control."
+        - name: "Sycophant Incense (item baseline)"
+          justification: "Reference — Stage 1 item that Siren's Beckon/March replace"
+    
+    stage_2:
+      count: 4
+      abilities:
+        - name: "Compelled Strike"
+          justification: "Forces a specific attack action — overrides enemy's chosen target. Action specification = Stage 2."
+        - name: "Premature Aria"
+          justification: "Forces premature ability activation — interrupt equivalent through forced action rather than cancellation."
+        - name: "Discordant Chorus"
+          justification: "Forces multi-enemy target confusion — each enemy redirected to attack different targets. Coordination disruption = Stage 2."
+        - name: "Redirect Volley"
+          justification: "Redirects individual attack mid-action — reactive interrupt/redirect. Stage 2 (specific action override)."
+    
+    stage_3:
+      count: 3
+      abilities:
+        - name: "Paralytic Cadence"
+          justification: "Full paralysis — complete disable. Channeled, interruptible, no healing during. Maximum commitment for maximum control."
+        - name: "Fugue State"
+          justification: "Complete action cessation — enemy stands motionless. Breaks on heavy damage. Stage 3 with counterplay."
+        - name: "Fortissimo"
+          justification: "Forced flee — enemy completely removed from fight for 8s. Effectively an exile. Stage 3 with return-penalty mechanic."
+        - name: "Lullaby"
+          justification: "Full sleep (pre-combat only). Stage 3 with all-or-nothing break mechanic. Requires 3s channel — cannot use in active combat."
+  
+  total_assessment: |
+    Stage 1: 2 abilities (movement control)
+    Stage 2: 4 abilities (action specification — the Siren's identity zone)
+    Stage 3: 4 abilities (full disable — but each has severe constraints)
+    
+    The Stage 3 count is HIGH for a healer, which is appropriate because:
+    1. Paralytic Cadence requires channeling (Siren stops healing entirely)
+    2. Fugue State breaks on heavy damage (party must coordinate)
+    3. Fortissimo has 30s same-target cooldown and enemy returns tougher
+    4. Lullaby is pre-combat only (cannot be used during fights)
+    
+    Each Stage 3 ability has a built-in limitation that prevents the Siren
+    from being a "permanent disable" class. The COST of Stage 3 is always
+    losing something else (healing, resource, future effectiveness).
+    
+    This budget is appropriate for a Healer/CC whose CC IS their primary
+    contribution to the party beyond basic healing maintenance.
+
+# ============================================================================
+# SECTION 7: VULNERABILITY WINDOWS
+# ============================================================================
+
+vulnerability_windows:
+  
+  inherent_vulnerabilities:
+    - name: "Resonance Depletion"
+      description: |
+        At 0 Resonance, the Siren loses ALL functionality — no commands, no
+        healing, no utility. This lasts 4-6 seconds minimum. The party has
+        no healer and no controller during this window.
+      trigger: "Overcommitting to expensive commands without resource management"
+      counterplay_by_enemies: "SR3+ enemies may deliberately provoke expensive commands to drain the Siren, then exploit the gap"
+      strategic_choice: "Every expensive command (Fortissimo, Discordant Chorus, Chorus of Mending) makes depletion more likely. Budget management IS the Siren's skill floor."
+    
+    - name: "Triage Over Recovery"
+      description: |
+        After emergency healing burst, Siren enters 8 seconds of recovery mode:
+        reduced healing output, reduced command potency, halved Resonance regen.
+        This is the post-emergency hangover.
+      trigger: "Using Triage Over to save the party from a damage spike"
+      counterplay_by_enemies: "Multi-phase boss encounters that force Triage Over in phase 1, then ramp damage in phase 2 while Siren is recovering"
+      strategic_choice: "Using Triage Over is sometimes WRONG — better to let one ally die and maintain full functionality than save everyone and be crippled after."
+    
+    - name: "Paralytic Cadence Exposure"
+      description: |
+        While channeling the Stage 3 disable, the Siren is stationary, cannot
+        heal, and breaks if damaged. This is the highest-risk state.
+      trigger: "Choosing to hard-disable one enemy at the cost of all other functions"
+      counterplay_by_enemies: "ANY enemy that isn't the paralyzed one can hit the Siren to break the channel"
+      strategic_choice: "Only valuable when the party can protect the Siren during channel AND the disabled enemy is worth losing healing for."
+    
+    - name: "Discordant Chorus Proximity"
+      description: |
+        The AoE command requires the Siren to be within 8m of the enemy cluster.
+        This places the squishy Healer/CC in melee range of multiple enemies.
+      trigger: "Choosing to use the AoE command instead of multiple single-target commands"
+      counterplay_by_enemies: "Enemies not affected by the Chorus (outside 8m) can punish the Siren's forward position"
+      strategic_choice: "Proximity for AoE coverage vs safety at range with single-target precision"
+    
+    - name: "Silence / Interrupt Vulnerability"
+      description: |
+        The Siren's ENTIRE KIT is voice-based. Any effect that prevents
+        vocalization (silence, gag, throat damage, vacuum environments)
+        disables the Siren completely — no commands, no healing, no utility.
+        The Siren is the MOST silence-vulnerable class in the game.
+      trigger: "Environmental or enemy silence effects"
+      counterplay_by_enemies: "SR3+ caster enemies with silence abilities specifically counter Sirens"
+      strategic_choice: "Party must protect Siren from silence-capable enemies. Items that grant silence immunity become critical for Siren players."
+    
+    - name: "Active Command Cap (3 maximum)"
+      description: |
+        Only 3 simultaneous commands. In encounters with 5+ enemies, the Siren
+        cannot control everything. The 2+ uncontrolled enemies are free to act
+        normally — and they may target the Siren.
+      trigger: "Encounters with more enemies than command slots"
+      counterplay_by_enemies: "Swarming encounters with many weak enemies counter the Siren's precision control"
+      strategic_choice: "Which 3 enemies are worth controlling? The others are the party's problem via items/other classes."
+
+  designed_weaknesses:
+    vs_many_weak_enemies: "Siren excels against few powerful enemies. Swarms overwhelm the 3-command cap and Resonance budget."
+    vs_silence_users: "A single successful silence strips the Siren of everything. No other class is this comprehensively disabled by one effect."
+    vs_sustained_siren_damage: "Siren has no defensive abilities for itself beyond Parasitic Aria (requires active command on target) and Harmonic Shield (single hit only)."
+    vs_spread_enemies: "Commands require individual targeting. Enemies spread across the map at >20m cannot be commanded at all. The Siren needs enemies within voice range."
+
+# ============================================================================
+# SECTION 8: ITEM COMPLEMENTARITY
+# ============================================================================
+
+item_complementarity:
+  philosophy: |
+    The Siren replaces Attention Manipulation items and baseline healing items.
+    However, a party WITH a Siren still benefits enormously from other item
+    categories. The Siren does NOT replace all strategic consumables.
+  
+  items_still_critical_with_siren:
+    - category: "Silence Protection"
+      why: "Siren's total silence vulnerability makes items like silence-immunity consumables MANDATORY for the Siren player specifically"
+      examples: ["Anti-silence tonic (theoretical)", "Nullberry-equivalent for vocal debuffs"]
+    
+    - category: "Terrain Creation / Area Denial"
+      why: "Siren commands MOVEMENT — pairing with terrain hazards creates devastating combos. 'March into the fire zone' only works if fire zone exists."
+      examples: ["Bogcrust Grenade (difficult terrain to march enemies INTO)", "Thornveil Seed (hazard enemies are marched through)"]
+    
+    - category: "Vulnerability Application"
+      why: "Siren's Fugue State grants +25% damage taken. Stacking Brittlemark Chalk (+25% from next 3 hits) creates a +50% burst window (with >50% HP rule, potentially +75%)."
+      examples: ["Brittlemark Chalk", "Conductance Gel (if ally has lightning attacks)", "Rupture Oil"]
+    
+    - category: "Self-Defense (for the Siren)"
+      why: "Siren cannot self-heal efficiently and is squishy. Personal defense items keep the Siren alive."
+      examples: ["Ironhide Tincture (8s damage reduction)", "Smokebreak Ampule (untargetable escape)"]
+    
+    - category: "Speed Reduction (for uncommanded enemies)"
+      why: "Siren can only command 3 enemies. Speed reduction items on the remaining enemies prevent them from reaching the Siren."
+      examples: ["Thickglass Flask", "Frostweave Net", "Muddling Tincture"]
+    
+    - category: "Damage / DPS Items (for allies)"
+      why: "Siren creates WINDOWS (Fugue State, Paralytic Cadence) — ally DPS items maximize damage during those windows."
+      examples: ["Demon Powder (party ATK boost during stun)", "Berserker's Draught (for DPS during guaranteed hit window)"]
+    
+    - category: "Scouting (beyond Echolocation)"
+      why: "Echolocation reveals presence but not type. Hexcage Lantern or Scout Familiar provide persistent detailed information."
+      examples: ["Hexcage Lantern (sustained vision, reveals stealth)", "Scout Familiar Scroll (extended range scouting)"]
+  
+  items_the_siren_makes_unnecessary:
+    - "Pheromone Tag (Siren commands with more precision)"
+    - "Rivalmark Dust (Compelled Strike does this better and repeatedly)"
+    - "Compulsion Chime (Premature Aria replaces this function permanently)"
+    - "Sycophant Incense (Imperative March replaces with precision targeting)"
+    - "Taunt Cracker (Siren's Beckon replaces with longer duration and single-target precision)"
+    - "Hollowform Decoy (Siren redirects attention directly, no decoy needed)"
+    - "Harmony Draught (Sustaining Hymn passive replaces sustained regen)"
+    - "Resonance Crystal (Siren IS the healing amplification source)"
+
+# ============================================================================
+# SECTION 9: HIT/MISS ANALYSIS
+# ============================================================================
+
+hit_miss_analysis:
+  description: |
+    Comparing Siren abilities against item baselines — where does the class
+    clearly outperform? Where is the gap uncomfortably small? Where might
+    an item actually be PREFERABLE?
+  
+  clear_outperformance:
+    - comparison: "Compelled Strike vs Rivalmark Dust"
+      class_advantage: "Repeatable, precise target selection (any entity, not just pairs), no break condition, scales with enemy damage stats"
+      gap_magnitude: "ENORMOUS — Rivalmark Dust is single-use, pair-only, breaks on ally hit. Compelled Strike is indefinitely repeatable."
+    
+    - comparison: "Premature Aria vs Compulsion Chime"
+      class_advantage: "No 1.5s activation delay, repeatable, no consumable cost, can be used reactively to specific ability telegraphs"
+      gap_magnitude: "LARGE — item forces 'next ability' blindly. Siren forces abilities at CHOSEN moments."
+    
+    - comparison: "Sustaining Hymn (passive) vs Harmony Draught"
+      class_advantage: "Multi-target, permanent, scales with Siren stats, no ally consumable slot used, simultaneous with command output"
+      gap_magnitude: "ENORMOUS — Draught is single-target, 12s, consumed. Hymn is always-on multi-target."
+    
+    - comparison: "Paralytic Cadence vs Stasis Pin"
+      class_advantage: "Up to 5s vs 3s, repeatable, no projectile accuracy needed, maintained at will"
+      gap_magnitude: "LARGE (but offset by Siren vulnerability during channel — Stasis Pin has no user-cost)"
+    
+    - comparison: "Discordant Chorus vs Befuddlement Smoke + Rivalmark Dust combined"
+      class_advantage: "Forces actual attacks on each other (not just 'lose coordination'), 6s duration, multi-target, repeatable"
+      gap_magnitude: "LARGE — requires 2 items to approximate, and those items still don't force actual attacks."
+
+  uncomfortably_small_gaps:
+    - comparison: "Imperative March vs Sycophant Incense"
+      concern: |
+        Sycophant Incense affects ALL enemies in 3m radius for 10s (area effect).
+        Imperative March affects ONE enemy for up to 4s (single target, shorter).
+        In scenarios with clustered enemies, the ITEM may actually provide more
+        total movement control per use than the class ability.
+      resolution: |
+        March provides PRECISION (exact destination) while Incense provides
+        AREA (enemies path toward incense, not a chosen spot). The tradeoff
+        is valid: class = precision, item = coverage. But in narrow corridors
+        where 'toward the incense' = 'toward the right spot,' the item
+        approximates the class function too closely.
+      recommendation: "Imperative March should allow chaining — if enemy arrives and Siren immediately re-commands to new location, this creates a 'herding' pattern items cannot replicate."
+    
+    - comparison: "Siren's Beckon vs Taunt Cracker"
+      concern: |
+        Taunt Cracker affects ALL enemies in 6m radius for 3s (AoE pull).
+        Siren's Beckon affects ONE enemy for up to 5s (single target).
+        Against groups, one Taunt Cracker might outperform Beckon.
+      resolution: |
+        Beckon provides: longer duration (5s vs 3s), higher fidelity (specifically
+        toward Siren, not toward a point), and 150% speed (faster arrival).
+        But the AoE advantage of the item is real in multi-enemy pulls.
+      recommendation: "Acceptable gap — the Siren's value is NOT in matching AoE item coverage. It's in PRECISION and REPEATABILITY."
+    
+    - comparison: "Harmonic Shield vs Stoneskin Scroll/Ironhide Tincture"
+      concern: |
+        Harmonic Shield absorbs ONE hit at 25% reduction (or 35% at close range).
+        Ironhide Tincture provides 50% reduction for 8s (multiple hits).
+        The item provides strictly better damage mitigation over time.
+      resolution: |
+        Harmonic Shield is OFF-GCD (no action economy cost) and infinitely
+        repeatable (every 2s if Siren has Resonance). The item is stronger
+        per-use but the Siren can apply Shield every other GCD indefinitely.
+      recommendation: "This gap is intentional — the Siren is NOT a mitigation class. Shield is a bonus utility, not a replacement for defense items."
+
+  items_potentially_preferable:
+    - scenario: "Pre-combat stealth approach"
+      item: "Phantom Echo (3s invisibility) or Numbsense Spike (stealth detection immunity)"
+      vs_siren: "Lullaby (puts enemies to sleep for 12s)"
+      when_item_wins: |
+        Lullaby requires 3s channel with risk of interruption if enemies detect
+        the Siren during wind-up. Phantom Echo guarantees 3s of invisibility
+        with no failure condition. For solo scouting without party support,
+        the item is SAFER than the class ability.
+    
+    - scenario: "Many weak enemies in a swarm"
+      item: "Taunt Cracker (6m AoE, all enemies, 3s) + Bogcrust Grenade (area denial)"
+      vs_siren: "Discordant Chorus (8m AoE, 6s, but Siren must be IN the cluster)"
+      when_item_wins: |
+        Against 8+ enemies, Taunt Cracker provides safe-distance crowd
+        management without risking the healer. The Siren's proximity
+        requirement for Chorus makes it DANGEROUS against swarms.
+
+# ============================================================================
+# SECTION 10: ANTI-PATTERNS
+# ============================================================================
+
+anti_patterns:
+  
+  no_rotation:
+    statement: "The Siren has NO fixed ability order. NO opener. NO 'cycle.'"
+    explanation: |
+      Every ability is a RESPONSE to encounter state. "Imperative March because
+      the enemy is approaching my ally" is a valid use. "Imperative March because
+      it's next in my rotation" is a design failure. If a Siren player can
+      macro their abilities in a fixed sequence and perform well, the encounter
+      design has failed to create varied strategic demands.
+    enforcement: |
+      - Trigger conditions are ENCOUNTER-DERIVED, not internally-timed
+      - No ability has a cooldown that creates natural sequencing
+      - Resource cost variation means expensive abilities CAN'T be used on schedule
+      - Active Command Cap (3) means command choice is about WHICH enemies, not WHEN in rotation
+  
+  no_burst_windows:
+    statement: "The Siren has NO 2-minute burst window. NO damage amp cadence."
+    explanation: |
+      Fugue State (+25% damage) and Paralytic Cadence (full disable) create
+      burst OPPORTUNITIES, but they are triggered by encounter demand, not
+      by internal timers aligning. There is no "every 120 seconds, all my
+      stuff lines up for a burst." The Siren's value is CONSTANT PRESSURE
+      through continuous command maintenance and continuous healing output.
+    enforcement: |
+      - No ability has a 2-minute cooldown
+      - No ability charges on a fixed timer
+      - Fortissimo's 30s same-target restriction is a DEBUFF on the enemy (resistance), not a Siren cooldown
+      - Resonance regenerates continuously, not in burst windows
+  
+  no_fixed_cadence:
+    statement: "The Siren does NOT have a predictable output pattern over time."
+    explanation: |
+      A Siren fighting two different encounters will use completely different
+      ability sequences. Against a single powerful enemy, the Siren may use
+      Premature Aria and Fugue State repeatedly. Against a spread group, the
+      Siren may use Imperative March and Compelled Strike exclusively. The
+      kit adapts to the ENCOUNTER, not the other way around.
+    enforcement: |
+      - Abilities address different PROBLEMS (positioning, action control, healing, scouting)
+      - No two abilities share the same trigger condition
+      - Resonance budgeting varies per encounter length and enemy composition
+  
+  no_freecure:
+    statement: "NO RNG healing procs. NO 'free heal' rewards for bad play."
+    explanation: |
+      Sustaining Hymn is always-on (no proc). Resonant Mending is deliberate
+      (costs Resonance). Chorus of Mending is emergency response (costs heavily).
+      No ability says "15% chance your next heal is free." The Siren's healing
+      efficiency comes from PLAYING WELL (maintaining vocalization, managing
+      Resonance, choosing when to heal vs command) — not from rolling dice.
+    enforcement: |
+      - Zero % chance mechanics in the entire kit
+      - Healing throughput is deterministic (always X% based on stats)
+      - "Free" healing exists (Sustaining Hymn passive) but is ALWAYS active, not proc-based
+      - The conditional crit on Redirect Volley (backstab redirect) is POSITIONAL, not random
+  
+  no_stance_dancing:
+    statement: "The Siren does NOT toggle between 'command mode' and 'heal mode.'"
+    explanation: |
+      Both outputs happen simultaneously from every vocalization. The RATIO
+      shifts (Triage Minor/Over), but there is never a moment where the Siren
+      consciously "switches to healing stance." The kit is integrated by design.
+      Stance-dancing would create a version of the Freecure problem: "I healed
+      when I should have been commanding" or vice versa.
+    enforcement: |
+      - Sustaining Hymn fires on EVERY vocalization (command or heal)
+      - Triage ratio shifts are AUTOMATIC (triggered by ally HP thresholds)
+      - Only Triage Over is manually activated (emergency override)
+      - Command abilities don't stop healing; healing abilities don't stop commanding (just reduce potency)
+
+# ============================================================================
+# SECTION 11: OPEN QUESTIONS
+# ============================================================================
+
+open_questions:
+
+  - id: 1
+    category: "Boss Interaction"
+    question: |
+      How does command interact with boss immunity/resistance? Current spec
+      says SR4 requires channeled maintenance and allows only sub-optimal
+      action forcing (not full puppeteering). Is this sufficient for boss
+      encounters to remain challenging while the Siren still feels impactful?
+    proposed_direction: |
+      Boss encounters could have "command windows" — brief vulnerability
+      periods where the Siren's commands have full effect (analogous to
+      Monster Hunter flinch windows). Outside these windows, only movement
+      nudges work. This creates boss-fight-specific Siren gameplay without
+      making the class useless against bosses.
+    blocking: false
+
+  - id: 2
+    category: "Sound Propagation"
+    question: |
+      Does the Siren's voice propagate through walls? If yes, this eliminates
+      LoS as a requirement for commands. Sound SHOULD propagate through solid
+      matter (that's what sound does), but this makes the Siren potentially
+      too safe (command from behind full cover, never exposed).
+    proposed_direction: |
+      Sound propagates through obstacles BUT with ATTENUATION — commands
+      through walls have reduced duration (50%) and cannot apply Stage 3
+      effects. The Siren must have direct line-of-hearing for full-power
+      commands. Underwater: enhanced range (+50%). Vacuum: no function.
+    blocking: true
+
+  - id: 3
+    category: "Multi-Siren Party"
+    question: |
+      What happens with two Sirens in a party? Do their commands conflict?
+      Can they command the same enemy differently? Does vocal interference
+      cancel both commands?
+    proposed_direction: |
+      Vocal interference — two Sirens commanding the same enemy creates
+      "dissonance" that weakens both commands (50% duration on both).
+      Different enemies = no conflict. This discourages double-Siren but
+      doesn't prohibit it (they just can't stack commands on one target).
+    blocking: false
+
+  - id: 4
+    category: "Elemental Integration"
+    question: |
+      Merryin have lightning/water racial elements. Should Siren commands
+      carry elemental payload? (e.g., a command that also applies a
+      lightning DoT, or water-element healing specifically?)
+    proposed_direction: |
+      Healing resonance is water-aligned (cellular hydration, flow
+      restoration). Command frequencies are lightning-aligned (neurological
+      override via electrical impulse). This gives elemental identity without
+      creating a "Siren deals lightning damage" confusion with DPS classes.
+      Elemental typing matters for resistance/vulnerability calculations
+      but doesn't make the Siren a damage dealer.
+    blocking: false
+
+  - id: 5
+    category: "Counterplay Clarity"
+    question: |
+      How does an enemy-player (PvP) know they're being commanded? Is there
+      a visual/audio tell? If commands are irresistible, what counterplay
+      exists in PvP specifically?
+    proposed_direction: |
+      PvP commands should have a 0.5s "resist window" where the target
+      player can input a specific counteraction (break free) at the cost
+      of their current action. This makes Siren commands in PvP more like
+      forced-choice interrupts (you CAN resist but it costs you something)
+      rather than unavoidable puppeteering.
+    blocking: true
+
+  - id: 6
+    category: "Resonance Recovery"
+    question: |
+      Is 8 Resonance/GCD sufficient recovery? At 2.0s GCD, that's 4/second.
+      Chorus of Mending (60 cost) requires 15 seconds of pure recovery to
+      re-afford. Is that too punishing? Too generous?
+    proposed_direction: |
+      Needs quantitative simulation. The "enhanced regeneration when no
+      commands active" (12/GCD) creates a strategic release-and-recover
+      pattern: let all commands expire, vocalize without commanding for
+      a few GCDs, then re-engage. This is the Siren's "catch breath" moment
+      and should feel like a natural pause, not punishment.
+    blocking: false
+
+  - id: 7
+    category: "Deaf/Sound-Immune Enemies"
+    question: |
+      Are there enemies immune to sound-based compulsion? Constructs?
+      Undead? If so, the Siren becomes useless against them (total counter).
+    proposed_direction: |
+      Most enemies have neurological attention systems that the compulsion
+      frequencies target. Constructs (mechanical) may be immune or require
+      a specific "frequency override" ability. Undead should NOT be immune
+      (they have degraded but functional neural pathways). Full immunity
+      should be RARE (specific boss mechanic) not categorical (entire
+      enemy type).
+    blocking: true
+
+  - id: 8
+    category: "Healing Throughput Tier"
+    question: |
+      Where does Siren healing sit relative to Spiritcaller and Wavecaller?
+      Is the Siren a PRIMARY healer (sufficient solo) or SECONDARY (needs
+      support)? Current design suggests primary but with lower burst than
+      dedicated healers — sustained passive + moderate focused healing.
+    proposed_direction: |
+      Siren = primary healer for sustained encounters (passive + focused
+      = sufficient throughput). WEAKER than Spiritcaller/Wavecaller for
+      burst damage spikes. Party may carry burst-heal items to supplement
+      Siren's lower spike-healing capacity. The tradeoff: Siren provides
+      CC that other healers don't. You accept lower burst healing in
+      exchange for enemy control.
+    blocking: false
+
+  - id: 9
+    category: "Command Duration Standardization"
+    question: |
+      What is the base duration for commands once issued? Some abilities
+      specify (March = until arrival or 4s, Fugue = 3s, Paralytic = channeled).
+      But Compelled Strike (one attack) and Premature Aria (one ability) are
+      instant-resolution. Should all commands have residual effects?
+    proposed_direction: |
+      Commands that specify ONE ACTION (Compelled Strike, Premature Aria)
+      resolve instantly — no duration. Commands that specify a STATE
+      (March, Beckon, Fugue, Paralytic, Chorus) have stated durations.
+      This split is clean and doesn't need standardization.
+    blocking: false
+
+  - id: 10
+    category: "Merryin Economic Role"
+    question: |
+      Game_Juice_Taste_Design.md lists Merryin economic role as unexplored.
+      If Merryin are the Siren race, what do they PRODUCE for the game's
+      economy? Lightning/water magic items? CC-focused consumables?
+    proposed_direction: |
+      Merryin produce the Attention Manipulation item category: Pheromone
+      Tags, Compulsion Chimes, Sycophant Incense. These are Merryin-crafted
+      consumables that replicate weaker versions of Siren vocalization
+      (chemical/mechanical approximations of biological compulsion). This
+      connects lore → economy → gameplay: Merryin biology enables the Siren
+      class AND Merryin crafters produce the item-baseline equivalents.
+    blocking: false

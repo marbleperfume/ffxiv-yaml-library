@@ -1,0 +1,1199 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# STRIX — Complete Class Specification
+# juice-yaml-library | github.com/marbleperfume/juice-yaml-library
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class_name: Strix
+race_lock: Featherin
+tier: Experienced
+role: DPS
+lock_type: Biological
+last_updated: 2026-07-14
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1: IDENTITY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+identity:
+  tagline: "The Pre-Calculation Class — think for 30 seconds, move instantly."
+  fantasy: >
+    Bird of prey. Circling above a battlefield, reading patterns, calculating
+    the perfect moment — then folding wings and falling like a guided missile.
+    The kill was decided in the air. The ground is just where it resolves.
+    Raidraptors energy. EDF Wing Diver commitment loop.
+
+  race_biology:
+    race: Featherin
+    lock_justification: >
+      Featherin wings provide TRUE FLIGHT — sustained, controlled, altitude-variable.
+      Not gliding, not jump-boosted arcs. Actual hovering, circling, climbing.
+      Hollow bones make them light enough for flight but catastrophically fragile
+      on impact reception. The class IS "weaponize your ability to fly." Remove
+      the wings, remove the class entirely. No prosthetic, no magic substitute —
+      flight emerges from hollow skeletal structure + muscle-to-mass ratio +
+      wing surface area that only Featherin physiology produces.
+    biological_systems_used:
+      - wings: "Sustained flight, altitude control, dive trajectory steering"
+      - hollow_bones: "Enables flight via reduced mass; creates fragility as tradeoff"
+      - raptor_vision: "Enhanced visual acuity from altitude — target identification at distance"
+      - lightweight_frame: "SPD 15 on ground (light = fast on foot), STR 6 (light = no brawling power)"
+      - talons: "Dive terminus weapon — momentum delivery system, not raw strength weapon"
+
+  stat_profile:
+    SPD: 15   # Fastest ground movement — escape after dive, repositioning
+    DEX: 13   # Aerial agility, trajectory precision, talon accuracy
+    STR: 6    # Cannot brawl. Dive damage = momentum physics, NOT muscle
+    # Note: STR 6 means conventional melee is non-viable.
+    # All damage output routes through altitude → velocity → kinetic force.
+    # A grounded Strix hitting things with talons does PITIFUL damage.
+
+  reference_works:
+    - name: "EDF Wing Diver"
+      relevance: "Flight stamina management, altitude as resource, grounding as vulnerability"
+    - name: "Raidraptors (Yu-Gi-Oh archetype)"
+      relevance: "Layered assault from above, rank-up escalation, swarm-dive patterns"
+    - name: "Peregrine Falcon hunting behavior"
+      relevance: "Stoop (dive) reaches 240mph — fastest animal alive BECAUSE of altitude conversion"
+    - name: "Chess clock mentality"
+      relevance: "Think long, execute instant. Time spent reading = better outcome on commit"
+
+  core_design_statement: >
+    The Strix does not have a "rotation." The Strix has a DECISION LOOP:
+    observe → assess → commit → recover → repeat. The skill expression is
+    in the QUALITY of the decision made from above — which target cluster,
+    which angle of approach, which moment to fold wings. Execution is
+    deterministic once committed. You either calculated correctly (enemies
+    die, you recover) or calculated incorrectly (you land in the wrong
+    spot and YOUR hollow bones shatter). The ground doesn't forgive.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 2: CORE MECHANIC — ALTITUDE AS RESOURCE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+core_mechanic:
+  name: "Altitude Economy"
+  philosophy: >
+    Altitude is simultaneously a RESOURCE (costs stamina to maintain),
+    a POSITION (higher = safer from melee, better vision, exposed to anti-air),
+    and a DAMAGE MULTIPLIER (higher dive origin = more kinetic energy on impact).
+    The Strix manages altitude the way a mage manages mana — except altitude
+    also determines what you can SEE, what can HIT you, and how hard you HIT BACK.
+
+  altitude_states:
+    - state: GROUNDED
+      description: >
+        On the ground. Wings folded or recovering. The Strix's WORST state.
+        STR 6 means melee is pathetic. Hollow bones mean one solid hit
+        staggers/damages significantly. SPD 15 means you can RUN but not FIGHT.
+        This state exists only as recovery — you get OUT of it as fast as possible.
+      properties:
+        damage_output: "Minimal (STR 6, no momentum, talon scratches only)"
+        damage_received: "Maximum vulnerability (hollow bones, no armor, no evasion altitude)"
+        vision: "Ground-level only — same as any other character"
+        available_actions: "Ground recovery abilities, emergency escape, re-ascent initiation"
+        threat_to_enemies: "Near zero — enemies can freely ignore a grounded Strix"
+
+    - state: ASCENDING
+      description: >
+        Wings pumping, gaining altitude. Transitional state — costs significant
+        stamina, provides increasing vision/safety per second, but the Strix is
+        a visible climbing target during ascent. SLOWER than level flight.
+        Anti-air attacks are most dangerous during ascent (predictable climb path).
+      properties:
+        damage_output: "Zero (all energy committed to climbing)"
+        damage_received: "High during low-altitude climb, decreasing as altitude increases"
+        vision: "Improving — battlefield reveals progressively during climb"
+        available_actions: "Climb modifiers (burst ascent, lateral shift), abort to ground"
+        stamina_cost: "Highest of all airborne states (active climbing vs passive hovering)"
+        vulnerability_window: >
+          Ascending Strix moves on predictable vertical path. Anti-air
+          attacks that lead targets will hit ascending Strix reliably.
+          This is WHY you don't ascend IN FRONT OF enemies with ranged options.
+
+    - state: AIRBORNE
+      description: >
+        Cruising altitude. Sustained flight — the Strix's PLANNING state.
+        Safe from all melee. Exposed to anti-air and dedicated ranged abilities.
+        Full battlefield vision. Stamina drains at a steady rate to maintain
+        altitude (lighter drain than ascending but nonzero). This is where
+        the pre-calculation happens — reading enemy positions, predicting
+        movement, identifying the optimal dive window.
+      properties:
+        damage_output: "Zero directly (but dive PREPARATION happens here)"
+        damage_received: "Low from ground threats, HIGH from anti-air specialists"
+        vision: "Maximum — full battlefield read, enemy clustering visible, AoE telegraphs readable"
+        available_actions: "All aerial abilities (marking, trajectory planning, repositioning, dive initiation)"
+        stamina_cost: "Moderate sustained drain (flight maintenance)"
+        time_pressure: >
+          Cannot hover indefinitely. Stamina forces eventual descent.
+          The question is always: "Do I have enough information to dive NOW,
+          or do I spend more stamina hovering to get a better read?"
+
+    - state: DIVING
+      description: >
+        COMMITTED. Wings folded or angled for maximum velocity. Trajectory
+        is LOCKED at initiation — command-fixed movement. The Strix cannot
+        redirect, cannot abort, cannot slow down. This is the moment the
+        pre-calculation RESOLVES. Altitude converts to velocity converts to
+        kinetic force. The dive lasts 0.5-1.5 seconds depending on altitude
+        (higher = longer dive = more force = bigger commitment window for
+        enemies to react with anti-air).
+      properties:
+        damage_output: "Resolves on impact — MASSIVE burst scaled by altitude of origin"
+        damage_received: "Near-immune during dive (too fast for tracking), but anti-air INTERCEPTORS can hit"
+        vision: "Tunnel — locked on impact zone, peripheral awareness gone"
+        available_actions: "NONE. Trajectory is fixed. Impact is inevitable."
+        commitment_nature: >
+          IRREVERSIBLE. If the target moves, if an AoE spawns at the landing
+          zone, if allies move INTO your impact area — you cannot adjust.
+          The calculation was made BEFORE the dive. If reality changed between
+          commit and impact: bad outcome. This is the Strix's ENTIRE risk model.
+
+    - state: IMPACT_RECOVERY
+      description: >
+        The 1-3 second window immediately after dive landing. The Strix's
+        kinetic energy has dissipated into targets. Talons are planted.
+        Wings are resetting from dive-lock position. CANNOT re-ascend during
+        this window. This is the Strix's maximum vulnerability — on the ground,
+        surrounded by whatever survived the dive, unable to fly for a fixed duration.
+      properties:
+        damage_output: "Residual (impact shockwave, talon rend on grounded targets) — modest"
+        damage_received: "MAXIMUM — grounded, hollow bones, surrounded, wings folded"
+        vision: "Ground-level, immediate area only"
+        available_actions: "Ground recovery abilities, damage mitigation panic tools"
+        escape_condition: "Must survive recovery window → then re-ascend (costs stamina)"
+
+  state_transitions:
+    - from: GROUNDED
+      to: ASCENDING
+      trigger: "Player initiates ascent (stamina cost begins, climb speed depends on current stamina %)"
+      notes: "Cannot ascend if stamina < 15%. Must regenerate on ground first."
+
+    - from: ASCENDING
+      to: AIRBORNE
+      trigger: "Reaches minimum operational altitude (approximately 2-3 seconds of climbing)"
+      notes: "Can abort ascent at any point → returns to GROUNDED"
+
+    - from: AIRBORNE
+      to: DIVING
+      trigger: "Player commits dive (selects impact zone, locks trajectory)"
+      notes: "IRREVERSIBLE once dive animation begins (~0.3s commit window, then locked)"
+
+    - from: DIVING
+      to: IMPACT_RECOVERY
+      trigger: "Strix reaches ground/target level"
+      notes: "Damage resolves instantly on contact. Recovery window begins."
+
+    - from: IMPACT_RECOVERY
+      to: GROUNDED
+      trigger: "Recovery animation completes (1-3s based on dive altitude — higher dive = longer recovery)"
+      notes: "Player regains ground movement and re-ascent option"
+
+    - from: GROUNDED
+      to: ASCENDING
+      trigger: "Player initiates re-ascent"
+      notes: "Re-ascent after dive costs MORE stamina than fresh ascent (wings stressed from dive)"
+
+    - from: AIRBORNE
+      to: GROUNDED
+      trigger: "Stamina depleted OR hit by anti-air grounding effect"
+      notes: "Emergency landing — no dive damage, just forced descent. Stagger on landing."
+
+  the_pre_calculation_model:
+    explanation: >
+      While AIRBORNE, the Strix player sees the battlefield from above.
+      They observe: enemy clusters, movement patterns, AoE telegraph timings,
+      ally positions, terrain obstacles. They CALCULATE: "If I dive HERE at
+      THIS angle, my AoE will clip these 3 enemies, miss this ally, and land
+      me behind this cover for my recovery window." Then they COMMIT — and
+      the calculation either plays out correctly or it doesn't. There is no
+      mid-dive correction. The skill IS the calculation. A perfect calculation
+      = devastating multi-kill + safe recovery. A bad calculation = landing in
+      a boss telegraph + immediate death (hollow bones).
+
+    skill_expression_location: "BEFORE the dive, not during or after"
+    execution_complexity: "Near zero — commit button, then watch it resolve"
+    decision_complexity: "EXTREMELY high — spatial prediction, timing, AoE overlap math, escape route planning"
+
+    chess_analogy: >
+      The grandmaster thinks for 45 seconds and moves a piece in 1 second.
+      The thinking IS the gameplay. The move is just the output. A spectator
+      sees a 1-second action but the player experienced 45 seconds of intense
+      decision-making. The Strix's airborne phase IS the thinking. The dive
+      IS the piece moving. The impact IS the checkmate (or the blunder).
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 3: TRIGGER SYSTEM
+# ═══════════════════════════════════════════════════════════════════════════════
+
+trigger_system:
+  philosophy: >
+    The Strix's triggers are NOT cooldown-based or proc-based. They are
+    STATE-TRANSITION triggers: what causes the Strix to move between altitude
+    states. The player controls most transitions voluntarily — the exceptions
+    (forced grounding, stamina depletion) are the COUNTERPLAY other classes/enemies
+    use against the Strix.
+
+  ascent_triggers:
+    voluntary:
+      - trigger: "Player initiates climb from ground"
+        condition: "Stamina > 15%, not CC'd, not in Impact Recovery window"
+        notes: "The Strix ALWAYS wants to be airborne. Ascent is the default recovery action."
+      - trigger: "Burst Ascent (ability) — emergency rapid climb"
+        condition: "Ability off cooldown, stamina > 30%"
+        notes: "Faster than normal ascent but burns more stamina. Used to escape ground threats."
+    involuntary:
+      - trigger: "None — ascent is never forced"
+        notes: "Ascending is always a player choice. You are never PUSHED upward."
+
+  dive_commitment_triggers:
+    voluntary:
+      - trigger: "Player selects impact zone and confirms dive"
+        condition: "Airborne state, stamina sufficient for dive recovery, impact zone selected"
+        notes: >
+          The ONLY way to deal significant damage. The Strix MUST dive to be useful.
+          Hovering forever is safe but contributes nothing. Dive is the mandatory
+          commitment that creates the class's risk/reward tension.
+      - trigger: "Marked target enters kill zone (pre-set)"
+        condition: "Target previously marked with Raptor's Eye, enters designated zone"
+        notes: "Conditional dive — pre-calculated with a 'wait for them to walk into it' setup"
+    involuntary:
+      - trigger: "None — dive is NEVER forced"
+        notes: >
+          Critical design: the Strix is never MADE to dive. The dive is always
+          the player's choice. Bad dives are always the player's fault. This is
+          essential for the pre-calculation identity — forced dives would remove agency.
+
+  grounding_triggers:
+    voluntary:
+      - trigger: "Player lands without diving (soft landing)"
+        condition: "Any airborne state, player chooses to descend"
+        notes: "Used when stamina is low and no good dive target exists. Safe but wastes airtime."
+    involuntary:
+      - trigger: "Stamina fully depleted while airborne"
+        effect: "Emergency descent — stagger on landing, 2s recovery before re-ascent possible"
+        notes: "Punishes overstaying in the air. Stamina management IS the flight management."
+      - trigger: "Hit by anti-air grounding attack"
+        effect: "Forced descent with CRASH LANDING — extended recovery (3-4s), bonus damage taken on impact"
+        notes: >
+          The Strix's hard counter. Anti-air attacks don't just damage — they
+          GROUND. A grounded Strix is a dead Strix against prepared enemies.
+      - trigger: "Hit by Stage 2+ CC while airborne (stun, silence on wing-muscles)"
+        effect: "Immediate loss of flight control → crash to ground"
+        notes: "Any disable that prevents wing movement = crash. Strix is uniquely vulnerable to airborne CC."
+
+  emergency_abort:
+    availability: >
+      NO ABORT EXISTS once dive is committed. The 0.3-second commit window
+      (between pressing dive and trajectory lock) is the ONLY cancellation opportunity.
+      After lock: impact is inevitable. This is by design — the entire class
+      identity depends on dives being irrevocable commitments.
+    pre_commit_abort:
+      trigger: "Player releases dive input during 0.3s commit window"
+      effect: "Dive cancelled, remains airborne, short stamina penalty (aborted energy)"
+      notes: "Allows last-second 'wait no' moments but ONLY before lock"
+    post_commit_reality:
+      statement: "There is no emergency abort after trajectory lock. Period."
+      design_reason: >
+        If you could abort mid-dive, the class would have no risk. Pre-calculation
+        becomes irrelevant because you can always bail. The irrevocability IS
+        the skill test — were you right, or weren't you?
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 4: ABILITIES (15 total)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+abilities:
+  design_note: >
+    Abilities are organized by altitude state requirement. The Strix has NO
+    traditional rotation. Abilities serve the DECISION LOOP: observe (aerial
+    tools) → assess (marking/targeting tools) → commit (dive variants) →
+    recover (ground survival tools) → repeat. No ability exists to "maintain
+    DPS uptime" — damage is EXCLUSIVELY delivered through dive commitment.
+
+  # ─── AERIAL ABILITIES (Used while AIRBORNE) ─────────────────────────────────
+
+  aerial_abilities:
+    - name: "Raptor's Eye"
+      altitude_requirement: AIRBORNE
+      trigger_condition: "Player targets an enemy or zone from altitude"
+      effect: >
+        Marks a single enemy or a 4m ground zone. Marked target/zone is
+        highlighted through all visual noise (particle effects, terrain clutter).
+        Reveals marked target's current HP%, active buffs, and next telegraph
+        (if SR2+). Mark persists until dive completes or Strix is grounded.
+        Maximum 3 simultaneous marks.
+      item_replaced: "Aerial Vantage Scope (10s reveal, no targeting, no persistence)"
+      decision_created: >
+        Which targets do you mark? Marking is free but limited to 3 — choosing
+        WHAT to watch forces prioritization. Do you mark the healer, the clustered
+        pack, or the patrol route? Your marks telegraph your dive intent to
+        observant allies.
+      cooldown: "None (limited by mark cap of 3)"
+
+    - name: "Thermal Spiral"
+      altitude_requirement: AIRBORNE
+      trigger_condition: "Player initiates repositioning while airborne"
+      effect: >
+        Lateral reposition (8-12m horizontal movement) without altitude loss.
+        Uses rising thermal currents or wing-banking to shift position in the
+        air. Costs minimal stamina. Changes the Strix's overhead position
+        relative to the battlefield — essential for finding better dive angles.
+      item_replaced: "No direct item analog (items cannot reposition airborne entities)"
+      decision_created: >
+        Repositioning costs time (1.5s of movement during which you cannot dive).
+        Do you spend time getting the PERFECT angle, or do you dive NOW from a
+        suboptimal position because the window is closing?
+      cooldown: "2s between uses (prevents air-strafing spam)"
+
+    - name: "Windshear Cry"
+      altitude_requirement: AIRBORNE
+      trigger_condition: "Player activates while above enemy cluster (3+ enemies within 5m of each other)"
+      effect: >
+        Piercing aerial shriek that startles ground enemies below the Strix's
+        current position. Enemies in 5m radius below scatter outward 2-3m from
+        center (Stage 1 displacement). Duration: instant. Does NOT damage.
+        Purely repositional — used to BREAK clusters or FORCE enemies into
+        worse positions before diving.
+      item_replaced: "Concussion Charge (ground-level, 2s delay, fixed direction)"
+      decision_created: >
+        Scatter BREAKS clusters (bad for AoE dive) but forces enemies INTO
+        positions (potentially better for targeted dive or into ally abilities).
+        Do you want the cluster intact for a fat AoE dive? Or scattered into
+        your Shaman's totem radius? Using this REMOVES the fat AoE option.
+      cooldown: "12s"
+      cc_stage: 1
+
+    - name: "Altitude Surge"
+      altitude_requirement: AIRBORNE
+      trigger_condition: "Player invests stamina to gain additional altitude mid-flight"
+      effect: >
+        Rapid altitude increase from AIRBORNE state. Burns 20% max stamina for
+        a significant altitude jump. Increases next dive's damage multiplier by
+        raising origin height. Also increases time-in-dive (longer fall = more
+        time enemies have to react/move). Extends dive recovery window proportionally.
+      item_replaced: "Springboard Disc (fixed elevation, ground-placed, not altitude-additive)"
+      decision_created: >
+        Higher altitude = more dive damage BUT longer dive duration (enemies
+        might move), longer recovery on landing (more vulnerable post-impact),
+        and costs stamina that could sustain your airborne time. Is the
+        bonus damage worth the extended commitment and reduced flight time?
+      cooldown: "8s"
+
+    - name: "Silhouette Fade"
+      altitude_requirement: AIRBORNE
+      trigger_condition: "Player activates when at high altitude AND enemies have detected the Strix"
+      effect: >
+        The Strix positions itself between the sun/light source and the battlefield,
+        becoming a dark silhouette that is harder to track. Enemies lose targeting
+        priority on the Strix for 4s (anti-air attacks won't trigger automatically,
+        must be manually aimed). Does NOT grant invisibility — visually aware
+        enemies can still aim, but AI-driven anti-air targeting fails.
+      item_replaced: "Phantom Echo (3s invisibility, ground-level, no altitude interaction)"
+      decision_created: >
+        4s of reduced anti-air targeting pressure — do you use this window to
+        dive (enemies won't intercept)? Or to reposition safely? Using it
+        for safety wastes the dive window. Using it for diving means you lose
+        your defensive tool until cooldown resets.
+      cooldown: "18s"
+
+    - name: "Kill Corridor"
+      altitude_requirement: AIRBORNE
+      trigger_condition: "Player designates a linear path (8m long, 3m wide) on the ground below"
+      effect: >
+        Pre-calculates a STRAFING dive path instead of a point-impact dive.
+        Instead of landing at one point, the Strix commits to a linear run
+        through the corridor at dive speed. Damage is spread across the entire
+        path (lower per-target than point dive, but hits everything in the line).
+        Strix exits the corridor at the far end in GROUNDED state (not at center).
+      item_replaced: "Ramcharge Capsule (single-use, interruptible, no altitude scaling)"
+      decision_created: >
+        Strafing corridor vs point impact. Corridor = more targets, less damage
+        per target, and you end up at the FAR END of the line (potentially deep
+        in enemy territory for recovery). Point dive = fewer targets, more damage
+        per target, recovery in the CENTER of the impact zone. Choose your
+        exposure pattern.
+      cooldown: "Replaces standard dive — mutual exclusion with point dive per descent"
+
+  # ─── DIVE ATTACKS (Used during DIVE transition or at IMPACT) ────────────────
+
+  dive_attacks:
+    - name: "Raptor Stoop"
+      altitude_requirement: "Transition: AIRBORNE → DIVING → IMPACT"
+      trigger_condition: "Player commits standard dive to a selected impact point"
+      effect: >
+        THE primary damage ability. The Strix folds wings, locks trajectory to
+        selected impact zone, and accelerates under gravity + wing propulsion.
+        On impact: kinetic shockwave in 3m radius from landing point. Damage
+        scales with altitude of origin (higher = harder hit). Targets in center
+        1m take full damage; 1-3m radius takes 60% damage. Applies SHATTER
+        (armor reduction) to all targets hit — momentum physically cracks
+        defenses. STR 6 is irrelevant; this is PHYSICS, not muscle.
+      item_replaced: "Upheaval Flask (fixed AoE, no altitude scaling, ground-level cast)"
+      decision_created: >
+        Every Raptor Stoop is THE decision. Where do you land? Which enemies
+        are in the 3m radius? Will they still be there when you arrive (0.5-1.5s
+        dive time)? Is the landing zone safe for your 1-3s recovery? Is your
+        remaining stamina enough to re-ascend after? Every dive is a thesis
+        statement about the battlefield state 1 second from now.
+      cooldown: "None — limited by altitude/stamina economy (must re-ascend between dives)"
+      damage_scaling: "Base × (1 + 0.15 per altitude tier above minimum)"
+
+    - name: "Pinion Shear"
+      altitude_requirement: "Transition: AIRBORNE → DIVING → IMPACT"
+      trigger_condition: "Player commits dive with wing-edge orientation selected"
+      effect: >
+        Dive variant — instead of point impact, the Strix extends one wing edge
+        as a cutting surface during the final 2m of descent. Creates a 5m CLEAVE
+        arc at landing level. Less raw impact damage than Raptor Stoop (70%) but
+        wider hit area and applies BLEED (damage over time) to all clipped targets.
+        Wing edges on Featherin are reinforced keratin — evolved for this purpose.
+        Recovery window is 0.5s SHORTER than Raptor Stoop (less deceleration needed).
+      item_replaced: "No direct analog — items cannot deliver crescent-shaped cleave from altitude"
+      decision_created: >
+        Pinion Shear vs Raptor Stoop per dive. Shear = wider arc (catches spread
+        enemies), less burst per target, faster recovery. Stoop = concentrated
+        blast (punishes clusters), more burst, longer recovery. Which dive TYPE
+        matches what you observed from above?
+      cooldown: "None — alternative dive commit type, shares altitude/stamina cost with Stoop"
+
+    - name: "Talon Snatch"
+      altitude_requirement: "Transition: AIRBORNE → DIVING (special — does NOT fully ground)"
+      trigger_condition: "Player targets a single small/medium enemy from altitude"
+      effect: >
+        Low-altitude swoop (not a full dive). Strix descends rapidly, grabs one
+        target with talons, carries it 4-6m vertically, then DROPS it. Target
+        takes fall damage + is displaced from its original position. Strix
+        returns to LOW AIRBORNE state (not grounded) but with 30% stamina
+        penalty from carrying weight. Only works on targets smaller than Strix
+        or equal size. Cannot grab Large+ enemies.
+      item_replaced: "Ripcord Harpoon (ground-level pull, no vertical displacement, no carry)"
+      decision_created: >
+        Grab-and-drop singles out ONE enemy at the cost of stamina and altitude.
+        Do you remove the healer from its pack? The caster mid-channel? You
+        stay airborne (huge advantage over full dive) but burn stamina heavily.
+        Repeated snatches drain you toward forced landing faster than patient hovering.
+      cooldown: "10s (cannot chain-snatch)"
+      size_restriction: "Small or Medium targets only"
+
+    - name: "Flock Descent"
+      altitude_requirement: "Transition: AIRBORNE → DIVING → IMPACT (coordinated)"
+      trigger_condition: "Two or more Strix players mark the same impact zone within 2s of each other"
+      effect: >
+        COORDINATED multi-Strix dive. When multiple Strix commit to overlapping
+        impact zones simultaneously, damage is not merely additive — the combined
+        shockwave creates a RESONANCE CRATER (radius increases by 1.5m per
+        additional Strix, damage per Strix increases by 20% from compression
+        waves). Recovery window is SHARED — Strix in a Flock Descent can cover
+        each other's recovery with ground-level abilities.
+      item_replaced: "No item analog — coordinated aerial bombardment has no consumable equivalent"
+      decision_created: >
+        Coordination requirement: all Strix must independently calculate the
+        same optimal dive point. If one Strix dives wrong, it's alone on the
+        ground. If all dive together, the payoff is multiplicative. Party trust
+        and communication create the skill expression here.
+      cooldown: "N/A (triggered by synchronized commit, not individual cooldown)"
+      party_requirement: "2+ Strix in party"
+
+    - name: "Terminal Velocity"
+      altitude_requirement: "Maximum altitude (post-Altitude Surge)"
+      trigger_condition: "Player commits dive from absolute maximum height with full stamina investment"
+      effect: >
+        The ultimate dive. Full stamina dump into maximum altitude, then
+        total-commitment dive. Impact creates a 5m radius devastation zone.
+        Everything in the zone takes damage scaled to FULL altitude stack.
+        Strix is IMMOBILIZED for 4s post-impact (longest recovery in kit).
+        Effectively an ultimate: massive damage, maximum vulnerability after.
+        If miscalculated, the Strix is a dead bird for 4 full seconds.
+      item_replaced: "Gravwell Orb + Concussion Charge combined (and still worse)"
+      decision_created: >
+        Nuclear option. Using Terminal Velocity means you have NO stamina for
+        re-ascent after recovery. You are grounded until full stamina regen
+        (8-10s). If allies cannot cover your recovery window AND your grounded
+        period, you will die. Is the burst worth being earthbound for 12-14s total?
+      cooldown: "45s (hard cooldown even if stamina permits — wing stress recovery)"
+
+  # ─── GROUND RECOVERY ACTIONS (Used while GROUNDED or in IMPACT RECOVERY) ────
+
+  ground_recovery:
+    - name: "Scatter Sprint"
+      altitude_requirement: GROUNDED or IMPACT_RECOVERY (tail end)
+      trigger_condition: "Player activates during or immediately after recovery window"
+      effect: >
+        Explosive ground dash using SPD 15 — 10m burst in chosen direction.
+        Does not deal damage. Does not grant flight. Purely ESCAPE movement.
+        Breaks soft-targeting from enemies (they lose lock for 1s). Used to
+        create distance for safe re-ascent. Cannot be used during first 1s
+        of Impact Recovery (true lockout).
+      item_replaced: "Flashstep Cartridge (8m teleport, no target-break, single use)"
+      decision_created: >
+        Which DIRECTION do you sprint? Toward allies (safety in numbers)?
+        Toward cover (LoS break for re-ascent)? Away from the cluster you
+        just dove into? Sprint direction after dive is the final piece of
+        pre-calculation — you should have planned your escape vector BEFORE diving.
+      cooldown: "6s"
+
+    - name: "Feathercloak"
+      altitude_requirement: GROUNDED or IMPACT_RECOVERY
+      trigger_condition: "Player activates when taking damage on ground"
+      effect: >
+        Wings wrap around body defensively — 50% damage reduction for 2s.
+        Cannot attack, cannot move, cannot re-ascend during Feathercloak.
+        Pure survival button. Wings absorb hits that would otherwise shatter
+        hollow bones. After Feathercloak ends, wings need 1s reset before
+        flight is possible (total defensive window + re-ascent delay = 3s).
+      item_replaced: "Ironhide Tincture (+50% DR for 8s but slowed — Feathercloak is shorter, more intense, no movement)"
+      decision_created: >
+        2s of immunity-lite vs 2s of doing nothing. If you Feathercloak, you
+        survive BUT you delay re-ascent by 3s total. If you DON'T Feathercloak,
+        you might die from the next hit — or you might get airborne 3s sooner.
+        Risk tolerance decision in real-time.
+      cooldown: "15s"
+
+    - name: "Burst Ascent"
+      altitude_requirement: GROUNDED (post-recovery, not during recovery window)
+      trigger_condition: "Player initiates emergency rapid climb"
+      effect: >
+        Explosive wing-thrust launch — reaches AIRBORNE altitude in 1.5s instead
+        of normal 2-3s. Costs 30% max stamina (vs 15% for normal ascent).
+        Leaves a small dust cloud at launch point (1s visual obstruction, 2m radius).
+        The speed increase makes the Strix harder to hit with anti-air during
+        the ascent (smaller targeting window).
+      item_replaced: "Springboard Disc (fixed-point launch, 6m up + 4m lateral, doesn't reach true flight)"
+      decision_created: >
+        Burn 30% stamina for fast escape OR take the slow ascent (15% stamina)
+        and risk being hit during the longer climb. After a full dive cycle,
+        stamina is already depleted — can you AFFORD the burst? Or must you
+        slow-climb and pray?
+      cooldown: "8s"
+
+    - name: "Talon Rake"
+      altitude_requirement: GROUNDED or IMPACT_RECOVERY (last 0.5s)
+      trigger_condition: "Enemy is within melee range while Strix is grounded"
+      effect: >
+        Desperation ground attack. Quick talon swipe — low damage (STR 6 makes
+        this weak), but applies 1s STAGGER to the target (interrupts their
+        current action). This is NOT a damage tool — it's an interrupt to
+        buy time for re-ascent. If the enemy was about to hit you during
+        recovery, Talon Rake gives you the 1s you need to start climbing.
+      item_replaced: "Stupor Bell (AoE interrupt, one-time — Talon Rake is single-target but repeatable)"
+      decision_created: >
+        Limited uses before re-ascent (2 swipes maximum in recovery window).
+        Do you interrupt the enemy attacking YOU (selfish survival) or the
+        enemy attacking your ALLY who's covering your recovery? Your ground
+        time is someone else's problem too.
+      cooldown: "3s"
+      damage: "Negligible (STR 6 base, no momentum multiplier)"
+      utility: "1s stagger (CC Stage 1 equivalent interrupt)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 5: ALTITUDE SYSTEM (Resource Economics)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+altitude_system:
+  resource: "Flight Stamina"
+  resource_description: >
+    A dedicated stamina pool (separate from any combat stamina shared with other
+    classes) that represents wing muscle endurance. Featherin hollow bones make
+    flight POSSIBLE but not FREE — maintaining altitude requires continuous
+    muscular effort. Flight Stamina determines how long the Strix can stay
+    airborne, how many altitude adjustments it can make, and whether it can
+    re-ascend after a dive.
+
+  stamina_budget:
+    maximum: 100 # Arbitrary units for scaling
+    ascent_cost: "15 per full ascent to AIRBORNE (normal) / 30 per Burst Ascent"
+    maintenance_cost: "4 per second while AIRBORNE (sustain drain)"
+    altitude_surge_cost: "20 per use (gains bonus altitude/damage)"
+    dive_cost: "0 (gravity is free — but recovery + re-ascent costs apply after)"
+    re_ascent_penalty: "+5 additional cost per ascent after dive (wing fatigue, cumulative per cycle)"
+    talon_snatch_cost: "30 (carrying weight burns stamina rapidly)"
+    terminal_velocity_cost: "ALL remaining stamina (full dump before dive)"
+
+  time_airborne_calculation:
+    fresh_ascent: "15 cost → 85 remaining ÷ 4/s drain = ~21s maximum hover time"
+    post_dive_re_ascent: "20 cost (15 base + 5 penalty) → variable remaining"
+    practical_cycle: >
+      Ascend (15) → hover + plan (4/s × ~8s = 32) → dive (0) → recover (ground) →
+      re-ascend (20) → hover + plan (4/s × ~6s = 24) → stamina critical (~9 remaining).
+      Two dive cycles per full stamina bar is the standard rhythm. Third dive requires
+      ground-time stamina regen or external support.
+    design_intent: >
+      Two clean dive cycles, then a forced grounding period for stamina recovery.
+      This creates a natural rhythm without being a ROTATION — the timing of each
+      dive within those cycles is entirely player-determined based on battlefield reads.
+
+  stamina_regeneration:
+    while_grounded: "8 per second (fast — incentivizes brief ground time, not extended stays)"
+    while_airborne: "0 (cannot regen what you're actively spending)"
+    while_ascending: "0 (spending heavily)"
+    full_regen_from_zero: "~12.5 seconds grounded (100 ÷ 8/s)"
+    design_intent: >
+      Ground time is unpleasant (fragile, useless damage, vulnerable) but NECESSARY.
+      Fast regen means short ground stays. The Strix cycles: air → dive → ground (brief) → air.
+      Extended grounding (stamina-zeroed or anti-air forced landing) is the punishment state.
+
+  what_forces_you_down:
+    - cause: "Stamina depletion (hovering too long without diving)"
+      result: "Emergency descent — stagger on landing, 2s before re-ascent available"
+      counterplay: "Manage stamina; don't hover past your budget hoping for a perfect window"
+
+    - cause: "Anti-air grounding attack (specific enemy ability)"
+      result: "Crash landing — 3-4s recovery, bonus impact damage TO the Strix"
+      counterplay: "Read anti-air tells from above, use Silhouette Fade, avoid hovering in LoS of anti-air enemies"
+
+    - cause: "Stage 2+ CC while airborne (stun, paralyze, wing-target attacks)"
+      result: "Loss of flight control → crash. Duration = CC duration + crash recovery"
+      counterplay: "Maintain altitude (some CC has range limits), use Thermal Spiral to break LoS to CC sources"
+
+    - cause: "Environmental (enclosed rooms with low ceilings)"
+      result: "Flight restricted or impossible — ceiling height determines available altitude"
+      counterplay: "Strix performs worse in confined spaces. Room selection/pathing matters."
+
+  anti_air_mechanics:
+    philosophy: >
+      The Strix MUST have counterplay while airborne. If altitude is purely safe,
+      the class degenerates into "hover forever, dive on cooldown, never risk anything."
+      Anti-air exists to make airborne time a MANAGED RISK, not a safe haven.
+
+    enemy_anti_air_types:
+      - type: "Tracking Projectile"
+        description: "Slow-moving homing projectile that follows airborne targets. Dodgeable via Thermal Spiral."
+        threat_level: "Low (avoidable with repositioning)"
+        grounding: false
+        damage: "Moderate"
+
+      - type: "Flak Burst"
+        description: "Area-of-effect explosion at the Strix's current altitude. Fast activation, small radius."
+        threat_level: "Medium (requires quick lateral movement to avoid)"
+        grounding: false
+        damage: "High"
+
+      - type: "Grounding Net / Bola"
+        description: "Entangles wings on hit → immediate forced descent. Low damage but GROUNDS the target."
+        threat_level: "HIGH (direct counter — grounding = death spiral)"
+        grounding: true
+        damage: "Low (the grounding IS the threat)"
+
+      - type: "Anti-Air Screech (enemy ability)"
+        description: "Sound-based disruption that causes wing-muscle spasm. If Strix is below certain altitude: crash."
+        threat_level: "High (area denial for low-altitude flight)"
+        grounding: true
+        damage: "Moderate + crash damage"
+
+      - type: "Vertical Geyser / Pillar Attack"
+        description: "Ground-to-air attack that fills a vertical column. Hits everything at all altitudes in that X,Y position."
+        threat_level: "Medium-High (requires horizontal repositioning, not altitude adjustment)"
+        grounding: false
+        damage: "Very High"
+
+    design_principle: >
+      Anti-air should be READABLE from altitude. The Strix player should see
+      anti-air enemies and factor them into their planning: "I cannot dive
+      THAT cluster because the anti-air enemy will ground me during descent.
+      I need to dive the cluster BEHIND it, or wait for my ally to disable
+      the anti-air unit first." Anti-air creates PLANNING constraints, not
+      random deaths.
+
+  re_ascent_after_grounding:
+    normal_post_dive: "Re-ascent available after recovery window (1-3s). Costs 20+ stamina."
+    after_forced_grounding: "Re-ascent available after crash recovery (3-4s). Costs 25+ stamina."
+    after_stamina_depletion: "Must regenerate to 15% minimum before ascent (≈2s ground time minimum)."
+    cumulative_fatigue: >
+      Each dive cycle adds +5 to re-ascent cost (wing fatigue). First re-ascent: 20.
+      Second: 25. Third: 30. This escalation means prolonged fights force longer
+      ground phases as the Strix's wings tire. Resets on extended ground rest (8s+).
+    design_intent: >
+      The Strix cannot spam dives indefinitely. Wing fatigue creates a natural
+      pacing where early dives are frequent (short ground time between) and
+      later dives are spaced further apart (longer ground regen needed). This
+      prevents the class from feeling like a bombardment rotation and emphasizes
+      that each dive should COUNT because you get fewer as the fight continues.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 6: CC STAGE BUDGET
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cc_stage_budget:
+  role_context: >
+    DPS class. CC budget is MINIMAL. The Strix's job is to KILL things from above,
+    not control them. Any CC is incidental to the dive's physics (impact displacement,
+    stagger from kinetic force) — not a designed-for-control toolkit.
+
+  available_cc:
+    - ability: "Windshear Cry"
+      cc_stage: 1
+      type: "Displacement (scatter)"
+      context: "Aerial — pushes ground enemies 2-3m outward from below Strix"
+      note: "Utility displacement, not damage. Used to reposition enemies pre-dive."
+
+    - ability: "Raptor Stoop (impact)"
+      cc_stage: 1
+      type: "Stagger (0.5s)"
+      context: "All targets in 3m impact radius briefly stagger from shockwave"
+      note: "Incidental to damage. Not reliable as CC — just the physics of a body hitting the ground at speed."
+
+    - ability: "Talon Rake"
+      cc_stage: 1
+      type: "Interrupt/Stagger (1s)"
+      context: "Grounded desperation melee — interrupts one enemy action"
+      note: "Self-preservation tool, not offensive CC. Exists to buy time for re-ascent."
+
+    - ability: "Talon Snatch (drop)"
+      cc_stage: 1
+      type: "Displacement (vertical + fall damage)"
+      context: "Single target carried up and dropped. Displacement on landing."
+      note: "Displacement-as-damage. The CC is the FALL, not a disable."
+
+  total_budget: "Stage 1 only. No Stage 2 or 3 access. DPS class stays in damage lane."
+  comparison: >
+    Compared to Grappler (Stage 3 pin), Shaman (Stage 2-3 curses), Siren (command override):
+    the Strix has near-zero control contribution. Its party value is DAMAGE and RECONNAISSANCE
+    from altitude — never crowd control. If the party needs CC, they bring a controller.
+    The Strix brings the kill.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 7: VULNERABILITY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+vulnerability:
+  core_fragility: "HOLLOW BONES"
+  statement: >
+    The Strix is the MOST fragile class in the game when not airborne. Hollow bones
+    provide the mass reduction necessary for flight but make the Strix catastrophically
+    weak to physical impacts. A hit that a Siegebreaker wouldn't notice can shatter
+    a Strix's ribs. The altitude system exists because the Strix CANNOT survive
+    sustained ground combat — it must avoid it entirely through flight.
+
+  vulnerability_profile:
+    grounded_durability: >
+      LOWEST in the game. Hollow bones = reduced HP pool or dramatically increased
+      damage taken (or both). Two solid hits from a baseline enemy should threaten
+      a grounded Strix. This is BY DESIGN — ground time must feel DANGEROUS.
+    airborne_durability: >
+      Moderate — still fragile per hit, but evasion (altitude, speed, distance from
+      melee) compensates. Anti-air hits still hurt significantly.
+    armor_capacity: >
+      MINIMAL. Heavy armor defeats the purpose of flight (too heavy for hollow bones
+      to carry). Strix gear is lightweight — featherweave, wind-silk, talon sheaths.
+      No plate, no chain, no bulk.
+    healing_dependency: >
+      HIGH. The Strix cannot self-sustain. Between dives, it relies on party healing,
+      positioning (avoiding damage entirely), and brief ground time for stamina regen.
+      A party without healing that loses its Strix to chip damage has no way to
+      restore the Strix's combat capacity.
+
+  specific_vulnerabilities:
+    - vulnerability: "Anti-air grounding"
+      severity: CRITICAL
+      explanation: >
+        Grounding effects specifically counter the Strix by removing its PRIMARY
+        defensive tool (altitude). A grounded Strix facing enemies designed to
+        ground flyers is in a death spiral: too fragile to fight, too depleted
+        to re-ascend quickly, surrounded by enemies that KNOW it can't leave.
+      counterplay: "Read anti-air enemies before engaging. Don't dive clusters containing anti-air. Request ally disable of anti-air first."
+
+    - vulnerability: "Committed dive into changed conditions"
+      severity: CRITICAL
+      explanation: >
+        The 0.5-1.5s dive duration is enough for the battlefield to change.
+        If a boss drops an AoE on your landing zone AFTER you commit, you land
+        in it. If your target dodges, you hit empty ground surrounded by enemies.
+        If an ally moves into your impact zone, you hit THEM. The irrevocable
+        commit means miscalculation = catastrophe.
+      counterplay: "Better reads. Shorter dive times (lower altitude = less change window but less damage). Target selection for low-mobility enemies."
+
+    - vulnerability: "Enclosed spaces / low ceilings"
+      severity: HIGH
+      explanation: >
+        The Strix's entire kit assumes vertical space exists. In tight corridors,
+        low-ceiling rooms, or underground tunnels: flight is limited or impossible.
+        A Strix in a 3m-ceiling room is just a STR 6 character with talons.
+        Effectively a non-class in extreme confinement.
+      counterplay: "Party awareness — route selection matters. Strix should scout BEFORE the party commits to tight spaces. Open-air encounters are the Strix's battlefield."
+
+    - vulnerability: "Sustained attention from ranged enemies"
+      severity: HIGH
+      explanation: >
+        Multiple ranged enemies that track the Strix while airborne force constant
+        repositioning (stamina drain) or low-altitude evasion (reducing dive damage
+        potential). A room full of archers makes airborne time a DPS RACE against
+        incoming fire rather than a safe planning phase.
+      counterplay: "Prioritize ranged threats in dive selection. Kill the archers FIRST. Use Silhouette Fade to reduce tracking pressure."
+
+    - vulnerability: "Wing damage / targeted limb attacks"
+      severity: HIGH
+      explanation: >
+        Attacks that specifically target wings (cutting, fire, entanglement) can
+        disable flight capability temporarily even without a formal 'grounding' CC.
+        Damaged wings increase stamina costs, reduce flight speed, and may prevent
+        altitude surge usage until repaired/healed.
+      counterplay: "Avoid sustained presence in range of wing-targeting enemies. Wings are a critical body part — protect them like a caster protects their hands."
+
+    - vulnerability: "No self-healing, no damage reduction, no sustain"
+      severity: MODERATE (managed through avoidance)
+      explanation: >
+        The Strix has exactly ONE defensive ability (Feathercloak, 2s, 15s CD).
+        No lifesteal, no regeneration, no damage reduction passives. Every hit
+        taken is permanent until healed by an external source. Chip damage
+        accumulates across dive cycles with no personal recovery mechanism.
+      counterplay: "Don't get hit. The altitude system IS the defensive tool. If you're getting hit regularly, your flight management is wrong."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 8: ITEM COMPLEMENTARITY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+item_complementarity:
+  philosophy: >
+    The Strix replaces flight potions, dive-attack scrolls, and reconnaissance items
+    as a premium class solution. Items that COMPLEMENT (not replace) the Strix's kit
+    address its weaknesses: ground-time survival, stamina management, and anti-air mitigation.
+
+  items_the_strix_replaces:
+    - item: "Aerial Vantage Scope"
+      replaced_by: "Raptor's Eye (persistent marking, no duration limit while airborne)"
+    - item: "Springboard Disc"
+      replaced_by: "Natural flight + Burst Ascent (no fixed point needed, true sustained altitude)"
+    - item: "Upheaval Flask"
+      replaced_by: "Raptor Stoop (altitude-scaled AoE burst, repeatable, no consumable cost)"
+    - item: "Gravwell Orb"
+      replaced_by: "Pre-calculation target selection from altitude (Strix CHOOSES clusters, doesn't need to create them)"
+    - item: "Charcoal Pine Bundle"
+      replaced_by: "Dive attacks (ranged-into-melee delivery from altitude, AoE, altitude-scaled)"
+
+  items_that_complement_the_strix:
+    - item: "Smokebreak Ampule"
+      synergy: "Use during ground recovery window to avoid targeting while re-ascending"
+      decision: "Spend an item slot on ground-survival vs. bringing more offense items"
+
+    - item: "Flashstep Cartridge"
+      synergy: "Emergency ground repositioning when Scatter Sprint is on cooldown"
+      decision: "Backup escape — is one fight's safety worth the inventory slot for the whole run?"
+
+    - item: "Hardshell Powder"
+      synergy: "Party-wide defense boost helps Strix survive its recovery windows"
+      decision: "Allies must be near Strix on ground (tight timing, requires party awareness of dive cycle)"
+
+    - item: "Harmony Draught"
+      synergy: "Pre-applied regen active during ground time — passive healing during recovery"
+      decision: "Must be consumed BEFORE the dive (can't drink while diving). Costs ally action to apply."
+
+    - item: "Screamer Pod (MH reference)"
+      synergy: >
+        Forces OTHER flying enemies to land — removes anti-air threats from the sky.
+        Strix becomes sole airborne entity. Dominance established.
+      decision: "Limited carry — save for anti-air heavy encounters or use generously?"
+
+  items_that_counter_the_strix:
+    - item: "Frostweave Net"
+      threat: "If hit while on low-altitude pass or just after landing — grounds and slows for 6s. Near-fatal."
+    - item: "Screamer Pod (used against Strix)"
+      threat: "Forces the Strix to land if treated as 'flying monster' by game logic. Devastating."
+      design_note: "Open question — should Screamer Pod affect player Strix? Asymmetry if not."
+    - item: "Flash Pod (MH reference)"
+      threat: "Blinds Strix while airborne — removes the pre-calculation advantage (can't see targets)"
+
+  loadout_recommendations:
+    aggressive: "Maximize dive damage items. Accept ground-time risk. Bring Demon Powder for landing AoE."
+    defensive: "Smokebreak Ampule + Flashstep for ground survival. Sacrifice top-end damage for consistency."
+    reconnaissance: "Aerial Vantage Scope stacks with Raptor's Eye for total battlefield awareness. Support-oriented Strix build."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 9: HIT/MISS ANALYSIS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+hit_miss_analysis:
+  what_makes_this_class_hit:
+    - hit: "The decision moment is visceral"
+      explanation: >
+        The airborne phase creates TENSION. You see the perfect cluster, you
+        know the window is closing, your stamina is ticking down — and you
+        commit. The dive is 1.5 seconds of held breath. The impact resolves
+        your thesis about the battlefield. Correct = euphoria. Wrong = despair.
+        This emotional loop is what makes the class FEEL incredible.
+
+    - hit: "Skill expression without mechanical complexity"
+      explanation: >
+        No combos. No frame-perfect inputs. No ability priority systems.
+        The Strix's skill is READING and DECIDING — cognition, not dexterity.
+        This appeals to a player type rarely served by DPS classes: the
+        strategic thinker who wants to observe and calculate, not grind
+        APM. High skill ceiling via decision quality, not execution speed.
+
+    - hit: "Altitude provides genuine unique perspective"
+      explanation: >
+        No other class sees the battlefield from above. The Strix player has
+        INFORMATION ADVANTAGE baked into their gameplay loop. They see flanks
+        forming, patrol paths converging, boss telegraphs from overhead. This
+        makes them valuable even when NOT diving — their callouts and
+        battlefield reads serve the whole party.
+
+    - hit: "Risk/reward is clear and immediate"
+      explanation: >
+        Every dive is a gamble the player CHOSE to take. Payoff is instant
+        (damage on impact). Consequence is instant (grounded and vulnerable).
+        No delayed feedback, no "was that good?" ambiguity. You know IMMEDIATELY
+        whether your calculation was correct. Fast feedback loop = addictive gameplay.
+
+    - hit: "Counter-identity is legible"
+      explanation: >
+        Anti-air enemies are a VISIBLE, PLANNABLE threat. The Strix player
+        sees them from above and incorporates them into calculations. Being
+        countered doesn't feel random — it feels like a puzzle to solve.
+        "How do I handle that anti-air unit?" is an interesting question,
+        not a frustrating one.
+
+  what_could_make_this_class_miss:
+    - miss: "Airborne phase becomes boring if battlefield is static"
+      explanation: >
+        If enemies stand still in predictable clusters, the pre-calculation
+        is trivial. The Strix needs DYNAMIC battlefields (enemy movement,
+        shifting formations, timed mechanics) to make the read interesting.
+        Against stationary targets, hovering + dive is just a slow DPS rotation.
+      mitigation: "SR2+ enemies reposition. SR3+ enemies react to Strix presence (scatter when overhead). Dynamic content prevents stale reads."
+
+    - miss: "Ground time feels like punishment instead of tension"
+      explanation: >
+        If ground recovery is pure suffering (getting hit repeatedly while
+        unable to act), players will feel helpless. Ground time must feel
+        like a TENSE escape sequence, not a passive death sentence.
+      mitigation: "Scatter Sprint, Feathercloak, Talon Rake give ground AGENCY. Short recovery windows (1-3s) prevent extended helplessness."
+
+    - miss: "Enclosed maps make the class non-functional"
+      explanation: >
+        A Strix in a room with a 3m ceiling is a liability. If content design
+        frequently features tight interiors, the Strix is excluded from relevance.
+      mitigation: "Content must include open-air zones regularly. Strix as SCOUT means they can identify open-air paths. Party routing accounts for their needs."
+
+    - miss: "Solo play viability is questionable"
+      explanation: >
+        No self-healing + extreme ground fragility + limited ground damage = the
+        Strix in solo play must NEVER take a hit. This is either incredibly
+        demanding skill expression or frustrating impossibility depending on content.
+      mitigation: "Solo Strix relies on SPD 15 kiting between dive cycles. Stamina regen on ground is fast enough for hit-and-run solo play. Not easy, but POSSIBLE for skilled players."
+
+    - miss: "Party doesn't understand the Strix's needs"
+      explanation: >
+        If allies don't know the Strix will be grounded for 1-3s after a dive,
+        they won't cover it. If allies stand in the impact zone, they get hit.
+        The Strix requires party literacy about its dive cycle.
+      mitigation: "Clear audio/visual cues for dive commitment. Impact zone visible to allies. Recovery state clearly communicated through UI/VFX."
+
+    - miss: "Optimal play degenerates into safe shallow dives"
+      explanation: >
+        If low-altitude dives are 'good enough' with minimal risk, players will
+        never commit to high-altitude devastating dives. The class loses its
+        identity as a high-commitment pre-calculator and becomes a 'hop-and-peck' spammer.
+      mitigation: >
+        Altitude scaling MUST be significant enough that shallow dives feel unsatisfying.
+        Content HP values should be tuned so shallow dives require 3-4 passes where
+        a single calculated high dive kills the pack. Reward the commitment.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 10: ANTI-PATTERNS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+anti_patterns:
+  primary_rejection: "NO ROTATION"
+  statement: >
+    The Strix does NOT have a rotation. It does not have a "priority system."
+    It does not have an "opener" in the FFXIV sense (pre-fight buff sequence
+    executed identically every pull). The gameplay is:
+
+      observe → assess → commit → recover → repeat
+
+    The TIMING, TARGETING, and ANGLE of each dive is unique to that moment's
+    battlefield state. Two identical encounters will produce different dive
+    patterns because enemy positioning, ally positioning, and stamina state
+    will differ. This is NON-NEGOTIABLE for the class identity.
+
+  specific_anti_patterns:
+    - pattern: "Dive on cooldown"
+      rejection: >
+        There is no "dive cooldown" to hit. Dives are gated by stamina economy
+        and state transitions. A player who dives immediately upon reaching
+        airborne (without reading the battlefield) is playing WRONG and will
+        land in bad positions, miss targets, and die on the ground. The airborne
+        observation phase is not "dead time waiting for cooldown" — it IS the
+        skill expression.
+
+    - pattern: "Fixed ability sequence"
+      rejection: >
+        Raptor's Eye → Altitude Surge → Raptor Stoop is NOT a fixed opener.
+        Sometimes you dive immediately without marking. Sometimes you mark
+        three targets and wait 10s for the right cluster. Sometimes you use
+        Kill Corridor instead of Raptor Stoop. The ability used depends on
+        what you SEE, not on a priority list.
+
+    - pattern: "2-minute burst window"
+      rejection: >
+        No ability has a 2-minute cooldown that defines a burst phase. Terminal
+        Velocity (45s CD) is the longest cooldown in the kit — and it's used
+        when the SITUATION demands nuclear damage, not when a timer expires.
+        Dive frequency is determined by BATTLEFIELD STATE and STAMINA, not
+        by cooldown alignment.
+
+    - pattern: "Maintain uptime / ABC (Always Be Casting)"
+      rejection: >
+        The Strix's "downtime" (airborne planning) IS its active gameplay.
+        A Strix that is constantly diving with no airborne phase is MISCALCULATING
+        (insufficient reads = bad dives = grounding = death). The class rewards
+        PATIENCE and TIMING, not maximizing casts-per-minute. Airborne time
+        without diving is not wasted time — it's calculation time.
+
+    - pattern: "Ground DPS filler"
+      rejection: >
+        Talon Rake is NOT a DPS button. It does negligible damage (STR 6).
+        If a Strix player is on the ground spamming Talon Rake "for DPS uptime,"
+        they have fundamentally misunderstood the class. Ground time is ESCAPE
+        time. Get back in the air. The only damage that matters comes from dives.
+
+    - pattern: "Hover at safe altitude indefinitely (risk-free reconnaissance bot)"
+      rejection: >
+        Stamina drain prevents infinite hovering. If the Strix is not diving,
+        it is wasting its limited flight resource. Observation must lead to
+        COMMITMENT or the stamina runs out and the Strix is forced down with
+        nothing accomplished. Recon is valuable but must be punctuated by action.
+
+  the_correct_loop:
+    description: "The Strix gameplay loop as designed:"
+    steps:
+      - step: 1
+        name: "OBSERVE"
+        action: "Ascend. Survey battlefield from altitude. Identify enemy clusters, threats, anti-air, ally positions."
+        time: "2-8 seconds (variable based on battlefield complexity)"
+
+      - step: 2
+        name: "ASSESS"
+        action: "Mark priority targets. Calculate dive angle, AoE coverage, landing zone safety, post-dive escape route."
+        time: "1-5 seconds (skill expression: faster assessment = more stamina saved)"
+
+      - step: 3
+        name: "COMMIT"
+        action: "Initiate dive. Trajectory locks. Helpless during descent. Pre-calculation resolves on impact."
+        time: "0.5-1.5 seconds (altitude-dependent)"
+
+      - step: 4
+        name: "RECOVER"
+        action: "Impact. Damage resolves. Enter recovery window. Use ground abilities to survive. Re-ascend."
+        time: "1-3 seconds recovery + 1.5-3 seconds re-ascent"
+
+      - step: 5
+        name: "REPEAT"
+        action: "Back to OBSERVE with reduced stamina. Each subsequent cycle has less flight time available."
+        time: "Cycle shortens as fatigue accumulates"
+
+    cycle_duration: "8-20 seconds total per full cycle (depending on observation time)"
+    cycles_per_fight: "2-4 dive cycles per full stamina bar, depending on efficiency"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 11: OPEN QUESTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+open_questions:
+  altitude_model:
+    - question: "Is altitude CONTINUOUS (real meters) or TIERED (low/medium/high states)?"
+      implications: >
+        Continuous allows fine-grained damage scaling and positional nuance but is
+        harder to communicate to the player. Tiered is simpler to read but reduces
+        decision granularity. EDF Wing Diver uses continuous. MH Insect Glaive uses
+        tiered (essentially 'airborne or not').
+      leaning: "Tiered with sub-gradients. 3 tiers (Low Air / Cruising / High Altitude) with smooth transition between."
+
+    - question: "How is altitude communicated to the player visually?"
+      implications: >
+        Camera position? HUD element? Environmental cues (cloud layers, sound changes)?
+        The player needs constant awareness of their current altitude for damage
+        calculations and stamina planning.
+      leaning: "Altitude gauge (wing-shaped stamina bar) + camera zoom-out at higher altitude + atmospheric VFX (wind intensity increases with height)"
+
+  dive_damage_formula:
+    - question: "Exact scaling formula for altitude → damage?"
+      implications: >
+        Linear scaling = predictable but unexciting. Exponential = high-altitude
+        extremely rewarding but potentially balance-breaking. Tiered breakpoints =
+        clearest decision points but less satisfying granularity.
+      leaning: "Stepped multiplier with tier breakpoints: Low = 1.0x, Cruising = 1.3x, High = 1.6x, Maximum (Altitude Surge) = 2.0x"
+
+    - question: "Does dive accuracy decrease with altitude?"
+      implications: >
+        Higher altitude = more damage but less precision (enemies move more during
+        longer dive time)? This would create a natural accuracy/damage tradeoff.
+        Or is the targeting system lock-on (guaranteed hit in the zone)?
+      leaning: "Impact ZONE doesn't change (3m radius), but targets have more time to LEAVE the zone during longer dives. Not accuracy — reaction window for enemies."
+
+  party_interaction:
+    - question: "Can allies see the Strix's dive targeting reticle?"
+      implications: >
+        If yes: allies can coordinate (move out of zone, push enemies INTO zone).
+        If no: allies must trust the Strix and potentially get hit.
+      leaning: "Yes — impact zone visible to allies as a ground marker 0.5s before impact. Enough time to react, not enough to be trivial."
+
+    - question: "Does the Strix benefit from being the only airborne entity?"
+      implications: >
+        Multiple Strix in a party share airspace. Do they interfere? Benefit from
+        Flock Descent synergy? Compete for the same dive targets?
+      leaning: "Flock Descent provides coordination reward. Otherwise independent — no interference. Aerial space is effectively unlimited."
+
+    - question: "How does the Strix communicate dive timing to the party's healer?"
+      implications: >
+        The healer needs to know: 'Strix will be grounded in 3... 2... 1... heal NOW.'
+        Without communication, the healer can't pre-position heals for recovery window.
+      leaning: "Audio cue (distinctive screech on dive commit) + visual (dive trail visible to all). Healer skill: reading the Strix's rhythm."
+
+  content_design:
+    - question: "What percentage of content MUST have flight-viable ceiling height?"
+      implications: >
+        If too little open-air content exists, Strix is a niche class with limited viability.
+        If all content is open-air, enclosed-space classes (Siegebreaker in corridors) lose their advantage.
+      leaning: "60-70% of combat encounters in open-air or high-ceiling spaces. 30-40% confined. Strix is a specialist, not a universal pick."
+
+    - question: "Does the Strix gain anything from scouting rooms before the party enters?"
+      implications: >
+        If Strix can fly over walls/obstacles to preview future rooms, this adds
+        strategic value beyond damage. The party benefits from aerial recon.
+      leaning: "Yes — Strix can preview upcoming rooms from altitude if open-air. Closed rooms (ceilings, roofs) prevent this. Scouting is a valued secondary role."
+
+    - question: "How do boss encounters with anti-air phases interact with the Strix?"
+      implications: >
+        Boss phase where anti-air is active = Strix is grounded and useless.
+        Boss phase where anti-air is down = Strix has free dives. Is this design
+        interesting (phase awareness) or frustrating (forced downtime)?
+      leaning: "Interesting IF grounded phases are short and the Strix has meaningful ground contributions during them (ground recovery abilities, scouting for allies). Frustrating if grounded for 30+ seconds with nothing to do."
+
+  screamer_pod_interaction:
+    - question: "Does Screamer Pod (forces flying entities to land) affect player Strix?"
+      implications: >
+        If yes: enemies can use the same items against Strix. Symmetry but potentially
+        frustrating (item that instantly counters a class). If no: asymmetry
+        (player items work on monsters but not the reverse). Design precedent: MH
+        Flash Pod does affect player-allied flying wyverns.
+      leaning: "Yes, but with RESISTANCE. Player Strix has a 50% chance to resist Screamer Pod (trained flyer vs wild monster). Still a threat but not a guaranteed counter."
+
+  pvp_considerations:
+    - question: "How does the Strix function in PvP scenarios?"
+      implications: >
+        Against players who can LOOK UP and DODGE: is the dive ever viable?
+        Players won't stand in the impact zone. Strix in PvP might need to be
+        purely a scout/harasser rather than a dive-bomber.
+      leaning: "PvP Strix uses Talon Snatch (grab single target) and Kill Corridor (strafe path, harder to dodge). Point-dive against aware players is likely a trap option."
+
+  fatigue_reset:
+    - question: "What resets wing fatigue (cumulative re-ascent penalty)?"
+      implications: >
+        If only long ground rest resets fatigue: fights have a natural dive-count
+        limit. If combat items can reset fatigue: items become stamina extends.
+        If nothing resets fatigue mid-fight: very long encounters punish Strix.
+      leaning: "8s consecutive ground rest resets fatigue counter. Items cannot reset fatigue. Long fights punish Strix late but reward efficient early dives."
+
+  momentum_damage_vs_str:
+    - question: "How does the game engine distinguish momentum damage from STR-based damage?"
+      implications: >
+        If dive damage scales with STR, Strix wants STR gear (contradicts identity).
+        If dive damage scales with a unique MOMENTUM stat (altitude × mass × speed),
+        STR is irrelevant and Strix gears for stamina/DEX/flight duration.
+      leaning: >
+        Momentum is a DERIVED stat: Altitude Tier × DEX (accuracy of impact) × Dive Speed.
+        STR has zero contribution to dive damage. Strix gear should emphasize:
+        stamina capacity, stamina regen, DEX, and flight maintenance cost reduction.
+        This ensures STR 6 is truly a dump stat with no hidden scaling benefit.

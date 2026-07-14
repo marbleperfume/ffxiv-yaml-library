@@ -1,0 +1,1263 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# REAVER / DEEPHUNTER — Complete Class Specification
+# juice-yaml-library | github.com/marbleperfume/juice-yaml-library
+# ═══════════════════════════════════════════════════════════════════════════════
+
+header:
+  class_name: "Reaver"
+  alternate_name: "Deephunter"
+  race_lock: "Chunkers"
+  tier: "Experienced"
+  role: "DPS"
+  lock_type: "Biological"
+  last_updated: "2026-07-14"
+  design_status: "Qualitative Complete — Awaiting Layer 1 Spatial Quantification"
+  strategic_role: "Pursuit-locked single-target DPS. Replaces tracking consumables, speed potions, and berserker draughts with biological pursuit physiology that escalates indefinitely."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1: IDENTITY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+identity:
+  race: "Chunkers"
+  race_region: "Depth Dead"
+  lock_justification: |
+    Biological lock — shark/piranha pursuit physiology. Chunkers possess:
+    - Bloodscent organs: lateral-line equivalent sensory system that detects
+      biological distress (HP loss) in nearby organisms. Not magical detection —
+      literal chemoreception of stress hormones and blood-equivalent fluids.
+    - Pursuit musculature: fast-twitch dominant, hydrodynamic body plan. Built
+      to accelerate toward weakened prey, not for sustained patrolling.
+    - Frenzy cascade: adrenal system that triggers involuntarily upon detecting
+      prey weakness. Pain suppression, tunnel vision, metabolic overdrive. This
+      is a PHYSIOLOGICAL RESPONSE, not a buff — the Chunker's body seizes
+      control from higher cognition.
+    - Aquatic optimization: native water movement with zero penalty. Pressure
+      tolerance, gill-equivalent respiration, current-riding instincts.
+
+  aesthetic: |
+    Humanoid, cute race (Shylily-esque) with visible predatory features:
+    - Multiple rows of replaceable teeth (visually prominent, slightly too many)
+    - Skin that shifts from smooth/pleasant to rough (dermal denticles engage
+      during Frenzy — tactile threat display)
+    - Eyes that dilate fully black during pursuit (nictitating membrane retracts)
+    - Fins/webbing that deploy from forearms and calves during aquatic movement
+    - Small, compact frame — NOT a hulking brute. The terror is in the
+      disproportionate aggression from something that looks harmless at rest.
+    
+    The dissonance IS the identity: calm Chunker looks like a friendly aquatic
+    companion. Frenzied Chunker is a biological missile with too many teeth.
+
+  behavioral_baseline: |
+    Calm until the hunt begins. Pre-commitment Reaver is:
+    - Observant, patient, efficient in movement
+    - Slightly detached — waiting for the SIGNAL (weakness detection)
+    - Not aggressive, not threatening, not posturing
+    
+    Post-commitment Reaver is:
+    - CANNOT DISENGAGE. This is not willpower — the adrenal cascade physically
+      prevents retreat behavior. The body will not obey "run away" signals.
+    - Accelerating. Every second of pursuit = faster movement toward target.
+    - Narrowing. Peripheral awareness drops. Only the target exists.
+    - Escalating. Damage output increases continuously. No plateau.
+
+  fantasy_reference: |
+    The shark that smells blood. The piranha school sensing a wound. The
+    persistence predator that doesn't stop, doesn't tire, doesn't negotiate.
+    But wrapped in a body that — at rest — looks like it should be selling
+    you potions in a shop. The cute exterior makes the predatory switch
+    MORE unsettling, not less.
+
+  distinction_from_similar:
+    vs_nightmare: |
+      Nightmare is self-damage/shadow manipulation. Internal destruction as fuel.
+      Reaver has NO self-harm mechanic. Reaver is PURSUIT — external target
+      focus, not internal resource burning. Nightmare destroys itself to destroy
+      others. Reaver destroys others by refusing to stop chasing them.
+    vs_madolt_warrior: |
+      Madolt Warrior PULLS things to itself (Capacitor Pull, Unfocus draws
+      aggro). Reaver GOES TO the target. Madolt controls space by making enemies
+      come to it. Reaver abandons all spatial control to chase one thing.
+    vs_siegebreaker: |
+      Siegebreaker is commitment to a DIRECTION. Reaver is commitment to a
+      TARGET. Siegebreaker can't turn. Reaver can turn — but only toward the
+      marked prey. Siegebreaker threatens everything in its path. Reaver
+      threatens ONE thing with absolute certainty.
+    vs_strix: |
+      Strix commits at the moment of DIVE (pre-calculated burst). Reaver
+      commits at the moment of SCENT (sustained escalation). Strix's commitment
+      is brief and devastating. Reaver's commitment is indefinite and ramping.
+      Strix is a bullet. Reaver is a homing missile that gets faster.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 2: CORE MECHANIC
+# ═══════════════════════════════════════════════════════════════════════════════
+
+core_mechanic:
+  name: "PURSUIT + COMMITMENT"
+  philosophy: |
+    The Reaver's gameplay is a binary state machine with irreversible transition:
+    
+    CALM STATE → [trigger] → PURSUIT STATE → [resolution: kill or die]
+    
+    There is no "medium engagement." No partial commitment. No testing the
+    waters. The moment Bloodscent activates, the Reaver is ALL IN. The skill
+    expression is entirely in the DECISION BEFORE the trigger — reading the
+    battlefield, evaluating the target, determining if commitment will result
+    in a kill or a death.
+
+  states:
+    calm:
+      description: |
+        Pre-commitment. The Reaver is functional but unremarkable:
+        - Normal movement speed (no pursuit bonus)
+        - Standard DPS output (competent but not exceptional)
+        - Full peripheral awareness (can target anything, reposition freely)
+        - Bloodscent passive is SCANNING — detecting which enemies are near
+          threshold, providing information for the commitment decision
+      gameplay_feel: |
+        Patient observation. The Reaver is a coiled spring during Calm —
+        monitoring HP bars, watching enemy behavior, deciding WHO to commit to.
+        This is the "chess" phase. Every second in Calm is a second of
+        evaluation: "Is THAT the right target? Can I finish it? What happens
+        to me after I commit?"
+      design_note: |
+        Calm state MUST be engaging, not dead time. The Bloodscent scanning
+        provides constant tactical information (enemy HP proximity to threshold,
+        relative positioning, escape routes the target might use). The Reaver
+        in Calm is an intelligence-gathering predator, not a bored warrior
+        waiting for a proc.
+
+    pursuit:
+      description: |
+        Post-commitment. The Reaver has locked onto a target and CANNOT
+        voluntarily disengage:
+        - Movement speed accelerates continuously toward the marked target
+        - Damage dealt to the marked target escalates over time (Frenzy ramp)
+        - Movement AWAY from the target is physiologically penalized (slowed,
+          ability lockout, damage to self from adrenal backlash)
+        - Peripheral awareness narrows — damage taken from non-target sources
+          increased (tunnel vision debuff)
+        - Tracking is absolute — target cannot hide, stealth, or break LoS to
+          escape detection (Bloodscent persists through walls, terrain, stealth)
+      gameplay_feel: |
+        Controlled violence with mounting desperation. Every second the chase
+        continues, you hit harder and move faster — but you're also more
+        vulnerable to everything ELSE. The target might be running toward its
+        allies. You can't stop. The healer is calling for peel. You can't
+        respond. The boss just spawned adds behind you. You don't turn around.
+        
+        THIS IS THE GAMBLE. Right target = fastest kill in the game.
+        Wrong target = the party loses a DPS and gains nothing.
+
+  bloodscent:
+    description: |
+      Passive sensory ability. Constantly active. Provides the Reaver with
+      real-time awareness of nearby enemies' HP relative to the activation
+      threshold. This is INFORMATION — not a trigger. The Reaver sees which
+      enemies are approaching the commitment threshold and can plan accordingly.
+    activation_threshold: "Target drops below 70% HP"
+    what_it_provides:
+      - "Tracking: marked target's position revealed regardless of stealth, LoS, or terrain"
+      - "Speed bonus: +15% base movement speed toward marked target (stacks with Frenzy)"
+      - "Damage bonus: +10% damage dealt to marked target (baseline, before Frenzy ramp)"
+      - "Commitment lock: Reaver cannot voluntarily select a different target or retreat"
+    range: "Detection range scales with target's HP deficit — lower HP = detectable from further"
+    design_note: |
+      The 70% threshold is deliberately HIGH. This means Bloodscent triggers
+      EARLY in many fights — the Reaver must decide quickly whether to
+      commit NOW (when the target is at 70% and allies haven't focused it)
+      or wait and hope someone else brings it lower first (risking that
+      the target gets healed above threshold, or that the Reaver misses
+      the optimal commitment window).
+
+  frenzy:
+    description: |
+      Escalating physiological state during Pursuit. NOT a buff with a
+      duration — a RAMP that increases continuously the longer the chase
+      persists. No ceiling. No plateau. The longer you chase, the stronger
+      you get. But also the more locked-in you become.
+    escalation_model: |
+      Frenzy Stage 1 (0-5s pursuit): +20% damage, +10% speed toward target
+      Frenzy Stage 2 (5-12s pursuit): +40% damage, +25% speed, -15% awareness
+      Frenzy Stage 3 (12-20s pursuit): +70% damage, +40% speed, -30% awareness
+      Frenzy Stage 4 (20s+ pursuit): +100%+ damage, +50%+ speed, awareness = target ONLY
+      
+      "Awareness reduction" = increased damage taken from non-target sources.
+      At Stage 4, the Reaver is effectively blind to everything except the
+      marked target. Allies cannot communicate tactical information. The
+      Reaver is a biological weapon pointed at one thing.
+    what_ends_it:
+      - "Target dies (Frenzy immediately drops, Calm state resumes after 3s recovery)"
+      - "Reaver dies (obviously)"
+      - "Target exits the instance/phase (forced break — Reaver suffers Adrenal Crash debuff)"
+      - "NOTE: Target being healed above threshold does NOT break Frenzy once committed"
+
+  aquatic_terrain_advantage:
+    description: |
+      Chunker native environment. Water terrain provides:
+      - No movement speed penalty (other classes lose 30-50% speed in water)
+      - +20% movement speed bonus in water (on top of no penalty)
+      - Abilities gain bonus range/AoE in water environments
+      - Pursuit in water = dramatically accelerated Frenzy ramp (home field)
+    design_function: |
+      Creates map-dependent power spikes. A Reaver fighting near water has
+      a significant advantage — both in catching fleeing targets and in
+      raw output. Enemies that flee toward water are making the WORST
+      possible escape decision against a Reaver. This also creates team
+      synergy with Wavecaller (who generates water portals/terrain) and
+      anti-synergy with fire-based terrain manipulation.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 3: TRIGGER SYSTEM
+# ═══════════════════════════════════════════════════════════════════════════════
+
+trigger_system:
+  bloodscent_activation:
+    threshold: "Enemy drops below 70% current HP"
+    voluntary_vs_involuntary: |
+      SEMI-VOLUNTARY. Bloodscent detects ALL enemies below threshold, but
+      the Reaver CHOOSES which one to commit to. The detection is involuntary
+      (the body detects weakness automatically). The commitment is voluntary
+      (the player selects the target). Once selected, the commitment is
+      INVOLUNTARY (cannot be cancelled by player action).
+    multiple_targets_below_threshold: |
+      If multiple enemies are below 70%, the Reaver's Bloodscent highlights
+      all of them. The player must CHOOSE ONE. This is the core decision:
+      - The lowest HP enemy (safest commitment — closest to death)
+      - The highest-value enemy (riskiest — might take longer to kill)
+      - The enemy nearest to water terrain (environmental advantage)
+      - The enemy furthest from allies (isolated = safe pursuit)
+      You pick ONE. The rest cease to exist for you.
+    party_coordination: |
+      Smart parties TELL the Reaver who to commit to. The optimal play is:
+      "We'll bring Target X to 70%, then the Reaver commits and finishes."
+      This creates a hand-off pattern: party softens → Reaver executes.
+      
+      The RISK is committing to a target the party HASN'T softened — the
+      Reaver sees 70% and commits, but the party was focusing something
+      else. Now the Reaver is alone against a 70% HP enemy with no support.
+
+  frenzy_escalation_triggers:
+    time_based: |
+      Primary escalation is TIME IN PURSUIT. Every second committed = stronger.
+      This is automatic and unavoidable. The clock starts at commitment.
+    damage_dealt_acceleration: |
+      Secondary: dealing damage to the marked target accelerates Frenzy buildup.
+      Successful hits = faster ramp. Misses/blocks = standard time-based ramp only.
+      This rewards staying in melee range and landing attacks, not just chasing.
+    damage_taken_acceleration: |
+      Tertiary: taking damage from the marked target ALSO accelerates Frenzy.
+      Being hit by your prey makes you MORE aggressive, not less. This prevents
+      the target from "fighting back" as a defensive strategy — hitting the
+      Reaver makes the Reaver stronger faster.
+    environmental_acceleration: |
+      Water terrain doubles all Frenzy accumulation rates. Blood in the water
+      is literal — if the marked target is bleeding in water, the Reaver's
+      biology responds with maximum predatory intensity.
+
+  pursuit_state_termination:
+    target_killed:
+      effect: "Frenzy drops immediately. 3-second Adrenal Recovery (reduced speed, no abilities). Then full Calm state resumes."
+      feel: "Post-kill clarity. The biological high crashes. Brief vulnerability window."
+    reaver_killed:
+      effect: "Death. Standard respawn/revival mechanics apply."
+      feel: "The gamble didn't pay. Wrong target. Wrong timing. Learn."
+    target_phases_out:
+      effect: |
+        Forced Frenzy break. Adrenal Crash debuff: -40% all speeds, -30% damage,
+        +25% damage taken for 8 seconds. The body was READY to kill and the
+        target disappeared — adrenal backlash is severe.
+      feel: |
+        Physiological punishment for unresolvable pursuit. Designers must ensure
+        phase transitions don't unfairly punish Reavers — telegraph the phase
+        change so the Reaver can choose not to commit (or commit KNOWING the
+        phase change is coming and planning to kill before it triggers).
+    target_healed_above_threshold:
+      effect: "Does NOT break pursuit. Once committed, COMMITTED. Bloodscent mark persists regardless of current HP."
+      rationale: |
+        If healing broke pursuit, healers would hard-counter Reavers by simply
+        healing the target above 70%. This eliminates the class's identity.
+        Instead: once the Reaver has committed, the target must DIE or the
+        Reaver must die. Healing the target just makes the fight LONGER (and
+        the Reaver's Frenzy ramps HIGHER during that longer fight).
+    ally_intervention:
+      effect: "Allies CANNOT break the Reaver's pursuit. No friendly ability cancels commitment."
+      rationale: |
+        This is biological, not mental. You can't talk someone out of a seizure.
+        The party must plan AROUND the committed Reaver, not rescue them from
+        their own biology. This is the cost of the class's power.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 4: ABILITIES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+abilities:
+  # ─── CALM STATE ABILITIES (Pre-Commitment) ─────────────────────────────────
+
+  - name: "Scent the Weak"
+    state: "Calm"
+    type: "Passive / Toggle"
+    trigger_condition: "Always active while in Calm state"
+    effect: |
+      Displays HP percentage of all enemies within detection range as a
+      persistent overlay. Enemies approaching 70% threshold are highlighted
+      with increasing intensity. Enemies below 70% pulse with a lock-on
+      indicator. Provides directional awareness of wounded enemies even
+      through walls (within range). Range extends as target HP drops lower.
+    item_replaced: "Bloodhound Capsule (20s tracking, +15% speed, no damage, consumed)"
+    decision_created: |
+      INFORMATION OVERLOAD. Multiple enemies are wounded. Which one do you
+      watch? Which one is about to cross threshold? Do you damage one yourself
+      to force the threshold, or wait for allies to create the opportunity?
+      The passive creates constant tactical awareness that demands EVALUATION.
+
+  - name: "Test Bite"
+    state: "Calm"
+    type: "Active — Melee Strike"
+    trigger_condition: "No commitment active. Standard GCD."
+    effect: |
+      Quick melee attack dealing moderate damage. If this attack brings the
+      target below 70% HP, Bloodscent activates IMMEDIATELY on that target
+      (player can decline commitment for 1.5s grace period — after which,
+      if still below threshold, auto-commits). Applies a minor bleed DoT
+      (3s, negligible damage — but creates "blood in the water" visual).
+    item_replaced: "Berserker's Draught (flat +30% damage, no tracking, no pursuit)"
+    decision_created: |
+      Do you Test Bite a full-HP enemy (safe, but doesn't trigger anything)?
+      Or do you Test Bite an enemy already at 72% (RISKY — might push them
+      below threshold before you're ready to commit)? The ability is both
+      your bread-and-butter damage AND your potential commitment trigger.
+      Using it carelessly can force an unwanted pursuit.
+
+  - name: "Circling Patience"
+    state: "Calm"
+    type: "Active — Positional Buff"
+    trigger_condition: "Not in Pursuit. Cooldown: 15s."
+    effect: |
+      The Reaver enters a slow orbit pattern around a target area (5m radius).
+      While Circling: +20% damage on next commitment activation, +10% speed
+      on Pursuit initiation, and Bloodscent detection range doubles. Lasts
+      until commitment triggers or 12s pass (whichever first). Cancelled by
+      taking damage or using an attack ability.
+    item_replaced: "Might Potion (+ATK for 3 minutes — flat, unconditional, no risk)"
+    decision_created: |
+      Circling makes your EVENTUAL commitment stronger — but you're doing
+      nothing while Circling. Every second in Circling Patience is a second
+      you're not dealing damage. Is the setup worth the delay? What if an
+      ally kills your intended target while you're buffering? What if the
+      fight moves away from your orbit position?
+
+  - name: "Sense Vulnerability"
+    state: "Calm"
+    type: "Active — Information"
+    trigger_condition: "Target enemy within 20m. Cooldown: 8s."
+    effect: |
+      Reveals the targeted enemy's: current HP (exact number), defensive
+      cooldowns remaining, escape ability availability, and proximity to
+      allied enemies that might reinforce. Information persists for 6s.
+      Does NOT trigger commitment. Pure intelligence-gathering.
+    item_replaced: "Aerial Vantage Scope (10s bird's-eye reveal, consumed, no target-specific data)"
+    decision_created: |
+      Do you Sense the target you're PLANNING to commit to (confirming it's
+      safe)? Or do you Sense the scariest enemy to know if it's a THREAT
+      during your eventual pursuit? Information costs a GCD — that's a GCD
+      not spent dealing damage to push something to threshold.
+
+  - name: "Wade In"
+    state: "Calm"
+    type: "Active — Repositioning"
+    trigger_condition: "Water terrain within 12m. Cooldown: 20s."
+    effect: |
+      Dash 8m toward nearest water terrain. Upon entering water, gain
+      Submerged state: +30% movement speed, enemies lose LoS on Reaver
+      (underwater), Bloodscent range triples from water. Submerged lasts
+      until the Reaver leaves water or commits to Pursuit.
+    item_replaced: "Flashstep Cartridge (8m directional teleport, no water synergy, consumed)"
+    decision_created: |
+      Positioning for advantage vs. immediate engagement. Wade In puts you
+      in your STRONGEST position (water) but might move you AWAY from the
+      target you want to commit to. Do you take the environmental advantage
+      and commit from water? Or stay on land near the softened target?
+
+  # ─── COMMITMENT ABILITIES (Transition Moment) ──────────────────────────────
+
+  - name: "Lock Jaw"
+    state: "Transition (Calm → Pursuit)"
+    type: "Active — Commitment Trigger"
+    trigger_condition: "Target below 70% HP AND within 15m. Replaces auto-commit."
+    effect: |
+      VOLUNTARY commitment activation. The Reaver selects the target and
+      triggers Bloodscent lock manually (instead of waiting for auto-commit).
+      Grants: immediate Frenzy Stage 1, +30% gap-close speed for 3s,
+      first attack against locked target deals +50% damage (the "first bite").
+      
+      IRREVERSIBLE once activated. No cancel. No undo. The hunt has begun.
+    item_replaced: "Berserker's Draught + Bloodhound Capsule combined (two items, weaker, temporary)"
+    decision_created: |
+      THE critical decision of the class. Every Lock Jaw is a life-or-death
+      gamble. Questions the player must answer BEFORE pressing this:
+      - Can I kill this target before I die to its allies?
+      - Is anyone going to heal it? Can I out-damage the healing?
+      - Am I positioned to reach it quickly, or will I be kited?
+      - What happens to MY party when I'm no longer available to help them?
+      - Is this target BAIT? Is something worse waiting behind it?
+
+  - name: "Blood Rush"
+    state: "Transition (Calm → Pursuit)"
+    type: "Active — Aggressive Commitment"
+    trigger_condition: "Target below 50% HP (deeper threshold). Cooldown: 45s."
+    effect: |
+      Commitment + immediate gap close. The Reaver launches toward the target
+      (up to 20m), arriving in melee range within 0.5s regardless of obstacles
+      (phases through enemies, ignores terrain except walls). Deals burst
+      damage on arrival (15% of target's missing HP as bonus damage). Starts
+      at Frenzy Stage 2 immediately (skipping Stage 1 ramp).
+    item_replaced: "Flashstep Cartridge + Elixir of Bloodlust (gap close + kill reward, but separate purchases)"
+    decision_created: |
+      Blood Rush is the "sure thing" commitment — target is already at 50%,
+      you get a head start on Frenzy, and you arrive instantly. But the 45s
+      cooldown means if you use it on the WRONG target, your next commitment
+      (within 45s) won't have this advantage. Do you spend Blood Rush on the
+      safe kill, or save it for the high-value target that might drop to 50%
+      later?
+
+  # ─── PURSUIT STATE ABILITIES (During Frenzy) ───────────────────────────────
+
+  - name: "Rend"
+    state: "Pursuit"
+    type: "Active — Core Damage"
+    trigger_condition: "In Pursuit state. Marked target within melee range. Standard GCD."
+    effect: |
+      Primary damage ability during Pursuit. Deals physical damage that scales
+      with current Frenzy stage (base × Frenzy multiplier). Applies Hemorrhage:
+      target bleeds for 4s, bleeding targets are easier to track (Bloodscent
+      intensity increases), and bleed damage counts toward Frenzy acceleration.
+      Each consecutive Rend on the same target deals +8% more than the last
+      (stacking indefinitely during the pursuit).
+    item_replaced: "Rupture Oil (3-stack armor shred, 8s window — Rend is permanent and escalating)"
+    decision_created: |
+      Minimal decision per-use (spam during melee range). The decision was
+      made AT commitment. Rend rewards you for BEING in range — the challenge
+      is staying there. If the target kites you out of melee, you lose Rend
+      stacks (reset after 4s without landing one). Staying in melee = snowball.
+      Being kited = losing your ramp.
+
+  - name: "Thrash"
+    state: "Pursuit"
+    type: "Active — AoE (Limited)"
+    trigger_condition: "In Pursuit. Frenzy Stage 2+. Marked target within melee range."
+    effect: |
+      Wild slashing attack. Deals moderate damage to marked target AND all
+      enemies within 3m of the Reaver. Damage to non-marked targets is 40%
+      of damage to marked target. Does NOT trigger Frenzy acceleration from
+      non-marked target damage. Knocks non-marked enemies back 2m (creates
+      space between Reaver and distractions).
+    item_replaced: "Concussion Charge (directional blast, knockback, no single-target focus)"
+    decision_created: |
+      Use Thrash to clear chaff that's interrupting your pursuit (knock back
+      adds so you can focus the marked target), or use Rend for pure single-
+      target escalation? Thrash is DEFENSIVE (clearing space) within an
+      offensive state. It acknowledges reality: you're chasing ONE thing but
+      the world has OTHER things in it.
+
+  - name: "Hamstring Snap"
+    state: "Pursuit"
+    type: "Active — Anti-Kite"
+    trigger_condition: "In Pursuit. Marked target moves away from Reaver for 2+ consecutive seconds."
+    effect: |
+      Lunging bite attack (gap close 4m). If target is moving away: deals
+      heavy damage AND applies -40% movement speed for 3s. If target is
+      stationary or moving toward Reaver: deals moderate damage, no slow.
+      The ability ONLY reaches full power against fleeing targets.
+    item_replaced: "Frostweave Net (-70% speed, 6s, thrown, breakable — Hamstring is pursuit-native and rewards chase)"
+    decision_created: |
+      Hamstring Snap is the anti-kite tool. But it requires 2s of the target
+      fleeing before it activates. Do you position to FORCE the target to flee
+      (then punish with Hamstring)? Or do you lock them down differently?
+      Against enemies that STAND AND FIGHT, Hamstring is just a weaker Rend.
+      It only shines against runners.
+
+  - name: "Deathroll"
+    state: "Pursuit"
+    type: "Active — Finisher"
+    trigger_condition: "In Pursuit. Marked target below 25% HP. Frenzy Stage 3+."
+    effect: |
+      Devastating grapple attack. The Reaver latches onto the target and
+      performs a rotational tear (crocodile deathroll reference). Deals
+      massive damage (highest single-hit in the kit). Both Reaver and target
+      are locked in place for 1.5s during animation (neither can move).
+      If this kills the target: Frenzy drops cleanly (no Adrenal Recovery
+      penalty). If it DOESN'T kill: 4s cooldown before usable again, and
+      the Reaver is stationary for 0.5s after (recovery from failed deathroll).
+    item_replaced: "No direct item equivalent — this is premium class execution. Closest: Stasis Pin (3s lock) but without the damage."
+    decision_created: |
+      The finisher gamble. Target is at 25% — Deathroll MIGHT kill it. If it
+      does, clean exit, no penalty. If it doesn't, you're briefly stationary
+      (vulnerable) and the target is still alive with you in its face. Do you
+      Deathroll NOW at 25% (risky but potentially clean), or Rend twice more
+      to be SURE (safer but Frenzy ramp means you're more vulnerable for
+      those 2 extra GCDs)?
+
+  - name: "Feeding Frenzy"
+    state: "Pursuit"
+    type: "Passive — Sustain"
+    trigger_condition: "In Pursuit. Dealing damage to marked target."
+    effect: |
+      Each hit on the marked target restores HP to the Reaver equal to
+      (Frenzy Stage × 3)% of damage dealt. At Stage 1: 3% lifesteal.
+      At Stage 4: 12%+ lifesteal. The Reaver sustains by KILLING FASTER.
+      Does not apply to non-marked target damage. Does not work during
+      Calm state (no free sustain without commitment).
+    item_replaced: "Elixir of Bloodlust (lifesteal on KILL only — Feeding Frenzy rewards hitting, not just finishing)"
+    decision_created: |
+      Feeding Frenzy means the Reaver is HARDEST to kill when actively hitting
+      the marked target. Being kited = no lifesteal = no sustain = dying to
+      chip damage. This creates a death spiral for Reavers who commit to
+      targets they can't stick to. It also means the Reaver heals MORE the
+      longer the fight goes (higher Frenzy = more lifesteal). Extended fights
+      favor the Reaver's survival... if nothing else kills them first.
+
+  - name: "Apex Pursuit"
+    state: "Pursuit"
+    type: "Active — Mobility"
+    trigger_condition: "In Pursuit. Marked target is 8m+ away. Cooldown: 6s."
+    effect: |
+      Burst of predatory speed. Dash 6m toward marked target (MUST be toward
+      target — cannot be aimed elsewhere). Ignores unit collision during dash.
+      If the Reaver enters water terrain during Apex Pursuit, the dash extends
+      +4m (total 10m) and grants brief stealth (1.5s — emerges from water
+      like a breaching shark).
+    item_replaced: "Flashstep Cartridge (8m any direction, consumed — Apex is 6m target-locked, repeatable on CD)"
+    decision_created: |
+      Apex Pursuit is your kite-answer on a cooldown. 6s means you get one
+      every few GCDs. If the target runs, you Apex to close. But if they
+      BAIT your Apex into a trap (kite toward their allies, then stop when
+      you dash in), you've spent your mobility cooldown arriving in a bad
+      position. The 8m minimum range requirement means you can't use it in
+      melee — it's a chase tool, not a combat tool.
+
+  - name: "Tunnel Instinct"
+    state: "Pursuit"
+    type: "Passive — Defensive"
+    trigger_condition: "In Pursuit. Frenzy Stage 2+."
+    effect: |
+      While in Frenzy Stage 2+, the Reaver gains damage reduction against
+      attacks from the MARKED TARGET specifically: 15% at Stage 2, 25% at
+      Stage 3, 35% at Stage 4. This does NOT apply to damage from other
+      sources (tunnel vision = only defended against what you're looking at).
+      Represents the adrenal pain suppression focused entirely on the prey.
+    item_replaced: "Ironhide Tincture (+50% DR for 8s, all sources — Tunnel Instinct is target-specific but permanent)"
+    decision_created: |
+      Tunnel Instinct makes the Reaver increasingly unkillable BY ITS TARGET.
+      But increasingly vulnerable to EVERYTHING ELSE. This deepens the
+      commitment gamble: if the target is alone, Pursuit is nearly unloseable.
+      If the target has allies, those allies are what kill the Reaver — not
+      the target itself. Target selection must account for the target's
+      SUPPORT structure, not just the target's own threat.
+
+  - name: "Crimson Wake"
+    state: "Pursuit"
+    type: "Active — Zone Creation"
+    trigger_condition: "In Pursuit. Currently in water terrain."
+    effect: |
+      The Reaver's movement through water leaves a 2m-wide trail of
+      bloodied water (Crimson Wake zone) lasting 8s. Enemies entering
+      Crimson Wake suffer: -20% movement speed AND the Reaver gains
+      +10% speed while any enemy is in their Wake. Multiple enemies in
+      Wake stack the speed bonus. Wake also provides minor damage to
+      enemies (1% HP/s bleed from chemically aggressive water).
+    item_replaced: "Thickglass Flask (viscous resin puddle, -50% speed, 4m, 20s, stationary)"
+    decision_created: |
+      Crimson Wake only works in water. Do you CHASE through water (creating
+      advantageous terrain behind you — cutting off retreat for the target)?
+      Or take the direct path on land? If the target is fleeing THROUGH water,
+      Crimson Wake means chasing through the same path creates a speed
+      advantage. If they flee on LAND, Wake does nothing. Water positioning
+      matters for more than just the Reaver's own speed bonus.
+
+  - name: "Refuse to Die"
+    state: "Pursuit"
+    type: "Passive — Threshold Survival"
+    trigger_condition: "In Pursuit. Frenzy Stage 3+. HP drops to 0."
+    effect: |
+      ONCE per Pursuit: when the Reaver would die, instead survive at 1 HP
+      for 3s. During these 3s: cannot be healed, cannot be reduced below 1 HP,
+      Frenzy IMMEDIATELY jumps to maximum stage, all abilities deal +100%
+      damage. After 3s: if the marked target is dead, Reaver survives at 15%
+      HP. If the marked target is ALIVE, Reaver dies (deferred death).
+    item_replaced: "No item equivalent — this is the class's signature premium survival mechanic."
+    decision_created: |
+      Refuse to Die is the ultimate commitment reward. It means that even if
+      you miscalculated slightly, you get ONE LAST CHANCE to finish the kill.
+      But it's not a safety net — it's a SHORTER TIMER on an existing gamble.
+      3s to kill a target that already wasn't dying fast enough. The decision
+      isn't "do I use it" (it's automatic). The decision is: "am I committed
+      to a target I can kill within 3s of hitting 0 HP?" If yes, Refuse to Die
+      is a win condition. If no, it's just a delayed death animation.
+
+  # ─── UTILITY / TRANSITIONAL ABILITIES ──────────────────────────────────────
+
+  - name: "Shed Scent"
+    state: "Calm"
+    type: "Active — Defensive"
+    trigger_condition: "Not in Pursuit. Cooldown: 30s."
+    effect: |
+      The Reaver suppresses its own predatory indicators for 6s. During
+      Shed Scent: enemies do not perceive the Reaver as a threat (reduced
+      aggro generation, SR1-2 enemies may ignore the Reaver entirely).
+      Allows repositioning without drawing attention before commitment.
+      Breaks immediately if the Reaver attacks or takes damage.
+    item_replaced: "Phantom Echo (3s invisibility + ghost image, consumed)"
+    decision_created: |
+      Use Shed Scent to position for an optimal Lock Jaw (get close without
+      drawing fire), or save it for emergency disengagement if the fight goes
+      wrong pre-commitment? Once you commit (Pursuit), Shed Scent is UNUSABLE.
+      It's a Calm-only tool. This is your last chance to reposition safely.
+
+  - name: "Pack Signal"
+    state: "Either"
+    type: "Active — Team Utility"
+    trigger_condition: "Cooldown: 45s."
+    effect: |
+      In Calm: marks an enemy for the party. Marked enemy takes +10% damage
+      from ALL allies for 6s. Signals "I'm going to commit to THIS one soon."
+      
+      In Pursuit: emits a danger pulse. All allies within 15m gain +15%
+      movement speed away from the Reaver's marked target for 4s. Signals
+      "I'm locked in — get away from my hunting ground."
+    item_replaced: "Pheromone Tag (forces enemy aggro, 8s — Pack Signal coordinates allies, not enemies)"
+    decision_created: |
+      In Calm: Pack Signal commits you SOCIALLY before biologically. Your party
+      will focus the marked target. If you then commit to a DIFFERENT target,
+      you've wasted the setup. Do you Signal your intended target early (optimal
+      coordination) or keep your options open (flexibility)?
+      
+      In Pursuit: Pack Signal spends a GCD NOT dealing damage to your target.
+      But it might save an ally who's too close to your hunting ground. Is
+      the ally's survival worth 1 GCD of Frenzy damage? At Stage 4, one GCD
+      might be the difference between killing the target and Refuse to Die
+      triggering.
+
+  - name: "Adrenal Dump"
+    state: "Pursuit"
+    type: "Active — Burst"
+    trigger_condition: "In Pursuit. Frenzy Stage 2+. Cooldown: 30s."
+    effect: |
+      Spend accumulated Frenzy for immediate burst damage. Deals damage equal
+      to 200% of current Frenzy bonus as a single hit. THEN: Frenzy drops by
+      one stage (Stage 3 → Stage 2). The Reaver trades sustained ramp for
+      immediate burst. Frenzy continues building from the reduced stage.
+    item_replaced: "Berserker's Draught (+30% flat damage, no escalation tradeoff)"
+    decision_created: |
+      Adrenal Dump is ANTI-RAMP — it spends your accumulated power for
+      immediate payoff. Use it to finish a target that's ALMOST dead (burst
+      over sustained), or hold Frenzy and let the ramp continue? Dumping at
+      Stage 3 deals big damage but puts you back to Stage 2 speeds and damage.
+      If the target survives, you've WEAKENED yourself for the remaining
+      pursuit. If the target dies, the Dump was optimal. Risk/reward within
+      risk/reward.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 5: RESOURCE SYSTEM
+# ═══════════════════════════════════════════════════════════════════════════════
+
+resource_system:
+  primary_resource: "Frenzy (Escalating State)"
+  resource_model: |
+    Frenzy is NOT a gauge that fills and spends. It is an ESCALATING STATE
+    that increases continuously during Pursuit and resets upon resolution.
+    There is no "building Frenzy to spend." Frenzy IS the spending — each
+    stage increases power but also increases vulnerability and lock-in.
+
+  stages:
+    stage_0:
+      name: "Calm"
+      threshold: "Not in Pursuit"
+      bonuses: "None. Standard DPS. Full awareness. Free movement."
+      restrictions: "Cannot use Pursuit abilities. Limited damage ceiling."
+    stage_1:
+      name: "Scenting"
+      threshold: "0-5s in Pursuit"
+      bonuses: "+20% damage to target, +10% speed toward target, Tracking active"
+      restrictions: "Cannot voluntarily disengage. Cannot change target."
+    stage_2:
+      name: "Closing"
+      threshold: "5-12s in Pursuit"
+      bonuses: "+40% damage, +25% speed, 15% DR from target, Thrash unlocked"
+      restrictions: "All Stage 1 + awareness reduced 15% (more damage from other sources)"
+    stage_3:
+      name: "Frenzied"
+      threshold: "12-20s in Pursuit"
+      bonuses: "+70% damage, +40% speed, 25% DR from target, Deathroll unlocked, Refuse to Die active"
+      restrictions: "All Stage 2 + awareness reduced 30%. Ally communication impaired."
+    stage_4:
+      name: "Apex Predator"
+      threshold: "20s+ in Pursuit"
+      bonuses: "+100%+ damage (continues scaling), +50%+ speed, 35% DR from target"
+      restrictions: "All Stage 3 + awareness = target ONLY. Effectively deaf/blind to non-target."
+
+  reset_conditions:
+    - "Target killed → clean reset, 3s Adrenal Recovery, return to Calm"
+    - "Reaver killed → permanent reset (death)"
+    - "Target phases/disappears → Adrenal Crash (8s severe debuff), forced Calm"
+    - "Adrenal Dump ability → drops one stage (not full reset)"
+
+  anti_rotation_note: |
+    Frenzy is CONTINUOUS. There is no "build to Stage 4, dump, rebuild" loop.
+    The intended pattern is: commit → ramp → kill → recover → commit again.
+    Each pursuit is a SEPARATE escalation event. You do not carry Frenzy
+    between targets. This prevents "rotation" thinking — each engagement is
+    a fresh gamble with a fresh ramp from zero.
+    
+    Adrenal Dump exists as an EMERGENCY burst option, not as a "spend" in a
+    build/spend cycle. Using it is an admission that the ramp alone isn't
+    enough — you need the burst NOW even at the cost of stage regression.
+
+  secondary_resource: "Commitment Windows"
+  secondary_description: |
+    The Reaver's TRUE resource is OPPORTUNITY. Bloodscent detection is always
+    active, but the number of good commitment targets per encounter is LIMITED.
+    The Reaver "spends" commitment opportunities — each one is irreversible.
+    A bad commitment is a wasted resource that cannot be recovered within the
+    same encounter (you're dead, or you've spent 20s killing a low-value
+    target while the high-value one was ignored).
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 6: CC STAGE BUDGET
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cc_stage_budget:
+  classification: "DPS — Minimal CC Budget"
+  philosophy: |
+    The Reaver is a KILLER, not a controller. Its contribution to team CC is
+    incidental at best. The class's "control" comes from THREAT PRESENCE —
+    enemies can't ignore a ramping Reaver heading toward them. But it has
+    no dedicated CC toolkit.
+
+  stage_1_access:
+    available: true
+    sources:
+      - name: "Crimson Wake"
+        type: "Slow (water terrain only)"
+        mechanism: "-20% movement speed to enemies in bloodied water trail"
+        limitations: "Requires water terrain. Only affects enemies who enter the wake. Reaver must be moving through water."
+      - name: "Hamstring Snap"
+        type: "Slow (conditional)"
+        mechanism: "-40% movement speed for 3s — but ONLY if target is fleeing"
+        limitations: "Conditional on target movement. Stationary targets receive no slow. Single target only."
+      - name: "Pursuit Pressure (Passive)"
+        type: "Psychological CC"
+        mechanism: |
+          Not mechanical CC. The PRESENCE of a ramping Reaver heading toward
+          an enemy creates behavioral pressure: SR2+ enemies will prioritize
+          escape over optimal play when a Frenzy Stage 3+ Reaver is approaching.
+          This is the Reaver's "CC" — it doesn't lock enemies down, it makes
+          them PANIC.
+        limitations: "Only works on SR2-3 enemies. SR4 enemies don't panic. SR1 enemies are too dumb to react."
+
+  stage_2_access:
+    available: false
+    note: "No silence, interrupt, or confusion effects in the Reaver kit. The class does not prevent actions — it punishes them by killing faster than actions can save."
+
+  stage_3_access:
+    available: false
+    note: "No stun, blind, paralysis, or sleep. Deathroll pins both Reaver AND target for 1.5s but this is a DAMAGE ability, not CC (the Reaver is also locked)."
+
+  team_cc_interaction: |
+    The Reaver BENEFITS from ally CC enormously (stunned target can't flee = 
+    free Rend stacks = faster Frenzy = faster kill). But it contributes almost
+    nothing TO the team's CC budget. This is by design: the Reaver's role is
+    to FINISH things that are already being controlled by others. It's the
+    executioner, not the jailer.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 7: VULNERABILITY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+vulnerability:
+  core_vulnerability: "CANNOT DISENGAGE"
+  philosophy: |
+    The Reaver's greatest strength IS its greatest weakness. The commitment
+    that makes it an unstoppable pursuit predator also makes it the most
+    bait-able, trap-able, and isolatable class in the game.
+
+  vulnerability_vectors:
+    bait_and_trap:
+      description: |
+        If the target is BAIT (intentionally brought below 70% to trigger
+        commitment), the Reaver is dead. The target runs toward a trap,
+        allies, or a death zone. The Reaver follows because it MUST. Smart
+        enemies (SR3+) will absolutely use this tactic: wound a scout, have
+        it flee toward an ambush, watch the Reaver charge into a kill box.
+      counterplay: |
+        Sense Vulnerability (pre-commitment intelligence). Reading the map.
+        Understanding enemy formations. Recognizing bait patterns. The
+        DECISION to commit is still the player's — the biology doesn't commit
+        for them until they Lock Jaw. Good Reavers recognize traps before
+        committing. Bad Reavers chase the first thing that bleeds.
+
+    multi_threat_lockout:
+      description: |
+        Once committed, the Reaver is locked to ONE target. If additional
+        threats appear (reinforcements, phase adds, boss mechanics), the
+        Reaver CANNOT switch. They're chasing their mark while the party
+        deals with new problems without them. In 4-player content, losing
+        one DPS to pursuit while 3 new enemies spawn is potentially fatal.
+      counterplay: |
+        TIMING. Commit only when the party can handle the remaining threats
+        without you. Commit to the MOST DANGEROUS target so that your
+        absence from general combat is offset by removing the biggest threat.
+        Pack Signal in Pursuit helps allies disengage from your hunting
+        ground — use it to warn them.
+
+    kiting_enemies:
+      description: |
+        Enemies that are faster than the Reaver's pursuit speed (rare but
+        possible), enemies with repeated gap-creation tools (teleports,
+        dashes, terrain creation), or enemies that can maintain range
+        indefinitely are the Reaver's NIGHTMARE. The Reaver ramps damage
+        while in MELEE — being kited means Frenzy stages increase (making
+        you faster) but you can't APPLY the damage. You get faster and
+        stronger while hitting nothing.
+      counterplay: |
+        Hamstring Snap (anti-kite tool). Apex Pursuit (gap close on CD).
+        Ally CC (stun the target so Reaver catches up). Water terrain
+        (massive speed advantage). Eventually, Frenzy Stage 4 speed bonus
+        catches most targets. But if the fight takes that long, the Reaver
+        has been useless for 20s — which might mean the party is already dead.
+
+    pre_commitment_vulnerability:
+      description: |
+        In Calm state, the Reaver is NORMAL. No damage bonus, no speed bonus,
+        no lifesteal, no damage reduction from target. If enemies focus the
+        Reaver before it commits, it has no defensive tools beyond Shed Scent
+        (6s reduced aggro). A Reaver that never gets to commit (focused down
+        before ANY target hits 70%) is the worst DPS in the game — all power
+        budget is in Pursuit state.
+      counterplay: |
+        Positioning. Shed Scent for pre-commitment survival. Relying on
+        party frontline to absorb initial aggro. Not overextending before
+        commitment. The Reaver is a backline observer until the hunt starts —
+        it should NOT be in the front before Bloodscent triggers.
+
+    healing_the_target:
+      description: |
+        While healing above 70% doesn't BREAK pursuit (once committed = committed),
+        it DOES extend the fight duration. Longer fight = higher Frenzy (good)
+        but also = more time for other threats to kill the Reaver (bad). If the
+        target has a dedicated healer and the Reaver's party isn't helping burst
+        through the healing, the Reaver is stuck in an indefinite pursuit that
+        slowly drains them via non-target damage accumulation.
+      counterplay: |
+        Target selection must account for healing support. Don't commit to a
+        target that has a healer unless your party is ready to burst with you
+        or CC the healer. Frenzy eventually out-damages most healing, but
+        "eventually" might be too long.
+
+    terrain_separation:
+      description: |
+        If the target goes through a door that closes, falls off a cliff the
+        Reaver can't follow from, or moves through terrain that physically
+        blocks pursuit, the Reaver suffers Adrenal Crash (forced break without
+        kill resolution). This is the WORST outcome — neither kill nor clean
+        death. Just debuff and failure.
+      counterplay: |
+        Awareness of map geometry even during Frenzy. Wade In to access water
+        shortcuts. Apex Pursuit to ignore some terrain. But fundamentally: if
+        the map allows the target to escape through terrain, the Reaver should
+        not have committed in that location. Map reading is pre-commitment
+        skill expression.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 8: ITEM COMPLEMENTARITY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+item_complementarity:
+  philosophy: |
+    The Reaver REPLACES tracking + speed + damage ramp items through biology.
+    But it still BENEFITS from other item categories that shore up its
+    weaknesses or enhance its commitment windows.
+
+  items_the_reaver_replaces:
+    - item: "Bloodhound Capsule"
+      function: "20s tracking + 15% speed toward target"
+      why_class_is_better: "Bloodscent is permanent, scales with target HP, and includes damage bonus"
+    - item: "Berserker's Draught"
+      function: "+30% damage, -20% DR, 15s"
+      why_class_is_better: "Frenzy has no duration limit, scales higher, and DR loss is target-specific (not universal)"
+    - item: "Flashstep Cartridge"
+      function: "8m directional teleport"
+      why_class_is_better: "Apex Pursuit is repeatable (6s CD), target-tracking, and extends in water"
+    - item: "Elixir of Bloodlust"
+      function: "Speed + attack speed on kill"
+      why_class_is_better: "Feeding Frenzy provides sustain DURING the fight (not only after kill)"
+    - item: "Might Potion"
+      function: "+ATK for 3 minutes"
+      why_class_is_better: "Frenzy Stage 4 provides +100%+ damage — no potion matches this ceiling"
+    - item: "Rupture Oil"
+      function: "3-stack armor shred, 8s window"
+      why_class_is_better: "Rend stacks infinitely during pursuit with no expiration window"
+
+  items_the_reaver_still_wants:
+    - category: "Survival (Pre-Commitment)"
+      items:
+        - "Hardshell Powder — party defense buff protects the Reaver in Calm before it commits"
+        - "Stoneskin Scroll — emergency DR if focused before commitment"
+        - "Smokebreak Ampule — 5s untargetable to survive pre-commitment pressure"
+      rationale: "Reaver is vulnerable in Calm. Survival items keep it alive until the hunt starts."
+
+    - category: "CC (Target Lockdown)"
+      items:
+        - "Frostweave Net — slow target so Reaver can stick in melee"
+        - "Stasis Pin — freeze target for 3s (free Rend stacks, Frenzy acceleration)"
+        - "Lockjaw Spore — action skip = target can't fight back during pursuit"
+      rationale: "Reaver has minimal CC. Ally items that HOLD the target in place directly amplify Reaver output."
+
+    - category: "Terrain Manipulation"
+      items:
+        - "Bogcrust Grenade — creates difficult terrain (slows fleeing target)"
+        - "Any water-generating items — creates Reaver-advantaged terrain"
+        - "Barricade Foam — blocks escape routes (forces target back toward Reaver)"
+      rationale: "Map control benefits the Reaver by limiting target escape options."
+
+    - category: "Economy Disruption"
+      items:
+        - "Drainwick Candle — drains target's resources (can't use escape abilities)"
+        - "Voidleech Capsule — depletes target's defensive cooldowns"
+      rationale: "A target without escape resources is a DEAD target once Reaver commits."
+
+  anti_synergy_items:
+    - "Taunt Cracker — pulls enemies toward a point, might pull Reaver's target away from optimal pursuit path"
+    - "Retrograde Bead — recall to marked position is USELESS on committed Reaver (can't retreat to recall point)"
+    - "Pheromone Tag — redirects enemy aggro, might make target STOP RUNNING (reduces Hamstring Snap value)"
+
+  class_synergies:
+    strong_synergies:
+      - class: "Shaman"
+        interaction: "Shaman slows/paralyzes the Reaver's marked target → free damage window. Shaman debuffs speed → target can't kite. This is THE ideal Reaver support."
+      - class: "Wavecaller"
+        interaction: "Wavecaller generates water terrain → Reaver gains aquatic advantage. Wavecaller heals Reaver through walls during pursuit (sound propagation = no LoS needed)."
+      - class: "Siren"
+        interaction: "Siren commands target to STOP RUNNING → Reaver catches immediately. Siren commands adds to ignore Reaver → reduces non-target damage pressure."
+      - class: "Grappler (Melee Stance)"
+        interaction: "Grappler pins target (Stage 3 CC) → Reaver gets free Rend stacks on immobile target. Best possible setup."
+    
+    weak_synergies:
+      - class: "Adafold"
+        interaction: "Adafold Force Targeting keeps enemies contained — but Reaver chases OUTSIDE containment zones. Adafold's strength (holding position) conflicts with Reaver's identity (leaving position)."
+      - class: "Another Reaver"
+        interaction: "Two Reavers = two DPS members potentially locked to different targets. Party loses BOTH for general combat. Extremely risky composition."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 9: HIT/MISS ANALYSIS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+hit_miss_analysis:
+  what_this_class_nails:
+    - aspect: "Unique Input Modality"
+      analysis: |
+        No other class has "target selection as primary skill expression."
+        Most DPS classes express skill through EXECUTION (combos, timing,
+        positioning). The Reaver expresses skill through a single DECISION
+        point (who to commit to) and then pure aggression. This is unlike
+        anything else in the roster — fundamentally different gameplay feel.
+
+    - aspect: "Clear Risk/Reward Fantasy"
+      analysis: |
+        Every Reaver engagement is an unambiguous gamble. Player knows BEFORE
+        committing that this is life or death. The clarity of the stakes makes
+        every success feel earned and every failure feel like a learning moment
+        (not RNG, not lag, not unfair — "I chose wrong").
+
+    - aspect: "Biological Lock Justification"
+      analysis: |
+        You cannot teach Bloodscent. You cannot learn Frenzy cascade. The
+        class is the body. No race-class lock in the game is more clearly
+        PHYSIOLOGICAL than "my body involuntarily enters predatory overdrive
+        when it smells weakness."
+
+    - aspect: "Anti-2-Minute Design"
+      analysis: |
+        Frenzy is not a burst window. There is no "build → spend → build"
+        cadence. There is no optimal rotation. There is: calm → commit → ramp
+        → kill → recover. Each pursuit is a unique event with unique duration.
+        This perfectly aligns with the project's anti-rotation philosophy.
+
+    - aspect: "Item Baseline Clarity"
+      analysis: |
+        The items the Reaver replaces (Bloodhound Capsule, Berserker's Draught,
+        Flashstep Cartridge) are clear, distinct, and meaningfully inferior.
+        A party without a Reaver CAN still chase low-HP targets using items —
+        just worse. The class/item relationship is clean.
+
+    - aspect: "Party Role Clarity"
+      analysis: |
+        The Reaver's job is to FINISH wounded targets. Not to soften them.
+        Not to control them. Not to protect allies. Finish. This is narrow,
+        clear, and creates obvious party composition roles: "who softens the
+        target for the Reaver to execute?"
+
+  potential_misses:
+    - aspect: "Calm State Engagement"
+      concern: |
+        If Calm state is truly "mediocre DPS while waiting for threshold,"
+        the Reaver might feel BORING for extended periods. In encounters
+        where enemies don't drop below 70% quickly (bosses with large HP
+        pools), the Reaver might be waiting too long before their class
+        identity activates.
+      mitigation: |
+        Scent the Weak provides constant information engagement. Circling
+        Patience creates active positioning decisions. Test Bite allows
+        the Reaver to FORCE thresholds (aggressive play). Sense Vulnerability
+        creates intelligence-gathering gameplay. Calm should feel like
+        "coiling the spring" — active preparation, not passive waiting.
+
+    - aspect: "Team Frustration"
+      concern: |
+        "Our Reaver committed to the WRONG target and now we're 3v5."
+        Bad Reaver play is CATASTROPHIC for the party. Unlike other DPS
+        who might play suboptimally (lower damage but still present), a
+        badly-committed Reaver is GONE — chasing a low-value target while
+        the party needs them elsewhere.
+      mitigation: |
+        Pack Signal (pre-commitment coordination). High skill floor for
+        commitment decisions. Clear team communication meta. The class is
+        Experienced tier — players are expected to understand party dynamics.
+        The frustration IS the design tension — it creates memorable moments
+        both good ("clutch Reaver finish saved us") and bad ("why did they
+        commit to the add???").
+
+    - aspect: "PvP Exploitation"
+      concern: |
+        In PvP, enemies will INTENTIONALLY bait Reaver commitments. Drop
+        below 70%, run toward a trap, watch the Reaver suicide. The counter
+        is trivially obvious to human players.
+      mitigation: |
+        PvP Reavers must have the highest target-evaluation skill. The class
+        is HIGH CEILING in PvP precisely because the opponent KNOWS the
+        counter. Outplaying the counter (committing only when the opponent
+        CANNOT escape) is the Reaver's PvP mastery expression.
+
+    - aspect: "Aquatic Content Dependency"
+      concern: |
+        Multiple abilities (Wade In, Crimson Wake, Apex Pursuit extension)
+        require water terrain. If water terrain is rare in endgame content,
+        these abilities are functionally dead in most situations.
+      mitigation: |
+        Water abilities are BONUSES, not requirements. Core kit (Rend,
+        Thrash, Hamstring Snap, Deathroll, Feeding Frenzy) works on any
+        terrain. Water provides advantage, not necessity. Additionally,
+        Wavecaller synergy can CREATE water terrain, making water availability
+        a party composition decision rather than a map dependency.
+
+    - aspect: "Boss Design Tension"
+      concern: |
+        Bosses that phase, teleport, or become untargetable punish the Reaver
+        with Adrenal Crash. If every boss has phase transitions, the Reaver
+        is permanently in crash/recovery states and never reaches high Frenzy.
+      mitigation: |
+        Boss phase transitions should be TELEGRAPHED sufficiently for a Reaver
+        to decide: "commit now and kill before phase" or "don't commit because
+        phase is imminent." Boss design guidance: if a phase transition is
+        coming, enemies near the Reaver should display tells at 5-8s warning.
+        This makes the commitment decision include TIMING (can I kill in 5s?).
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 10: ANTI-PATTERNS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+anti_patterns:
+  - name: "No Burst Windows"
+    violation: |
+      Frenzy is CONTINUOUS ESCALATION, not "build then spend." If the Reaver
+      accumulates a resource to dump in a window, it becomes a standard DPS
+      with a burst cadence. This violates the project's anti-2-minute
+      philosophy AND the class's identity as a persistence predator.
+    correct_implementation: |
+      Frenzy increases passively over time. There is no "I'm full, now I
+      spend." There is only "I'm stronger than I was 5 seconds ago and
+      stronger than I'll be 5 seconds ago from now." Adrenal Dump EXISTS but
+      is explicitly an emergency/tradeoff tool — using it feels like a
+      SACRIFICE (losing stage progression) not a PAYOFF (spending built resources).
+
+  - name: "No Rotation"
+    violation: |
+      If abilities have an optimal sequence (A → B → C → repeat), the Reaver
+      has a rotation. Rotations imply predictable, repeatable patterns. The
+      Reaver's gameplay is REACTIVE to the target's behavior: target runs →
+      Hamstring Snap. Target stands → Rend spam. Target's HP dips → Deathroll.
+      The SITUATION dictates the ability, not a memorized order.
+    correct_implementation: |
+      Abilities are CONDITIONAL — triggered by the target's actions and
+      current HP, not by an internal sequence. The Reaver responds to what
+      the prey DOES, not what a rotation timer says. Two pursuits against
+      different target types should look completely different in ability usage.
+
+  - name: "No Multi-Target Spreading"
+    violation: |
+      If the Reaver can efficiently damage multiple targets simultaneously,
+      it stops being a pursuit predator and becomes a standard AoE DPS.
+      Thrash exists but at 40% damage to non-marked targets — it's a
+      UTILITY tool (clearing interference), not an AoE damage identity.
+    correct_implementation: |
+      The Reaver commits to ONE target. Its power budget is entirely in
+      single-target pursuit. AoE exists only as crowd management (knock away
+      distractions). The class fantasy REQUIRES ignoring everything except
+      the mark. Multi-target damage is anti-thetical to pursuit identity.
+
+  - name: "No Voluntary Disengage"
+    violation: |
+      If the Reaver can choose to exit Pursuit (even at a cost), the
+      commitment gamble is no longer a gamble — it's a trade with a safety
+      valve. "Commit but pay X to uncommit" eliminates the defining tension.
+    correct_implementation: |
+      CANNOT EXIT PURSUIT. Period. No cooldown. No resource cost. No
+      ability that breaks it. The ONLY exits are: target dies, Reaver dies,
+      or target leaves the playable area. This is NON-NEGOTIABLE for class
+      identity. The moment you add "but in an emergency you can..." the
+      class loses its soul.
+
+  - name: "No Passive Gameplay"
+    violation: |
+      If Frenzy provides such high stats that the Reaver can auto-attack
+      to victory during Pursuit, the class has no moment-to-moment decisions
+      after commitment. "Commit → AFK → win" is degenerate.
+    correct_implementation: |
+      Pursuit requires active ability use: Rend for stacking damage, Hamstring
+      to prevent kiting, Apex Pursuit for gap closing, Thrash for crowd
+      management, Deathroll for execution timing. Auto-attacks during Pursuit
+      deal REDUCED damage (50% of normal) to incentivize active play.
+      Frenzy bonuses apply to ABILITIES, not auto-attacks.
+
+  - name: "No Pre-Commitment Power"
+    violation: |
+      If Calm-state Reaver deals competitive damage, there's no reason to
+      commit (risking death for power you already have). The power gap between
+      Calm and Pursuit MUST be dramatic — Calm is mediocre, Pursuit is exceptional.
+    correct_implementation: |
+      Calm-state Reaver deals approximately 60% of the damage of an equivalent-
+      tier pure DPS class with no commitment mechanic. Pursuit Stage 3+
+      Reaver deals approximately 150-200% of that same benchmark. The
+      REASON to commit is the power difference. The RISK of committing is
+      that you might die for that power.
+
+  - name: "No Shadow/Darkness/Undeath Theming"
+    violation: |
+      The Reaver is a PREDATOR, not an edge-lord. No shadow magic. No death
+      themes. No self-harm. No "powered by suffering." This is BIOLOGY — tooth
+      and muscle and adrenaline and bloodscent. Keep it grounded in predatory
+      zoology, not dark fantasy.
+    correct_implementation: |
+      Visual language: water, blood, teeth, fins, speed. Sound language:
+      rushing water, jaw snaps, heartbeat acceleration, the "no music — just
+      pursuit sounds" audio design during Frenzy. Thematic reference: sharks,
+      piranhas, orcas, persistence predators (wolves, painted dogs). NOT:
+      vampires, liches, shadow beasts, demons.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 11: OPEN QUESTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+open_questions:
+  mechanical:
+    - question: "How does 'cannot disengage' interact with physics? Can allies knock/push the Reaver away from its target? Does the Reaver resist displacement effects during Pursuit?"
+      priority: "High"
+      leaning: "Reaver should resist displacement FROM the target direction. Displacement TOWARD the target should work normally (allies can 'help' by pushing them closer)."
+
+    - question: "What is the exact movement-away penalty? If the Reaver is caught in an AoE and involuntarily moved away, does it take adrenal backlash damage? Or is the penalty only on VOLUNTARY movement attempts?"
+      priority: "High"
+      leaning: "Involuntary displacement = no penalty (not the Reaver's choice). Voluntary input away from target = increasing resistance + stamina drain + screen distortion."
+
+    - question: "Deathroll pins both Reaver and target — is this interruptible by external damage? If an ally AoEs through both, does it break the pin?"
+      priority: "Medium"
+      leaning: "Deathroll should be uninterruptible from OUTSIDE (both locked in). Only breaks if Reaver or target dies during it. Gives it finisher weight."
+
+    - question: "Bloodscent detection through WALLS — is there a maximum range? Or truly infinite tracking once committed?"
+      priority: "Medium"
+      leaning: "Detection range should be functionally infinite during Pursuit (the target cannot hide). During Calm/scanning, detection range should be 30-50m with range extending as target HP drops."
+
+    - question: "How does Refuse to Die interact with team revival mechanics? If Reaver enters 'deferred death' state and the target dies from an ALLY's attack during those 3s, does the Reaver survive?"
+      priority: "Medium"
+      leaning: "Yes — if the marked target dies by ANY cause during Refuse to Die's 3s window, Reaver survives at 15% HP. Encourages team play: 'help me finish this and I live.'"
+
+  balance:
+    - question: "Is 70% HP threshold too high? Too low? At 70%, Bloodscent triggers very early in most fights. Does this make Calm state too short (reducing evaluation time)?"
+      priority: "High"
+      leaning: "70% is intentionally high to force FAST decisions. If threshold were lower (30%), Calm would dominate gameplay and Pursuit would be brief. Design intent: Pursuit IS the class. Calm is preamble."
+
+    - question: "Frenzy Stage 4 (+100% damage, +50% speed) — is this overtuned for content where targets survive 20s+ against a committed Reaver?"
+      priority: "High"
+      leaning: "If a target survives 20s of Reaver pursuit, something is wrong (target is being heavily healed, or Reaver committed to something far above its pay grade). Stage 4 should feel 'unfair' — it's the reward for a 20s all-in bet."
+
+    - question: "Feeding Frenzy lifesteal scaling — at Stage 4 (12%+), is the Reaver effectively unkillable by a single target? Does this need a cap?"
+      priority: "Medium"
+      leaning: "Single target vs. Reaver at Stage 4 should lose. Period. The Reaver committed 20s and is hitting harder and healing. The counter is EVERYTHING ELSE — allies of the target, not the target itself. No cap needed if vulnerability to non-target damage is preserved."
+
+    - question: "Adrenal Crash (-40% speed, -30% damage, +25% taken, 8s) after forced break — is this too punishing? Reaver is nearly useless for 8s after target phases."
+      priority: "Medium"
+      leaning: "Intentionally severe. The crash is the 'wrong bet' punishment for committing to a target that was going to phase. 8s of severe weakness = party must protect the Reaver during recovery. This creates dramatic moments."
+
+  content_design:
+    - question: "How much content is aquatic? If water terrain is only in 10% of dungeons, aquatic abilities are niche. If it's 40%, the Reaver has a significant terrain advantage in nearly half the game."
+      priority: "High"
+      leaning: "Depth Dead region (Chunker homeland) should feature heavy water terrain. Other regions should have SOME water (rivers, flooded basements, rain-filled areas) but not dominant. Reaver should feel strongest in Depth Dead content and competent-but-not-water-dependent elsewhere."
+
+    - question: "Boss encounter design — should bosses have 'Reaver windows' (periods where they don't phase and can be pursuit-committed safely)? Or should all phase transitions be telegraphed enough for Reavers to evaluate?"
+      priority: "High"
+      leaning: "Telegraph over dedicated windows. Don't design around the Reaver — design encounters honestly and let the Reaver player READ them. Phase telegraphs benefit all players, not just Reavers."
+
+    - question: "SR3+ enemies using Reaver-bait tactics — how common should this be? If every SR3 encounter has an intentional Reaver trap, the class becomes unplayable at high SR."
+      priority: "Medium"
+      leaning: "Occasional, not constant. SR3 enemies should SOMETIMES bait (once per encounter? once per dungeon?). It's a knowledge check: 'I know this enemy type baits. I won't commit to the obvious one.' Learning which enemies bait is part of Reaver mastery."
+
+    - question: "Does the Reaver's pursuit AI awareness (Tunnel Instinct, reduced peripheral awareness) actually reduce player INFORMATION? Or just damage taken from other sources?"
+      priority: "Medium"
+      leaning: "Gameplay impact only (damage taken increase, not literal UI blindness). The PLAYER always has full screen vision. The character's 'reduced awareness' manifests as increased vulnerability, not as UI restriction. Do NOT obscure the player's screen during Frenzy."
+
+  identity:
+    - question: "How do we communicate the Calm → Pursuit transition VISUALLY to teammates and enemies? Audio? Visual effects? Animation shift?"
+      priority: "High"
+      leaning: "Dramatic. Dermal denticles raise (skin texture change). Eyes go full black. Fins deploy. Audio shifts from ambient to heartbeat + rushing water. Movement animation changes from bipedal walk to predatory lean-forward sprint. Everyone should KNOW when a Reaver commits."
+
+    - question: "Does the 'cute race with predatory switch' dissonance work? Or does it feel tonally jarring?"
+      priority: "Medium"
+      leaning: "This IS the point. The dissonance is the identity. Shylily-esque cute exterior that suddenly reveals rows of teeth and black eyes is UNSETTLING in the right way. It subverts expectation. Players should feel the same 'oh no it's cute wait WHY IS IT CHASING ME' that prey feels."
+
+    - question: "Reaver naming — 'Reaver' vs 'Deephunter'. Which communicates the class fantasy better to new players?"
+      priority: "Low"
+      leaning: "Reaver = aggressive, predatory, violent. Deephunter = aquatic, pursuit, profession. Reaver is the combat identity. Deephunter is the cultural/professional identity. Both can coexist (Reaver is what enemies call it, Deephunter is what Chunkers call themselves)."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DESIGN VALIDATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+design_validation:
+  item_baseline_test:
+    can_party_accomplish_same_goals_with_items: true
+    note: "Bloodhound Capsule + Berserker's Draught + Flashstep + Rupture Oil covers tracking + damage + gap close + armor shred. Worse in every dimension, but functional."
+  
+  item_solution_meaningfully_worse: true
+  note: "Items are fixed-duration, single-use, non-scaling. Reaver's biology is permanent, escalating, and self-sustaining."
+  
+  class_provides_something_items_cannot: true
+  unique_premium: "Commitment-driven indefinite escalation with no ceiling. No item provides 'the longer you fight one thing, the stronger you get with no upper limit.'"
+  
+  strategic_problems_clear: true
+  core_problems_solved:
+    - "Target fleeing at low HP (pursuit lock)"
+    - "Need guaranteed single-target kill pressure (commitment = certainty)"
+    - "Need DPS that scales in extended fights (Frenzy ramp)"
+    - "Need to punish enemies that kite/flee (biological counter to evasion)"
+  
+  solves_problems_when_items_fail: true
+  note: "At SR3+, Bloodhound Capsule's 20s tracking is too short. Berserker's Draught's 15s window expires before the kill. Frenzy has no duration — it matches any fight length."
+
+  anti_rotation_compliance: true
+  note: "No burst cycle. No build/spend. No fixed cadence. Pursuit IS the gameplay — commit, ramp, kill, recover. Each pursuit is unique in duration and intensity."
+
+  crit_system_compliance: true
+  note: "Frenzy damage bonus is NOT crit. It's flat scaling. Crit can layer on top through positional/conditional means (backstab during pursuit, flanking from water emergence) per project-wide crit rules."
+
+  magiccap_compliance: true
+  note: "Chunkers MAGICCAP 8 = banned from all caster classes. Reaver has ZERO magic. All abilities are biological/physical. No mana resource. No casting. Pure physiology."
