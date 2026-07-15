@@ -1,0 +1,735 @@
+# =============================================================================
+# GRAPPLER — Design Specification
+# juice-yaml-library | Race-Locked Biological Class
+# Split from: Grappler_Complete.yaml (design half)
+# =============================================================================
+
+class_name: Grappler
+race_lock: Iblis Grabbers
+tier: Special
+role: Frontline
+lock_type: Biological
+last_updated: 2026-07-14
+
+# =============================================================================
+# § CLASS IDENTITY & FANTASY
+# =============================================================================
+identity:
+  race: Iblis Grabbers
+  fantasy: |
+    The PREDATOR who prepares. An octopus-humanoid that decides what kind of
+    hunt this is BEFORE it begins. Not adaptive in the moment — devastatingly
+    effective when preparation matches situation. The skill expression is in
+    READING upcoming content and committing to the correct stance. Wrong read
+    = suboptimal for the entire instance. Same class, four completely different
+    gameplay experiences.
+
+  physiology: |
+    Octopus-humanoid predator. Upper body humanoid frame (bipedal, main-hand
+    weapon capable). Lower/lateral body features 2-4 combat tentacles that
+    function as a unified "offhand system." Tentacles possess:
+    - Chromatophores (color/texture shift for stealth)
+    - Ink sacs (biological ink production)
+    - Suckers with chemoreceptors (taste/grip/sense through contact)
+    - Muscular hydrostat structure (boneless extension/contraction)
+    - Proprioceptive nerve density 4x humanoid baseline (precise spatial awareness)
+
+  design_lineage: |
+    Emerges from the intersection of three design pillars:
+    1. Pre-commitment knowledge expression — the Special tier gate. Unlike
+       Base/Experienced classes that react and adapt, the Grappler commits
+       identity before instance entry. Game knowledge IS the class currency.
+    2. Biological offhand paradigm — the tentacle is not equipment but body.
+       This creates a race-lock that is justified by physiology, not culture
+       or lore. No other race CAN play this class.
+    3. Four-games-in-one stance architecture — not four rotations of the same
+       game, but four fundamentally different gameplay experiences sharing a
+       race and a main-hand weapon.
+
+  special_tier_justification: |
+    Knowledge gate. The Grappler requires understanding of instance content
+    BEFORE entering. Base and Experienced classes can react and adapt mid-run.
+    The Grappler cannot. This demands game knowledge that only comes from
+    repeated exposure, community information sharing, or deliberate study.
+    Special tier = "you must know what you're walking into."
+
+# =============================================================================
+# § RACIAL LOCK — IBLIS GRABBERS
+# =============================================================================
+racial_lock:
+  lock_type: Biological
+  justification: |
+    The tentacle IS the offhand slot. Not a weapon equipped in the offhand,
+    but the offhand ITSELF being a biological appendage. The class is literally
+    "fight with your extra limb." No other race possesses functional prehensile
+    tentacles capable of the grip force, extension range, ink production, and
+    sensory feedback required for stance-based combat.
+
+  biological_requirements:
+    - Chromatophores (color/texture shift — required for Stealth stance)
+    - Ink sacs (biological ink production — required for Ink stance)
+    - Suckers with chemoreceptors (taste/grip/sense — required for Melee Grapple stance)
+    - Muscular hydrostat structure (boneless extension — required for Long-Range stance)
+    - Proprioceptive nerve density 4x humanoid baseline (spatial awareness for all stances)
+
+  why_not_equipment: |
+    A mechanical grappling arm could theoretically replicate extension and
+    grip. It CANNOT replicate: chromatophore-based stealth (biological light
+    manipulation), ink production (biological fluid synthesis), chemoreceptor
+    sensing (biological contact-based awareness), or the proprioceptive
+    feedback loop that allows stance-specific tentacle behavior without
+    conscious effort. The appendage must be alive and evolved.
+
+# =============================================================================
+# § ROLE OBJECTIVE FUNCTION
+# =============================================================================
+role_objective:
+  primary_role: Frontline
+  role_justification: |
+    The Grappler must be physically PRESENT in the engagement zone. Even the
+    Long-Range stance (8-15m) requires line of effect and accepts vulnerability
+    during extension. The Melee Grapple stance — the defining "this is why
+    Frontline" stance — demands adjacent positioning and commits both Grappler
+    and target in place. The class does not function from safety.
+
+  objective_function: |
+    MAXIMIZE the impact of pre-committed stance choice across an instance run.
+    - Stealth: maximize opener value (correct target selection × approach quality)
+    - Long-Range: maximize displacement value (enemies consistently out of position)
+    - Ink: maximize territorial coverage (zone placement quality × duration economy)
+    - Melee Grapple: maximize pin value (high-value targets locked × ally capitalisation)
+
+  success_metric: |
+    A successful Grappler is measured by PREPARATION QUALITY, not in-combat
+    reaction speed. The player who read the instance correctly and committed
+    to the right stance outperforms the mechanically-superior player who
+    guessed wrong. Knowledge > reflexes.
+
+  party_function: |
+    The Grappler is a SPECIALIST that the party invites for specific content.
+    Parties do not bring "a Grappler" generically — they bring "a Stealth
+    Grappler for this opener-dependent encounter" or "a Melee Grappler because
+    this boss needs 15s hard CC." Stance visibility in lobby enables this.
+
+# =============================================================================
+# § CLASS MECHANIC — RESOURCE SYSTEM
+# =============================================================================
+resource_system:
+  primary_resource:
+    name: Grip Gauge
+    description: |
+      Shared resource across all stances. Generated through main-hand combat
+      and passive regeneration. Spent on ALL tentacle abilities regardless
+      of stance. The Grip Gauge is the "muscle engagement budget" — how much
+      tentacle work the Grappler can perform before needing to fight
+      conventionally to refuel.
+    design_purpose: |
+      Ensures the Grappler must USE their main hand to fuel tentacle abilities.
+      Pure tentacle spam is impossible without conventional fighting. This
+      prevents the Grappler from being "just the tentacle" — both weapon
+      systems feed each other in a mandatory loop.
+    generation:
+      per_main_hand_hit: 5
+      passive_in_combat: 2 per second
+      combat_start_baseline: 30
+      maximum: 100
+    spending: |
+      Tentacle abilities cost 10-30 Grip Gauge. Cheap abilities (Tentacle
+      Lash: 10) enable frequent use. Expensive abilities (Ambush Crush: 30,
+      Drag Under: 25) require buildup or force reliance on combat-start
+      baseline.
+    cross_combat_behavior: |
+      Resets to 30 at combat start. Does NOT carry between encounters.
+      This prevents banking gauge in easy fights for free openers in hard
+      fights. Every encounter begins at the same resource state.
+
+  secondary_resource:
+    name: Ink Charges
+    description: |
+      Ink stance-specific biological resource. Represents the physical
+      capacity of ink sacs. Separate from Grip Gauge (which is muscular,
+      not glandular). Ink stance must manage BOTH resources simultaneously.
+    max_charges: 4 (base, modified by Ink Augments)
+    regeneration: 1 charge per 8s (base, modified by Ink Augments)
+    design_purpose: |
+      Creates a distinct economy layer for Ink stance. Grip Gauge gates HOW
+      MUCH tentacle work happens; Ink Charges gate HOW MANY ZONES exist.
+      The Ink Grappler juggles two resource pools where other stances juggle
+      only one.
+
+  resource_interaction: |
+    Grip Gauge is universal (all stances spend it on tentacle actions).
+    Ink Charges are stance-locked (only Ink stance abilities consume them).
+    Melee Grapple's Full Pin costs NO ongoing Grip Gauge (sustained by the
+    pin state itself) — the cost was paid at Seize initiation. This means
+    Melee Grapple has burst resource spend (20 Grip on Seize) then free
+    maintenance, while Ink has sustained resource bleed (Grip + Ink Charges
+    continuously).
+
+# =============================================================================
+# § CLASS MECHANIC — STATE MACHINE
+# =============================================================================
+state_machine:
+  pre_instance_state:
+    name: Stance Selection
+    description: |
+      The Grappler exists in an "uncommitted" state only outside instances.
+      At instance entry (or rest point in open world), the player selects one
+      of four stances. This is a ONE-WAY GATE — no reversal until instance
+      completion or abandonment.
+    transitions:
+      - to: Stealth Stance (tentacle coils, chromatophores activate)
+      - to: Long-Range Stance (tentacle loosens, extends preparatory)
+      - to: Ink Stance (ink sacs engorge, tentacle darkens)
+      - to: Melee Grapple Stance (tentacle tenses, grip density maximizes)
+
+  stance_states:
+    stealth:
+      idle: Stealthed (chromatophores active, invisible, waiting)
+      engaged: |
+        First Blood spent → conventional melee fighter with coiled tentacle.
+        Minimal tentacle utility until re-stealth (requires 8s out of combat).
+      vulnerability_window: Post-opener (stealth spent, no special capability)
+      re_entry: 8s out of combat → Silent Approach re-engages
+
+    long_range:
+      idle: Tentacle loose, ready to extend (8-15m threat range)
+      extended: Tentacle attached to target (follow-up decision pending)
+      retracting: |
+        2.0s vulnerability window. Tentacle returning. Cannot use tentacle
+        abilities. Exposed to melee if enemy closed during extension.
+      vulnerability_window: Retraction (exposed body, split attention)
+
+    ink:
+      idle: Ink sacs full, tentacle engorged, ready to spray
+      territory_active: Zones placed, managing zone economy and positioning
+      depleted: |
+        Ink sacs empty. 12s regeneration before new zones available.
+        Tentacle operates as basic melee appendage only.
+      saturation: 3+ zones active → Murk Field → Eruption access
+      vulnerability_window: Ink Depleted (no primary tool for 12s)
+
+    melee_grapple:
+      idle: Tentacle tensed, grip-ready, stalking for Seize opportunity
+      grabbing: |
+        Stage 1 — target seized. Escalation timer running (4s to Full Pin).
+        Both Grappler and target have reduced mobility. Grappler chooses:
+        escalate toward Pin, or apply Submission Hold (Stage 2) and release.
+      pinning: |
+        Stage 3 — Full Pin. Both combatants locked. Grappler can only Crush
+        (90 potency/GCD) or voluntarily release (Suplex Release). Allies
+        deal +25% to pinned target.
+      fatigued: |
+        3s post-release. Attack speed -30%, cannot re-grab. Target has 6s
+        Grapple Immunity. This is the cyclical downtime that prevents
+        perma-lock.
+      vulnerability_window: Pinning (self-CC) and Fatigued (post-release weakness)
+
+  universal_state_rule: |
+    The Grappler always exists in ONE stance state. There is no "neutral"
+    in-combat state — the tentacle is always in a stance-defined configuration.
+    State transitions within a stance are fluid (idle → extended → retracting)
+    but state transitions BETWEEN stances are impossible mid-instance.
+
+# =============================================================================
+# § CLASS MECHANIC — CORE LOOP
+# =============================================================================
+core_loop:
+  meta_loop: |
+    STUDY → SELECT → COMMIT → EXECUTE → EVALUATE
+    1. Study: Learn instance content (community knowledge, prior runs, scouting)
+    2. Select: Choose the stance that maximizes value for this specific content
+    3. Commit: Lock in at instance entry (irreversible)
+    4. Execute: Play the stance's unique game for the entire run
+    5. Evaluate: After run, assess whether selection was correct. Iterate knowledge.
+
+  per_stance_loops:
+    stealth: |
+      APPROACH → IDENTIFY → STRIKE → TRANSITION
+      - Approach: navigate invisible, gather intel on enemy positioning
+      - Identify: select optimal opener target (caster? isolated? high-value?)
+      - Strike: Ambush Crush + Drag Under combo (one devastating sequence)
+      - Transition: become conventional fighter, contribute main-hand DPS
+      Loop frequency: ONCE per combat (opener is not repeatable without full reset)
+
+    long_range: |
+      EXTEND → ASSESS → DISPLACE → RETRACT → REPEAT
+      - Extend: project tentacle to target at range
+      - Assess: read situation (pull? throw? tether?)
+      - Displace: execute chosen follow-up (Reel-In / Sling Launch / Tether)
+      - Retract: 2.0s vulnerability window, tentacle returns
+      - Repeat: continuous cycle of displacement control
+      Loop frequency: Every 4-6s (extend + GCD + retract + recovery)
+
+    ink: |
+      SPRAY → HERD → SATURATE → ERUPT → REPLENISH
+      - Spray: place ink zones at strategic locations
+      - Herd: position so enemies are driven into ink territory
+      - Saturate: reach 3+ zones for Murk Field / Ink Saturation trigger
+      - Erupt: detonate all zones when enemies are positioned inside
+      - Replenish: wait for Ink Charge regeneration, repeat cycle
+      Loop frequency: 30-45s full cycle (zone duration + regen + rebuild)
+
+    melee_grapple: |
+      CLOSE → SEIZE → DECIDE → ESCALATE/SUBMIT → RELEASE → RECOVER → REPEAT
+      - Close: reach melee range (gap close challenge)
+      - Seize: initiate grab (Stage 1)
+      - Decide: escalate to Pin or apply Submission Hold?
+      - Escalate: 4s timer → Full Pin (Stage 3, both locked)
+        OR Submit: Submission Hold (Stage 2, Grappler freed)
+      - Release: Suplex Release (controlled) or timer/damage break (forced)
+      - Recover: 3s Fatigue + 6s target Immunity
+      - Repeat: re-approach, select next target
+      Loop frequency: 15-25s full cycle (approach + grab + pin + immunity)
+
+# =============================================================================
+# § CLASS-SPECIFIC SYSTEMS
+# =============================================================================
+class_specific_systems:
+  stance_lock_system:
+    name: Predator Stance Lock
+    description: |
+      The defining system. Four stances locked PRE-INSTANCE. Once selected,
+      the stance CANNOT be swapped mid-run. This is not a "stance dance" class.
+      It is a "stance commitment" class. The decision is made ONCE and lives
+      with it for the entire run.
+    lock_rules:
+      instanced_content: Locked at instance entry. Cannot change until instance completes or is abandoned.
+      open_world: Locked per rest point. Changeable at any designated rest/camp location.
+      party_visibility: Stance selection is visible to party members during pre-instance lobby.
+      declaration: Party can see which stance the Grappler has chosen before confirming the run.
+    stances:
+      stealth:
+        name: The Lurker
+        tentacle_state: Coiled tight against body, chromatophores active (camouflage)
+        gameplay_identity: Ambush predator. One devastating opener, then conventional fighting.
+        positioning: Behind or flanking. Must reach target without detection.
+        max_cc_stage: 2
+        fantasy: The octopus in the crevice. Invisible until the grab.
+      long_range:
+        name: The Fisher
+        tentacle_state: Extended and loose, ready to project outward (8-15m reach)
+        gameplay_identity: Displacement predator. Constant repositioning of enemies.
+        positioning: Mid-range (8-15m from target). Needs line of effect for extension.
+        max_cc_stage: 2
+        fantasy: The octopus arm reaching from a tide pool to snatch a crab.
+      ink:
+        name: The Cloudmaker
+        tentacle_state: Engorged with ink sacs, visibly darker/swollen
+        gameplay_identity: Territorial predator. Zone creation, area denial, vision warfare.
+        positioning: Flexible — creates zones then fights within or around them.
+        max_cc_stage: 1
+        fantasy: The octopus ink cloud. Vanish the world, then strike in darkness.
+      melee_grapple:
+        name: The Holder
+        tentacle_state: Tensed, thick, grip-ready. Maximum muscular density.
+        gameplay_identity: Restraint predator. Full CC escalation to Stage 3 pin.
+        positioning: Melee range. Must close distance and remain adjacent.
+        max_cc_stage: 3
+        fantasy: The octopus wrapping a crab. Complete envelopment. No escape.
+
+  trigger_system:
+    name: Stance-Conditional Triggers
+    description: |
+      Each stance has battlefield-state triggers that activate bonus effects.
+      Triggers are NOT cooldown-based — they respond to positioning, enemy
+      behavior, HP thresholds, and tactical conditions. This enforces the
+      "respond to strategy, not follow a rotation" design principle.
+    design_purpose: |
+      Triggers make the Grappler reactive to SITUATION rather than to internal
+      timers. The player cannot force triggers — they must create the conditions
+      for triggers to activate. This is reading the battlefield, not watching
+      a cooldown bar.
+    per_stance_trigger_philosophy:
+      stealth: |
+        Triggers reward PATIENCE and target SELECTION. Undetected enables
+        abilities. First Blood rewards the perfect opener. Isolation Detected
+        rewards picking stragglers. Blown Cover punishes impatience or bad
+        pathing.
+      long_range: |
+        Triggers reward COMMITMENT and POSITIONING. Full Extension gives power
+        at max range. Successful Displacement chains into bonus damage.
+        Overextension punishes over-commitment. Elevation Advantage rewards
+        map reading.
+      ink: |
+        Triggers reward TERRITORY MANAGEMENT. Ink Territory debuffs enemies
+        in zones. Fresh Spray rewards active zone cycling. Ink Saturation
+        rewards accumulation. Ink Depleted punishes over-spending.
+      melee_grapple: |
+        Triggers reward ESCALATION and TARGET PRIORITY. Grab Initiated begins
+        the sequence. Escalation Complete delivers the payoff. Grapple Broken
+        punishes failed attempts. Prey Above 50% HP integrates the >50% rule
+        directly into grab decisions.
+
+  tentacle_augment_system:
+    name: Offhand Augmentation
+    description: |
+      The tentacle IS the offhand slot — it cannot be unequipped. It CAN be
+      augmented with biological modifications that enhance stance-specific
+      behavior. Augments are gear items that attach to/modify the tentacle
+      and progress with gear tiers like any equipment slot.
+    augment_philosophy: |
+      Augments ENHANCE the chosen stance. They do not cross stance boundaries
+      or grant abilities from other stances. A Grip Augment on a Long-Range
+      Grappler provides marginal pull-strength but does NOT grant Full Pin.
+      Stance purity is preserved — augments deepen, not broaden.
+    categories:
+      - Grip Augments (Melee Grapple: faster escalation, harder break-free)
+      - Reach Augments (Long-Range: farther extension, faster retraction)
+      - Ink Augments (Ink: more charges, faster regen, zone duration)
+      - Chromatophore Augments (Stealth: tighter detection radius, faster re-stealth)
+
+  equipment_system:
+    main_hand: |
+      Conventional melee weapons. Main hand operates independently of the
+      tentacle. Weapon choice affects basic attacks only — tentacle abilities
+      are unmodified by weapon type. Three options:
+      - Flail: AoE cleave, STR scaling, best for group fights
+      - Dual Kama: fast dual-hit, DEX scaling, best for single-target
+      - Sickle+Chain: extended reach, STR/DEX split, best for maintaining range
+    offhand: |
+      The tentacle itself. Cannot be unequipped or replaced. Augmented via
+      Tentacle Augment gear slot. The offhand is the body.
+    design_intent: |
+      Main hand is the CONSISTENT variable (same across stances). Tentacle
+      is the DIVERGENT variable (completely different per stance). Player
+      customizes main-hand for encounter type; stance determines tentacle
+      behavior.
+
+  cc_escalation_budget:
+    description: |
+      Each stance has a maximum CC stage ceiling. Higher ceiling = more
+      commitment required from the Grappler. The budget ensures only Melee
+      Grapple justifies true frontline commitment (Stage 3 access).
+    budget_distribution:
+      stealth: |
+        Max Stage 2. Front-loaded CC (Silence + Restrain in opener window).
+        After opener, CC budget is spent. Commitment: LOW.
+      long_range: |
+        Max Stage 2 (pseudo — displacement IS control). High frequency of
+        Stage 1 (slow, root, displacement) on recurring basis. Zero hard
+        disables. Commitment: MEDIUM.
+      ink: |
+        Max Stage 1 ONLY. Extremely high VOLUME of Stage 1 effects across
+        wide areas. Vision reduction + slow + accuracy debuff simultaneously
+        on many targets. Zero single-target lockdown. Commitment: LOW-MEDIUM.
+      melee_grapple: |
+        Max Stage 3. Full escalation path: Stage 1 → 2 → 3 sequentially.
+        Single-target lockdown that progresses through all stages. Strongest
+        CC in the game on one target — but Grappler is locked too.
+        Commitment: MAXIMUM.
+
+# =============================================================================
+# § ROTATION PHILOSOPHY
+# =============================================================================
+rotation_philosophy:
+  core_statement: |
+    The Grappler has NO rotation. There is no fixed sequence that repeats on
+    a cycle. Each stance creates a DECISION SEQUENCE where each node branches
+    based on battlefield state. The Grappler plays the SITUATION, not the toolkit.
+
+  decision_drivers:
+    stealth: |
+      WHO to open on (target selection is the entire skill expression). The
+      decision is complete before the first button press — everything after
+      First Blood is execution of a pre-made plan.
+    long_range: |
+      WHAT to do after attachment (pull/throw/tether decision made based on
+      developing situation). Decisions happen AFTER commitment — read the
+      battlefield between GCDs.
+    ink: |
+      WHERE to place zones (territory design is the skill). Herd enemies into
+      prepared territory through positioning pressure. Timing of Eruption is
+      the capstone decision.
+    melee_grapple: |
+      WHETHER to escalate (Pin vs Submission Hold). Every grab is a branching
+      point: commit to 15s lockdown or take the Stage 2 and stay mobile?
+      Target selection + escalation choice = the full decision tree.
+
+  why_no_burst_cycle: |
+    No ability operates on a 2-minute timer. No stance has a "build up → burst"
+    cadence. Stealth's opener is one-time (not recurring). Long-Range displaces
+    continuously. Ink builds at biological regeneration pace. Melee pins based
+    on opportunity. All responses to STRATEGY, not internal clocks.
+
+  why_no_fixed_cadence: |
+    GCD is the ONLY rhythmic element. Beyond individual button presses, timing
+    is determined entirely by external factors:
+    - Stealth: enemy patrol patterns and party need
+    - Long-Range: tentacle retraction cycles (forced by physics, not by choice)
+    - Ink: charge regeneration rate and zone duration
+    - Melee Grapple: target immunity timers and ally protection availability
+    The player cannot "speed up" their loop — they must wait for conditions.
+
+  conditional_not_random: |
+    Every "bonus damage" moment is EARNED through meeting a condition:
+    - First Blood: target must be unaware (positional)
+    - Successful Displacement: target must move 4m+ (physics-conditional)
+    - Prey Above 50% HP: target must be above threshold (HP-conditional)
+    - Ink Territory: enemy must be inside zones (positional)
+    Zero random critical strike chance. The player knows exactly when extra
+    damage is available and plays to create those conditions.
+
+# =============================================================================
+# § ANTI-PATTERNS
+# =============================================================================
+anti_patterns:
+  - name: No Rotation
+    rule: |
+      The Grappler NEVER repeats a fixed ability sequence. Each stance has a
+      decision TREE, not a decision LINE. Stealth is "read → approach → strike
+      → transition." Long-Range is "extend → assess → displace → retract →
+      reassess." These branch at every node based on what the battlefield presents.
+
+  - name: No Burst Cycle
+    rule: |
+      There is no 2-minute window, no recurring burst phase, no damage cadence
+      tied to internal cooldown alignment. The Grappler is NEVER "waiting for
+      cooldowns to align." It is always responding to opportunity.
+
+  - name: No Fixed Cadence
+    rule: |
+      Beyond GCD rhythm (2.0s base / 1.4s cap), there is no predictable pattern
+      to the Grappler's output. How long between actions is determined by content
+      pacing, enemy behavior, and party state — never by internal timers.
+
+  - name: Stances Are Different GAMES
+    rule: |
+      Stances are NOT "different rotations of the same game." A Stealth Grappler
+      and a Melee Grappler in the same instance are playing two DIFFERENT classes
+      that share a main-hand weapon and race. No stance-swap mid-combat. No
+      "stance dance." Permanent identity commitment per run.
+
+  - name: Crit Is Not RNG
+    rule: |
+      The Grappler NEVER relies on random critical hit chance. Every bonus
+      damage instance is conditional (positional, HP-threshold, displacement-
+      triggered, or awareness-state-based). If a bonus damage proc exists, the
+      player created the condition for it deliberately.
+
+  - name: No Self-Heal
+    rule: |
+      The Grappler has ZERO self-healing across all stances. No lifesteal, no
+      regeneration, no tentacle-based recovery. The class absorbs damage
+      (especially Melee Grapple during Full Pin) and depends entirely on allies
+      and items for sustain. This is deliberate — the predator endures, not
+      regenerates.
+
+  - name: No Stance Flexibility
+    rule: |
+      The Grappler NEVER adapts mid-run by switching stances. Wrong choice =
+      suboptimal for the entire instance. There is no "oh well, I'll just swap"
+      safety valve. The commitment is real. This is the Special tier cost.
+
+# =============================================================================
+# § VULNERABILITY DESIGN
+# =============================================================================
+vulnerability:
+  universal: |
+    STANCE LOCK = KNOWLEDGE GAMBLE. Wrong stance for content = suboptimal for
+    the ENTIRE RUN. The Grappler committed before entering. This is systemic
+    vulnerability that cannot be patched by skill — only by knowledge.
+    First-time blind runs as Grappler are inherently risky.
+
+  per_stance:
+    stealth: |
+      Detection = complete advantage loss. Blown Cover disables First Blood
+      permanently for that combat. Post-opener, the Stealth Grappler is a
+      conventional melee fighter with minimal tentacle utility.
+      Counter-content: detection-heavy enemies, dense packs (no isolation),
+      single-boss fights with no re-stealth opportunity.
+
+    long_range: |
+      Overextension. Tentacle committed elsewhere = body exposed. 2.0s
+      retraction window means +15% damage taken and -20% attack speed if
+      enemies close. Line of effect dependency — cluttered environments
+      break the entire initiation system.
+      Counter-content: melee-rush enemies, cluttered maps, displacement-immune targets.
+
+    ink: |
+      Friendly fire on vision. Ink zones blind allies too. Poor placement
+      actively hinders the party. Resource depletion (12s of no-ink when
+      sacs empty). Counterable terrain (fire burns, wind disperses, water dilutes).
+      Counter-content: fire environments, open/windy areas, uncoordinated parties.
+
+    melee_grapple: |
+      Self-CC during Full Pin. Grappler cannot act while pinning — other
+      enemies attack freely. Without ally protection, pin = death sentence
+      for the Grappler. Must close to melee against kiting/flying enemies.
+      Grapple Immunity (6s) prevents chain-locking same target.
+      Counter-content: multi-enemy with no ally peel, ranged/flying targets,
+      high-damage content exceeding pin survival threshold.
+
+# =============================================================================
+# § ITEM COMPLEMENTARITY PHILOSOPHY
+# =============================================================================
+item_complementarity:
+  design_principle: |
+    The Grappler REPLACES specific item categories (nets, grappling hooks,
+    stealth consumables, smoke bombs, vision denial) but CREATES demand for
+    others. The class is not item-independent — it shifts which items matter.
+
+  items_replaced: |
+    CC consumables (Stasis Pin, Frostweave Net) → class CC is superior.
+    Stealth items (Phantom Echo, Numbsense Spike) → native stealth surpasses.
+    Vision items (Blindveil Powder) → ink zones are persistent and repeatable.
+    Displacement items (Ripcord Harpoon) → tentacle is unlimited use, longer range.
+
+  items_still_critical: |
+    Healing (zero self-heal across all stances — mandatory).
+    Elemental damage (pure physical class — needs coatings for resistant enemies).
+    Anti-air/ranged engagement (melee-centric — needs forced engagement items).
+    Stance-specific gap-fillers (Smokebreak Ampule for Long-Range retraction
+    safety; fire items for Ink detonation combos; damage reduction for Melee
+    Grapple pin survival; speed items for Stealth blown-cover escape).
+
+  item_baseline_test_result: |
+    Can a party WITHOUT the Grappler accomplish the same goals using items? YES.
+    Ripcord Harpoon, Stasis Pin, Blindveil Powder, Phantom Echo, Frostweave
+    Net all exist as consumables. The Grappler provides the CEILING version —
+    longer duration, repeatable, integrated, escalating — where items provide
+    the FLOOR version (single-use, shorter, weaker, non-escalating).
+
+# =============================================================================
+# § OPEN DESIGN QUESTIONS
+# =============================================================================
+open_questions:
+  high_priority:
+    - question: Does Full Pin allow slow drag movement (0.5 m/s)?
+      context: |
+        Current: both locked. Alternative: Grappler drags pinned target
+        into hazards/away from adds. Increases agency during pin but reduces
+        commitment cost.
+      affects: Melee Grapple identity, commitment calculation
+
+    - question: How does stance-lock interact with open-world exploration?
+      context: |
+        30 minutes from rest point + wrong stance = stuck. Alternative: 60s
+        "reconfiguration" channel in open world (biological state change
+        takes time). Preserves commitment feel without frustration.
+      affects: Open-world playability, frustration prevention
+
+    - question: What is the Break Free contest mechanic?
+      context: |
+        STR vs STR? Size category resistance? Grip Difficulty tiers? Duration-
+        based degradation? Must feel fair to both Grappler and target.
+      affects: Melee Grapple viability across enemy types
+
+    - question: Is 15s Full Pin too long?
+      context: |
+        15s at 2.0s GCD = 7 ally GCDs of +25% free damage. Grappler deals
+        only 630 total potency (Crush). Offset by self-CC + 30% HP break
+        threshold + 6s immunity after. Needs validation.
+      affects: Melee Grapple balance, party DPS math
+
+    - question: Is Stealth stance viable against SR3+ content?
+      context: |
+        SR3 enemies coordinate and have enhanced senses. SR4 are instantly
+        reactive. At what SR does Stealth become non-functional? Need clear
+        SR-based detection scaling rules.
+      affects: Stealth stance endgame, Special tier justification
+
+  medium_priority:
+    - question: Can augments cross-pollinate between stances?
+      context: Minor cross-stance utility (emergency grab for Ink Grappler) vs stance purity.
+      affects: Augment design space, stance identity
+
+    - question: How does Ink + Fire chain reaction work?
+      context: |
+        Ink is flammable. Pyrien Ninja/Samurai detonating ink = massive fire
+        chain. Needs explicit rules for cross-class synergy.
+      affects: Party composition incentives, Layer 3 interactions
+
+    - question: Multiple Grapplers in same party?
+      context: Same-stance stacking (2× Melee Pin, 2× Ink coverage) vs mixed-stance synergy.
+      affects: Party composition variety
+
+    - question: Ink ally-friendly-fire — too punishing for random groups?
+      context: |
+        Allies blinded in ink. Options: 50% reduced penalty, or purchasable
+        "Chemoreceptor Tonic" item (60s ink-vision for allies).
+      affects: Ink usability in matchmade parties
+
+# =============================================================================
+# § DESIGN NOTES
+# =============================================================================
+design_notes:
+  section_25_audit:
+    description: |
+      §25 mandates that identity skills should not be gated behind long
+      cooldowns (>15s). Identity expression should be gated by RESOURCES
+      (Grip Gauge, Ink Charges) or STATE CONDITIONS (triggers), not timers.
+
+    flagged_for_conversion:
+      - skill: Vanish Retreat
+        current: 30s cooldown
+        stance: Stealth
+        issue: |
+          Identity-adjacent escape tool on 30s timer. The Stealth Grappler's
+          ability to reset engagement is a core stance behavior — gating it
+          behind a 30s CD creates a window where the stance's escape fantasy
+          is simply unavailable regardless of resource state.
+        recommendation: |
+          Needs resource gating conversion. Possible: cost 40 Grip Gauge
+          (expensive, must earn via main-hand fighting) instead of fixed timer.
+          Skills task should implement this.
+        note: "Attempted fixed 30s CD — superseded by §25 resource-gating mandate."
+
+      - skill: Ink Eruption
+        current: 20s cooldown
+        stance: Ink
+        issue: |
+          Zone detonation payoff on 20s timer. The Ink Grappler's climactic
+          moment (detonate territory when enemies are positioned inside) should
+          be gated by the CONDITION (3+ zones active + enemies inside) and
+          RESOURCE (Ink Charges available to rebuild), not an arbitrary timer.
+        recommendation: |
+          Needs resource gating conversion. Possible: consuming 2 Ink Charges
+          on detonation (reducing available zones, creating rebuild window)
+          instead of flat 20s CD. The natural zone-rebuild cycle (~16s for 2
+          charges) creates organic pacing without arbitrary lockout.
+        note: "Attempted fixed 20s CD — superseded by §25 resource-gating mandate."
+
+    compliant_skills:
+      - Anchor Point (12s CD — utility, not identity. Below 15s threshold. Acceptable.)
+      - All other abilities are trigger-gated or resource-gated. No additional §25 violations found.
+
+  design_contradictions_from_original: |
+    The original complete spec contained some tensions that are noted here
+    for awareness during Skills file construction:
+
+    1. Ink Eruption's 20s CD contradicts the "no burst cycle / no fixed cadence"
+       anti-pattern stated in Section 10. A fixed CD creates a predictable
+       cadence. Superseded by §25 — convert to resource cost.
+
+    2. Vanish Retreat's 30s CD on a stealth-reset tool contradicts the trigger-
+       based philosophy (Blown Cover should gate re-stealth access, not an
+       arbitrary timer). Superseded by §25 — convert to resource cost.
+
+    3. The spec states "no fixed cadence" but Ink Charge regeneration (8s per
+       charge) creates implicit cadence for Ink stance. This is ACCEPTABLE —
+       biological regeneration IS the pacing mechanism. The cadence comes from
+       the body, not from an ability timer. This is organic, not arbitrary.
+
+  future_considerations: |
+    - Layer 3 interactions (Grappler + other classes in party) need cross-class
+      synergy documentation once other classes are specified.
+    - SR-based detection scaling needs systemic rules before Stealth stance can
+      be fully validated for endgame.
+    - Break Free contest mechanics need a unified system shared with any class
+      or item that imposes grab/restrain CC.
+
+# =============================================================================
+# § DESIGN VALIDATION CHECKLIST (Summary)
+# =============================================================================
+design_validation:
+  item_baseline_test: PASS — party can accomplish same goals with items (weaker floor)
+  class_ceiling_above_item_floor: PASS — duration, repeatability, escalation all superior
+  exclusive_capability: PASS — stance integration, CC escalation path, biological persistence
+  strategic_problems_clear: PASS — each stance solves a distinct Layer 1 problem
+  no_burst_cycle: PASS — no 2-minute window, all response-to-opportunity
+  crit_not_rng: PASS — all bonus damage is conditional/earned
+  over_50_hp_rule_integration: PASS — Prey Above 50% trigger directly integrates systemic rule
+  section_25_compliance: PARTIAL — two skills flagged for resource-gating conversion (see above)
+
+# ▼ CONTINUES IN: Grappler_Skills.yaml

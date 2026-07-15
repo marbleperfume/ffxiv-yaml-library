@@ -1,0 +1,386 @@
+# ▲ CONTINUES FROM: Colony_Design.yaml | PHENOTYPE: Flutter
+# ═══════════════════════════════════════════════════════════════════════════════
+# COLONY — FLUTTER PHENOTYPE
+# Aerial Scouting / Pollen CC / Seed Bombardment / Mobility
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Resource Gating Compliance (§25):
+#   - Swarm Cloud: APEX SKILL — 90 Biomass + 3 Pheromone Charges + 4 active pollen clouds
+#   - Paralysis Pollen (Stage 3 CC): gated by Pheromone Charge cost, NOT timer
+#   - NO 90s/120s/180s cooldowns anywhere in this file
+#   - Pollen application as gauge building: clouds deployed = enemy interactions = charges earned
+#   - 120% flight speed: aerial dominance identity CONSTANT, not periodic
+#   - Intensity scaling: dense enemy groups walking through pollen = rapid charge generation
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLUTTER SECTION 1: PHENOTYPE IDENTITY
+# ─────────────────────────────────────────────────────────────────────────────
+
+FlutterPhenotype:
+  Identity:
+    Name: "Colony — Flutter"
+    PhenotypeRole: "Aerial Skirmisher / Pollen Deployer / Area Denial Bomber"
+    GameFeel: >
+      Singed meets Pharah meets crop duster. ALWAYS in the air, ALWAYS moving,
+      ALWAYS dropping CC clouds and seed bombs on enemies below. Untouchable
+      through mobility. The ground is lava — Flutter only lands when forced.
+
+    CoreLoop: >
+      1. Take flight immediately (Flutter starts and stays airborne)
+      2. Identify enemy clusters or high-value paths
+      3. Deploy pollen clouds along enemy movement vectors
+      4. Seed-bomb enemies entering pollen zones (combo damage)
+      5. Kite — enemies below cannot reach you easily
+      6. Leverage 120% flight speed for hit-and-run
+      7. Earn charges as enemies walk through your pollen (passive income)
+      8. Deploy Apex cloud when saturation threshold reached
+
+    PowerBudget:
+      DirectDPS: "40% of DPS reference (seed bombs = real damage)"
+      InfrastructureValue: "25% through pollen CC enabling party DPS"
+      TotalContribution: "65% of DPS reference"
+
+    FlightIntegration: >
+      Flutter IS flight. 120% flight speed (fastest phenotype), superior
+      maneuverability, multiple skills REQUIRE airborne. Flutter grounded = 40%
+      effectiveness. Flutter airborne = 100%. Designed to NEVER LAND.
+
+    ResourceGatingIdentity: >
+      Flutter's Apex gate is POLLEN SATURATION. The more clouds you deploy and
+      the more enemies walk through them, the faster charges build. A Flutter
+      who has been actively crop-dusting for 25-35s has EARNED their Swarm Cloud
+      through the exact actions that define Flutter identity. Bombing IS the gate.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLUTTER SECTION 2: PHENOTYPE MECHANICS
+# ─────────────────────────────────────────────────────────────────────────────
+
+  Mechanics:
+    PollenSystem:
+      PollenTypes:
+        Slow: "Yellow. -40% movement, 5s. Stage 1. Default/cheapest."
+        Confuse: "Purple. 25% action failure, 4s. Stage 2. +5 Biomass vs. Slow."
+        Paralyze: "Red. 2s full paralysis, then 15s immunity. Stage 3. Costs 1 Pheromone Charge (resource-gated power)."
+      TypeSwitch: "Instant toggle, 3s internal CD."
+      ParalyzeGating: >
+        Stage 3 pollen (Paralyze) is NOT on a cooldown. It costs 1 Pheromone Charge
+        per deployment. In intense fights where charges generate every 8-10s, Flutter
+        can apply paralysis frequently. In light fights, paralysis is rarer because
+        charges generate slowly. Power scales with engagement intensity per §25.
+        Anti-pattern eliminated: no "save paralysis for the boss pull in 2 minutes."
+        Use it when you have it. Earn another through continued pollen deployment.
+      CloudDuration: "12s (drifts downward at 0.5m/s)"
+      CloudRadius: "3m per puff (4m if deployed from 6y+)"
+      MaxActiveClouds: 6
+      Drift: "Deploy at 4-6y above targets for optimal ground coverage in 1-2s."
+
+    PollenInteractionCharging: >
+      Every enemy that enters a Flutter pollen cloud generates Pheromone Charge progress.
+      Each unique enemy-cloud interaction per 5s window = +0.33 charge progress.
+      4 enemies walking through 3 clouds in 10s = ~4 charge progress = 1+ full charge.
+      Flutter's constant deployment ensures charges build PASSIVELY through identity actions.
+      Dense enemy packs through pollen corridors = extremely fast charge generation.
+
+    SeedSystem:
+      SeedTypes:
+        Impact: "150p single-target. Standard damage."
+        Scatter: "80p in 3m AoE. Cluster punish."
+        Root: "60p + 2s root (vine erupts). Utility."
+      Ammo: "4 seeds max. Regen 1 per 8s (Biomass-fueled passively, not directly spent)."
+      ComboBonus: "+30% damage to enemies in ANY Flutter pollen. (150p → 195p)"
+
+    AerialCombatAdvantage:
+      - "+10% potency vs. grounded targets from above (gravity assist)"
+      - "Immune to ground-targeted AoE"
+      - "Melee enemies cannot reach without gap-closers"
+      - "Pollen from altitude covers wider area (expands during drift)"
+      - "Seed trajectory from altitude = faster travel time"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLUTTER SECTION 3: SKILL ROSTER
+# ─────────────────────────────────────────────────────────────────────────────
+
+  Skills:
+    PollenDeployment:
+      - Name: "Pollen Puff"
+        ID: flutter_pollen_puff
+        ActionType: GCD
+        CastTime: 0s  # Instant — never stops moving
+        BiomassCost: 15  # Yellow (Slow). +5 for Purple (Confuse). +1 Pheromone Charge for Red (Paralyze).
+        Effect: "Drop pollen cloud at current position. Drifts down. Current type. 12s, 3m radius."
+        ElevationBonus: "From 6y+: expands to 4m"
+        ChargeGeneration: "Each enemy entering this cloud: +0.33 Pheromone Charge progress"
+        RankRequired: 1
+
+      - Name: "Pollen Trail"
+        ID: flutter_pollen_trail
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 8s  # Short tactical CD
+        BiomassCost: 25
+        Effect: "4s continuous pollen trail behind flight path. 2m wide, 10s persist. Up to 12m coverage."
+        ChargeGeneration: "Each enemy entering trail: +0.25 charge progress per unique segment touched"
+        RankRequired: 1
+
+      - Name: "Pollen Storm"
+        ID: flutter_pollen_storm
+        ActionType: GCD
+        CastTime: 1.5s
+        Cooldown: 15s  # Short tactical CD — reduced from 25s, acceptable per §25
+        Range: 20y
+        BiomassCost: 45
+        Effect: "6m radius cloud. +50% CC effectiveness (Slow: -60%, Confuse: 40%, Para: 3s). 15s. Counts as 2 clouds."
+        ChargeGeneration: "+0.5 charge progress per enemy per 5s inside (large cloud = big charge engine)"
+        RankRequired: 2
+
+      - Name: "Concentrated Burst"
+        ID: flutter_concentrated_burst
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 10s  # Short tactical CD
+        Range: 15y
+        BiomassCost: 20
+        Potency: 50
+        Effect: "Single-target pollen pellet. Guaranteed application, can't miss. No cloud, just direct CC."
+        CritCondition: "Crits if target already has different pollen type (cross-reaction)"
+        RankRequired: 1
+
+      - Name: "Paralysis Burst"
+        ID: flutter_paralysis_burst
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 5s  # Minimal recast to prevent instant double-paralysis
+        Range: 15y
+        PheromoneChargeCost: 1  # RESOURCE GATED — no long CD
+        Potency: 80
+        Effect: >
+          Direct-application Stage 3 paralysis. 2s full paralysis + 15s immunity.
+          IMMENSELY powerful — earned through pollen deployment and enemy interaction.
+          Available every 8-20s depending on fight intensity (charge generation rate).
+          In dense fights: frequent paralysis control. In light fights: occasional.
+          Power scales with engagement, never locked behind arbitrary timer.
+        CritCondition: "Crits if target is in pollen cloud (cross-contamination)"
+        RankRequired: 2
+        ResourceGatingNote: >
+          OLD: Paralysis pollen available but on implicit 180s ultimate cycle.
+          NEW: Paralysis available whenever you have a Pheromone Charge. In intense
+          fights you may paralyze every 8-10s. In light fights, every 20-25s.
+          Flutter's CC identity is PRESENT at engagement intensity, not timer.
+
+    SeedAttacks:
+      - Name: "Seed Drop"
+        ID: flutter_seed_drop
+        ActionType: GCD
+        CastTime: 0s
+        AmmoCost: 1
+        Potency: 150
+        Effect: "Drop bomb below. Travel time by height. 80p AoE splash. In pollen: 195p primary."
+        CritCondition: "From 4y+. Also crits if target in 2+ pollen zones."
+        RankRequired: 1
+
+      - Name: "Scatter Seed"
+        ID: flutter_scatter_seed
+        ActionType: GCD
+        CastTime: 0s
+        AmmoCost: 1
+        Range: 15y
+        Potency: 80  # Per target
+        Effect: "Mid-air burst, 4m AoE. Max 8 targets. In pollen: 104p each."
+        CritCondition: "Crits if 4+ enemies hit"
+        RankRequired: 1
+
+      - Name: "Root Seed"
+        ID: flutter_root_seed
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 12s  # Short tactical CD
+        AmmoCost: 1
+        Range: 15y
+        Potency: 60
+        Effect: "Vine erupts: 2s root. In pollen slow: extends to 3s. Stage 1 CC."
+        CritCondition: "Crits if enemy was moving when rooted"
+        RankRequired: 2
+
+      - Name: "Seed Barrage"
+        ID: flutter_seed_barrage
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 15s  # Short tactical CD — reduced from 35s, ammo cost IS the gate
+        AmmoCost: 3
+        Range: 15y
+        Potency: "120p × 3 seeds (360p total, 468p in pollen)"
+        Effect: "Rapid-fire 3 seeds at area (0.5s apart). 3m AoE each. Dumps magazine."
+        CritCondition: "Each seed checks individually"
+        RankRequired: 3
+
+    Mobility:
+      - Name: "Tailwind"
+        ID: flutter_tailwind
+        ActionType: oGCD
+        Recast: 12s  # Short tactical CD
+        BiomassCost: 10
+        Effect: "+50% flight speed, 6s. Pollen Trail becomes free. Seed travel time halved."
+
+      - Name: "Updraft"
+        ID: flutter_updraft
+        ActionType: oGCD
+        Recast: 15s  # Short tactical CD
+        BiomassCost: 5
+        Effect: "Instant rise to ceiling (12y). 3s Thermal buff: pollen duration doubled (24s)."
+
+      - Name: "Divebomb"
+        ID: flutter_divebomb
+        ActionType: GCD
+        CastTime: 0s
+        Cooldown: 12s  # Short tactical CD
+        Potency: 200
+        BiomassCost: 15
+        Effect: "Vertical dive to ground target. 3m AoE + 3m knockback. From 8y+: 280p. Grounds Flutter (must Lift Off again)."
+        CritCondition: "Always crits from ceiling (12y)"
+        RankRequired: 2
+
+    ApexSkill:
+      - Name: "Swarm Cloud"
+        ID: flutter_swarm_cloud
+        ActionType: GCD
+        CastTime: 2.0s
+        Cooldown: null  # NO COOLDOWN — resource-gated only
+        Range: 25y
+        BiomassCost: 90
+        PheromoneChargeCost: 3
+        FieldStateRequirement: "4+ active pollen clouds on field"
+        Effect: >
+          10m radius cloud cycling ALL pollen types over 20s: Slow (0-7s) →
+          Confuse (7-14s) → Paralyze (14-20s). Escalating, unavoidable CC.
+          Seed damage in cloud: +50% (vs normal +30%). Cannot be resisted —
+          only leaving the area avoids it.
+        ResourceGatingNote: >
+          Available every 30-40s in intense fights (many enemies walking through
+          active pollen = rapid charge generation). Available every 50-70s in
+          moderate fights. Flutter who has been crop-dusting earns this through
+          the SAME ACTIONS that define Flutter identity. Deploying pollen IS
+          earning your Apex. The cycling escalation rewards allies who keep
+          enemies inside — Builder walls at exits guarantee maximum exposure.
+        ApexFrequency:
+          IntenseFight_8enemies: "~30s between casts (enemies constantly in pollen)"
+          ModerateFight_4enemies: "~45s between casts"
+          LightFight_2enemies: "~70s between casts"
+        AntiPattern_Eliminated: >
+          OLD: 180s cooldown. Flutter drops pollen for 3 min, presses Swarm Cloud,
+          waits 3 min. The ultimate cloud exists 20s per 3 min = 11% uptime.
+          NEW: Resource-gated. Flutter deploys pollen → enemies interact → charges
+          build → Swarm Cloud deployed → Flutter keeps deploying → charges rebuild.
+          In intense content, Swarm Cloud is up nearly 2/3 of the fight. Identity
+          is CONSTANT. Aerial bombing that earns it IS the gameplay.
+        RankRequired: 3
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLUTTER SECTION 4: ROTATION PHILOSOPHY
+# ─────────────────────────────────────────────────────────────────────────────
+
+  RotationPhilosophy:
+    Overview: >
+      Flutter's "rotation" is an AERIAL PATROL PATTERN. Fly over, drop pollen,
+      seed-bomb targets in pollen, reposition. Priority: Maintain flight → Deploy
+      pollen on vectors → Seed into pollen zones → Manage altitude → Use Paralysis
+      Burst when charges available → Swarm Cloud when earned.
+
+    NO_Fixed_Cadence: >
+      Pollen production is continuous, seeds regen on timer. No "save for burst."
+      Optimal play is CONSTANT DEPLOYMENT: pollen every 2-4s, seeds every
+      opportunity a target is in pollen. DPS is a STREAM, not bursts.
+      Charges build PASSIVELY through this identity play — Apex is the reward
+      for doing what Flutter does anyway.
+
+    CoreDecisions:
+      HeightManagement: "Higher = safer + wider pollen + crit. Lower = faster seeds + risky."
+      PollenTypeSelection: "Many weak → Slow. Few dangerous → Confuse. Priority target → Paralyze (1 charge)."
+      AmmoManagement: "Constant dropping (sustain) vs. save for Barrage (burst on priority target)."
+      ChargeSpending: "Paralysis Burst (immediate CC) vs. save for Swarm Cloud (3 charges, massive payoff)."
+
+    ResourceDecisionSpace: >
+      Flutter has a meaningful CHOICE with Pheromone Charges:
+      - Spend 1 charge on Paralysis Burst (immediate Stage 3 CC, high value in moment)
+      - Save 3 charges for Swarm Cloud (enormous area denial, escalating CC, team-wide value)
+      This creates tension: do you CC NOW (tactical) or SAVE for the big cloud (strategic)?
+      In intense fights where charges flow fast, you can do BOTH frequently.
+      In light fights, the choice matters more. Flutter players optimize around intensity.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLUTTER SECTION 5: FAILURE STATES
+# ─────────────────────────────────────────────────────────────────────────────
+
+  FailureStates:
+    Grounded:
+      Cause: "Knockdown or forgetting flight"
+      Cost: "40% effectiveness. All aerial bonuses lost. Vulnerable."
+      Severity: "HIGH — Flutter is designed airborne."
+    SeedDumping:
+      Cause: "All 4 seeds fired without pollen setup"
+      Cost: "23% less damage (no combo). 24-32s with 0-1 seeds."
+      Severity: "MODERATE"
+    PollenMisplacement:
+      Cause: "Pollen where enemies don't path"
+      Cost: "15-45 Biomass wasted, no CC/combo value, no charge generation"
+      Severity: "HIGH — wastes both damage AND charge building"
+    ChargeHoarding:
+      Cause: "Saving all charges for Swarm Cloud, never using Paralysis Burst"
+      Cost: "Losing immediate CC value in exchange for slightly faster Apex access"
+      Severity: "LOW — but suboptimal. Charges are income, not savings."
+    ParalyzeSpam:
+      Cause: "Spending every charge on Paralysis Burst, never reaching Apex"
+      Cost: "Loses Swarm Cloud value (massive area denial worth more than individual paralyzes)"
+      Severity: "MODERATE — good micro, poor macro"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLUTTER SECTION 6: RANK PROGRESSION
+# ─────────────────────────────────────────────────────────────────────────────
+
+  RankProgression:
+    Rank1:
+      Name: "Worker"
+      BiomassMax: 100
+      CloudCap: 4
+      Unlocks: ["Pollen Puff", "Pollen Trail", "Concentrated Burst", "Seed Drop", "Scatter Seed", "Tailwind"]
+      PheromoneChargeMax: 3
+      Note: "Core aerial bombing loop. Pollen + seed combo. Learns flight patterns and enemy vector prediction."
+
+    Rank2:
+      Name: "Specialist"
+      BiomassMax: 120
+      CloudCap: 6
+      Unlocks: ["Pollen Storm", "Root Seed", "Updraft", "Divebomb", "Paralysis Burst"]
+      BonusPassive: "Deployment cast times -0.3s. Pollen drift speed reduced 25% (hangs longer)."
+      PheromoneChargeMax: 4
+      Note: "Stage 3 CC unlocked (resource-gated). Divebomb for burst. Full aerial combat kit."
+
+    Rank3:
+      Name: "Stormcaller"
+      BiomassMax: 150
+      CloudCap: 8
+      Unlocks: ["Seed Barrage", "Swarm Cloud"]
+      BonusPassive: "Pheromone Charge generation +50%. Pollen-enemy interactions generate double charge progress."
+      PheromoneChargeMax: 5
+      Note: >
+        Full Flutter mastery. Apex + Barrage for burst. With +50% charge gen,
+        Swarm Cloud available every 25-30s in intense content while still
+        spending charges on Paralysis Burst. Flutter becomes a CC FACTORY.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLUTTER SECTION 7: BALANCE VALIDATION
+# ─────────────────────────────────────────────────────────────────────────────
+
+  BalanceValidation:
+    - "First pollen within 1 GCD (instant cast, 15 Biomass, starts at 100): PASS"
+    - "Sustained 1 pollen per 4s (3.75/s spending vs 7/s airborne regen): PASS"
+    - "Paralysis Burst available within 20-25s of first engagement: PASS"
+    - "Apex available within 35s of engagement start (moderate fight): PASS"
+    - "Apex NEVER locked behind 180s timer: PASS (§25 compliant)"
+    - "Field state requirement prevents Apex without active pollen deployment: PASS"
+    - "Paralysis gated by charge (earned through identity) not timer: PASS (§25)"
+    - "Charge tension (Paralysis vs Swarm Cloud) creates meaningful decisions: PASS"
+    - "Flutter airborne 95%+ of fight (120% speed, instant pollen): PASS"
+    - "No 2-min burst alignment: PASS (resource-driven, not timer-driven)"
+    - "Zero RNG: PASS (deterministic crit, seeds on timer, charges from interactions)"
+    - "Single-weave model: PASS (instant GCDs + oGCD weaves)"

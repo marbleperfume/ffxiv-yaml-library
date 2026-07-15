@@ -1,0 +1,351 @@
+# ▲ CONTINUES FROM: Reaver_Design.yaml | THIS FILE COVERS: Balance, matchups, validation, constraints
+# ═══════════════════════════════════════════════════════════════════════════════
+# REAVER / DEEPHUNTER — Validation & Balance Specification
+# juice-yaml-library | github.com/marbleperfume/juice-yaml-library
+# ═══════════════════════════════════════════════════════════════════════════════
+
+header:
+  class_name: "Reaver"
+  alternate_name: "Deephunter"
+  file_scope: "Balance targets, matchups, system interactions, validation checks, constraints"
+  design_authority: "Reaver_Design.yaml"
+  skills_authority: "Reaver_Skills.yaml"
+  last_updated: "2026-07-14"
+  validation_status: "Qualitative Complete — Awaiting Layer 1 Numerical Pass"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BALANCE TARGETS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+balance_targets:
+  reference: "Generic Experienced-tier DPS (no commitment mechanic) = 100%"
+
+  dps_by_state:
+    # State            | % of Ref  | Duration   | Intent
+    calm:               [55, 65]    # —          | Below peer. Forces commitment.
+    stage_1_scenting:   [85, 95]    # 0-5s       | Approaching parity.
+    stage_2_closing:    [110, 125]  # 5-12s      | Risk premium begins.
+    stage_3_frenzied:   [145, 170]  # 12-20s     | Dominant single-target.
+    stage_4_apex:       [190, 220]  # 20s+       | Uncapped. "Unfair" by design.
+
+  encounter_averaged:
+    perfect_play: [105, 115]  # 3 kills, fast commits, zero Crash
+    average_play: [90, 100]   # 2 kills, 1 Recovery, moderate Calm
+    poor_play:    [65, 75]    # 1 bad commit, Crash, extended Calm
+
+  ttk_from_lock_jaw:  # Target = SR2 elite at 70% HP
+    ideal_water_r5:  [8, 10]   # 2× Frenzy, Deathroll finish
+    standard_land_r3: [12, 16]  # Base Frenzy, Deathroll at 25%
+    contested_healed: [18, 25]  # Single healer on target
+    kited_gap_issues: [20, 30]  # Frequent melee breaks
+
+  hp_sustainability:
+    lifesteal_by_stage: {s1: "3%", s2: "6%", s3: "9%", s4: "12%+"}
+    gross_hp_cost_per_pursuit: "~12% max HP"
+    net_after_lifesteal: "3-6% max HP"
+    vs_target_alone: "Unkillable at Stage 3+ (DR + lifesteal)"
+    vs_target_plus_1: "Sustainable if add <40% target's damage"
+    vs_target_plus_2: "Needs team support or dies"
+    refuse_to_die_proc_rate: "~15-20% of pursuits at average play"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SYSTEM INTERACTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+system_interactions:
+
+  strategy_rank:
+    # SR | Flee        | Bait Freq    | Difficulty    | TTK Mod
+    sr1:  ["None",      "Never",       "Trivial",     "×0.7"]
+    sr2:  ["<30% HP",   "Never",       "Low",         "×1.0"]
+    sr3:  ["<50% to allies", "1/encounter", "Medium", "×1.2-1.4"]
+    sr4:  ["Coordinated traps", "Regular", "High",    "×1.5-2.0"]
+
+  above_70_threshold:
+    gate: "Cannot commit to targets >70% HP"
+    party_dependency: "Team must soften. Reaver Calm DPS (~60%) until crossing."
+    exception: "Test Bite can push 72%→69% (aggressive self-trigger)."
+    balance_position: "70% intentionally high. Pursuit IS the class."
+
+  crit_conditions:
+    rhythmic: "NONE — no rotation = zero rhythm-based crits"
+    execution_positional: "Backstab during Pursuit (target facing away)"
+    execution_state: "Circling Patience full 12s → first hit guaranteed crit (R5)"
+    health_target: "Deathroll on target <15% → guaranteed crit"
+    health_self: "Refuse to Die 3s window → all crits"
+    environmental: "Lock Jaw from Submerged (Wade In R5) → crit + 2s stun"
+    note: "Frenzy multipliers are FLAT SCALING, not crit. Crit layers independently."
+
+  procgen_maps:
+    water_frequency:
+      depth_dead: "40-60% tiles"
+      other_regions: "10-25% tiles"
+      minimum: "≥1 water feature per dungeon floor"
+    advantage_delta:
+      land: "Base Frenzy. Standard speed."
+      water: "2× Frenzy. +20% speed. Stage 4 in ~10s. ~1.5-1.8× effective DPS."
+    map_seed: "High-water = Reaver-favored. Dry = neutral (not crippled)."
+
+  aquatic_terrain_table:
+    # Parameter              | Land     | Water
+    movement_penalty:         ["0%",     "0% Reaver / -30-50% others"]
+    reaver_speed_bonus:       ["0%",     "+20%"]
+    frenzy_rate:              ["1×",     "2×"]
+    time_to_stage_4:          ["~20s",   "~10s"]
+    rend_hemorrhage_dur:      ["4s",     "6s"]
+    thrash_knockback:         ["2m",     "4m"]
+    hamstring_slow:           ["-40%",   "-50%"]
+    deathroll_channel:        ["1.5s",   "1.2s"]
+    deathroll_potency:        ["450",    "500"]
+    apex_pursuit_range:       ["6m",     "10m"]
+    lock_jaw_gap_speed:       ["+30%",   "+80%"]
+    lock_jaw_potency:         ["base",   "+20%"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MATCHUP ANALYSIS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+matchup_analysis:
+
+  vs_strix:
+    type: "Execution timing clash"
+    same_target: "Strix kills 1-3s burst. Reaver ramps 12-16s. Strix may steal before Stage 3."
+    resolution: "Reaver targets what Strix CANNOT one-shot (HP too high for dive)."
+    strix_targets_reaver:
+      calm: "Dead. No DR, no lifesteal."
+      pursuit: "Tunnel Instinct does NOT apply (Strix ≠ marked target). Vulnerable."
+    draft: "Complementary. Strix=burst-killable. Reaver=HP-heavy."
+
+  vs_shaman:
+    type: "Primary synergy"
+    shaman_slows: "Reaver catches instantly. +1-2 extra Rend stacks per pursuit."
+    shaman_paralysis: "Free ramp window. Target cannot flee."
+    combined_speed: "~30% faster kills vs unassisted."
+    when_opposing: "Shaman squishy, lacks burst escape. Easy commit once <70%."
+    draft: "Ideal pairing. Shaman=CC. Reaver=kill pressure."
+
+  vs_frontliners:
+    handoff_pattern: "Frontliner softens → target crosses 70% → Reaver evaluates → commits → finishes"
+    vs_madolt: "Non-conflicting zones. Madolt tanks group, Reaver peels wounded target."
+    vs_siegebreaker: "Siegebreaker charges through (softens). Reaver finishes survivors."
+    vs_grappler: "BEST pairing. Pin = free Rend stacks on immobile target. A+ composition."
+    risk: "Both Reaver + Siegebreaker committed = party loses 2 non-recallable members."
+
+  vs_healers:
+    pre_commit: "No healing needed. Standard durability."
+    isolated_pursuit: "Self-sustains via Feeding Frenzy. No healer needed."
+    adrenal_crash: "NEEDS healing. -40% speed, +25% taken, HP drain."
+    enemy_healer_on_target:
+      stage_1_2: "May stall. Cannot out-DPS dedicated healing."
+      stage_3: "+70% bonus likely overcomes single healer."
+      stage_4: "Guaranteed out-DPS. No single healer sustains vs 200%+."
+    wavecaller_synergy: "Heals through walls. Extends pursuit survivability +5-8s."
+
+  vs_kiters:
+    threat_level: "HIGH — primary counter-archetype"
+    kiter_wins_if: "Maintains range indefinitely. Repeatable dash CD <6s."
+    reaver_wins_if: "Closes via Apex+Hamstring. Reaches Stage 3+ speed."
+    tools: "Hamstring(-40% 3s), Apex(6m/6s), Blood Rush(20m, Stage 2+), Frenzy speed"
+    chase_resolution:
+      stage_1: "Closing only if Hamstring lands"
+      stage_2: "Slowly closing"
+      stage_3: "Catching most kiters"
+      stage_4: "Outpacing all non-dash"
+    worst_case: "6s teleport + ranged DPS. 20s+ chip, minimal Reaver output."
+
+  matchup_summary:
+    # Opponent           | Favored | Key Factor
+    stationary_dps:       ["Reaver",  "Cannot flee. Free Rend stacks."]
+    burst_dps_strix:      ["Strix",   "Kills before Frenzy ramps."]
+    control_dps:          ["Neutral", "Depends on CC timing."]
+    tanks:                ["Reaver",  "Eventually out-damages any DR."]
+    healers_solo:         ["Reaver",  "Stage 3+ exceeds heal throughput."]
+    kiters:               ["Kiter",   "Until Stage 3. Then Reaver."]
+    sr3_bait:             ["Enemy",   "Knowledge check. Reaver must read."]
+    grouped_enemies:      ["Enemy",   "Non-target chip overwhelms."]
+    isolated_target:      ["Reaver",  "Strongest 1v1 in game at Stage 3+."]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ITEM BASELINE COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════════
+
+item_baseline:
+  # Item               | Item Gives                    | Reaver Bio             | Δ
+  bloodhound_capsule:   ["20s track +15% spd, consumed", "Permanent, +15%+10%dmg, scales", "∞ duration"]
+  berserker_draught:    ["+30% 15s, -20%DR, consumed",   "+20-100%+ no limit, DR from target", "×3-7 peak"]
+  flashstep_cartridge:  ["8m any dir, one-use",          "6m/6s repeat + 20m Blood Rush",      "Repeatable"]
+  rupture_oil:          ["3-stack 8s, consumed",         "Infinite stacks, no expiry, +8%/ea", "∞ stacks"]
+  elixir_bloodlust:     ["Lifesteal on KILL only",       "Lifesteal on HIT, 3-12%",            "Continuous"]
+  might_potion:         ["+ATK 3min, flat",              "Stage 4: +100%+",                    "×3+ peak"]
+
+  sr_breakpoint: "Items adequate SR1-2. Fail SR3+: durations expire before kill."
+  still_wants: ["Survival (Calm)", "CC items (lockdown)", "Terrain manipulation", "Economy disruption"]
+  anti_synergy: ["Taunt Cracker (redirects target)", "Retrograde Bead (recall useless)", "Pheromone Tag (stops flee)"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PASS/FAIL VALIDATION CHECKS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+validation_checks:
+
+  identity:
+    VAL-ID-01: {check: "Commitment irreversible", status: "PASS"}
+    VAL-ID-02: {check: "Calm state meaningful (active decisions)", status: "PASS"}
+    VAL-ID-03: {check: "Zero magic (MAGICCAP 8)", status: "PASS"}
+    VAL-ID-04: {check: "Tracking ignores stealth/LoS during Pursuit", status: "PASS"}
+    VAL-ID-05: {check: "Cute/predator visual dissonance", status: "PASS (qualitative)"}
+
+  mechanical:
+    VAL-MC-01: {check: "§25 CD compliance (max 15s)", status: "PASS", note: "All long CDs converted to state gates."}
+    VAL-MC-02: {check: "Anti-rotation (reactive not sequential)", status: "PASS"}
+    VAL-MC-03: {check: "No burst window / build-spend", status: "PASS"}
+    VAL-MC-04: {check: "Feedback-based gating (no gauge)", status: "PASS", note: "14 state, 5 frenzy, 2 behavior, 1 hit-count, 1 HP, 2 positional, 4 short-CD."}
+    VAL-MC-05: {check: "Crit system (all conditional)", status: "PASS"}
+    VAL-MC-06: {check: "Auto-attack reduced in Pursuit (50%)", status: "PASS"}
+
+  balance:
+    VAL-BL-01: {check: "Calm < Ref < Pursuit", status: "PASS (qual)", note: "60% < 100% < 160-200%"}
+    VAL-BL-02: {check: "Encounter-avg near reference", status: "PASS (qual)", note: "90-115% depending on play quality"}
+    VAL-BL-03: {check: "Stage 2+ exceeds ref by ≥10%", status: "PASS"}
+    VAL-BL-04: {check: "Stage 4 out-DPSes single healer", status: "PASS"}
+    VAL-BL-05: {check: "Non-target damage threatening", status: "PASS", note: "+15-100% taken from non-target"}
+    VAL-BL-06: {check: "Adrenal Crash punishing", status: "PASS", note: "-40%spd/-30%dmg/+25%taken/2%drain/8s"}
+
+  party_role:
+    VAL-PR-01: {check: "Clear role (execute wounded)", status: "PASS"}
+    VAL-PR-02: {check: "Not redundant with other DPS", status: "PASS"}
+    VAL-PR-03: {check: "Party survives Reaver absence", status: "CONDITIONAL", note: "Depends on target value vs encounter pressure."}
+    VAL-PR-04: {check: "Benefits from coordination", status: "PASS", note: "Coordinated commit ~30% faster."}
+
+  content_design:
+    VAL-CD-01: {check: "Boss phases telegraphed 5-8s", status: "REQUIREMENT (pending)"}
+    VAL-CD-02: {check: "Aquatic abilities = bonus not required", status: "PASS"}
+    VAL-CD-03: {check: "SR3+ bait ≤1/encounter", status: "REQUIREMENT (pending)"}
+    VAL-CD-04: {check: "≥1 water feature per floor", status: "REQUIREMENT (pending)"}
+
+  summary:
+    total: 20
+    pass: 16
+    pass_qualitative: 3
+    conditional: 1
+    requirements_pending: 3
+    fail: 0
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# VISUALIZATION HOOKS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+visualization_hooks:
+  real_time:
+    - {hook: "frenzy_stage_indicator", type: "Stage 0-4 + time-in-stage"}
+    - {hook: "bloodscent_radius", type: "Radial pulse on threshold targets"}
+    - {hook: "target_hp_overlay", type: "Enhanced HP with threshold proximity"}
+    - {hook: "pursuit_tether", type: "Color-shifting line Reaver↔target"}
+    - {hook: "awareness_vignette", type: "Edge darkening Stage 3-4 (cosmetic only)"}
+
+  combat_log_metrics:
+    - "pursuit_duration_seconds"
+    - "frenzy_stage_reached"
+    - "rend_stacks_achieved"
+    - "feeding_frenzy_healed"
+    - "non_target_damage_taken"
+    - "deathroll_kill_rate"
+    - "refuse_to_die_proc_count / success_rate"
+    - "adrenal_crash_count"
+    - "calm_time_percentage"
+    - "water_pursuit_percentage"
+
+  post_encounter:
+    commitment_accuracy: {formula: "kills / commits × 100", target: "≥80%"}
+    avg_pursuit_duration: {formula: "Σpursuit_s / count", target: "12-16s"}
+    frenzy_efficiency: {formula: "pursuit_dmg / (pursuit_s × ref_dps)", target: "≥1.3"}
+    team_burden: {formula: "ally_deaths_during_pursuit / encounters", target: "<0.3"}
+    calm_utilization: {formula: "calm_abilities / calm_gcds", target: "≥0.6"}
+
+  state_graph:
+    nodes: ["Calm", "S1", "S2", "S3", "S4", "Recovery", "Crash", "Dead"]
+    edges:
+      - ["Calm→S1", "Lock Jaw (<70%)"]
+      - ["Calm→S2", "Blood Rush (<50%)"]
+      - ["S1→S2", "5s"]
+      - ["S2→S3", "12s"]
+      - ["S3→S4", "20s"]
+      - ["S1-4→Recovery", "Target killed"]
+      - ["S1-4→Crash", "Target phases"]
+      - ["S1-4→Dead", "HP=0 (no RtD)"]
+      - ["S3-4→Dead|Survive", "Refuse to Die 3s"]
+      - ["Recovery→Calm", "3s"]
+      - ["Crash→Calm", "8s"]
+      - ["S2-4→S(N-1)", "Adrenal Dump"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CONSTRAINTS & INVARIANTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+constraints:
+
+  hard_invariants:
+    INV-01: "No voluntary Pursuit exit. No ability/item/ally breaks it."
+    INV-02: "No magic. MAGICCAP 8. All biological/physical."
+    INV-03: "Frenzy has no ceiling. Damage/speed scales indefinitely past S4."
+    INV-04: "Single-target identity. AoE = utility only (Thrash at 40%)."
+    INV-05: "Healing target does NOT break Pursuit."
+    INV-06: "No UI blindness during Frenzy. Awareness = dmg taken increase only."
+    INV-07: "Calm DPS < reference DPS. Always."
+    INV-08: "No self-harm mechanic. HP costs minimal (3-5%), not fuel."
+
+  soft_constraints:
+    # ID   | Parameter              | Current | Flex Range   | Rationale
+    CON-01: ["70% HP threshold",     "70%",    "65-75%",     "High = fast decisions, Pursuit dominates"]
+    CON-02: ["Stage 4 timing",       "20s/10s","17-23s/8-12s","Meaningful investment before 'unfair' power"]
+    CON-03: ["Adrenal Recovery",     "3s",     "2-4s",       "Brief vulnerability. Not useless, not free."]
+    CON-04: ["Adrenal Crash",        "8s",     "6-10s",      "Severe. Must be felt, not encounter-ending."]
+    CON-05: ["Rend stack bonus",     "+8%",    "+6-10%",     "Snowball without instant-death at high stacks"]
+    CON-06: ["Feeding Frenzy %",     "S×3%",   "S×2-4%",    "Self-sustain 1v1. NOT vs multi-threat."]
+    CON-07: ["Tunnel Instinct DR",   "15/25/35%","±5%/stage","Target can't kill S4. Non-target still can."]
+    CON-08: ["Deathroll potency",    "450-560","400-600",    "Must FEEL like a finisher."]
+
+  boundary_conditions:
+    - {condition: "Reaver vs solo target, no allies/heals", outcome: "Reaver ALWAYS wins after S3."}
+    - {condition: "Reaver vs target + 1 healer", outcome: "Wins at S3-4. Stalls at S1-2."}
+    - {condition: "Reaver vs 3 enemies simultaneously", outcome: "Reaver dies."}
+    - {condition: "Bad commit (target phases at 50% after 10s)", outcome: "Crash. Party protects 8s."}
+    - {condition: "Perfect Patience → Lock Jaw from water", outcome: "~2.5× first hit."}
+    - {condition: "Refuse to Die + ally kills target in 3s", outcome: "Reaver survives 15-25% HP."}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TUNING LEVERS & OPEN QUESTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+tuning_levers:
+  if_too_strong:
+    - "Reduce Frenzy multipliers (S3: 70%→55%, S4: 100%→80%)"
+    - "Increase awareness reduction (more non-target vuln)"
+    - "Extend Recovery (3s→4s)"
+    - "Reduce lifesteal (S×3%→S×2%)"
+    - "Increase HP costs"
+  if_too_weak:
+    - "Increase Frenzy multipliers"
+    - "Reduce Stage timings (20s→16s for S4)"
+    - "Increase Calm DPS (60%→70%) — CAREFUL: INV-07"
+    - "Add micro-lunge to Rend (0.5m)"
+    - "Raise Deathroll threshold (25%→30%)"
+
+open_questions_layer_1:
+  - "Absolute potency → damage conversion at benchmark ATK"
+  - "GCD interaction with Frenzy speed (attack speed increase?)"
+  - "HP pools at level benchmarks (% cost real impact)"
+  - "Healer HPS vs Reaver DPS crossover point (which Stage?)"
+  - "Movement speed in absolute units (chase math)"
+  - "Water tile dimensions (Crimson Wake coverage)"
+  - "Non-target damage at each SR (awareness lethality)"
+
+integration_tests:
+  - "Reaver+Shaman: slow-stacking cap check"
+  - "Reaver+Wavecaller: water gen frequency vs pursuit timing"
+  - "Reaver+Grappler: pin duration ≥3 GCDs for meaningful Rend"
+  - "Reaver vs SR4 bait: distinguishability check"
+  - "Reaver in boss: phase telegraph ≥ decision time"
+  - "2×Reaver party: avg DPS ≥70% ref per Reaver"
+
+# ▼ AWAITING: Layer 1 Spatial Quantification Pass

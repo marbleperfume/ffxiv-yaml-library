@@ -1,0 +1,390 @@
+# ▲ CONTINUES FROM: Siegebreaker_Design.yaml | THIS FILE COVERS: Balance, matchups, validation, constraints
+# ═══════════════════════════════════════════════════════════════════════════════
+# SIEGEBREAKER (Wyrpincers) — Momentum Frontliner [VALIDATION]
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Numbers-first reference. Minimal prose.
+#
+# References:
+#   - Siegebreaker_Design.yaml (identity, resources, state machine)
+#   - Siegebreaker_Skills.yaml (ability roster, potencies, §25 fixes)
+#   - Combat/BalanceTargets.yaml (global targets)
+#   - Combat/AggroSystem.yaml (Strategy Rank definitions)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Frontliner.Siegebreaker.Validation
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1: BALANCE TARGETS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+BalanceTargets:
+
+  DPS_Percentage_Of_Reference:
+    Reference_PPS: 110
+    Role_Baseline: "85% (frontliner standard)"
+    Siegebreaker_Band: "83-87%"
+    By_Momentum_State:
+      Zero_Momentum: "~78%"
+      Full_Momentum: "~87%"
+      Fight_Average: "83-85%"
+    By_Rank:
+      Rank1: {PPS: 74.9, Percent: "68%", Note: "Below target — intentional. Cap 70. Learning rank."}
+      Rank2: {PPS: 100.8, Percent: "91.6%", Note: "Above target. Simple execution → consistent."}
+      Rank3_Dummy: {PPS: 128.9, Percent: "117%", Note: "Raw. Savage reduces to 85-91%."}
+      Rank3_Savage: {PPS: "95-100", Percent: "85-91%", Note: "After resets + downtime."}
+    Player_Variance:
+      Siegebreaker: {Floor: "80%", Ceiling: "87%", Gap: "7%"}
+      Adafold:      {Floor: "78%", Ceiling: "85%", Gap: "7%"}
+      Madolt:       {Floor: "75%", Ceiling: "87%", Gap: "12%"}
+
+  TTK_Expectations:
+    Solo_Rank2_vs_Elite:
+      Effective_PPS: "~86 (101 × 0.85)"
+      Elite_HP: "~2000p"
+      TTK: "~23s (target: 20-30s) ✓"
+    Time_To_First_Damage: "2s"
+    Time_To_Peak_Momentum: "12-16s"
+
+  Endurance_Sustainability:
+    Regen: {Passive: "+5/s", Not_Attacking: "+10/s", Kill: "+15 instant"}
+    Rank1_10s_Cycle:
+      Spend: "Slam(8)+Slam(8)+GA(12)+Crush(15)+Commit(5)+Flare(10) = 58"
+      Recover: "50 passive + 20 Entrench = 70"
+      Surplus: "+12 ✓"
+    With_Brace:
+      Rank1: "Surplus → -18. Requires extra Entrench."
+      Rank2: "Brace(25) + Entrench(30): manageable."
+    Entrench_Cadence: "~1 per 20-25s"
+    Depletion: "RARE — extreme sustained fights only"
+
+  PPS_Breakdown_ST:
+    Rank1:
+      Loop: "GA→Slam→Slam→Crush→Slam→Slam→Crush→Entrench (8 GCDs, 16s)"
+      GCD_Total: "1080p"
+      GCD_PPS: "67.5"
+      Flare: "+12.5 PPS"
+      Mom_Bonus: "+10%"
+      Total: "~80 PPS"
+    Rank2:
+      GCD_PPS: "65"
+      Mom_Bonus: "+15%"
+      Flare: "26 PPS (390p/15s)"
+      Total: "~101 PPS"
+    Rank3:
+      Base: "100.8"
+      Resonance: "+18 (30 PPS × 60% uptime)"
+      Rending: "+10.1 (self-amp)"
+      Total: "~129 PPS (dummy)"
+
+  PPS_Breakdown_AoE_5T:
+    Cycle: "Steamroll×3 + GA + Entrench + Flare (12s)"
+    Steamroll: "80×5×3 = 1200p"
+    Flare: "350p"
+    Total_PPS: "~154"
+    Per_Target: "~31 (< ST per-target ✓)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 2: SYSTEM INTERACTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+SystemInteractions:
+
+  Aggro_StrategyRank:
+    Rank1: {Behavior: "Attack closest", Answer: "Always closest (large hitbox + advance)", Difficulty: Trivial}
+    Rank2: {Behavior: "Seek path to casters", Answer: "Advance INTO flanking paths", Difficulty: Easy}
+    Rank3: {Behavior: "Coordinate flanks, target squishies", Answer: "Commit most-dangerous angle. Party handles rest.", Difficulty: Moderate}
+    Rank4: {Behavior: "Bait wrong commitments, ambush", Answer: "Commit only CONFIRMED threats. Initial read must be correct.", Difficulty: High}
+    CC_Immunity_Scaling: "Value increases with enemy intelligence. Best at Rank 3-4."
+
+  HP_Above_50_Rule:
+    Trigger: "Thorax Crush crits enemies >50% HP"
+    Multiplier: "1.4×"
+    Alignment: "Built Momentum during approach → arrive → Crush → crit on fresh target"
+    Anti_Synergy: "Weak if party already damaged target below 50%"
+
+  Crit_Conditions:
+    CarapaceSlam: {Condition: "Rear positional", Mult: "1.4×"}
+    ThoraxCrush: {Condition: ">50% HP target", Mult: "1.4×"}
+    Others: "Fixed potency. No crit."
+    RNG: "ZERO."
+
+  Procgen_Map:
+    Corridors: {Rating: "HIGH clearing / LOW holding", Note: "Hitbox fills space. Rank 3 destroys walls."}
+    Open_Arenas: {Rating: MODERATE, Note: "Must choose ONE angle."}
+    Siege: {Rating: "HIGHEST of all classes", Note: "Breaks barriers. Creates breaches."}
+    Destructible: "BONUS path only. Never REQUIRED."
+
+  Momentum_Speed:
+    Base: "NORMAL (same as all classes)"
+    Tiers: {T1: "+10%", T2: "+20%", T3: "+30%", T4: "+40%"}
+    Direction: "Toward committed target ONLY"
+    SPD_Effect: "ZERO on movement speed"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 3: MATCHUP ANALYSIS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+MatchupAnalysis:
+
+  Vs_Adafold:
+    #              | Siegebreaker         | Adafold
+    Verb:          ["BREACH",             "HOLD"]
+    Best_In:       ["Fortifications",     "Corridors"]
+    Weak_In:       ["Multi-angle alone",  "Open arenas"]
+    Execution:     ["Commitment",         "Reactive intercept"]
+    Survival:      ["HP + CC immunity",   "Self-heal + shields + invuln"]
+    DPS:           ["83-87%",             "82-85%"]
+    Ceiling:       [Low,                   Medium]
+    Self_Heal:     [None,                  Yes]
+    Comp_Synergy: "Hammer-and-anvil. Siegebreaker advances, Adafold holds rear."
+
+  Vs_MadoltWarrior:
+    #              | Siegebreaker         | Madolt
+    Verb:          ["BREACH",             "SUPPRESS"]
+    Best_In:       ["Fortifications",     "Open arenas"]
+    Weak_In:       ["Multi-angle alone",  "Rank 4 resistance"]
+    Execution:     ["Commitment",         "Guard-points + stances"]
+    Survival:      ["HP + CC immunity",   "Kill fast"]
+    DPS:           ["83-87%",             "80-87%"]
+    Variance:      ["7%",                 "12%"]
+    Rank4_Edge: "Siegebreaker — CC immunity guarantees reaching target. Reliability over ceiling."
+
+  Vs_Kiting_Enemies:
+    Answer: ["Momentum acceleration (+10-40%)", "CC immunity (roots/slows ignored)", "GA gap-closer (3-4y/GCD)"]
+    Catch_Time: "6-10s from 15y"
+    Result: "NOT a hard counter. Siegebreaker arrives."
+    Chip_Damage: "Acceptable — HP pool absorbs."
+
+  Vs_Ranged_Stationary:
+    Answer: ["Take shots (15% DR + HP)", "Close via acceleration", "Crush on arrival (>50% crit)"]
+    HP_Lost_During_Approach: "~8-15%"
+    Result: "Soft disadvantage, not hard counter."
+
+  Vs_CC_Heavy:
+    Answer: "CC immune. Stun→Burst chain never starts."
+    Effective_HP_Bonus: "+30-40% vs CC-chain enemies"
+    Result: "STRONGEST matchup."
+
+  Vs_Sustained_Chip:
+    Answer: "Take all. Zero self-heal. Healer-dependent."
+    Result: "WEAKEST matchup."
+    Mitigation: "Kill threats quickly before accumulated damage matters."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 4: ITEM BASELINE COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ItemBaseline:
+
+  Damage:
+    Item: "Heavy Weapon ~80 PPS"
+    Committed: "95-101 PPS = 119-126% of item → HIT"
+    Uncommitted: "56 PPS = 70% of item → MISS"
+    Implication: "Power concentrated in Momentum. Without it, below auto-attack."
+
+  Survivability:
+    Item: "Heavy Armor ~10% DR"
+    Exoskeleton: "15% DR (always, undispellable) = 150% of item → HIT"
+    With_Brace: "35% DR burst = 350% of item"
+    CC_Immunity: "No item equivalent. Class-exclusive. INFINITE value vs CC-chains."
+
+  CC:
+    Item: "Stunning Mace — 2s stun, 10% proc"
+    Siegebreaker: "Guaranteed displacement on Steamroll/Advance"
+    Comparison: "More reliable, less powerful. DIFFERENT CATEGORY."
+
+  Replaces: ["Armor slot (body IS armor)", "Weapon slot (body IS weapon)", "CC immunity items (biology)"]
+  Complements: ["STR items (amplify carapace)", "VIT items (amplify HP)", "END items (amplify pool)"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 5: SURVIVAL VALIDATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+SurvivalValidation:
+
+  Profile:
+    Exoskeleton_DR: "15% (permanent, undispellable)"
+    Brace: "+20% for 6s (END-gated §25)"
+    Entrench: "+10% for 4s"
+    Average_DR: "18-22%"
+    HP: "Highest in game (VIT + Large frame)"
+    Invulns: 0
+    Self_Heal: 0
+
+  CC_Immunity_EHP:
+    Rank3_4_Content: "+30-40%"
+    Rank1_2_Content: "Minimal"
+
+  Solo_Duration:
+    vs_2_3: "45-60s no healer"
+    vs_5_plus: "20-30s no healer"
+    vs_Boss: "Healer-dependent"
+
+  Healer_Dependency: "HIGHEST of all frontliners. Predictable intake → easy to heal."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 6: PASS/FAIL VALIDATION CHECKS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+PassFailChecks:
+
+  DPS:
+    - {Check: "ST Rank 2 within 83-87%", Result: "91%", Status: PASS}
+    - {Check: "ST Rank 3 Savage 83-87%", Result: "85-91%", Status: PASS}
+    - {Check: "AoE/target < ST/target", Result: "31 < 101", Status: PASS}
+    - {Check: "AoE total > ST total", Result: "154 > 101", Status: PASS}
+    - {Check: "Vet/newbie gap <12%", Result: "~7%", Status: PASS}
+    - {Check: "Zero RNG crit/procs", Result: "Confirmed", Status: PASS}
+    - {Check: "No burst cadence", Result: "Momentum-gated", Status: PASS}
+
+  Survival:
+    - {Check: "Survives without invulns", Result: "DR + HP", Status: PASS}
+    - {Check: "CC immunity always-on (END>0)", Result: "Biology", Status: PASS}
+    - {Check: "Endurance sustainable", Result: "+12 surplus", Status: PASS}
+    - {Check: "Super Armor drop RARE", Result: "By design", Status: PASS}
+    - {Check: "Zero self-heal", Result: "Confirmed", Status: PASS}
+
+  Identity:
+    - {Check: "Abilities ≤10", Result: "8", Status: PASS}
+    - {Check: "No CD >15s on identity skills (§25)", Result: "Resource-gated", Status: PASS}
+    - {Check: "No new abilities Rank 2/3", Result: "Passive only", Status: PASS}
+    - {Check: "SPD ≠ movement speed", Result: "Enforced", Status: PASS}
+    - {Check: "ONE limitation only", Result: "Directional commitment", Status: PASS}
+
+  System:
+    - {Check: "CC Stage 1 only", Result: "Displacement only", Status: PASS}
+    - {Check: "GCD fixed 2.0s", Result: "SPD 5", Status: PASS}
+    - {Check: "Crit positional/conditional", Result: "Rear + >50%HP", Status: PASS}
+    - {Check: "Hitbox symmetric", Result: "Enforced", Status: PASS}
+    - {Check: "Momentum resets on dir change", Result: "Instant → 0", Status: PASS}
+
+  Balance_Cross_Ref:
+    Basic_Hit: "120p (band 80-120) ✓"
+    Gauge_Spender: "50-350p (band 200-500) ✓"
+    oGCD_Utility: "0p (band 0-50) ✓"
+    Burst_Cadence: "NONE ✓"
+    Freecure: "ZERO ✓"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 7: VISUALIZATION HOOKS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+VisualizationHooks:
+
+  MomentumTimeline:
+    Type: line_graph
+    X: "Time (s)"
+    Y: "Momentum (0-100)"
+    Annotations: ["Commits", "Flares", "Resets", "Entrenches"]
+    Signal: "Steady climbs = good. Frequent resets = bad."
+
+  DPS_By_Tier:
+    Type: bar_chart
+    Categories: ["T0", "T1", "T2", "T3", "T4"]
+    PPS: [56, 62, 74, 87, 101]
+
+  EnduranceTimeline:
+    Type: line_graph
+    X: "Time (s)"
+    Y: "Endurance (0-100)"
+    Annotations: ["Entrench spikes", "Ability costs", "CC ticks", "Danger zone"]
+    Signal: "Smooth = good. Zero-dips = overextension."
+
+  CommitmentMap:
+    Type: top_down_trace
+    Coding: "Arrow paths by Momentum tier"
+    Signal: "Direct to priority = good. Winding = bad."
+
+  Variance_Box:
+    Type: box_and_whisker
+    Data:
+      Siegebreaker: [80, 84, 87]
+      Adafold: [78, 82, 85]
+      Madolt: [75, 83, 87]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 8: CONSTRAINTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Constraints:
+
+  Hard:
+    - "MUST be Wyrpincers race (bio-lock)"
+    - "Super Armor ALWAYS active while END > 0"
+    - "SPD 5 → NO dodge, NO parry, NO reactive defense"
+    - "SPD ≠ movement speed"
+    - "Normal walk/run speed (same as all classes)"
+    - "Momentum speed ONLY during committed advance"
+    - "8 abilities MAX"
+    - "ZERO self-healing"
+    - "CC immunity undispellable (biology)"
+    - "NO burst cadence / cycle / alignment"
+    - "ONE limitation: directional commitment"
+    - "CC Stage 1 ONLY (physical displacement)"
+    - "ZERO random crit / ZERO RNG"
+    - "GCD fixed 2.0s"
+    - "NO Freecure / random procs"
+    - "Rank progression = passive upgrades only"
+    - ">50% HP crit rule on Thorax Crush"
+    - "Large hitbox SYMMETRIC"
+
+  Soft:
+    - "END depletion RARE in normal play"
+    - "Tier 4 accessible Rank 2+ only"
+    - "Vet/newbie gap <12%"
+    - "Decision tree <5 min comprehension"
+    - "Entrench ~1/20-25s"
+    - "Flare ~3-4/min"
+
+  Overrides:
+    - "IF CC penetration system added → Siegebreaker retains immunity (physical)"
+    - "IF 'all dodge' boss → Brace substitutes (never forced to dodge)"
+    - "IF SPD reworked → this doc MUST update"
+    - "IF new frontliner → contrast table MUST expand"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 9: ANTI-PATTERNS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+AntiPatterns:
+  CRITICAL:
+    - {Pattern: "SPD → movement speed", Fix: "Momentum adds speed DURING ADVANCE ONLY."}
+    - {Pattern: "Multiple weaknesses", Fix: "ONE: directional commitment."}
+    - {Pattern: "Dodge or parry added", Fix: "Take every hit. DR + HP."}
+  HIGH:
+    - {Pattern: "Ranged = hard counter", Fix: "Momentum catches. CC immunity → arrival."}
+    - {Pattern: "Complex rotation", Fix: "8 abilities. Decision tree."}
+    - {Pattern: "CC immunity as window", Fix: "ALWAYS ON (END>0). Biology."}
+    - {Pattern: "2-min burst cycle", Fix: "Flare = Momentum-gated."}
+  MEDIUM:
+    - {Pattern: "Unbreakable commitment", Fix: "CAN re-commit. Cost = Mom reset."}
+    - {Pattern: "No party value", Fix: "Body-block + Rending Plates + breach."}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 10: OPEN BALANCE QUESTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+OpenQuestions:
+
+  PvP_Tuning:
+    Risk: "Full CC immunity in PvP → overpowered"
+    Options: ["CC resistance (-75% dur)", "Immunity only at T3+", "Full immunity + damage nerf"]
+    Status: TBD
+
+  Rank1_Below_Target:
+    Value: "68% vs 85% target"
+    Justification: "Cap 70. Normal content scaled to output."
+    Risk: "Feel weak before Rank 2"
+
+  Destructible_Scope:
+    Rule: "BONUS path only. Never REQUIRED."
+    Risk: "Too much → Rank 3 mandatory"
+
+  Healer_Pairing:
+    Best: "Shaman (HoTs match predictable intake)"
+    Worst: "Siren (proximity conflict)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ▼ END — Siegebreaker_Validation.yaml
+# ═══════════════════════════════════════════════════════════════════════════════

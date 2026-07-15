@@ -1,0 +1,904 @@
+# =============================================================================
+# GRAPPLER — Skills Specification
+# juice-yaml-library | Race-Locked Biological Class
+# =============================================================================
+# ▲ CONTINUES FROM: Grappler_Design.yaml
+# ▲ GAP: Sections 1-9 NOT in this file (identity, mechanic, triggers, resources,
+# ▲      equipment, vulnerability, rotation philosophy, open questions, §25 notes)
+# =============================================================================
+
+class_name: Grappler
+race_lock: Iblis Grabbers
+tier: Special
+role: Frontline
+last_updated: 2026-07-14
+
+# =============================================================================
+# SECTION 10: FULL ABILITY ROSTER
+# =============================================================================
+abilities:
+  # -------------------------------------------------------------------------
+  # SHARED ABILITIES (Available in all stances)
+  # -------------------------------------------------------------------------
+  shared:
+    - name: Predator's Strike
+      stance_availability: [stealth, long_range, ink, melee_grapple]
+      type: Main Hand Attack
+      gcd: true
+      trigger_condition: None (always available)
+      potency:
+        flail: 100 (AoE cleave, 2m arc)
+        dual_kama: 90 × 2 hits (faster animation)
+        sickle_chain: 110 (4m range, chain extension)
+      resource_generation: 5 Grip Gauge per hit
+      cc_stage: null
+      item_baseline_replaced: Basic attack items (weapon coatings, on-hit oils)
+      decision_created: |
+        Weapon choice determines melee expression across all stances.
+        Flail for group fights, kama for single-target speed, sickle+chain
+        for reach. The main hand is consistent — the tentacle is the variable.
+      rank_progression:
+        rank_1: Base potencies as listed. 5 Grip Gauge per hit.
+        rank_2: +10% potency per weapon type. 6 Grip Gauge per hit.
+        rank_3: +20% potency. 7 Grip Gauge per hit. Flail arc → 150°.
+        rank_4: +30% potency. 8 Grip Gauge per hit. Kama gains 3rd hit at 70% potency.
+
+    - name: Tentacle Lash
+      stance_availability: [stealth, long_range, ink, melee_grapple]
+      type: Tentacle Attack (Offhand)
+      gcd: true
+      trigger_condition: 10+ Grip Gauge
+      potency: 80 (base)
+      resource_cost: 10 Grip Gauge
+      stance_variants:
+        stealth: Low-profile slap, no sound, does not break stealth if target dies
+        long_range: Whip at 8m range, pulls target 2m toward Grappler
+        ink: Ink-coated slap, leaves residue (2s -10% vision on target)
+        melee_grapple: Constricting strike, applies 1s micro-slow per hit (stacking)
+      cc_stage: Varies (Stealth=null, Long-range=null, Ink=1, Melee=1)
+      item_baseline_replaced: |
+        Replaces basic CC consumables used for minor slowdowns (Muddling Tincture
+        single-application, Frostweave Net initial contact).
+      decision_created: |
+        Spend Grip Gauge on basic tentacle use or save for expensive stance-specific
+        abilities? The Lash is cheap and consistent vs. bigger abilities that cost more.
+      rank_progression:
+        rank_1: 80 potency. 10 Grip Gauge cost.
+        rank_2: 95 potency. Ink variant vision reduction → 3s.
+        rank_3: 110 potency. Long-range pull → 3m. Melee micro-slow → 1.5s.
+        rank_4: 125 potency. 8 Grip Gauge cost. All variants enhanced.
+
+    - name: Predator's Read
+      stance_availability: [stealth, long_range, ink, melee_grapple]
+      type: Passive (Knowledge)
+      gcd: false
+      trigger_condition: Always active
+      potency: null (information skill)
+      effect: |
+        Special-tier knowledge passive. The Grappler can see:
+        - Enemy resistances to grab/pin (Grip Difficulty: Easy/Medium/Hard/Immune)
+        - Enemy awareness state (Unaware/Alert/Hunting/Locked On)
+        - Terrain properties relevant to tentacle use (wet = ink spreads faster,
+          rough = better grip anchors, smooth = harder to pin on)
+        Does NOT reveal enemy HP or abilities — only GRIP-RELEVANT information.
+      cc_stage: null
+      item_baseline_replaced: |
+        Replaces Hexcage Lantern (enemy detection) and Aerial Vantage Scope
+        (reconnaissance) for grip-specific information only.
+      decision_created: |
+        Information for stance selection (pre-instance) and target prioritization
+        (in-combat). "This enemy is Hard to pin — do I commit 4s of escalation
+        or focus on the Easy targets first?"
+      rank_progression:
+        rank_1: Grip Difficulty + Awareness State visible.
+        rank_2: Terrain properties visible. Grip Difficulty shows exact % resist.
+        rank_3: Break Free timer prediction visible during Seize. Ink zone countdowns.
+        rank_4: Full predictive display (shows optimal grab timing windows on enemies).
+
+    - name: Anchor Point
+      stance_availability: [stealth, long_range, ink, melee_grapple]
+      type: Utility (Positioning)
+      gcd: false (off-GCD)
+      trigger_condition: Adjacent to a wall, pillar, or terrain feature
+      potency: null (utility)
+      duration: 6s
+      cooldown: 12s (§25 PASS — tactical positioning tool, not identity-defining)
+      effect: |
+        Tentacle grips a terrain anchor. For 6s:
+        - Cannot be displaced (knockback immune)
+        - Cannot be pulled (anti-displacement)
+        - Movement speed reduced to 0 (anchored in place)
+        - Main hand attacks gain +15% damage (stable platform)
+      cc_stage: null
+      item_baseline_replaced: Ironvine Snare (self-root for stability — but Snare is enemy-targeted)
+      decision_created: |
+        Trade mobility for stability. Against enemies that displace (knockbacks,
+        pulls, charges), Anchor Point is defensive gold. Against enemies that
+        simply hit hard, standing still is dangerous. Terrain-dependent — only
+        works near surfaces.
+      rank_progression:
+        rank_1: 6s duration, +15% damage. 12s CD.
+        rank_2: 7s duration, +18% damage. 11s CD.
+        rank_3: 8s duration, +20% damage. 10s CD. Grants Grip Gauge +2/s while anchored.
+        rank_4: 8s duration, +25% damage. 10s CD. Tentacle can still Lash while anchored.
+
+  # -------------------------------------------------------------------------
+  # STEALTH STANCE ABILITIES
+  # -------------------------------------------------------------------------
+  stealth:
+    - name: Silent Approach
+      stance_availability: [stealth]
+      type: Stance Passive
+      gcd: false
+      trigger_condition: Out of combat OR 8s since last detected
+      potency: null (stealth state)
+      effect: |
+        Native stealth. Tentacle chromatophores activate — Grappler becomes
+        visually invisible and sound-dampened. Movement speed -10% while
+        stealthed. Detection radius for enemies reduced to 2m (vs normal
+        8-12m based on SR). SR4 enemies detect at 4m.
+        Persists indefinitely until:
+        - Grappler attacks
+        - Grappler enters 2m of aware enemy
+        - Grappler takes damage from AoE
+        - Grappler uses a non-stealth ability
+      cc_stage: null
+      item_baseline_replaced: |
+        Phantom Echo (3s invisibility) + Numbsense Spike (prevents detection
+        of stealth, 15s, 5m, destroyable). Silent Approach is permanent,
+        native, and requires no installation.
+      decision_created: |
+        When to BREAK stealth. Every moment in stealth is information gathered
+        and positioning improved. Every moment in stealth is also DPS not dealt.
+      rank_progression:
+        rank_1: 2m detection radius. -10% move speed. 8s re-stealth timer.
+        rank_2: 1.8m detection. -8% move speed. 7s re-stealth.
+        rank_3: 1.5m detection. -5% move speed. 6s re-stealth. AoE damage does not break (1 hit grace).
+        rank_4: 1.2m detection. No move penalty. 5s re-stealth. Can use Tentacle Lash without breaking.
+
+    - name: Ambush Crush
+      stance_availability: [stealth]
+      type: Tentacle Attack (Opener)
+      gcd: true
+      trigger_condition: First Blood trigger active (target unaware of Grappler)
+      potency: 280 (guaranteed critical hit — conditional on unaware target)
+      resource_cost: 30 Grip Gauge
+      effect: |
+        Explosive tentacle constriction from stealth. Guaranteed critical hit.
+        Applies Stage 2 Silence for 3s (tentacle covers mouth/vocalization).
+        Breaks stealth permanently for this combat.
+        If target dies from this hit: stealth is NOT broken (silent kill).
+      cc_stage: 2 (Silence)
+      item_baseline_replaced: |
+        Phantom Echo (3s invis + ghost image for damage bonus). Ambush Crush
+        provides 280 potency + silence vs Phantom Echo's brief window.
+      decision_created: |
+        Which target to open on. The opener is ONE shot — choose wrong and
+        the silence lands on a target that doesn't cast. Target selection IS the skill.
+      rank_progression:
+        rank_1: 280 potency. 3s Silence. 30 Grip Gauge.
+        rank_2: 320 potency. 3.5s Silence. Silent kill threshold → 120% overkill (room for error).
+        rank_3: 360 potency. 4s Silence. 25 Grip Gauge. If kill: next Drag Under costs 0 gauge.
+        rank_4: 400 potency. 4s Silence. AoE splash 60 potency to enemies within 2m of target (silent).
+
+    - name: Drag Under
+      stance_availability: [stealth]
+      type: Tentacle Grab (Stealth)
+      gcd: true
+      trigger_condition: Isolation Detected trigger active (target has no allies within 10m)
+      potency: 120
+      resource_cost: 25 Grip Gauge
+      effect: |
+        Silent tentacle grab from stealth. Target is Seized (Stage 2 Restrain
+        for 4s — cannot move, CAN still attack in melee range but cannot use
+        movement abilities). Grappler remains in semi-stealth (other enemies
+        at 8m+ do not detect this action if target does not vocalize — Silence
+        from Ambush Crush prevents vocalization).
+        If used AFTER Ambush Crush's silence: grab is undetectable.
+        If used WITHOUT silence: target's struggle alerts enemies within 10m.
+      cc_stage: 2 (Restrain)
+      item_baseline_replaced: |
+        Frostweave Net (70% slow / 2 actions to break free). Drag Under is
+        a full restrain (no movement at all) with Isolation trigger duration bonus.
+      decision_created: |
+        Combo order matters. Ambush Crush first (silence) then Drag Under
+        (silent grab) = undetected elimination. Drag Under first (no silence)
+        = target screams, allies alerted. The combo sequence IS the decision.
+      rank_progression:
+        rank_1: 120 potency. 4s Restrain. 25 Grip Gauge. Isolation = +50% duration.
+        rank_2: 140 potency. 4.5s Restrain. Isolation threshold → 12m (easier to trigger).
+        rank_3: 160 potency. 5s Restrain. 20 Grip Gauge. Isolated targets take +15% damage from all sources.
+        rank_4: 180 potency. 5s Restrain. If target dies while Restrained: Grappler enters semi-stealth immediately.
+
+    - name: Vanish Retreat
+      stance_availability: [stealth]
+      type: Utility (Escape)
+      gcd: false (off-GCD)
+      trigger_condition: Blown Cover trigger active OR HP below 40%
+      potency: null (utility)
+      resource_cost: 25 Grip Gauge
+      cooldown: NONE (§25 CHANGE — was 30s, now resource-gated)
+      effect: |
+        Emergency chromatophore burst. 2s of invisibility + 4m backwards
+        displacement (tentacle pushes off nearest surface). If out of combat
+        for re-stealth timer after this, Silent Approach re-engages.
+        Cannot be used while grabbing a target.
+        §25 GATE: Available whenever Grip Gauge ≥ 25 AND trigger condition met.
+        Natural pacing through gauge economy — must fight to earn escape resource.
+      cc_stage: null
+      item_baseline_replaced: |
+        Smokebreak Ampule (4m untargetable smoke, 5s). Vanish Retreat provides
+        displacement + brief stealth vs Ampule's stationary untargetability.
+      decision_created: |
+        Escape tool that resets the engagement. Costs the same gauge as Drag Under —
+        spending gauge on escape means that gauge ISN'T available for grab abilities.
+        Flee or fight? The resource trade makes this meaningful every time.
+      section_25_note: |
+        CHANGED from 30s cooldown → 25 Grip Gauge cost.
+        Rationale: Stealth stance reset should be available whenever the player
+        has earned the resource through combat. 30s CD created dead-identity
+        windows where the exposed Stealth Grappler had no path back to their
+        defining mechanic. Now: fight → earn gauge → escape → re-stealth.
+        Never "wait 30s with nothing to do."
+      rank_progression:
+        rank_1: 2s invis. 4m displacement. 25 Grip Gauge.
+        rank_2: 2.5s invis. 5m displacement. 22 Grip Gauge.
+        rank_3: 3s invis. 6m displacement. 20 Grip Gauge. Leaves ink residue at departure point (2s -10% vision).
+        rank_4: 3s invis. 6m displacement. 18 Grip Gauge. If HP <25%: displacement → 8m (panic burst).
+
+  # -------------------------------------------------------------------------
+  # LONG-RANGE STANCE ABILITIES
+  # -------------------------------------------------------------------------
+  long_range:
+    - name: Tentacle Extend
+      stance_availability: [long_range]
+      type: Tentacle Utility (Initiation)
+      gcd: true
+      trigger_condition: Target within 8-15m, line of effect clear
+      potency: 0 (attachment only — damage comes from follow-up)
+      resource_cost: 15 Grip Gauge
+      effect: |
+        Project tentacle to maximum reach (15m). Tentacle attaches to target.
+        Once attached, Grappler can choose follow-up action next GCD:
+        - Reel-In (pull target toward self)
+        - Sling Launch (throw target in chosen direction)
+        - Tether Hold (maintain connection, restricting target to 15m radius)
+        Attachment lasts until follow-up resolves or 6s (3 GCDs) without action.
+      cc_stage: null (setup — CC comes from follow-up)
+      item_baseline_replaced: |
+        Ripcord Harpoon (8m pull toward player, single-use). Tentacle Extend
+        provides 15m range, multiple follow-up OPTIONS, and unlimited uses.
+      decision_created: |
+        Attach then CHOOSE. Pull them to you? Throw them off a ledge? Hold
+        them in place? The decision happens AFTER attachment.
+      rank_progression:
+        rank_1: 15m range. 15 Grip Gauge. 6s attachment window.
+        rank_2: 17m range. 13 Grip Gauge. 8s attachment window.
+        rank_3: 19m range. 12 Grip Gauge. 8s window. Attachment deals 30 potency (sucker grab).
+        rank_4: 20m range. 10 Grip Gauge. 10s window. Can maintain TWO attachments simultaneously.
+
+    - name: Reel-In
+      stance_availability: [long_range]
+      type: Tentacle Attack (Displacement)
+      gcd: true
+      trigger_condition: Tentacle attached to target (via Tentacle Extend)
+      potency: 130 (impact on arrival)
+      resource_cost: 0 (costs paid at Extend)
+      effect: |
+        Pull attached target to Grappler's position. Target arrives in melee
+        range. Triggers Successful Displacement if target moved 4m+. Large
+        enemies (2x+ size) pulled half distance only.
+        Tentacle retracts on completion (2.0s retraction — Overextension
+        window if another enemy is close).
+      cc_stage: null (Stage 1 Root from Successful Displacement trigger)
+      item_baseline_replaced: |
+        Ripcord Harpoon (single-use, 8m, pulls to you, no follow-up).
+        Reel-In is repeatable, longer range, and feeds displacement trigger.
+      decision_created: |
+        Pull the target INTO your team's kill zone. But pulling creates
+        Overextension vulnerability if other enemies are nearby.
+      rank_progression:
+        rank_1: 130 potency. 2.0s retraction.
+        rank_2: 150 potency. 1.8s retraction.
+        rank_3: 170 potency. 1.6s retraction. Large enemies pulled 75% distance (up from 50%).
+        rank_4: 190 potency. 1.4s retraction. Reel-In generates 10 Grip Gauge (momentum refund).
+
+    - name: Sling Launch
+      stance_availability: [long_range]
+      type: Tentacle Attack (Displacement)
+      gcd: true
+      trigger_condition: Tentacle attached to target (via Tentacle Extend)
+      potency: 150 (base) + 80 (wall collision) + 100 (enemy collision, both targets)
+      resource_cost: 0 (costs paid at Extend)
+      effect: |
+        Throw attached target in a chosen direction (up to 10m throw distance).
+        If target collides with wall: +80 bonus potency (impact).
+        If target collides with another enemy: 100 potency to both (bowling).
+        Triggers Successful Displacement.
+        Large enemies cannot be thrown (attachment breaks, 60 potency only).
+        Tentacle retracts on completion (2.0s retraction).
+      cc_stage: 1 (Root from Successful Displacement trigger)
+      item_baseline_replaced: |
+        Concussion Charge (directional blast, pushes 4m, 2s delay). Sling Launch
+        throws farther (10m), deals more damage, has no delay, and creates combos.
+      decision_created: |
+        WHERE to throw. Into a wall for bonus damage? Into another enemy for
+        bowling? Off a ledge for environmental kill? Into an ally's AoE zone?
+      rank_progression:
+        rank_1: 150 potency. 10m throw. +80 wall / +100 bowling.
+        rank_2: 170 potency. 12m throw. +100 wall / +120 bowling.
+        rank_3: 190 potency. 14m throw. +120 wall / +140 bowling. Bowling hits 3m AoE.
+        rank_4: 210 potency. 15m throw. +150 wall / +160 bowling. Can throw INTO ink zones (§synergy).
+
+    - name: Tether Drag
+      stance_availability: [long_range]
+      type: Tentacle Utility (Movement)
+      gcd: true
+      trigger_condition: Tentacle attached to immovable object (wall, pillar, large enemy)
+      potency: 100 (kick impact on arrival to enemy only)
+      resource_cost: 0 (costs paid at Extend)
+      effect: |
+        Pull SELF to target/anchor point. Grappler launches toward attachment
+        at high speed (gap close). If attached to terrain: repositioning tool.
+        If attached to immovable enemy: arrives in melee with impact + Stage 1
+        Slow (2s). Does NOT trigger Overextension (tentacle retracts during travel).
+      cc_stage: 1 (Slow on arrival to enemy only)
+      item_baseline_replaced: |
+        Flashstep Cartridge (8m teleport, fixed direction). Tether Drag is
+        directional, crosses gaps, and deals damage on arrival.
+      decision_created: |
+        Gap close or reposition? Using tentacle to pull YOURSELF means it's
+        not available to pull ENEMIES for the retraction duration.
+      rank_progression:
+        rank_1: 100 potency arrival. 2s Slow.
+        rank_2: 120 potency. 2.5s Slow. Travel speed +20%.
+        rank_3: 140 potency. 3s Slow. Can Tether Drag to ally positions (friendly anchor).
+        rank_4: 160 potency. 3s Slow. On arrival: AoE 80 potency shockwave (3m radius).
+
+  # -------------------------------------------------------------------------
+  # INK STANCE ABILITIES
+  # -------------------------------------------------------------------------
+  ink:
+    - name: Ink Spray
+      stance_availability: [ink]
+      type: Tentacle Zone Creation
+      gcd: true
+      trigger_condition: Ink Charge available
+      potency: 0 (zone creation — damage comes from Eruption or enemy staying inside)
+      resource_cost: 1 Ink Charge
+      zone_properties:
+        radius: 4m
+        range: Up to 10m placement distance
+        duration: 30s (or until cleaned by fire/wind/water)
+        effects_on_enemies: "-60% detection range (Stage 1 vision), -30% attack accuracy"
+        effects_on_allies: "Also vision-impaired (friendly fire — allies warned)"
+        grappler_navigation: "Chemoreceptor navigation — sees normally in own ink"
+      cc_stage: 1 (Vision Reduction)
+      item_baseline_replaced: |
+        Blindveil Powder (60% detection reduction, 12s) + Scatterlung Phial
+        (-30% accuracy, 3m, 12s). Ink Spray: LARGER zones, 30s persist,
+        regenerating resource, vision + accuracy combined.
+      decision_created: |
+        Ink affects ALLIES too (vision). Placement: between enemies and allies
+        (screen) vs ON enemies (debuff) vs on self (home territory).
+      rank_progression:
+        rank_1: 4m radius. 30s duration. 10m range.
+        rank_2: 4.5m radius. 35s duration. 12m range.
+        rank_3: 5m radius. 40s duration. 12m range. Allies suffer only 40% of vision penalty.
+        rank_4: 5m radius. 45s duration. 15m range. Can spray while moving (no animation lock).
+
+    - name: Murk Bomb
+      stance_availability: [ink]
+      type: Tentacle Attack (Targeted)
+      gcd: true
+      trigger_condition: Target within 8m
+      potency: 100
+      resource_cost: 1 Ink Charge
+      effect: |
+        Concentrated ink blast at enemy's sensory organs. Applies personal
+        Stage 1 Vision Reduction (-60% detection for 8s, follows target).
+        If target ALREADY inside an ink zone: duration → 12s, reduction → -80%.
+      cc_stage: 1 (Vision Reduction — personal debuff)
+      item_baseline_replaced: |
+        Blindveil Powder (thrown, 12s, radius). Murk Bomb is single-target
+        but FOLLOWS the target (cannot walk out of it).
+      decision_created: |
+        Zone (Ink Spray, area control) vs personal debuff (Murk Bomb, travels
+        with target). Use Spray to control space, Bomb to shut down a specific threat.
+      rank_progression:
+        rank_1: 100 potency. 8s debuff (12s in zone). -60% (-80% in zone).
+        rank_2: 120 potency. 9s debuff (13s in zone). Refunds 0.5 Ink Charge if target already in zone.
+        rank_3: 140 potency. 10s debuff (14s in zone). -70% (-90% in zone).
+        rank_4: 160 potency. 10s debuff (15s in zone). Bombed target's attacks have 20% miss chance.
+
+    - name: Ink Slick
+      stance_availability: [ink]
+      type: Tentacle Zone Creation (Terrain)
+      gcd: true
+      trigger_condition: Ink Charge available, ground-level target area
+      potency: 0 (terrain control)
+      resource_cost: 1 Ink Charge
+      zone_properties:
+        shape: 3m × 8m lane
+        duration: 20s
+        effects: |
+          - 50% movement speed reduction on slick
+          - Displacement effects move target 50% FARTHER on slicked ground
+          - Direction change on slick = 1s slip animation (movement loss)
+          - Does NOT reduce vision (floor ink, not cloud ink)
+      cc_stage: 1 (Slow)
+      item_baseline_replaced: |
+        Thickglass Flask (-50% movement, 4m puddle, 20s) + Bogcrust Grenade
+        (difficult terrain). Ink Slick combines slow + displacement amp.
+      decision_created: |
+        Floor denial vs air denial. Slick doesn't block vision (allies see
+        through) but punishes movement. Synergizes with displacement classes.
+      rank_progression:
+        rank_1: 3m × 8m. 20s. 50% slow. +50% displacement distance.
+        rank_2: 3m × 10m. 22s. 55% slow. +60% displacement.
+        rank_3: 4m × 10m. 24s. 55% slow. +70% displacement. Enemies that fall on slick = 1.5s prone.
+        rank_4: 4m × 12m. 25s. 60% slow. +80% displacement. Slick counts toward Ink Saturation.
+
+    - name: Ink Eruption
+      stance_availability: [ink]
+      type: Tentacle Attack (Zone Detonation)
+      gcd: true
+      trigger_condition: Ink Saturation trigger active (3+ zones within 15m)
+      potency: 120 per zone (diminishing: 70% on 2nd+)
+      resource_cost: 2 Ink Charges (§25 CHANGE — was 20s cooldown)
+      cooldown: NONE (§25 CHANGE — resource-gated only)
+      effect: |
+        Detonate all active ink zones simultaneously. Each zone explodes for
+        120 potency to all enemies inside. Zones are NOT consumed (persist and
+        refresh to "Fresh Spray" state, reactivating 40% slow for 2s on
+        anyone currently inside). Multi-zone hits: 70% damage from 2nd+ detonation.
+        §25 GATE: Costs 2 Ink Charges + Saturation requirement. Available whenever
+        both conditions met. Natural pacing: 3 charges spent on zones + 2 on
+        Eruption = 5 charge cycle. At 4 max + regen, self-regulating tempo.
+      cc_stage: 1 (Slow from Fresh Spray refresh)
+      item_baseline_replaced: |
+        No direct item equivalent. Upheaval Flask is single-use, single-zone.
+        Ink Eruption detonates an ENTIRE prepared battlefield.
+      decision_created: |
+        Timing + resource. Eruption strongest when enemies inside multiple zones.
+        But 2 charges spent = fewer zones available for next cycle. Detonate now
+        (damage) or hold charges for more zone coverage? Resource trade, not timer.
+      section_25_note: |
+        CHANGED from 20s cooldown → 2 Ink Charge cost.
+        Rationale: Ink Eruption IS the stance identity payoff. The 20s CD
+        created dead-identity windows post-detonation. Now: spending charges
+        to detonate creates natural tension (zone creation vs zone detonation
+        compete for the same resource). Never "wait 20s with territory ready."
+      rank_progression:
+        rank_1: 120 potency/zone. 2 Ink Charges. 70% diminishing.
+        rank_2: 140 potency/zone. 2 Ink Charges. 75% diminishing.
+        rank_3: 160 potency/zone. 2 Ink Charges. 80% diminishing. Eruption leaves fire-reactive residue (1 hit).
+        rank_4: 180 potency/zone. 1 Ink Charge (reduced cost). 85% diminishing. Refresh also applies Murk Bomb to enemies inside.
+
+  # -------------------------------------------------------------------------
+  # MELEE GRAPPLE STANCE ABILITIES
+  # -------------------------------------------------------------------------
+  melee_grapple:
+    - name: Seize
+      stance_availability: [melee_grapple]
+      type: Tentacle Grab (Initiation)
+      gcd: true
+      trigger_condition: Target within melee range (2m), Grip Gauge 20+
+      potency: 0 (control initiation — damage comes from Crush/Suplex)
+      resource_cost: 20 Grip Gauge
+      effect: |
+        Tentacle wraps target. Stage 1 Slow (-50% movement speed).
+        Target can still attack and use abilities but cannot move freely.
+        Grappler's movement reduced by 30% (dragging target).
+        Escalation timer begins: 4s until Full Pin available.
+        Target can attempt Break Free (contest: target STR vs Grappler grip
+        strength — modified by Grip Difficulty from Predator's Read).
+      cc_stage: 1 (Slow/Restrain)
+      item_baseline_replaced: |
+        Frostweave Net (70% slow, 6s OR 2 actions to break). Seize provides
+        similar restraint but ESCALATES to Stage 3 if maintained.
+      decision_created: |
+        Who to grab. Seize one target = committed. Other enemies can attack
+        freely while Grappler holds. "Can my allies protect me while I hold this?"
+      rank_progression:
+        rank_1: -50% Slow. 20 Grip Gauge. 4s escalation timer.
+        rank_2: -55% Slow. 18 Grip Gauge. 3.8s escalation timer.
+        rank_3: -60% Slow. 16 Grip Gauge. 3.5s escalation timer. Break Free difficulty +1 tier.
+        rank_4: -65% Slow. 15 Grip Gauge. 3s escalation timer. Seized target generates 3 Grip Gauge/s for Grappler.
+
+    - name: Full Pin
+      stance_availability: [melee_grapple]
+      type: Tentacle Escalation (Stage 3)
+      gcd: true
+      trigger_condition: Escalation Complete trigger active (Seize maintained for escalation duration)
+      potency: 0 (control — damage from Crush)
+      resource_cost: 0 (earned through Seize commitment)
+      effect: |
+        Complete tentacle envelopment. Stage 3 Paralysis — target CANNOT act.
+        Grappler ALSO cannot move, cannot use main hand, cannot use other
+        abilities. CAN use Crush while pinning.
+        Allies deal +25% damage to pinned target.
+        Pin lasts until: voluntary release / cumulative damage > 30% Grappler
+        max HP / ally CC on Grappler / 15s maximum biological fatigue.
+        After pin ends: Grapple Broken trigger activates.
+      cc_stage: 3 (Paralysis — Full Disable)
+      item_baseline_replaced: |
+        Stasis Pin (total freeze, 3s, single-use, projectile). Full Pin is
+        up to 15s, no projectile, ally damage bonus. Overwhelmingly superior —
+        but costs Grappler's ENTIRE action economy.
+      decision_created: |
+        The Grappler becomes a CC tool, not a damage dealer. Worth it against
+        high-value targets (boss adds, casters, healers). Wasteful against trash.
+        "Is this target worth ME being offline for up to 15s?"
+      rank_progression:
+        rank_1: 15s max. +25% ally damage. Breaks at 30% HP taken.
+        rank_2: 16s max. +28% ally damage. Breaks at 33% HP taken.
+        rank_3: 17s max. +30% ally damage. Breaks at 35% HP taken. Can slow-drag (0.5 m/s).
+        rank_4: 18s max. +35% ally damage. Breaks at 38% HP taken. Pinned target takes 2% max HP/s bleed.
+
+    - name: Crush
+      stance_availability: [melee_grapple]
+      type: Tentacle Attack (While Pinning)
+      gcd: true
+      trigger_condition: Full Pin active (Grappler is pinning a target)
+      potency: 90 per GCD
+      resource_cost: 0 (sustained by pin state)
+      effect: |
+        Constriction pressure. The ONLY offensive action during Full Pin.
+        Steady damage, not burst. Over 15s pin (max): 90 × 7 GCDs = 630
+        total potency from Crush alone (at 2.0s GCD). LOW personal DPS —
+        value is allies dealing +25% to helpless target.
+      cc_stage: null (maintains existing Stage 3)
+      item_baseline_replaced: No item equivalent — items cannot deal damage while CCing.
+      decision_created: |
+        Minimal during pin. The decision was at Seize (who) and Full Pin
+        (whether to escalate). During pin: release early for different play
+        vs continue Crushing.
+      rank_progression:
+        rank_1: 90 potency/GCD.
+        rank_2: 105 potency/GCD.
+        rank_3: 120 potency/GCD. Every 3rd Crush applies Stage 1 Slow to enemies within 3m (tentacle thrashing).
+        rank_4: 135 potency/GCD. Crush generates 5 Grip Gauge (builds resource DURING pin for post-release burst).
+
+    - name: Suplex Release
+      stance_availability: [melee_grapple]
+      type: Tentacle Attack (Pin Termination)
+      gcd: true
+      trigger_condition: Full Pin active OR Seize active (holding target)
+      potency: 200 (base) + 100 (wall collision) + 80 (enemy collision, both targets)
+      resource_cost: 0
+      effect: |
+        Forceful release — slam target into ground in chosen direction (4m throw).
+        Target gains Grapple Immunity (6s). Grappler recovers immediately
+        (NO Fatigue — voluntary controlled release). Can act normally next GCD.
+        Wall collision: +100 bonus potency.
+        Enemy collision: 80 potency to secondary + Stage 1 Slow (2s) on both.
+      cc_stage: 1 (Slow on collision only)
+      item_baseline_replaced: |
+        Concussion Charge (directional blast, push 4m). Suplex deals more
+        damage, is directional, and creates bowling combos.
+      decision_created: |
+        When to end the pin. End early to reposition? Into a wall for damage?
+        Into another enemy for bowling? Into ally AoE? Pin duration vs Suplex
+        timing is the sustained decision.
+      rank_progression:
+        rank_1: 200 potency. 4m throw. +100 wall / +80 bowling.
+        rank_2: 230 potency. 5m throw. +120 wall / +100 bowling.
+        rank_3: 260 potency. 6m throw. +140 wall / +120 bowling. Wall splat applies 2s Stun (Stage 2).
+        rank_4: 300 potency. 7m throw. +160 wall / +140 bowling. Suplex generates 20 Grip Gauge (instant re-engage).
+
+    - name: Submission Hold
+      stance_availability: [melee_grapple]
+      type: Tentacle Utility (While Grabbing)
+      gcd: true
+      trigger_condition: Seize active (Stage 1 grab, before Full Pin)
+      potency: 0 (CC application)
+      resource_cost: 15 Grip Gauge
+      effect: |
+        Alternative to Full Pin escalation. Apply a specific Stage 2 CC:
+        - Arm Lock: Stage 2 Silence (cannot use abilities) for 6s.
+          Grab releases after. Grappler free to act.
+        - Leg Lock: Stage 2 Root (cannot move AT ALL, can attack/cast) for 6s.
+          Grab releases after. Grappler free to act.
+        Choose one on use. Does NOT progress toward Full Pin.
+      cc_stage: 2 (Silence OR Root — chosen on use)
+      item_baseline_replaced: |
+        Stupor Bell (AoE interrupt) for Arm Lock. Ironvine Snare (root) for
+        Leg Lock. Submission Hold provides targeted Stage 2 that items deliver
+        less precisely.
+      decision_created: |
+        Escalate to Stage 3 (Full Pin — both locked) OR settle for Stage 2
+        (Submission Hold — immediate CC, Grappler freed)? Risk vs efficiency.
+      rank_progression:
+        rank_1: 6s Silence OR Root. 15 Grip Gauge. Grab releases.
+        rank_2: 7s duration. 13 Grip Gauge.
+        rank_3: 8s duration. 12 Grip Gauge. New option: Spine Lock (Stage 2 Paralyze — cannot act, 3s only).
+        rank_4: 8s duration. 10 Grip Gauge. Submission generates 15 Grip Gauge refund on expiry (efficient cycle).
+
+# =============================================================================
+# SECTION 11: CC STAGE BUDGET
+# =============================================================================
+cc_budget:
+  stealth_stance:
+    max_stage: 2
+    stage_1: "Tentacle Lash (Stealth variant — no formal CC, silent damage)"
+    stage_2: "Ambush Crush (Silence 3s), Drag Under (Restrain 4s)"
+    stage_3: NONE
+    total_cc_output: |
+      Front-loaded opener CC (Silence + Restrain if combo'd). After opener,
+      CC budget is spent. Sustained CC is minimal.
+    commitment_level: Low (avoid commitment until perfect moment)
+
+  long_range_stance:
+    max_stage: 2
+    stage_1: "Tentacle Lash (2m pull), Tether Drag (2s Slow), Displacement trigger (2s Root)"
+    stage_2: "Displacement itself functions as pseudo-Stage 2 (forced repositioning)"
+    stage_3: NONE
+    total_cc_output: |
+      High FREQUENCY of minor CC (slow, root, displacement) on recurring basis.
+      Zero hard disables. Disrupts and repositions constantly.
+    commitment_level: Medium (tentacle extension = vulnerable during retraction)
+
+  ink_stance:
+    max_stage: 1
+    stage_1: "Ink Spray (vision -60%, accuracy -30%), Murk Bomb (personal vision debuff), Ink Slick (50% slow), Fresh Spray (40% slow 2s), Ink Saturation (-80% near-blind)"
+    stage_2: NONE
+    stage_3: NONE
+    total_cc_output: |
+      Extremely high Stage 1 VOLUME. Multiple simultaneous effects across wide
+      area. Everyone less effective, no single-target lockdown.
+    commitment_level: Low-Medium (zone creator, flexible positioning)
+
+  melee_grapple_stance:
+    max_stage: 3
+    stage_1: "Seize (-50% Slow), Suplex collision (2s Slow)"
+    stage_2: "Submission Hold (Silence OR Root, 6s chosen)"
+    stage_3: "Full Pin (Paralysis, up to 15s)"
+    total_cc_output: |
+      Full escalation: Stage 1 → 2 → 3. Single-target lockdown through all
+      stages. Strongest CC in the game — but Grappler self-CCs during pin.
+    commitment_level: MAXIMUM (melee, maintain grab, self-locked during pin)
+
+# =============================================================================
+# SECTION 12: BALANCE TARGETS
+# =============================================================================
+balance_targets:
+  dps_reference:
+    stealth_opener: |
+      Ambush Crush (280) + Drag Under (120) + 2× Predator's Strike (110 sickle) = 620 potency
+      in first 4 GCDs (8s). Front-loaded burst. Post-opener sustained: ~110 potency/GCD (conventional).
+    long_range_sustained: |
+      Extend (0) → Reel-In (130) + Displacement bonus (+30% next hit = 143) = 273 per cycle
+      (3 GCDs = 6s). Effective sustained: ~91 potency/GCD + displacement utility.
+    ink_zone_pressure: |
+      Zone damage via Eruption: 120 × 3 zones × 0.7 diminishing = ~288 per Eruption.
+      At 2 Ink Charge cost + 3 zones setup, one cycle every ~24s.
+      Effective sustained: ~60 potency/GCD (damage secondary to area denial).
+    melee_grapple_pin: |
+      Crush: 90 potency/GCD for 7 GCDs = 630. BUT allies deal +25% to pinned target.
+      If 2 allies at 150 potency/GCD × 1.25 × 7 GCDs = 2,625 ally potency.
+      Total party output during pin: 3,255 potency over 14s (~232 party potency/GCD).
+      Grappler PERSONAL sustained: 90 potency/GCD (lowest in game — value is team amp).
+
+  grip_gauge_economy:
+    generation_rate_base: "5/hit + 2/s = ~12/s at 1 hit per 2s GCD"
+    generation_rate_intense: "5/hit + 6/s (4 enemies) + 3/hit received = ~20+/s under pressure"
+    spending_rate:
+      cheap: "Tentacle Lash: 10 gauge (basic tentacle use)"
+      medium: "Tentacle Extend: 15 / Submission Hold: 15 / Seize: 20"
+      expensive: "Vanish Retreat: 25 / Ambush Crush: 30 / Drag Under: 25"
+    equilibrium: |
+      Base generation: ~12/s. Average spend: ~15 per GCD (one tentacle ability per 2s).
+      Gauge trends toward equilibrium at 1 tentacle ability per 2 GCDs (alternate
+      main-hand → tentacle → main-hand → tentacle). Under pressure: more gauge
+      available, enabling tentacle ability EVERY GCD.
+
+  ink_charge_economy:
+    base_cycle: "4 charges max. 8s regen base. Full refill: 32s from empty."
+    eruption_cycle: "3 zones (3 charges) + 1 Eruption (2 charges) = 5 charges. Requires full refill + 1 extra."
+    intensity_modified: "At 4 enemies in ink: 4s regen. Full refill: 16s. Eruption cycle: ~20s."
+    design_note: |
+      The Ink Grappler's tempo accelerates when enemies are inside ink (intensity
+      scaling). Herding enemies into territory = faster ink economy = more zones
+      and detonations. The predator is rewarded for successful territory control.
+
+# =============================================================================
+# SECTION 13: SYSTEM INTERACTIONS
+# =============================================================================
+system_interactions:
+  aggro_system:
+    stealth: "Generates zero threat while stealthed. Ambush Crush generates massive spike threat on opener."
+    long_range: "Displacement generates moderate threat (pulling enemies repositions them toward Grappler)."
+    ink: "Zone creation generates low threat (passive). Eruption generates high burst threat."
+    melee_grapple: "Seize locks threat on self (grabbed target focused on Grappler). Pin eliminates target from threat table."
+
+  over_50_percent_rule:
+    integration: |
+      Prey Above 50% HP trigger in Melee Grapple stance directly integrates the
+      >50% enemy HP rule. +25% damage from ALL sources to grabbed targets above 50%.
+      Grappler is incentivized to grab HEALTHY targets — making the systemic rule
+      a core stance mechanic. Grab the strongest, let allies amplify.
+
+  crit_system:
+    first_blood: "Conditional crit — target unaware. Positional/state-based, not RNG."
+    displacement_bonus: "+30% damage after 4m+ displacement. Conditional on successful displacement."
+    hp_threshold: "+25% on grabbed target above 50% HP. HP-conditional amp, not crit chance."
+    ink_stance: "No crit mechanic. Consistent zone pressure. Damage is reliable, not spikey."
+
+  procgen_interaction:
+    stealth_vs_procgen: |
+      Procedural layouts affect stealth approach routes. Narrow corridors with
+      no flanking = Stealth stance compromised. Wide rooms with cover = ideal.
+      Stance selection must account for likely layout generation.
+    ink_vs_procgen: |
+      Zone persistence interacts with room transitions. Zones stay in placed
+      room. Moving to next room = starting fresh. Short rooms = fewer zone
+      cycles. Long rooms/arenas = territory dominance.
+    displacement_vs_procgen: |
+      Ledges, pits, and elevation in procgen create environmental kill
+      opportunities for Sling Launch. Flat featureless rooms = reduced value.
+
+# =============================================================================
+# SECTION 14: MATCHUP ANALYSIS
+# =============================================================================
+matchup_analysis:
+  favorable_content:
+    stealth:
+      - "Patrol-based enemies with predictable routes (approach windows)"
+      - "Isolated high-value targets (casters, healers, scouts)"
+      - "Content with long pre-combat setup phases (time to position)"
+      - "SR1-SR2 enemies with standard 8-12m detection ranges"
+    long_range:
+      - "Entrenched ranged enemies on platforms/elevated positions"
+      - "Content near ledges, pits, or environmental hazards"
+      - "Mixed-range encounters (pull ranged into melee kill zone)"
+      - "Large open rooms with clear sight lines"
+    ink:
+      - "Chokepoint-heavy content (zone placement maximized)"
+      - "Multi-wave encounters (zones persist between waves)"
+      - "Enemies reliant on sight-based targeting (archers, casters)"
+      - "Content where party has alternative sensing (Hexcage Lanterns)"
+    melee_grapple:
+      - "Single high-value targets (boss adds, priority kills)"
+      - "Content with party support (tank + healer + DPS available)"
+      - "Enemies above 50% HP that need to die fast (>50% rule synergy)"
+      - "Encounters where one disable wins the fight"
+
+  unfavorable_content:
+    stealth:
+      - "Tremorsense/blindsight enemies (detection ignores chromatophores)"
+      - "Dense pack encounters with no isolation opportunities"
+      - "Boss fights with no adds (single target, no re-stealth)"
+      - "SR3+ content with enhanced detection capabilities"
+    long_range:
+      - "Melee-rush enemies that close faster than retraction (2.0s window punished)"
+      - "Cluttered corridors with no clean sight lines for Extend"
+      - "Displacement-immune enemies (massive/anchored/rooted)"
+      - "Content with frequent corner-fighting (LoE broken)"
+    ink:
+      - "Fire-heavy environments (ink zones burned on contact)"
+      - "Wind/outdoor areas (ink disperses rapidly)"
+      - "Uncoordinated parties with no alternative sensing"
+      - "Mobile enemies that refuse to enter/stay in zones"
+    melee_grapple:
+      - "Multi-enemy encounters with no party peel support"
+      - "Ranged/flying enemies that never enter melee range"
+      - "High-damage content (30% HP break threshold reached too fast)"
+      - "Solo content (self-CC during pin = suicide vs multiple enemies)"
+
+# =============================================================================
+# SECTION 15: ITEM COMPLEMENTARITY
+# =============================================================================
+item_complementarity:
+  universal_items_still_needed:
+    - category: "Healing/Recovery"
+      reason: "Zero self-healing. Potions mandatory, especially during pin sequences."
+      examples: [Harmony Draught, Rejuvenation Flask, Healing Specter]
+    - category: "Elemental Damage"
+      reason: "Pure physical damage. No elemental option vs physically-resistant enemies."
+      examples: [Gold Pine Resin, Conductance Gel, Charcoal Pine Bundle]
+    - category: "Anti-Air/Ranged Engagement"
+      reason: "All stances except Long-Range operate at melee. Items needed vs 20m+ enemies."
+      examples: [Ripcord Harpoon (for non-LR stances), Gravwell Orb]
+
+  stance_specific:
+    stealth: ["Numbsense Spike (extra safe zone vs SR4)", "Speed consumables (escape if Blown Cover)"]
+    long_range: ["Ironvine Snare (root for easy Extend targeting)", "Smokebreak Ampule (safety during retraction)"]
+    ink: ["Hexcage Lantern (alt detection for allies in ink)", "Fire-source items (ink + fire = area damage combo)"]
+    melee_grapple: ["DR consumables (extend pin by surviving)", "Aggro redirection (Decoy/Pheromone Tag — protect pinning Grappler)"]
+
+# =============================================================================
+# SECTION 16: DESIGN VALIDATION
+# =============================================================================
+design_validation:
+  item_baseline_test:
+    can_party_without_class_still_accomplish_goals: true
+    is_item_solution_meaningfully_worse: true
+    does_class_provide_exclusive_capability: true
+    are_strategic_problems_clear: true
+
+  compliance_checks:
+    no_burst_cycle: true
+    crit_not_rng: true
+    over_50_percent_hp_integration: true
+    section_25_resource_gating: true
+    intensity_scales_generation: true
+
+  hit_miss_summary:
+    hits:
+      - "Full Pin vs Stasis Pin: MASSIVE HIT (15s vs 3s, +25% amp, repeatable)"
+      - "Silent Approach vs Phantom Echo: CLEAR HIT (indefinite vs 3s)"
+      - "Ink Spray vs Blindveil Powder: CLEAR HIT (30s persist, 4 charges, combined debuffs)"
+      - "Tentacle Extend vs Ripcord Harpoon: CLEAR HIT (15m, multi-option, unlimited)"
+    partials:
+      - "Ink zones vs Webspinner Sac: PARTIAL (different control type — vision vs root)"
+      - "Stealth vs Numbsense Spike: PARTIAL (mobile personal vs stationary zone)"
+    misses:
+      - "Ink Stance (Stage 1 max) vs Stasis Pin (Stage 3 item): MISS — item outperforms for single-target CC"
+      - "Stealth post-opener vs offensive item loadout: MISS — Stealth Grappler is weak after opener"
+      - "Melee Grappler solo vs item-loaded solo: MISS — self-CC in pin is pure downside without allies"
+
+# =============================================================================
+# SECTION 17: VISUALIZATION HOOKS
+# =============================================================================
+viz_hooks:
+  grip_gauge_display:
+    type: "Circular gauge around tentacle silhouette icon"
+    color_states:
+      low: "Grey (0-29) — limited tentacle access"
+      medium: "Teal (30-69) — normal operations"
+      high: "Bright cyan (70-99) — high tentacle access"
+      full: "Pulsing white (100) — maximum, spend or waste"
+
+  ink_charge_display:
+    type: "4 ink sac icons (fill/drain animation)"
+    regeneration_indicator: "Slow fill animation on next empty sac"
+    intensity_feedback: "Fill speed visibly accelerates when enemies in ink"
+
+  stance_indicator:
+    type: "Tentacle posture silhouette (changes per stance)"
+    stealth: "Coiled, translucent outline"
+    long_range: "Extended, reaching outward"
+    ink: "Swollen, dripping"
+    melee_grapple: "Tensed, thick, grip-ready"
+
+  escalation_display:
+    type: "Ring around grabbed target (fills over escalation duration)"
+    stage_1: "Partial ring (grab initiated)"
+    stage_2: "Half ring (Submission Hold available)"
+    stage_3: "Full ring (Full Pin available/active)"
+
+# =============================================================================
+# SECTION 18: CONSTRAINTS & BOUNDARIES
+# =============================================================================
+constraints:
+  hard_limits:
+    - "Full Pin maximum: 18s (Rank 4). NEVER exceeds 18s under any condition."
+    - "Grip Gauge maximum: 100. Cannot exceed. No overflow mechanic."
+    - "Ink Charges maximum: 6 (4 base + 2 from max augment). NEVER exceeds 6."
+    - "Tentacle Extend maximum range: 20m (Rank 4). Beyond 20m = biological limit."
+    - "Stealth detection minimum: 1.2m (Rank 4). NEVER reaches 0m detection. Always detectable at close range."
+    - "GCD floor: 1.4s. Tentacle abilities respect GCD floor like all other abilities."
+
+  stance_boundaries:
+    - "Stances NEVER unlock each other's abilities. No cross-stance access via any mechanism."
+    - "Augments enhance within-stance performance. NEVER grant cross-stance abilities."
+    - "Stance lock is ABSOLUTE in instanced content. No talent, item, or augment bypasses this."
+    - "CC stages per stance are hard-capped. Ink NEVER reaches Stage 2. Stealth NEVER reaches Stage 3."
+
+  resource_boundaries:
+    - "Grip Gauge resets to 30 at combat start. NEVER carries from previous combat."
+    - "Ink Charges are stance-specific. Changing stance (at rest points) resets charges to max."
+    - "Intensity scaling has caps: +4/s max from enemies nearby, +3 per hit received max once per 2s."
+    - "Ink Charge regen floor: 4s minimum. NEVER regenerates faster than 4s/charge regardless of intensity."
+
+  interaction_rules:
+    - "Full Pin breaks if Grappler takes >30% max HP cumulative (Rank 1). Tracked per pin instance."
+    - "Grapple Immunity (6s) is absolute. No ability, item, or augment reduces or bypasses it."
+    - "Blown Cover is permanent per combat. No ability restores First Blood mid-fight."
+    - "Ink zones affected by environment: fire (burns, instant destroy), wind (disperses, halves duration), water (dilutes, reduces debuff strength 50%)."
+    - "Tentacle retraction time is REAL vulnerability (cannot act during retraction). No ability cancels retraction."
+
+# =============================================================================
+# END OF FILE
+# =============================================================================

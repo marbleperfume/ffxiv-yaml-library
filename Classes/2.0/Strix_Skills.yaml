@@ -1,0 +1,694 @@
+# Classes/DPS/Strix_Skills.yaml
+# ══════════════════════════════════════════════════════════════════════════════
+# STRIX (Talon) — Skill Roster, Progression & Balance
+# ══════════════════════════════════════════════════════════════════════════════
+# ▲ CONTINUES FROM: Strix_Design.yaml
+# ▲ GAP: Sections 1-11 NOT in this file (identity, mechanic, systems, rotation)
+# ══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.DPS.Strix.Skills
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 12: GCD SKILL ROSTER — AERIAL STATE
+# ─────────────────────────────────────────────────────────────────────────────
+
+Skills:
+  AerialState:
+    Philosophy: >
+      Aerial GCDs are PREPARATION and RECONNAISSANCE. While airborne, the Strix
+      SETS UP the dive: marking targets, calculating AoE paths, applying debuffs.
+      The "rotation" in air: ascend → 1-2 prep GCDs → read → commit dive.
+
+    - Name: "Raptor Mark"
+      ID: raptor_mark
+      ActionType: GCD
+      CastTime: 0s
+      Recast: 2.0s
+      TargetType: single_enemy_from_altitude
+      DamageType: none
+      Potency: 0
+      Effect: >
+        Marks target for dive. Shows trajectory preview (landing point, AoE radius,
+        travel time). Mark persists 15s or until dive lands. Only 1 active.
+        BONUS: Marked target takes +10% damage from next dive impact.
+        Successful dives on marked targets grant 1 Dive Momentum (Terminal Velocity gate).
+      Range: "Line of sight from altitude"
+      StaminaCost: 0
+      RankRequired: 1
+
+    - Name: "Windshear Bolt"
+      ID: windshear_bolt
+      ActionType: GCD
+      CastTime: 0s
+      Recast: 2.0s
+      TargetType: single_enemy_from_altitude
+      DamageType: wind_elemental
+      Potency: 80
+      Effect: "Wind bolt downward. Applies Windshear: -15% movement speed 6s."
+      Range: 25m
+      StaminaCost: 2
+      UsagePriority: "Slow target before diving to prevent dodge."
+      RankRequired: 1
+
+    - Name: "Screech"
+      ID: screech
+      ActionType: GCD
+      CastTime: 0s
+      Recast: 2.0s
+      TargetType: cone_from_altitude
+      ConeAngle: 120_degrees
+      ConeRange: 15m
+      DamageType: wind_sonic
+      Potency: 50  # Per target
+      Effect: >
+        Sonic screech from altitude. All enemies in cone. Applies Startled 3s:
+        cannot use movement abilities (dashes, charges, retreats). Can still walk.
+      StaminaCost: 3
+      CritCondition: "Crits if 3+ enemies hit"
+      RankRequired: 1
+
+    - Name: "Galefeather Toss"
+      ID: galefeather_toss
+      ActionType: GCD
+      CastTime: 0s
+      Recast: 2.0s
+      TargetType: single_enemy_from_altitude
+      DamageType: wind_physical
+      Potency: 100
+      Effect: >
+        Razor feather projectile. If target has Windshear: bonus 40p (total 140p).
+        Feather lodges 8s — Strix sees target through walls (tracking).
+      Range: 30m
+      StaminaCost: 1
+      RankRequired: 1
+
+    - Name: "Thermal Spiral"
+      ID: thermal_spiral
+      ActionType: GCD
+      CastTime: 1.0s  # Commitment cast — gaining altitude DURING cast
+      Recast: 2.0s
+      TargetType: self
+      DamageType: none
+      Potency: 0
+      Effect: >
+        Rapid +20 AU during 1.0s cast. Restores 5 Wing Stamina. Cannot use
+        below 10 AU (must already be airborne).
+      StaminaCost: "0 (net POSITIVE — restores 5)"
+      UsagePriority: "Rush to high-alt for max dive OR stamina management."
+      RankRequired: 1
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # DIVE STATE GCDs
+  # ─────────────────────────────────────────────────────────────────────────
+
+  DiveState:
+    Philosophy: >
+      Dive state has VERY LIMITED actions. Trajectory fixed — these skills
+      modify IMPACT only. Committing dive IS the GCD action.
+
+    - Name: "Raptor Dive"
+      ID: raptor_dive
+      ActionType: GCD
+      CastTime: 0s
+      Recast: "N/A (altitude-gated)"
+      TargetType: ground_point_from_altitude
+      DamageType: physical_kinetic
+      Potency: "150 + (Altitude × 5)"
+      # 10 AU = 200p | 30 AU = 300p | 50 AU = 400p | 70 AU = 500p | 100 AU = 650p
+      Effect: >
+        Core dive. Fixed-trajectory, all altitude → kinetic force. AoE splash
+        4m radius at 60%. Trajectory FIXED on commit. Cannot abort.
+        Grants 1 Dive Momentum if target was Raptor Marked.
+      MinimumAltitude: 10
+      AoERadius: 4m
+      SplashPotency: "60%"
+      GroundedDuration: "6s / 5s / 4s (by Rank)"
+      CritCondition: "Auto-crits against targets above 50% HP"
+      StaminaCost: 0
+      DesignNote: "NOT cooldown-gated. Gated by ALTITUDE. More altitude management = more dives/min."
+      RankRequired: 1
+
+    - Name: "Piercing Plunge"
+      ID: piercing_plunge
+      ActionType: GCD
+      CastTime: 0s
+      Recast: "N/A (altitude-gated)"
+      TargetType: single_enemy_from_altitude
+      DamageType: physical_kinetic + lightning_elemental
+      Potency: "200 + (Altitude × 6) — NO splash"
+      # 20 AU = 320p | 50 AU = 500p | 70 AU = 620p | 100 AU = 800p
+      Effect: >
+        Single-target dive. Higher potency, zero AoE. Lightning infusion during
+        descent. Applies 2 Neurotoxin stacks on impact. Shorter grounded time.
+        Grants 1 Dive Momentum if target was Raptor Marked.
+      MinimumAltitude: 20
+      AoERadius: 0
+      GroundedDuration: "5s / 4s / 3s (by Rank)"
+      PoisonApplication: "2 Neurotoxin stacks"
+      CritCondition: "Auto-crits if Raptor Marked AND above 50% HP"
+      DesignNote: "Boss-killer. At 100 AU: 800p single-target."
+      RankRequired: 2
+
+    - Name: "Scatterfall"
+      ID: scatterfall
+      ActionType: GCD
+      CastTime: 0s
+      Recast: "N/A (altitude-gated)"
+      TargetType: ground_point_from_altitude
+      DamageType: physical_kinetic + wind_elemental
+      Potency: "100 + (Altitude × 3) — MASSIVE AoE"
+      # 30 AU = 190p | 50 AU = 250p | 70 AU = 310p | 100 AU = 400p (to ALL in 8m)
+      Effect: >
+        Wide AoE dive. 8m radius (double standard). ALL targets take FULL
+        potency (no falloff). Applies Windshear to all hit. Longer ground lock.
+        Grants 1 Dive Momentum if primary target was Raptor Marked.
+      MinimumAltitude: 30
+      AoERadius: "8m (double standard — no falloff)"
+      GroundedDuration: "8s / 7s / 6s (by Rank)"
+      CritCondition: "Crits if 4+ enemies hit"
+      DesignNote: "Trash-pull dive. 6 targets at 70 AU: 310p × 6 = 1860p total."
+      RankRequired: 2
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # GROUND STATE GCDs
+  # ─────────────────────────────────────────────────────────────────────────
+
+  GroundState:
+    Philosophy: >
+      Weapon-based combat. Damage from elemental infusion/poison, not force.
+      WEAKER than aerial but provides continuous DPS during mandatory ground time.
+      Simple rotation: apply poison, cycle elements, find re-ascend window.
+
+    - Name: "Storm Slash"
+      ID: storm_slash
+      ActionType: GCD
+      CastTime: 0s
+      Recast: 2.0s
+      TargetType: single_enemy_melee
+      DamageType: "elemental (matches Stormweave state)"
+      Potency: 100
+      Effect: "Basic Storm Talon strike. Combo starter."
+      Range: 3m
+      ComboPosition: 1
+      RankRequired: 1
+
+    - Name: "Rending Talon"
+      ID: rending_talon
+      ActionType: GCD
+      CastTime: 0s
+      Recast: 2.0s
+      TargetType: single_enemy_melee
+      DamageType: "elemental (matches Stormweave)"
+      Potency: 130
+      Effect: "Combo 2. Wind: +0.1s next dash i-frame. Lightning: 30% arc to 1 nearby."
+      Range: 3m
+      ComboPosition: 2
+      RankRequired: 1
+
+    - Name: "Venom Rake"
+      ID: venom_rake
+      ActionType: GCD
+      CastTime: 0s
+      Recast: 2.0s
+      TargetType: single_enemy_melee
+      DamageType: poison_physical
+      Potency: 90
+      Effect: "Applies 1 Neurotoxin stack regardless of coating status. Free poison GCD."
+      Range: 3m
+      ComboPosition: "Any (non-combo)"
+      RankRequired: 1
+
+    - Name: "Updraft Cutter"
+      ID: updraft_cutter
+      ActionType: GCD
+      CastTime: 0s
+      Recast: 2.0s
+      TargetType: single_enemy_melee
+      DamageType: wind_physical
+      Potency: 150
+      Effect: >
+        Combo finisher (3rd). Upward slash launches Strix +5 AU (Wind state: +10 AU).
+        Feeds back into altitude system. 3 combos in Wind = 30 AU = shallow dive capable.
+      Range: 3m
+      ComboPosition: 3
+      RankRequired: 1
+
+    - Name: "Voltaic Strike"
+      ID: voltaic_strike
+      ActionType: GCD
+      CastTime: 0s
+      Recast: 2.0s
+      TargetType: small_aoe_melee
+      AoERadius: 4m
+      DamageType: lightning_elemental
+      Potency: 120
+      Effect: >
+        Lightning spinning strike (requires Lightning Stormweave). Hits all in 4m.
+        Chain arcs to up to 3 other targets (40p each).
+      Range: "4m (centered on self)"
+      Requirement: "Lightning Stormweave active"
+      MaxArcs: 3
+      ArcDamage: 40p
+      RankRequired: 1
+
+    - Name: "Lift Off"
+      ID: lift_off
+      ActionType: GCD
+      CastTime: 2.0s  # Interruptible commitment
+      Recast: "N/A (not cooldown-gated)"
+      TargetType: self
+      Potency: 0
+      Effect: >
+        Re-ascend. 2.0s cast → 30 AU (low-flight entry). INTERRUPTIBLE.
+        Cannot use during Grounded Duration. Requires 30+ Wing Stamina.
+      StaminaRequirement: 30
+      AltitudeGained: 30
+      DesignNote: "Vulnerability window. Must create safe space with dashes first."
+      RankRequired: 1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 13: oGCD SKILL ROSTER (§25 COMPLIANT)
+# ─────────────────────────────────────────────────────────────────────────────
+
+oGCDSkills:
+  Philosophy: >
+    Aerial oGCDs enhance dives. Ground oGCDs keep you alive. All single-weave.
+    §25 APPLIED: No cooldowns >15s on identity-defining skills. Resource-gated.
+
+  # Dashes defined in Strix_Design.yaml Section 5 (Evasion System)
+  DashReference: "See Strix_Design.yaml: Slipstream, Tailwind Rush, Feather Fade, Barrel Roll"
+
+  - Name: "Stormweave Toggle"
+    ID: stormweave_toggle
+    ActionType: oGCD
+    AnimationLock: 0.6s
+    Cooldown: "0s (free toggle)"
+    Effect: "Switch Storm Talon infusion between Wind and Lightning."
+    RankRequired: 1
+
+  - Name: "Neurotoxin Sheath"
+    ID: neurotoxin_sheath
+    ActionType: oGCD
+    AnimationLock: 0.6s
+    Cooldown: 15s  # §25 COMPLIANT — upper bound of tactical range
+    Duration: "20s or 5 weapon hits (whichever first)"
+    Effect: "Next 5 weapon hits apply 1 Neurotoxin stack each."
+    RankRequired: 1
+
+  - Name: "Updraft Burst"
+    ID: updraft_burst
+    ActionType: oGCD
+    AnimationLock: 0.6s
+    Cooldown: "NONE (§25 converted — was 30s)"
+    ResourceCost: "25 Wing Stamina"
+    TargetType: self_aoe
+    AoERadius: 6m
+    Effect: >
+      Emergency ground escape. Launches Strix 15 AU upward + pushes all enemies
+      6m back 4m. 60p wind damage. Usable DURING Grounded Duration (emergency
+      override — does NOT grant full flight, only 15 AU pop + glide).
+    Section25_Change: >
+      CONVERTED from 30s CD to 25 Wing Stamina cost. Escape available whenever
+      flight fuel exists — creates honest tradeoff (escape now = less flight later).
+      Spamming depletes Wing Stamina rapidly, enforcing natural limit.
+    RankRequired: 1
+
+  - Name: "Dive Accelerant"
+    ID: dive_accelerant
+    ActionType: oGCD
+    AnimationLock: 0.3s
+    Cooldown: "NONE (§25 converted — was 45s)"
+    ResourceCost: "30 Altitude Units (consumed from current altitude)"
+    TargetType: self
+    Duration: "6s buff (use it or lose it)"
+    Effect: >
+      Next dive within 6s has +30% potency AND 50% reduced travel time.
+      Consumes 30 AU — net dive is from (current altitude - 30) for formula,
+      but TOTAL potency includes the +30% multiplier on remaining altitude.
+    Example: >
+      At 100 AU: activate → altitude drops to 70 AU → dive from 70 AU (500p) × 1.3 = 650p.
+      At 70 AU: activate → altitude drops to 40 AU → dive from 40 AU (350p) × 1.3 = 455p.
+      Optimal: use at HIGH altitude where the 30 AU sacrifice is proportionally smaller.
+    Section25_Change: >
+      CONVERTED from 45s CD to 30 AU altitude cost. Burst amplifier available
+      whenever altitude invested. Creates tactical depth: sacrifice altitude for
+      power. Available every cycle IF player climbs high enough. No dead windows.
+    RankRequired: 2
+
+  - Name: "Feint Dive"
+    ID: feint_dive
+    ActionType: oGCD
+    AnimationLock: 0.4s
+    Cooldown: 12s  # §25 adjusted — was 20s, now in 5-15s tactical range
+    TargetType: self
+    Effect: >
+      Fake commit animation. Rank 2+ enemies bait-dodge. Strix remains airborne.
+      3s confusion window where real dive commit is unpredictable to AI.
+    Section25_Change: "REDUCED from 20s to 12s (5-15s tactical range). ~1 per dive cycle."
+    RankRequired: 2
+
+  - Name: "Raptor's Eye"
+    ID: raptors_eye
+    ActionType: oGCD
+    AnimationLock: 0.3s
+    Cooldown: "NONE (§25 converted — was 60s)"
+    ResourceCost: "15 Wing Stamina"
+    AltitudeGate: "50+ AU required"
+    TargetType: self
+    Duration: 10s
+    Effect: >
+      Full battlefield visibility (through walls, fog, darkness). All enemies
+      within 50m visible with HP bars and position. Scouting/pre-calculation
+      enhancement for complex encounters or procgen maps.
+    Section25_Change: >
+      CONVERTED from 60s CD to altitude gate (50+ AU) + 15 Wing Stamina cost.
+      The pre-calculation class's READ tool is available when POSITIONED correctly
+      (at altitude, with stamina to spare), not on arbitrary timer. Rewards
+      good flight economy with more information access.
+    RankRequired: 1
+
+  - Name: "Terminal Velocity"
+    ID: terminal_velocity
+    ActionType: oGCD
+    AnimationLock: 0.3s
+    Cooldown: "NONE (§25 converted — was 120s)"
+    ResourceCost: "3 Dive Momentum (earned through successful marked dives)"
+    TargetType: self
+    Duration: 12s
+    Effect: >
+      For 12s: altitude builds at 2× speed, Wing Stamina drain halved,
+      dive potency multiplier increased to ×7 per AU (from ×5). Maximum dive:
+      150 + 700 = 850p. Combined with Dive Accelerant at 100 AU:
+      Activate TV → climb to 100 AU (fast) → Accelerant (drops to 70 AU) →
+      dive from 70 AU at ×7: (150 + 490) × 1.3 = 832p.
+      OR: TV → 100 AU → dive raw: 150 + 700 = 850p.
+    Section25_Change: >
+      CRITICAL CONVERSION from 120s CD to Dive Momentum gate. Class apex
+      earned by PLAYING WELL (3 successful marked dives = proven read-commit
+      mastery). Intensity scaling: Rank 2+ enemies grant 1.5× momentum.
+      Always either USING Terminal Velocity or BUILDING TOWARD it. Zero
+      dead-identity windows. §25 principle: "class identity present in EVERY engagement."
+    RankRequired: 3
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 14: RANK PROGRESSION
+# ─────────────────────────────────────────────────────────────────────────────
+
+RankProgression:
+  Philosophy: >
+    Rank unlocks DIVE VARIANTS and REDUCES GROUND VULNERABILITY TIME.
+    Core loop (ascend → read → commit → recover) is IDENTICAL across ranks.
+
+  Rank1:
+    Name: "Fledgling Talon"
+    UnlockedSkills:
+      Aerial: [Raptor Mark, Windshear Bolt, Screech, Galefeather Toss, Thermal Spiral]
+      Dive: [Raptor Dive]
+      Ground: [Storm Slash, Rending Talon, Venom Rake, Updraft Cutter, Voltaic Strike, Lift Off]
+      oGCD: [Slipstream, Tailwind Rush, Feather Fade, Barrel Roll, Stormweave Toggle, Neurotoxin Sheath, Updraft Burst, Raptors Eye]
+    GroundedDuration: "6s"
+    DiveTypes: "Raptor Dive only"
+    ContentViability: "Normal dungeons, open world, story"
+    DesignIntent: >
+      Full aerial cycle with ONE dive type. Decision is "when/where" not "which."
+      Long ground time (6s) forces meaningful weapon engagement.
+
+  Rank2:
+    Name: "Proven Talon"
+    NewUnlocks:
+      DiveTypes: [Piercing Plunge, Scatterfall]
+      oGCD: [Dive Accelerant, Feint Dive]
+    GroundedDuration: "5s"
+    DesignIntent: >
+      Adds DIVE CHOICE. Pre-calculation now includes "which dive type?"
+      Feint Dive enables smart-enemy counterplay. Faster cycling (5s ground).
+
+  Rank3:
+    Name: "Apex Talon"
+    NewUnlocks:
+      oGCD: [Terminal Velocity]
+    GroundedDuration: "4s"
+    NewPassives:
+      - "Predator Instinct: above 50 AU, see enemy HP% and buffs without targeting"
+      - "Thermal Mastery: descent regen increased to 4%/s (from 3%)"
+      - "Dive Tempo: completing ground combo reduces remaining Grounded Duration by 1s"
+    ContentViability: "Extreme difficulty, Savage Raids, all content"
+    DesignIntent: >
+      Mastery. 4s ground = rapid cycling. Terminal Velocity via Dive Momentum
+      (earned, not timed). Passives reward active play during ground time.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 15: BALANCE TARGETS
+# ─────────────────────────────────────────────────────────────────────────────
+
+BalanceTargets:
+  DPSOutput:
+    FullCycle_OpenSky: "100% of DPS reference"
+    PartialCeiling_MedAlt: "80-85%"
+    GroundLocked_NoCeiling: "55-60%"
+    BossScenario_SingleTarget: "95-100% (Piercing Plunge focused)"
+    TrashPull_AoE: "105-110% (Scatterfall + Raptor Dive cycling — Strix excels AoE)"
+    DesignNote: "±12% balance band. Above average in AoE, below in pure ST."
+
+  SurvivabilityBudget:
+    HPPool: "70% of standard DPS HP"
+    EffectiveHP_WithBarrier: "~90% (barrier + DR compensates)"
+    DashUptime: "Near-continuous i-frame coverage with charge management"
+    AerialSafety: "Above 30 AU: immune to most ground damage"
+    GroundRisk: "Highest risk of any DPS when grounded and out of dashes"
+
+  ResourceEconomy:
+    WingStaminaCycle: >
+      100 AU cycle: ~80 stamina ascent + 3-9 hover. Recovery: 6-12 on dive,
+      60-80 on ground (6-8s). NET: stamina-positive at standard pace.
+      Max sustainable: ~1 dive per 14s without depletion.
+    PoisonUptime: "Neurotoxin Sheath (15s CD, 20s duration) + Venom Rake = near-100%"
+    DiveMomentumCycle: >
+      3 successful marked dives = Terminal Velocity available. At 15s/cycle,
+      TV accessible every ~45-50s through performance, not arbitrary timer.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 16: VULNERABILITY & SKILL EXPRESSION ANALYSIS
+# ─────────────────────────────────────────────────────────────────────────────
+
+VulnerabilityAnalysis:
+  EnvironmentalWeaknesses:
+    LowCeiling: "Hard-limits altitude. Reduced dive potency, ground reliance. INTENTIONAL."
+    NarrowCorridors: "Enemies in lines (not clusters) reduce AoE value. Lightning arc compensates."
+    AntiAirEnemies: "Long-range attacks threaten airborne Strix. Barrel Roll costs stamina."
+
+  SkillExpression:
+    ReadQuality: "#1 differentiator. Great Strix reads positions, patterns, timing."
+    AltitudeManagement: "Minimize hover, maximize useful prep GCDs. Efficient stamina."
+    GroundExecution: "Full poison application, complete combo, immediate safe re-ascend."
+    DiveTypeSelection: "Raptor vs Piercing vs Scatterfall based on target count and priority."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 17: >50% HP RULE INTERACTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+EnemyHP50Rule:
+  SystemRule: "Enemies above 50% HP take +25% from dive attacks (predator opener)."
+  StrixSpecific: "ALL dives deal +25% potency vs >50% HP targets."
+  Implications:
+    PullOpener: "First dive on fresh enemies (100% HP): 650p × 1.25 = 812p."
+    BossPhasing: "Above 50% = bonus dives. Below 50% = standard."
+    AddPhases: "Fresh adds = +25% on EACH. Strix excels during add spawns."
+    TargetPriority: "Always dive highest-HP enemy. Spread damage efficiently."
+  MathExample:
+    RaptorDive_70AU_AboveHalf: "500p × 1.25 = 625p"
+    PiercingPlunge_100AU_AboveHalf: "800p × 1.25 = 1000p"
+    Scatterfall_70AU_6Targets_AboveHalf: "310p × 1.25 × 6 = 2325p total"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 18: CRIT SYSTEM INTERACTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+CritInteraction:
+  SystemRule: "Crit is NOT RNG. Crit is positional/conditional."
+  StrixCritConditions:
+    DiveCrit_HP50: "Auto-crit vs >50% HP. Combined: 1.4× × 1.25 = 1.75× vs standard."
+    GroundCrit_Positional: "Rear positional crits (SPD 15 + dashes enable positioning)."
+    AerialCrit_Marked: "Aerial GCDs crit on Raptor Marked targets."
+    GroundCrit_Poisoned: "Weapon hits crit at 5 Neurotoxin stacks."
+  CritMultiplier: "1.4× (system-wide)"
+  CritImplication: "Skilled Strix: ~70% crit rate. Unskilled: ~20%. = ~20% DPS gap."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 19: AGGRO SYSTEM INTERACTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+AggroInteraction:
+  AerialPositioning: "Airborne = not 'closest target.' Rank 1 enemies ignore. Rank 2+ attempt ranged."
+  GroundThreat: "Grounded Strix = valid target. Low HP = attractive to Rank 2+ AI."
+  PartyDynamic: "Frontliner holds ground aggro. Strix dives untargeted → lands → frontliner covers."
+  SoloPlay: "Hit-and-run via altitude. Enemies deaggro when Strix ascends (target gone)."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 20: PROCGEN MAP INTERACTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+ProcgenInteraction:
+  HighCeiling: "EXCELLENT — full power, aerial scouting, AoE dives"
+  LowCeiling: "POOR — ground mode only, 55-60% DPS"
+  Mixed: "GOOD — adapt between modes by room type"
+  Reconnaissance: >
+    Aerial vision provides massive recon in procgen. Flying over reveals
+    positions, density, hazards, exits. Raptor's Eye (50+ AU gate) adds
+    through-wall vision for unknown layouts.
+  CorridorFighting: "Weakest environment. Wall-jumps, Lightning arc, poison-and-run."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 21: BALANCE VALIDATION
+# ─────────────────────────────────────────────────────────────────────────────
+
+BalanceValidation:
+  DPSCheck:
+    Target: "100% of DPS reference (open sky, full cycle)"
+    OptimalCycleDPS: >
+      Cycle: Raptor Mark (0p) + Windshear Bolt (80p) + Thermal Spiral (0p) +
+      Raptor Dive from 70AU (500p) + Ground combo (Storm Slash 100p + Rending
+      130p + Updraft Cutter 150p) + Venom Rake (90p) + Poison ticking (125p/12s).
+      Total per 15s cycle: ~1175p (before crits, before >50% bonus).
+      PPS: ~78 PPS (within DPS reference band).
+    BurstCeiling: >
+      Maximum single hit (§25 revised):
+      Terminal Velocity (Dive Momentum gated) + Dive Accelerant (30 AU cost) +
+      high altitude + Piercing Plunge on marked >50% HP target:
+      TV at 100 AU → Accelerant (drops to 70 AU) → Plunge at ×7:
+      (200 + 490) × 1.3 × 1.25 × 1.4 × 1.1 ≈ 1720p.
+      OR: TV at 100 AU → raw Plunge: (200 + 700) × 1.25 × 1.4 × 1.1 ≈ 1732p.
+      Requires: 3 Dive Momentum + 50+ AU altitude + marked + above 50% HP.
+    GroundOnlyDPS: "Cave-locked: ~45-50 PPS. 55-60% of reference. INTENTIONALLY WEAK."
+
+  GCDCount:
+    AerialPhase: "2-4 GCDs"
+    GroundPhase: "3-5 GCDs"
+    TotalPerCycle: "6-9 GCDs"
+
+  ButtonCount:
+    GCDs: "5 aerial + 3 dive + 6 ground = 14 total"
+    oGCDs: "4 dashes + 7 utility = 11 total"
+    Total: "~25 unique actions (Experienced tier budget)"
+    Note: "Only 8-12 relevant in any given state. Never all 25 simultaneously."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 22: MATCHUP ANALYSIS & ITEM BASELINE
+# ─────────────────────────────────────────────────────────────────────────────
+
+MatchupAnalysis:
+  VsFrontliners: "Complements. Frontliner holds ground aggro → Strix dives safely."
+  VsHealers: "Self-sufficient via descent regen + Featherward. Rarely needs heals."
+  VsOtherDPS: >
+    Strix vs Reaver: Strix front-loads (opener), Reaver back-loads (pursuit).
+    Strix wins packs, Reaver wins extended ST.
+    Strix vs Colony: Both fly differently. Colony supports, Strix damages.
+  VsEnvironment: "Biggest opponent is the MAP. Open sky: best DPS. Enclosed: worst."
+
+  ItemBaselineReference: >
+    No item provides: sustained flight, pre-calculation, repeated burst on cycle,
+    aerial attack perspective. Strix PERMANENTLY replaces: flight potions,
+    reconnaissance items, dive-attack scrolls, AoE items, elevation consumables.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 23: CONSTRAINTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+Constraints:
+  RuleChecklist:
+    GCD_Base: "2.0s ✓"
+    GCD_Cap: "1.4s (SPD scaling) ✓"
+    oGCD_SingleWeave: "All 0.3-0.6s animation lock ✓"
+    NoBurstCadence: "No 2-min alignment. TV earned via Dive Momentum. ✓"
+    NoRNGProcs: "Zero proc-based mechanics. All deterministic. ✓"
+    CritNotRNG: "All crits positional/conditional. ✓"
+    HP50Rule: "+25% dive damage above 50% HP. ✓"
+    ItemDefinesBaseline: "Flight/AoE/recon items exist. Strix replaces permanently. ✓"
+    PotencyBands: "Filler 100p, finisher 150p, dive 200-650p, ultimate 850+p. ✓"
+    ClassUltimateBand: "TV + max dive = 850p (within 600-1200p band). ✓"
+    Section25_Compliance: "All identity skills resource-gated. No CDs >15s on defining abilities. ✓"
+
+  ConsistencyNotes:
+    - "STR 6: dive = momentum, ground = weapon properties. Zero muscle reliance."
+    - "SPD 15: hollow bones = light = fast. Escape velocity."
+    - "DEX primary: precision + evasion (unhittable + accurate)."
+    - "EVA secondary: dash CD reduction + passive aerial evasion."
+    - "Ground functional: caves are weakness, not death sentence."
+    - "Storm Talons: elemental/poison independent of STR."
+    - "Barrier: emergency, not plan."
+    - "Regen on descent, not just ground."
+    - "Colony flight ≠ Strix flight (utility vs predatory)."
+    - "§25: Resource gating throughout. Dive Momentum for apex. Stamina/altitude for tools."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 24: VISUALIZATION HOOKS
+# ─────────────────────────────────────────────────────────────────────────────
+
+VisualizationHooks:
+  AltitudeGauge: "Vertical bar (left) fills upward. Glows brighter at height."
+  WingStamina: "Feather-shaped meter (drains tail-to-tip). Feathers fall off empty."
+  DiveMomentum: "3 talon marks below altitude gauge. Fill gold on successful marked dives."
+  DivePreview: "Raptor Mark active: ghosted trajectory + impact radius circle."
+  Stormweave: "Talons glow blue (wind) or yellow (lightning)."
+  PoisonStacks: "Target debuff: droplet × count. Full = skull overlay."
+  DescentRegen: "Green healing numbers float up during descent."
+  FeatherwardBarrier: "Swirling feathers. Break = dramatic scatter."
+  IFrames: "Afterimage trail during dashes."
+  DiveImpact: "Camera shake + crater + dust. Higher altitude = bigger effect."
+  ReAscend: "Feather burst at feet → rapid vertical accel (rocket feel)."
+  TerminalVelocity: "Wings glow white-hot. Speed lines. Air distortion around Strix."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 25: §25 COMPLIANCE CHANGELOG
+# ─────────────────────────────────────────────────────────────────────────────
+
+Section25_Changelog:
+  Summary: >
+    All identity-defining oGCDs converted from long cooldowns to resource gates.
+    Tactical CDs (≤15s) preserved. Intensity scales resource generation via
+    Dive Momentum (Rank 2+ enemies grant 1.5× momentum). Class identity is
+    present in EVERY engagement — always using or building toward defining tools.
+
+  Changes:
+    - ID: updraft_burst
+      Before: "30s cooldown"
+      After: "25 Wing Stamina cost, no CD"
+      Gate: "Resource (flight fuel)"
+      Tradeoff: "Escape = less flight time. Honest pressure."
+      IdentityPresence: "Available whenever stamina exists. Never locked out."
+
+    - ID: dive_accelerant
+      Before: "45s cooldown"
+      After: "30 AU altitude cost, no CD"
+      Gate: "Resource (class primary gauge)"
+      Tradeoff: "Burst power costs potential energy. Must climb to earn."
+      IdentityPresence: "Available every cycle at sufficient altitude."
+
+    - ID: feint_dive
+      Before: "20s cooldown"
+      After: "12s cooldown"
+      Gate: "Tactical CD (within 5-15s acceptable range)"
+      Tradeoff: "Minimal — already tactical. Brought into range."
+      IdentityPresence: "Available ~1× per dive cycle. Consistent counterplay access."
+
+    - ID: raptors_eye
+      Before: "60s cooldown"
+      After: "50+ AU altitude gate + 15 Wing Stamina cost, no CD"
+      Gate: "Field state (altitude position) + resource"
+      Tradeoff: "Must BE at altitude to get information. Rewards good positioning."
+      IdentityPresence: "Pre-calc class always has access to its READ tool when flying well."
+
+    - ID: terminal_velocity
+      Before: "120s cooldown"
+      After: "3 Dive Momentum (earned via successful marked dives), no CD"
+      Gate: "Escalation resource (performance-based)"
+      Tradeoff: "Must prove mastery (3 good dives) to access apex. Not time-gated."
+      IdentityPresence: "Always building toward TV or using TV. Zero dead-identity windows."
+
+  IntensityScaling:
+    Principle: "Bigger fights = more gauge = more identity access."
+    DiveMomentum: "Rank 2+ enemies grant 1.5× momentum per dive."
+    WingStamina: "More threats = more Updraft Bursts needed = more stamina pressure = tighter economy."
+    Altitude: "Multi-target fights reward Scatterfall from max altitude = more AU investment."
+
+# ─────────────────────────────────────────────────────────────────────────────

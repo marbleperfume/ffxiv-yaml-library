@@ -1,0 +1,601 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# REAVER / DEEPHUNTER — Design Specification
+# juice-yaml-library | github.com/marbleperfume/juice-yaml-library
+# Split from: Reaver_Complete.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+
+header:
+  class_name: "Reaver"
+  alternate_name: "Deephunter"
+  race_lock: "Chunkers"
+  tier: "Experienced"
+  role: "DPS"
+  lock_type: "Biological"
+  last_updated: "2026-07-14"
+  design_status: "Qualitative Complete — Awaiting Layer 1 Spatial Quantification"
+  strategic_role: "Pursuit-locked single-target DPS. Replaces tracking consumables, speed potions, and berserker draughts with biological pursuit physiology that escalates indefinitely."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1: CLASS IDENTITY + FANTASY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+identity:
+  race: "Chunkers"
+  race_region: "Depth Dead"
+  lock_justification: |
+    Biological lock — shark/piranha pursuit physiology. Chunkers possess:
+    - Bloodscent organs: lateral-line equivalent sensory system that detects
+      biological distress (HP loss) in nearby organisms. Not magical detection —
+      literal chemoreception of stress hormones and blood-equivalent fluids.
+    - Pursuit musculature: fast-twitch dominant, hydrodynamic body plan. Built
+      to accelerate toward weakened prey, not for sustained patrolling.
+    - Frenzy cascade: adrenal system that triggers involuntarily upon detecting
+      prey weakness. Pain suppression, tunnel vision, metabolic overdrive. This
+      is a PHYSIOLOGICAL RESPONSE, not a buff — the Chunker's body seizes
+      control from higher cognition.
+    - Aquatic optimization: native water movement with zero penalty. Pressure
+      tolerance, gill-equivalent respiration, current-riding instincts.
+
+  aesthetic: |
+    Humanoid, cute race (Shylily-esque) with visible predatory features:
+    - Multiple rows of replaceable teeth (visually prominent, slightly too many)
+    - Skin that shifts from smooth/pleasant to rough (dermal denticles engage
+      during Frenzy — tactile threat display)
+    - Eyes that dilate fully black during pursuit (nictitating membrane retracts)
+    - Fins/webbing that deploy from forearms and calves during aquatic movement
+    - Small, compact frame — NOT a hulking brute. The terror is in the
+      disproportionate aggression from something that looks harmless at rest.
+    
+    The dissonance IS the identity: calm Chunker looks like a friendly aquatic
+    companion. Frenzied Chunker is a biological missile with too many teeth.
+
+  behavioral_baseline: |
+    Calm until the hunt begins. Pre-commitment Reaver is:
+    - Observant, patient, efficient in movement
+    - Slightly detached — waiting for the SIGNAL (weakness detection)
+    - Not aggressive, not threatening, not posturing
+    
+    Post-commitment Reaver is:
+    - CANNOT DISENGAGE. This is not willpower — the adrenal cascade physically
+      prevents retreat behavior. The body will not obey "run away" signals.
+    - Accelerating. Every second of pursuit = faster movement toward target.
+    - Narrowing. Peripheral awareness drops. Only the target exists.
+    - Escalating. Damage output increases continuously. No plateau.
+
+  fantasy_reference: |
+    The shark that smells blood. The piranha school sensing a wound. The
+    persistence predator that doesn't stop, doesn't tire, doesn't negotiate.
+    But wrapped in a body that — at rest — looks like it should be selling
+    you potions in a shop. The cute exterior makes the predatory switch
+    MORE unsettling, not less.
+
+  design_lineage: |
+    Descends from the "pursuit predator" archetype (Bloodborne's aggressive
+    playstyles, Monster Hunter's Deviljho behavior, Left 4 Dead's Hunter
+    infected) but applied to a PLAYER class rather than enemy AI. The
+    innovation: making the "unstoppable chase monster" something the player
+    IS rather than fights against.
+    
+    Within the project, fills the "committed DPS" niche no other class
+    occupies — other DPS can always disengage, reposition, switch targets.
+    Reaver trades ALL flexibility for maximum single-target pressure.
+
+  distinction_from_similar:
+    vs_nightmare: |
+      Nightmare is self-damage/shadow manipulation. Internal destruction as fuel.
+      Reaver has NO self-harm mechanic. Reaver is PURSUIT — external target
+      focus, not internal resource burning. Nightmare destroys itself to destroy
+      others. Reaver destroys others by refusing to stop chasing them.
+    vs_madolt_warrior: |
+      Madolt Warrior PULLS things to itself (Capacitor Pull, Unfocus draws
+      aggro). Reaver GOES TO the target. Madolt controls space by making enemies
+      come to it. Reaver abandons all spatial control to chase one thing.
+    vs_siegebreaker: |
+      Siegebreaker is commitment to a DIRECTION. Reaver is commitment to a
+      TARGET. Siegebreaker can't turn. Reaver can turn — but only toward the
+      marked prey. Siegebreaker threatens everything in its path. Reaver
+      threatens ONE thing with absolute certainty.
+    vs_strix: |
+      Strix commits at the moment of DIVE (pre-calculated burst). Reaver
+      commits at the moment of SCENT (sustained escalation). Strix's commitment
+      is brief and devastating. Reaver's commitment is indefinite and ramping.
+      Strix is a bullet. Reaver is a homing missile that gets faster.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 2: RACIAL LOCK
+# ═══════════════════════════════════════════════════════════════════════════════
+
+racial_lock:
+  race: "Chunkers"
+  lock_category: "Biological — Hardcoded Physiology"
+  magiccap: 8
+  magiccap_implication: "Banned from all caster classes. ZERO magic in kit. All abilities biological/physical. No mana resource. No casting. Pure physiology."
+
+  why_only_chunkers: |
+    The Reaver class is not a TECHNIQUE — it is a BODY. The mechanics are
+    rooted in organs, glands, and musculature that only Chunkers possess:
+    
+    1. BLOODSCENT: Lateral-line chemoreception organs. Detects HP loss in
+       other organisms. Cannot be taught or augmented onto another race.
+    2. FRENZY CASCADE: Involuntary adrenal system. When Bloodscent detects
+       prey weakness, the body SEIZES CONTROL. Autonomic — not discipline.
+    3. PURSUIT MUSCULATURE: Fast-twitch hydrodynamic body plan. Speed bonuses
+       from muscle fiber activation patterns unique to Chunker biology.
+    4. AQUATIC OPTIMIZATION: Gill-equivalents, pressure tolerance, fin
+       deployment. Anatomical features, not learned skills.
+
+  cannot_be_replicated_by: |
+    - Items: Bloodhound Capsule approximates tracking but is temporary, weaker,
+      consumed. No item replicates Frenzy escalation or commitment lock.
+    - Other races: No other race has the adrenal cascade. Period.
+    - Magic: Chunkers are MAGICCAP 8 — can't use magic, abilities don't use
+      magic. There's no magical version of this class.
+    - Training: Cannot train someone to have organs they don't have.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 3: ROLE OBJECTIVE FUNCTION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+role_objective:
+  primary: "Execute wounded targets with absolute certainty"
+  secondary: "Punish fleeing/kiting enemies through biological pursuit mechanics"
+  tertiary: "Create threat pressure that distorts enemy decision-making"
+
+  what_the_reaver_is_for: |
+    The party brings targets to threshold (70% HP). The Reaver FINISHES them.
+    Hand-off pattern: soften → commit → execute.
+    
+    Without a Reaver, wounded enemies escape, get healed, or require the
+    entire party to chase. With a Reaver, one member locks onto the wounded
+    target with absolute tracking and escalating damage while the rest of
+    the party handles everything else.
+
+  party_composition_role: |
+    - NOT a frontliner (vulnerable in Calm, needs observation time)
+    - NOT a sustained AoE dealer (single-target pursuit identity)
+    - NOT a controller (minimal CC budget)
+    - IS an executioner (highest single-target kill pressure once committed)
+    - IS a threat distorter (enemies must account for Reaver commitment)
+    - IS a pursuit specialist (no target escapes once marked)
+
+  success_metric: |
+    Succeeded: target died AND party survived the Reaver's absence.
+    Failed: committed to wrong target (wasted pursuit on low value), died
+    during pursuit (gamble lost), or never committed (stayed Calm too long,
+    contributing mediocre DPS while better targets went unfinished).
+
+  strategic_problems_solved:
+    - "Target fleeing at low HP → pursuit lock (cannot escape)"
+    - "Guaranteed single-target kill pressure → commitment = certainty"
+    - "DPS that scales in extended fights → Frenzy ramp (no ceiling)"
+    - "Punish kiting/fleeing → biological counter to evasion"
+    - "At SR3+, item solutions (Bloodhound 20s, Berserker's 15s) expire before kill — Frenzy has no duration"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 4: CLASS MECHANIC — RESOURCE SYSTEM + STATE MACHINE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+core_mechanic:
+  name: "PURSUIT + COMMITMENT"
+  philosophy: |
+    Binary state machine with irreversible transition:
+    CALM STATE → [trigger] → PURSUIT STATE → [resolution: kill or die]
+    
+    No "medium engagement." No partial commitment. The skill expression is
+    entirely in the DECISION BEFORE the trigger — reading the battlefield,
+    evaluating the target, determining if commitment = kill or death.
+
+  # ─── STATE MACHINE ──────────────────────────────────────────────────────────
+
+  states:
+    calm:
+      description: |
+        Pre-commitment. Functional but unremarkable:
+        - Normal movement speed (no pursuit bonus)
+        - Standard DPS output (competent but not exceptional — ~60% of peer DPS)
+        - Full peripheral awareness (can target anything, reposition freely)
+        - Bloodscent passive is SCANNING — providing information for decision
+      gameplay_feel: |
+        Patient observation. Coiled spring. Monitoring HP bars, watching enemy
+        behavior, deciding WHO to commit to. The "chess" phase. Every second
+        in Calm is evaluation: "Is THAT the right target? Can I finish it?
+        What happens to me after I commit?"
+      design_note: |
+        Calm MUST be engaging, not dead time. Bloodscent scanning provides
+        constant tactical information. The Reaver in Calm is an intelligence-
+        gathering predator, not a bored warrior waiting for a proc.
+
+    pursuit:
+      description: |
+        Post-commitment. Locked onto target, CANNOT voluntarily disengage:
+        - Movement speed accelerates continuously toward marked target
+        - Damage dealt escalates over time (Frenzy ramp)
+        - Movement AWAY penalized (slowed, ability lockout, adrenal backlash)
+        - Peripheral awareness narrows — increased damage from non-target sources
+        - Tracking is absolute — target cannot hide, stealth, or break LoS
+      gameplay_feel: |
+        Controlled violence with mounting desperation. Every second: hit harder,
+        move faster — but more vulnerable to everything ELSE. Target runs toward
+        allies. You can't stop. Healer calls for peel. You can't respond. Boss
+        spawns adds behind you. You don't turn around.
+        
+        THIS IS THE GAMBLE. Right target = fastest kill in the game.
+        Wrong target = party loses a DPS and gains nothing.
+
+  # ─── RESOURCE SYSTEM ────────────────────────────────────────────────────────
+
+  resource_system:
+    primary_resource: "Frenzy (Escalating State)"
+    resource_model: |
+      Frenzy is NOT a gauge that fills and spends. It is an ESCALATING STATE
+      that increases continuously during Pursuit and resets upon resolution.
+      No "building Frenzy to spend." Frenzy IS the spending — each stage
+      increases power but also increases vulnerability and lock-in.
+      
+      FEEDBACK-BASED: the system's output (damage, speed) feeds back into
+      input (Frenzy acceleration from dealing/taking damage). No gauge. No
+      bar. No mana equivalent. The resource IS the state.
+
+    stages:
+      stage_0:
+        name: "Calm"
+        threshold: "Not in Pursuit"
+        bonuses: "None. Standard DPS. Full awareness. Free movement."
+        restrictions: "Cannot use Pursuit abilities. Limited damage ceiling."
+      stage_1:
+        name: "Scenting"
+        threshold: "0-5s in Pursuit"
+        bonuses: "+20% damage to target, +10% speed toward target, Tracking active"
+        restrictions: "Cannot disengage. Cannot change target."
+      stage_2:
+        name: "Closing"
+        threshold: "5-12s in Pursuit"
+        bonuses: "+40% damage, +25% speed, 15% DR from target, Thrash unlocked"
+        restrictions: "Stage 1 + awareness reduced 15%"
+      stage_3:
+        name: "Frenzied"
+        threshold: "12-20s in Pursuit"
+        bonuses: "+70% damage, +40% speed, 25% DR from target, Deathroll unlocked, Refuse to Die active"
+        restrictions: "Stage 2 + awareness reduced 30%. Ally communication impaired."
+      stage_4:
+        name: "Apex Predator"
+        threshold: "20s+ in Pursuit"
+        bonuses: "+100%+ damage (continues scaling), +50%+ speed, 35% DR from target"
+        restrictions: "Stage 3 + awareness = target ONLY. Deaf/blind to non-target."
+
+    reset_conditions:
+      - "Target killed → clean reset, 3s Adrenal Recovery, return to Calm"
+      - "Reaver killed → permanent reset (death)"
+      - "Target phases/disappears → Adrenal Crash (8s severe debuff), forced Calm"
+      - "Adrenal Dump ability → drops one stage (not full reset)"
+
+    anti_rotation_note: |
+      Frenzy is CONTINUOUS. No "build to 4, dump, rebuild" loop. Pattern:
+      commit → ramp → kill → recover → commit again. Each pursuit is a
+      SEPARATE escalation event. No carrying Frenzy between targets. This
+      prevents "rotation" thinking — each engagement is a fresh gamble.
+
+    secondary_resource: "Commitment Windows"
+    secondary_description: |
+      The Reaver's TRUE resource is OPPORTUNITY. Good commitment targets per
+      encounter are LIMITED. Each is irreversible. A bad commitment = wasted
+      resource unrecoverable within the same encounter.
+
+  # ─── CORE LOOP ──────────────────────────────────────────────────────────────
+
+  core_loop:
+    summary: "Observe → Evaluate → Commit → Escalate → Resolve → Recover"
+    phases:
+      observe: "Calm state. Bloodscent scans enemies. Info flows: who's wounded, who's approaching threshold, battlefield geometry."
+      evaluate: "DECISION phase. Which target can I kill? Should I kill? Can party survive without me? Is this bait? Highest-skill-expression moment."
+      commit: "Lock Jaw or Blood Rush. IRREVERSIBLE. The hunt begins."
+      escalate: "Frenzy ramps. Stronger AND more dangerous. Reactive ability use based on target behavior."
+      resolve: "Target dies (success) or Reaver dies (failure). Binary. No draws."
+      recover: "3s Adrenal Recovery after kill. Brief vulnerability. Then Calm resumes."
+
+  # ─── BLOODSCENT ─────────────────────────────────────────────────────────────
+
+  bloodscent:
+    description: |
+      Passive sensory ability. Constantly active. Real-time awareness of
+      enemies' HP relative to activation threshold. This is INFORMATION —
+      not a trigger. The Reaver sees who's approaching threshold and plans.
+    activation_threshold: "Target drops below 70% HP"
+    what_it_provides:
+      - "Tracking: target's position revealed regardless of stealth, LoS, terrain"
+      - "Speed: +15% movement toward marked target (stacks with Frenzy)"
+      - "Damage: +10% dealt to marked target (baseline, before Frenzy)"
+      - "Lock: cannot voluntarily select different target or retreat"
+    range: "Scales with target's HP deficit — lower HP = detectable from further"
+    design_note: |
+      70% is deliberately HIGH. Triggers EARLY in many fights. Forces fast
+      decisions: commit NOW at 70% (risky) or wait (risk target heals above
+      threshold / Reaver misses optimal window).
+
+  # ─── FRENZY ─────────────────────────────────────────────────────────────────
+
+  frenzy:
+    description: |
+      Escalating physiological state during Pursuit. NOT a buff with duration —
+      a RAMP that increases continuously. No ceiling. No plateau.
+    escalation_drivers:
+      time_based: "Primary. Every second committed = stronger. Automatic."
+      damage_dealt: "Secondary. Successful hits accelerate ramp. Rewards melee uptime."
+      damage_taken_from_target: "Tertiary. Being hit by prey = MORE aggressive. Prevents 'fight back' defense."
+      environmental: "Water terrain doubles all Frenzy accumulation rates."
+    what_ends_it:
+      - "Target dies → Frenzy drops, Calm after 3s recovery"
+      - "Reaver dies"
+      - "Target exits instance/phase → Adrenal Crash debuff"
+      - "Target healed above threshold does NOT break Frenzy once committed"
+
+  # ─── TRIGGER SYSTEM ─────────────────────────────────────────────────────────
+
+  trigger_system:
+    commitment_model: |
+      SEMI-VOLUNTARY. Detection is involuntary (body senses weakness).
+      Commitment is voluntary (player selects target). Once selected,
+      commitment is INVOLUNTARY (cannot be cancelled).
+    
+    multiple_targets: |
+      Multiple enemies below 70% → all highlighted. Player CHOOSES ONE.
+      Core decision: safest kill? Highest-value? Near water? Isolated?
+
+    party_coordination: |
+      Optimal play: "Party brings Target X to 70%, Reaver commits and finishes."
+      Hand-off pattern: soften → execute. Risk: committing to a target the
+      party wasn't focusing = alone against 70% HP enemy with no support.
+
+    pursuit_termination:
+      target_killed: "Clean exit. 3s Adrenal Recovery. Calm resumes."
+      reaver_killed: "Death. Standard respawn."
+      target_phases: "Adrenal Crash: -40% speeds, -30% damage, +25% taken, 8s."
+      target_healed: "Does NOT break pursuit. Once committed = COMMITTED."
+      ally_intervention: "Cannot break pursuit. Biological, not mental. Party plans AROUND."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 5: CLASS-SPECIFIC SYSTEMS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class_specific_systems:
+
+  aquatic_terrain_advantage:
+    description: |
+      Chunker native environment. Water terrain provides:
+      - No movement penalty (others lose 30-50% speed in water)
+      - +20% speed bonus in water (on top of no penalty)
+      - Abilities gain bonus range/AoE in water
+      - Pursuit in water = dramatically accelerated Frenzy ramp
+    design_function: |
+      Map-dependent power spikes. Enemies fleeing toward water = WORST escape
+      decision against a Reaver. Creates Wavecaller synergy (water terrain
+      generation) and anti-synergy with fire terrain manipulation.
+
+  commitment_lock_physics: |
+    Displacement interactions during Pursuit:
+    - TOWARD target: works normally (allies can push Reaver closer)
+    - AWAY from target: Reaver resists (design leaning)
+    - Involuntary displacement: no adrenal backlash (not Reaver's choice)
+    - Voluntary input away: increasing resistance + stamina drain + screen distortion
+
+  tunnel_vision_system: |
+    As Frenzy escalates, "awareness" decreases = increased damage from
+    NON-TARGET sources. At Stage 4: deaf/blind to everything except mark.
+    
+    GAMEPLAY IMPACT ONLY. Player always has full screen vision. Character's
+    "reduced awareness" = increased vulnerability, NOT UI blindness.
+    Do NOT obscure the player's screen during Frenzy.
+
+  refuse_to_die: |
+    Frenzy Stage 3+: deferred-death mechanic. If Reaver would die, enters
+    3s "undying" window. If marked target dies by ANY cause during those 3s,
+    Reaver survives at 15% HP. Encourages: "help me finish this and I live."
+
+  adrenal_crash: |
+    Pursuit terminates without kill → Adrenal Crash: -40% speeds, -30% damage,
+    +25% taken, 8 seconds. WRONG BET punishment. Party must cover recovery.
+
+  cc_budget:
+    classification: "DPS — Minimal CC"
+    access: "Stage 1 ONLY (conditional slows: Hamstring on fleeing, Crimson Wake in water)"
+    no_access: "No Stage 2 (silence/interrupt) or Stage 3 (stun/blind/paralysis)"
+    philosophy: |
+      BENEFITS from ally CC enormously (stunned target can't flee = free Rend).
+      Contributes almost nothing TO team's CC budget. By design: executioner,
+      not jailer.
+
+  vulnerability_profile:
+    core: "CANNOT DISENGAGE"
+    vectors:
+      - "Bait-and-trap: target intentionally below 70%, flees to ambush. Reaver follows because it MUST."
+      - "Multi-threat lockout: committed to one, cannot switch when adds spawn."
+      - "Kiting: faster enemies or repeated gap-creators = Frenzy ramps but damage can't be APPLIED."
+      - "Pre-commitment focus: Calm-state Reaver is NORMAL. Focused down before committing = worst DPS in game."
+      - "Healing the target: extends fight, doesn't break pursuit. More time = more non-target damage accumulates."
+
+  item_complementarity:
+    replaces:
+      - "Bloodhound Capsule (20s tracking → Bloodscent is permanent, scaling)"
+      - "Berserker's Draught (+30% 15s → Frenzy no duration, scales higher)"
+      - "Flashstep Cartridge (8m teleport → Apex Pursuit repeatable, target-tracking)"
+      - "Rupture Oil (3-stack 8s → Rend stacks infinitely)"
+    still_wants:
+      - "Survival (pre-commitment — Reaver vulnerable in Calm)"
+      - "CC items (target lockdown — minimal native CC)"
+      - "Terrain manipulation (water generation, escape blocking)"
+
+  class_synergies:
+    strong:
+      - "Shaman: slows/paralyzes target → free damage window"
+      - "Wavecaller: generates water terrain + heals through walls"
+      - "Siren: commands target to STOP → immediate catch"
+      - "Grappler: pins target → free Rend stacks on immobile target"
+    weak:
+      - "Adafold: containment conflicts with Reaver chasing OUTSIDE zones"
+      - "Another Reaver: two DPS locked to different targets = party loses both"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 6: ROTATION PHILOSOPHY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+rotation_philosophy:
+  core_principle: "There is no rotation. There are REACTIONS."
+  
+  decision_flow: |
+    Ability usage dictated by TARGET'S BEHAVIOR, not internal sequence:
+    
+    1. TARGET STANDS AND FIGHTS → Rend spam (stacking, snowball)
+    2. TARGET FLEES → Hamstring Snap (punish, slow, close gap)
+    3. TARGET CREATES GAP → Apex Pursuit (gap close)
+    4. NON-TARGET INTERFERES → Thrash (knock away distractions)
+    5. TARGET LOW HP → Deathroll (execution attempt)
+    6. NEED BURST NOW → Adrenal Dump (sacrifice stage for burst)
+    7. ALLY IN DANGER → Pack Signal (spend GCD for ally, cost = lost Frenzy damage)
+    
+    Two pursuits against different targets look COMPLETELY DIFFERENT.
+    Fleeing target = heavy Hamstring/Apex. Standing target = pure Rend into
+    Deathroll. Kiting target with adds = Thrash + Apex + Hamstring interleaved.
+
+  what_drives_action_choice: |
+    - Target position relative to Reaver (in range? fleeing? approaching?)
+    - Target HP (above/below 25% = Deathroll availability)
+    - Current Frenzy stage (unlocks: Thrash at 2+, Deathroll at 3+)
+    - Non-target interference (adds requiring Thrash?)
+    - Ally status (Pack Signal needed?)
+    - Time pressure (pursuit duration vs. vulnerability accumulation)
+
+  pre_commitment_decisions: |
+    Before Lock Jaw — the REAL skill-expression choices:
+    - Who do I commit to? (target evaluation)
+    - When? (timing — about to get healed/phase?)
+    - Where from? (positioning — near water? escape routes?)
+    - Circling Patience for setup? (power vs. time tradeoff)
+    - Sense Vulnerability first? (information vs. GCD cost)
+    - Test Bite to force threshold? (aggressive play vs. accidental commit)
+
+  anti_2_minute_compliance: |
+    No burst window. No "build → spend → build." No optimal rotation.
+    Calm → commit → ramp → kill → recover. Each pursuit unique in duration.
+    Perfectly aligned with project anti-rotation philosophy.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 7: ANTI-PATTERNS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+anti_patterns:
+  - name: "No Burst Windows"
+    violation: "Frenzy is CONTINUOUS ESCALATION, not 'build then spend.' A dump window = standard DPS burst cadence = violates anti-2-minute philosophy."
+    correct: "Frenzy increases passively over time. Adrenal Dump is emergency SACRIFICE (losing stage) not PAYOFF (spending resource)."
+
+  - name: "No Rotation"
+    violation: "Optimal sequence A→B→C→repeat = predictable repeatable pattern. Reaver gameplay is REACTIVE to target behavior."
+    correct: "Abilities CONDITIONAL on target actions/HP, not internal sequence. Two different targets = completely different ability usage."
+
+  - name: "No Multi-Target Spreading"
+    violation: "Efficient simultaneous multi-target damage = standard AoE DPS, not pursuit predator."
+    correct: "ONE target. Thrash at 40% to non-marked is UTILITY (clearing interference), not AoE identity."
+
+  - name: "No Voluntary Disengage"
+    violation: "'Commit but pay X to uncommit' eliminates the defining tension."
+    correct: "CANNOT EXIT PURSUIT. No CD, no cost, no ability breaks it. Only: target dies, Reaver dies, target leaves area. NON-NEGOTIABLE."
+
+  - name: "No Passive Gameplay"
+    violation: "Frenzy stats so high that auto-attack wins = no decisions after commitment."
+    correct: "Auto-attacks deal 50% during Pursuit. Frenzy bonuses apply to ABILITIES. Active play required."
+
+  - name: "No Pre-Commitment Power"
+    violation: "Competitive Calm damage = no reason to commit (risk death for power you already have)."
+    correct: "Calm = ~60% of peer DPS. Pursuit Stage 3+ = ~150-200%. The power gap IS the reason to commit."
+
+  - name: "No Shadow/Darkness/Undeath Theming"
+    violation: "Edge-lord aesthetics violate the biological predator identity."
+    correct: "Visual: water, blood, teeth, fins, speed. Audio: rushing water, jaw snaps, heartbeat. References: sharks, piranhas, orcas. NOT: vampires, liches, demons."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 8: DESIGN NOTES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+design_notes:
+
+  open_mechanical_questions:
+    - "Displacement physics during Pursuit — toward/away interaction (leaning: resist away, allow toward)"
+    - "Deathroll pin interruptibility — leaning: uninterruptible from outside"
+    - "Bloodscent range — infinite during Pursuit, 30-50m during Calm (scales with HP deficit)"
+    - "Refuse to Die + ally kill during window — leaning: yes, Reaver survives at 15%"
+
+  open_balance_questions:
+    - "70% threshold — intentionally high to force fast decisions. Pursuit IS the class."
+    - "Frenzy Stage 4 — if target survives 20s, it SHOULD feel unfair. That's the reward."
+    - "Feeding Frenzy lifesteal at Stage 4 — no cap if non-target vulnerability preserved."
+    - "Adrenal Crash severity — intentionally punishing. Wrong bet = party covers."
+
+  open_content_questions:
+    - "Aquatic content: heavy in Depth Dead, present but not dominant elsewhere."
+    - "Boss phases: telegraph honestly, let Reaver READ them (no dedicated 'Reaver windows')."
+    - "SR3+ bait tactics: occasional not constant. Knowledge check, not unavoidable trap."
+
+  # ─── §25 AUDIT: LONG COOLDOWN FLAGS ─────────────────────────────────────────
+
+  section_25_audit:
+    note: |
+      §25 mandates identity-defining abilities use resource gating rather
+      than static cooldowns >15s. The following carry CDs that may violate
+      this. Flagged for Skills task — design intent preserved, CD values
+      to be converted to resource/state gating where appropriate.
+
+    flagged_abilities:
+      - ability: "Blood Rush"
+        current_cd: "45s"
+        identity_relevance: "HIGH — primary aggressive commitment trigger"
+        recommendation: "Needs resource gating conversion. Consider Frenzy decay timer or 'hunts since last use' instead of flat 45s. The class has no traditional cooldown cadence — a 45s timer creates one."
+
+      - ability: "Pack Signal"
+        current_cd: "45s"
+        identity_relevance: "MEDIUM — team utility, not core identity loop"
+        recommendation: "Needs resource gating conversion. Gate behind 'Frenzy stage achieved this pursuit' or marked-target hits landed."
+
+      - ability: "Adrenal Dump"
+        current_cd: "30s"
+        identity_relevance: "HIGH — emergency burst, 'sacrifice stage for burst' tool"
+        recommendation: "Needs resource gating conversion. Already gated (requires Stage 2+). Stage-drop cost IS natural gate — remove timer."
+
+      - ability: "Shed Scent"
+        current_cd: "30s"
+        identity_relevance: "MEDIUM — pre-commitment survival"
+        recommendation: "Needs resource gating conversion. Tie to 'time since last commitment ended' or HP threshold proximity."
+
+      - ability: "Wade In"
+        current_cd: "20s"
+        identity_relevance: "LOW-MEDIUM — terrain repositioning"
+        recommendation: "Borderline. Consider gating behind water proximity duration, or retain if quantification pass confirms no rhythm creation."
+
+  # ─── SUPERSEDED ELEMENTS ────────────────────────────────────────────────────
+
+  superseded_elements:
+    - element: "Blood Rush 45s CD creating implicit burst cadence"
+      tension: "§23 anti-2-minute — fixed CD >15s on major ability = predictable rhythm"
+      status: "Attempted, superseded by §25. Skills file to implement state-gated version."
+
+    - element: "Adrenal Dump 30s CD creating mid-Pursuit rotation"
+      tension: "§23 — if Dump optimal every 30s during long pursuits, becomes rotation"
+      status: "Attempted, superseded by §23/§25. Stage-drop cost IS the gate; timer removed in Skills file."
+
+    - element: "Pack Signal 45s creating 'use on CD' optimization pressure"
+      tension: "§23 — fixed-CD utility creates 'use on CD' patterns"
+      status: "Attempted, superseded by §25. Skills file to implement conditional gate."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DESIGN VALIDATION (Summary Assertions)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+design_validation:
+  item_baseline_test: true
+  item_baseline_note: "Bloodhound + Berserker's + Flashstep + Rupture Oil = functional but worse in every dimension."
+  item_solution_meaningfully_worse: true
+  unique_premium: "Commitment-driven indefinite escalation with no ceiling. No item matches."
+  anti_rotation_compliance: true
+  crit_system_compliance: true
+  crit_note: "Frenzy bonus is flat scaling, not crit. Crit layers through positional/conditional per project rules."
+  magiccap_compliance: true
+
+# ▼ CONTINUES IN: Reaver_Skills.yaml

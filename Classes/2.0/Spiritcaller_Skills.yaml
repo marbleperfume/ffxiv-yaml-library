@@ -1,0 +1,1085 @@
+# Classes/Healer/Spiritcaller_Skills.yaml
+# ══════════════════════════════════════════════════════════════════════════════
+# SPIRITCALLER (Tidebinder) — Full Skill Roster & Balance Implementation
+# ══════════════════════════════════════════════════════════════════════════════
+# ▲ CONTINUES FROM: Spiritcaller_Design.yaml
+# ▲ GAP: Sections 1-6 NOT in this file (identity, race lock, role objective,
+#   class mechanic, resource system, weapon, rotation philosophy, terrain,
+#   anti-patterns, design notes, UI/UX)
+# ══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Healer.Spiritcaller.Skills
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 7: BALANCE TARGETS
+# ─────────────────────────────────────────────────────────────────────────────
+
+BalanceTargets:
+  HealerBaseline: 65%  # Standard healer DPS target (ref BalanceTargets.yaml)
+  DPSWhileHealing: 55%  # Melee uptime partially interrupted by Slime management
+  PureDPSMode: 70%  # Slime in Damage mode, full melee combo uptime
+  # NOTE: Spiritcaller's "DPS while healing" is HIGHER than other healers because
+  # healing costs NO GCDs (Slime handles it). But the Moisture vulnerability
+  # means death risk is higher, which averages out over encounters.
+
+  GlobalCooldown:
+    Base: 2.0s
+    HasteCap: 1.4s
+  oGCDAnimationLock: 0.6s  # Standard for most oGCDs
+  SlimeCommandLock: 0.3s  # Slime commands have SHORTER lock (responsive micro)
+  WeaveModel: single_weave_only
+
+  PotencyBands:
+    BasicFiller: 100        # Trident Thrust (reference GCD)
+    ComboFinisher: 170-200  # Tidal Impale (3-hit combo ender)
+    WaterSkill_Small: 150   # Moisture-cost water attacks (spending defense)
+    WaterSkill_Large: 250-300  # Heavy Moisture-cost water attacks
+    SlimeDamage_PerTick: 50-70  # Slime in Damage mode (per 3s tick)
+    SlimeHeal_PerTick: 150-200  # Slime in Heal mode (per 3s tick, proximity scaled)
+    SlimeBurstHeal: 350     # Swell Burst (positioned burst)
+    ClassUltimate: 600-700  # Tidal Convergence equivalent value over 15s
+
+  MoistureEconomy:
+    TimeToFull: "~20s from 0 to 100 with Slime at 0-10y range"
+    TimeToFull_Intensity: "~13s from 0 to 100 (high-intensity +50% generation)"
+    TimeToDepleted: "~30s from 100 to 0 with Slime at 30y+ and no water skills"
+    AggressiveDrain: "~15s from 100 to 0 with Slime far + water skill spam"
+    SafeWindow: "~12s at 80 Moisture before hitting danger zone (40) with Slime at 30y"
+    DesignNote: >
+      The 12s safe window at 80 Moisture means expert players can send
+      Slime away for roughly 4 GCDs worth of healing before needing to
+      evaluate recall. This is intentional — enough time to deliver meaningful
+      healing, not enough to forget about your own gauge.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 8: SKILL ROSTER — DRAKOL GCD ACTIONS (Melee Combo)
+# ─────────────────────────────────────────────────────────────────────────────
+
+Skills:
+  DrakolGCD:
+    # Philosophy:
+    # The Drakol's GCD timeline is 100% melee damage. There are NO GCD heals.
+    # Healing is the Slime's job. The Drakol FIGHTS. The melee combo is simple
+    # by design — the complexity budget is spent on Slime management (oGCDs),
+    # not on a complicated rotation. This is "easy hands, hard brain" design.
+
+    BasicCombo:
+      - Name: "Trident Thrust"
+        ID: trident_thrust
+        ActionType: GCD
+        CastTime: 0s  # Instant
+        Recast: 2.0s
+        TargetType: single_enemy
+        DamageType: physical
+        Potency: 100  # Reference filler
+        Position: "Combo Step 1"
+        ComboFrom: null  # Starter
+        ComboInto: [barbed_sweep, rising_current]
+        MoistureCost: 0
+        Range: 4y
+        Description: >
+          Standard trident stab. Combo starter. No resource cost, no conditions.
+          The bread-and-butter GCD you press between Slime commands.
+        RankRequired: 1
+
+      - Name: "Barbed Sweep"
+        ID: barbed_sweep
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: enemy_cone
+        ConeAngle: 120_degrees
+        ConeRange: 4y
+        DamageType: physical
+        Potency: 120  # AoE option, slightly higher than filler
+        Position: "Combo Step 2 (AoE path)"
+        ComboFrom: [trident_thrust]
+        ComboInto: [tidal_impale, undertow_slam]
+        MoistureCost: 0
+        Range: 4y
+        Description: >
+          Wide trident sweep. AoE combo path. Hits all enemies in frontal cone.
+          Use when 3+ enemies present. Combos into finishers.
+        RankRequired: 1
+
+      - Name: "Rising Current"
+        ID: rising_current
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: single_enemy
+        DamageType: physical
+        Potency: 130  # Single-target option, higher base
+        Position: "Combo Step 2 (ST path)"
+        ComboFrom: [trident_thrust]
+        ComboInto: [tidal_impale, skewering_dive]
+        MoistureCost: 0
+        Range: 4y
+        CritCondition: "Positional — Rear: guaranteed critical hit"
+        CritNote: >
+          Crit is NOT RNG. It's positional. Hit the enemy's rear to crit.
+          This gives Spiritcaller a reason to care about enemy facing even
+          while managing the Slime — another attention-split layer.
+        Description: >
+          Upward trident thrust with lifting motion. Single-target combo path.
+          Rear positional for guaranteed crit. Combos into finishers.
+        RankRequired: 1
+
+    ComboFinishers:
+      - Name: "Tidal Impale"
+        ID: tidal_impale
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: single_enemy
+        DamageType: physical
+        Potency: 200  # Combo finisher — strong
+        Position: "Combo Step 3 (standard finisher)"
+        ComboFrom: [barbed_sweep, rising_current]
+        ComboInto: null  # Restarts combo
+        MoistureCost: 0
+        Range: 4y
+        BonusEffect: "If enemy > 50% HP: +25% damage (250p effective)"
+        BonusNote: >
+          >50% HP rule: enemies above half health take +25% bonus damage.
+          This is a SYSTEM RULE applied here. It means Spiritcaller front-loads
+          damage on healthy targets, consistent with all classes.
+        Description: >
+          Driving impale through the target. Standard combo finisher. High potency.
+          The >50% HP bonus makes it particularly strong as an opener.
+        RankRequired: 1
+
+      - Name: "Undertow Slam"
+        ID: undertow_slam
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: enemy_circle
+        CircleRadius: 5y
+        DamageType: physical
+        Potency: 170  # AoE finisher — slightly lower per target, more total
+        Position: "Combo Step 3 (AoE finisher)"
+        ComboFrom: [barbed_sweep]
+        ComboInto: null
+        MoistureCost: 0
+        Range: 4y
+        BonusEffect: "Creates 3y water puddle at impact point (lasts 15s)"
+        TerrainNote: "This is a FREE puddle — no Moisture cost. Reward for AoE path."
+        Description: >
+          Slam trident into ground, creating a shockwave and water splash.
+          AoE combo finisher. Bonus: creates a water puddle (terrain interaction)
+          at zero Moisture cost. The AoE combo path generates terrain value.
+        RankRequired: 1
+
+      - Name: "Skewering Dive"
+        ID: skewering_dive
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: single_enemy
+        DamageType: physical
+        Potency: 180  # Slightly lower than Tidal Impale but has gap-close
+        Position: "Combo Step 3 (mobility finisher)"
+        ComboFrom: [rising_current]
+        ComboInto: null
+        MoistureCost: 0
+        Range: 15y  # GAP CLOSER — lunges to target
+        BonusEffect: "Dash to target (gap closer). If target is Soaked: +40% potency (252p)"
+        TerrainSynergy: "Soaked debuff applied by Slime's Damage mode or water puddles"
+        Description: >
+          Leaping trident dive toward target. Gap closer AND combo finisher.
+          Bonus damage against Soaked enemies rewards coordinating with Slime
+          positioning — if Slime applied Soaked, this hits MUCH harder.
+        RankRequired: 2
+
+    WaterSkills:
+      # These are Drakol GCD actions that cost MOISTURE (spending defense for offense/utility).
+      # They are OPTIONAL — you can ignore them and just melee. But they add DPS/utility
+      # at the cost of personal safety. The tradeoff is explicit.
+
+      - Name: "Torrent Lance"
+        ID: torrent_lance
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: single_enemy
+        DamageType: water  # Water element (magical, but STR-scaled via Moisture conversion)
+        Potency: 180
+        MoistureCost: 15
+        Range: 15y  # RANGED — this is the Drakol's only ranged option
+        BonusEffect: "If target is Soaked: applies Waterlogged (3s, -10% enemy damage dealt)"
+        Description: >
+          Hurl a water spear at target. The Drakol's ONLY ranged GCD. Costs
+          Moisture — you're spending your skin's water to form the projectile.
+          Use when forced out of melee, or to apply Waterlogged debuff for
+          mitigation. Ranged flexibility at defense cost.
+        DesignNote: >
+          This gives Spiritcaller a ranged option when knocked back or during
+          movement phases, but at Moisture cost. It's not free — every ranged
+          GCD hastens the Desiccated state if Slime isn't nearby refilling.
+        RankRequired: 1
+
+      - Name: "Riptide Slash"
+        ID: riptide_slash
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: enemy_line
+        LineWidth: 4y
+        LineLength: 10y
+        DamageType: water
+        Potency: 150  # Per target hit (AoE line)
+        MoistureCost: 20
+        Range: melee_origin  # Originates from Drakol's position
+        BonusEffect: "Leaves water trail (puddle line, 4y wide, 15s duration)"
+        TerrainNote: "Creates linear puddle — terrain control at Moisture cost."
+        Description: >
+          Sweep trident in horizontal arc, releasing a blade of water forward.
+          Line AoE that leaves a puddle trail. Excellent for creating terrain
+          coverage, but costs significant Moisture. Best used when Slime is
+          close (offsetting the cost with proximity generation).
+        RankRequired: 1
+
+      - Name: "Geyser Strike"
+        ID: geyser_strike
+        ActionType: GCD
+        CastTime: 1.0s  # Short cast — commitment for power
+        Recast: 2.0s
+        TargetType: ground_target
+        TargetRadius: 5y
+        DamageType: water
+        Potency: 250
+        MoistureCost: 25
+        Range: 20y
+        BonusEffect: "Creates geyser puddle (5y, 20s). Enemies in puddle: Soaked applied per tick."
+        CritCondition: "If Drakol is standing in ANY puddle while casting: guaranteed crit"
+        Description: >
+          Call up a geyser at target location. High damage, ground-targeted,
+          creates long-lasting terrain. The cast time makes it a commitment —
+          you sacrifice your weave window. The crit condition rewards puddle
+          awareness (stand in your own terrain for crits).
+        RankRequired: 2
+
+      - Name: "Maelstrom"
+        ID: maelstrom
+        ActionType: GCD
+        CastTime: 1.5s  # Long cast — high commitment
+        Recast: 2.0s
+        TargetType: ground_target
+        TargetRadius: 8y
+        DamageType: water
+        Potency: 300  # HIGH — this is the Drakol's biggest single hit (non-ultimate)
+        MoistureCost: 30  # EXPENSIVE — nearly 1/3 of max gauge. THIS IS THE GATE (§25).
+        Range: 25y
+        Cooldown: none  # §25 CHANGE: removed 30s CD. 30 Moisture IS the sufficient gate.
+        BonusEffect: "Pulls enemies toward center (gravitational CC). Creates massive puddle (8y, 25s)."
+        Section25Note: >
+          Former 30s additional cooldown REMOVED per §25 audit. The 30 Moisture cost
+          is the sole gate. Two rapid casts = 60 Moisture spent = DR collapse from
+          full to danger zone. Self-punishing excess IS the cooldown.
+        Description: >
+          Summon a whirlpool at target location. Highest-potency water skill.
+          Pulls enemies inward (setup for party AoE). Creates massive terrain.
+          30 Moisture cost is enormous — using this while Slime is far away
+          is EXTREMELY risky (could hit Desiccated from a single cast).
+          Best used when Slime is close and Moisture is >80.
+        RankRequired: 3
+
+      - Name: "Tidal Rush"
+        ID: tidal_rush
+        ActionType: GCD
+        CastTime: 0s
+        Recast: 2.0s
+        TargetType: self_dash
+        DashDistance: 15y
+        DamageType: water
+        Potency: 100  # Low damage — utility skill
+        MoistureCost: 10
+        Range: self
+        BonusEffect: "Dash through enemies, applying Soaked. Leaves water trail puddle."
+        Description: >
+          Dash forward in a burst of water. Gap closer / escape tool. Low damage
+          but applies Soaked to everything you pass through and creates terrain.
+          Minimal Moisture cost for a mobility tool. Use to reposition into melee
+          or escape danger zones.
+        RankRequired: 1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 9: SKILL ROSTER — SLIME oGCD COMMANDS (Spirit Direction)
+# ─────────────────────────────────────────────────────────────────────────────
+
+  SlimeCommands:
+    # Philosophy:
+    # These are ALL oGCDs. The Slime is commanded between GCDs — you never stop
+    # attacking to direct your spirit. This is the "RTS micro" layer: weaving
+    # spirit commands between melee swings. The commands are FAST (0.3s lock)
+    # to feel responsive. The complexity is in WHEN and WHERE, not in execution.
+    #
+    # §25 NOTE: All former cooldowns >15s replaced with Moisture costs.
+    # Powerful commands cost Moisture (defense). Short tactical CDs (5-15s)
+    # retained where needed to prevent animation abuse.
+
+    MovementCommands:
+      - Name: "Direct Spirit"
+        ID: direct_spirit
+        ActionType: oGCD
+        AnimationLock: 0.3s  # Fast — responsive micro
+        Recast: 1.0s  # Can redirect frequently
+        MoistureCost: 0  # Free — core positioning tool
+        Effect: "Command Slime to move to target ground position"
+        Range: 40y  # Anywhere within bond range
+        Description: >
+          Point-and-click ground target. Slime flows to that position. This is
+          the primary positioning tool — used constantly to adjust Slime location.
+          1.0s recast means you can reposition every other GCD cycle if needed.
+        RankRequired: 1
+
+      - Name: "Follow Ally"
+        ID: follow_ally
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 1.0s
+        MoistureCost: 0  # Free — mode assignment
+        Effect: "Command Slime to follow target party member (maintains 3y distance)"
+        Range: 40y
+        Description: >
+          Attach Slime to a party member. Slime tracks their movement, healing
+          them continuously in Heal mode. Set-and-forget for sustained single-target
+          healing. Useful on a frontliner who moves unpredictably.
+        RankRequired: 1
+
+      - Name: "Recall Spirit"
+        ID: recall_spirit
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 0.5s  # Very short — emergency recall
+        MoistureCost: 0  # Free — emergency survival tool
+        Effect: "Instantly recall Slime to Drakol's position (teleport, not travel)"
+        Bonus: "Grants +15 Moisture instantly on recall (emergency recovery)"
+        Description: >
+          EMERGENCY BUTTON. Teleports Slime directly to you (no travel time).
+          Grants immediate Moisture. Use when gauge is critical and you need
+          DR NOW. The 0.5s recast means you can't abuse it for teleport-heal-
+          teleport — after recall, you need to send it out again with Direct Spirit.
+        RankRequired: 1
+
+      - Name: "Flash Command"
+        ID: flash_command
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 1.0s  # §25 CHANGE: removed 30s CD, now resource-gated
+        MoistureCost: 15  # §25 GATE: costs defense for emergency repositioning
+        Effect: "Instantly teleport Slime to target position (no travel time)"
+        Range: 40y
+        Bonus: "Slime performs an immediate heal/damage pulse on arrival (150p)"
+        Section25Note: >
+          Former 30s CD replaced with 15 Moisture cost. Emergency repositioning
+          is now available whenever you can afford the defense hit. Multiple rapid
+          uses cost 15 Moisture EACH — 3 Flash Commands = 45 Moisture = DR collapse.
+          The cost IS the limitation.
+        Description: >
+          Emergency reposition. Teleports Slime to a location instantly (normally
+          Slime has travel time). The arrival pulse makes it a clutch heal delivery
+          tool — Flash Command to dying ally = instant heal on arrival. 15 Moisture
+          cost prevents spam while allowing multiple uses when emergencies cluster.
+        RankRequired: 2
+
+    ModeCommands:
+      - Name: "Spirit Mode: Scout"
+        ID: mode_scout
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 2.0s  # Mode switches have slight delay to prevent spam-toggling
+        MoistureCost: 0  # Free — mode assignment
+        Effect: "Switch Slime to Scout mode (reveals hidden, no healing/damage)"
+        Description: >
+          Exploration mode. Slime reveals hidden enemies, traps, and provides
+          vision in fog. No healing, no damage. Used pre-combat or for scouting
+          flanks during positioning phases.
+        RankRequired: 1
+
+      - Name: "Spirit Mode: Heal"
+        ID: mode_heal
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 2.0s
+        MoistureCost: 0  # Free — mode assignment
+        Effect: "Switch Slime to Heal mode (proximity healing, puddle generation)"
+        HealingPerTick: "150-200p (3s tick, proximity scaled)"
+        PuddleGeneration: "Creates 3y puddle at Slime location (refreshes every 6s)"
+        Description: >
+          Primary healing mode. Slime heals all allies within 8y every 3s.
+          Also generates water puddles for terrain interaction. This is the
+          default combat mode for most encounters.
+        RankRequired: 1
+
+      - Name: "Spirit Mode: Damage"
+        ID: mode_damage
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 2.0s
+        MoistureCost: 0  # Free — mode assignment
+        Effect: "Switch Slime to Damage mode (attacks enemies, applies Soaked)"
+        DamagePerTick: "50-70p water damage (3s tick, 6y radius)"
+        DebuffApplication: "Applies Soaked to enemies in radius every tick"
+        PuddleGeneration: "Creates 3y puddle at Slime location (refreshes every 6s)"
+        Description: >
+          Offensive mode. Slime deals water damage and applies Soaked debuff.
+          Use in DPS-check phases or when healing isn't needed. Soaked debuff
+          enables Drakol's bonus damage on several skills (Skewering Dive,
+          Torrent Lance). Good synergy with melee combo.
+        RankRequired: 1
+
+    SpecialCommands:
+      - Name: "Swell Burst"
+        ID: swell_burst
+        ActionType: oGCD
+        AnimationLock: 0.6s  # Standard lock — this is powerful
+        Recast: 5s  # §25 CHANGE: 20s CD → 5s tactical CD + Moisture cost
+        MoistureCost: 10  # §25 GATE: each burst costs defense
+        Effect: "Slime pulses a burst heal at current location"
+        HealPotency: 350  # Strong single burst
+        Radius: 8y
+        Section25Note: >
+          Former 20s CD replaced with 10 Moisture + 5s tactical CD. Available
+          every 5s if you have Moisture. 5 bursts in 25s = 50 Moisture spent =
+          significant DR loss. Self-limiting through resource expenditure.
+        Description: >
+          Emergency burst heal. Slime releases a concentrated water pulse,
+          healing all allies within 8y for 350p. The Slime must already be
+          positioned near the targets — this rewards PRE-POSITIONING.
+          If Slime is next to you (not near allies), you just healed yourself.
+          Position FIRST, then burst.
+        RankRequired: 1
+
+      - Name: "Torrent Wave"
+        ID: torrent_wave
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Recast: 8s  # §25 CHANGE: 25s CD → 8s tactical CD + Moisture cost
+        MoistureCost: 15  # §25 GATE: directional attack costs defense
+        Effect: "Slime releases directional water wave from current position"
+        DamagePotency: 200
+        HealPotency: 150  # Heals allies AND damages enemies in the wave
+        WaveLength: 15y
+        WaveWidth: 6y
+        Direction: "Aimed from Slime toward targeted direction"
+        Section25Note: >
+          Former 25s CD replaced with 15 Moisture + 8s tactical CD. Available
+          every 8s (~4 GCDs) if Moisture permits. Directional aim requires
+          Slime positioning setup inherently.
+        Description: >
+          Dual-purpose wave. Damages enemies and heals allies in its path.
+          Directional skill aimed FROM the Slime's current position. Positioning
+          the Slime between enemies and allies maximizes value (wave hits enemies
+          first, then reaches allies). Spatial puzzle.
+        RankRequired: 2
+
+      - Name: "Hydro Barrier"
+        ID: hydro_barrier
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Recast: 45s  # KEPT — not identity-defining, tactical CD acceptable
+        MoistureCost: 0  # No Moisture cost — CD-gated utility
+        Effect: "Slime creates water shield on nearest ally (or Drakol if Slime is close)"
+        ShieldPotency: 400  # Absorb shield based on MED
+        Duration: 10s
+        Description: >
+          Slime wraps an ally in a water barrier that absorbs damage.
+          Applied to the nearest ally within 8y of Slime. If Slime is next to
+          Drakol, shields Drakol (self-preservation option). If Slime is near
+          a frontliner, shields them. Position determines target.
+        RankRequired: 2
+
+      - Name: "Spirit Surge"
+        ID: spirit_surge
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Recast: 3s  # §25 CHANGE: 60s CD → Moisture-gated (cost is the limitation)
+        MoistureCost: 30  # §25 GATE: heavy defense cost for doubled output
+        Effect: "Slime doubles healing/damage output for 12s"
+        Duration: 12s
+        MoistureBurn: "+3 additional Moisture decay per 3s during Surge"
+        TotalMoistureCost: "~45 over full duration (30 activation + ~15 sustained drain)"
+        Section25Note: >
+          Former 60s CD replaced with 30 Moisture activation cost + sustained drain.
+          Total Moisture consumed: ~45 over 12s. Self-limiting — activating at <50
+          Moisture guarantees hitting Desiccated during effect. Available whenever
+          you bank 30+ Moisture. Expert play: activate with Slime close to offset
+          the sustained drain during Surge window.
+        Description: >
+          Overclock the spirit bond. Slime output doubles for 12s (heal ticks
+          become 300-400p, damage ticks become 100-140p). Heavy Moisture cost
+          (30 upfront + sustained drain). Using Surge while Slime is far away
+          compounds the drain dangerously. Best used with Slime nearby or
+          with high Moisture banked.
+        RankRequired: 2
+
+      - Name: "Tidal Convergence"
+        ID: tidal_convergence
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Recast: 5s  # §25 CHANGE: 180s CD → resource-gated (full gauge spend)
+        MoistureCost: 100  # §25 GATE: FULL GAUGE SPEND. You sacrifice ALL defense.
+        ActivationRequirement: "Slime must be within 5y of Drakol (spirit proximity for merge)"
+        Effect: "Slime and Drakol merge temporarily. All water production centered on Drakol."
+        Duration: 15s
+        MergeEffects:
+          - "Moisture locked at 100 (cannot decay during merge — the gauge is SPENT to activate, then locked full)"
+          - "Slime healing aura centered on Drakol (8y radius from DRAKOL)"
+          - "All water skills cost ZERO Moisture during merge"
+          - "Drakol gains +15% damage dealt"
+          - "Puddle generation doubled (terrain saturation)"
+        PostMerge: "Slime reappears at Drakol's position. Moisture starts at 0 (must rebuild)."
+        Section25Note: >
+          Former 180s CD replaced with 100 Moisture cost + Slime proximity requirement.
+          You EARN this by banking full Moisture with Slime close (can't activate while
+          Slime is far — bond must be tight for merge). After merge ends, Moisture starts
+          at 0 = Desiccated state = immediate vulnerability. The cycle: bank 100 →
+          merge (15s of power) → exit at 0 Moisture → must recall/recover → rebuild.
+          Available every ~20-25s IF you dedicate to banking (realistically every 30-40s
+          in combat due to healing pressure). Intensity scaling: harder fights generate
+          Moisture +50% faster, making more frequent merges possible in hard content.
+          §25 fulfilled: harder content = more identity expression, not less.
+        Description: >
+          CLASS ULTIMATE. Spirit and Drakol merge into one entity for 15s.
+          During merge: maximum DR (Moisture locked at 100), free water skills,
+          healing centered on self, damage amp. This is the "I need to be
+          both healer AND fighter simultaneously RIGHT HERE" button. Costs your
+          ENTIRE Moisture gauge to activate — you sacrifice all defense for 15s of
+          supreme power, then exit vulnerable and must rebuild.
+        DesignNote: >
+          This is USE-CASE driven, not burst-cadence. You don't save it for
+          a party buff alignment — you use it when the situation demands both
+          max healing and max defense simultaneously (transition phases,
+          unavoidable damage spikes, solo survival moments). The full-gauge cost
+          ensures you've been EARNING it through proper Moisture management.
+        RankRequired: 3
+
+      - Name: "Cleansing Waters"
+        ID: cleansing_waters
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Recast: 15s  # KEPT — at §25 boundary, utility skill
+        MoistureCost: 0
+        Effect: "Slime cleanses 1 debuff from nearest ally within 8y"
+        Priority: "Removes most recent debuff first. Cannot cleanse permanent debuffs."
+        Description: >
+          Debuff removal through water purification. Target is position-based
+          (nearest ally to Slime). If multiple allies need cleansing, reposition
+          Slime to the priority target before using. Another spatial decision.
+        RankRequired: 1
+
+      - Name: "Aqua Veil"
+        ID: aqua_veil
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Recast: 5s  # §25 CHANGE: 90s CD → resource-gated with setup requirement
+        MoistureCost: 35  # §25 GATE: expensive defense sacrifice
+        ActivationRequirement: "Slime must have been stationary for >= 3s (no movement commands in last 3s)"
+        Effect: "Slime creates a water curtain at current position. Allies passing through: +20 Moisture to Drakol, cleanse 1 debuff, heal 200p"
+        Duration: 8s
+        CurtainWidth: 10y
+        Section25Note: >
+          Former 90s CD replaced with 35 Moisture + 3s stationary requirement.
+          The setup cost (holding Slime still for 3s) prevents instant-deploy abuse.
+          You must PLAN the placement — send Slime to a position, WAIT 3s (during
+          which you're not repositioning), then activate. 35 Moisture cost is heavy.
+          Available multiple times per fight if Moisture is managed.
+        Description: >
+          Area denial / party support. Creates a wall of water that allies can
+          pass through for benefits. The +20 Moisture to Drakol is unique — allies
+          running through YOUR Slime's curtain refill YOUR gauge. Encourages
+          party coordination and creative Slime placement (put it between the
+          party's path and the safe zone during mechanic resolution).
+        RankRequired: 3
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 10: DRAKOL PERSONAL oGCDs (Non-Slime)
+# ─────────────────────────────────────────────────────────────────────────────
+
+  DrakolOGCDs:
+    # These are the Drakol's own oGCD abilities (not Slime commands).
+    # They provide personal utility, mitigation, and combat enhancement.
+
+    - Name: "Scale Hardening"
+      ID: scale_hardening
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Recast: 30s  # KEPT — personal mitigation, not identity-defining
+      MoistureCost: 0
+      Effect: "Drakol hardens scales. +10% DR for 8s (stacks with Moisture DR)."
+      Description: >
+        Personal mitigation. Stacks with Moisture DR for total up to 30% DR.
+        Use when you know a hit is coming and your Moisture is already low.
+        The safety net for moments when Slime is far and you can't recall.
+      RankRequired: 1
+
+    - Name: "Drakol Roar"
+      ID: drakol_roar
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Recast: 15s  # §25 CHANGE: 60s → 15s (minor utility, short tactical CD)
+      MoistureCost: 0
+      Effect: "Intimidating roar. Applies Soaked to all enemies within 8y. +10% Moisture instantly."
+      Section25Note: >
+        Reduced from 60s to 15s. Not identity-defining (minor AoE Soaked + small
+        Moisture gain). 15s makes it a regular combat utility tool rather than
+        something forgotten between uses.
+      Description: >
+        AoE Soaked application + minor Moisture recovery. Useful for setting up
+        Skewering Dive crits on packs without needing Slime in Damage mode.
+        The Moisture gain is small but can prevent Desiccated in emergencies.
+      RankRequired: 1
+
+    - Name: "Ancestral Bond"
+      ID: ancestral_bond
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Recast: 3s  # §25 CHANGE: 120s CD → resource-gated
+      MoistureCost: 25  # §25 GATE: defense cost for logistics buff
+      ActivationRequirement: "Slime must be >15y from Drakol (bond must be stretched)"
+      Effect: "Strengthens spirit bond for 20s. Slime movement speed +100%. Moisture generation rate doubled."
+      Section25Note: >
+        Former 120s CD replaced with 25 Moisture + stretched-bond requirement.
+        Thematic — strengthening the bond requires it to be under tension. Can't
+        activate with Slime on top of you (no tension to strengthen). Natural synergy:
+        send Slime far → activate Ancestral Bond (pay 25) → doubled generation helps
+        offset distance decay → faster Slime travel for repositioning. Available every
+        cycle when conditions are met.
+      Description: >
+        Utility window. Makes Slime much faster and Moisture regeneration much
+        stronger. Use during high-mobility phases where you need to reposition
+        Slime rapidly AND maintain Moisture. Doesn't increase healing output —
+        increases LOGISTICS efficiency.
+      RankRequired: 2
+
+    - Name: "Depth Pressure"
+      ID: depth_pressure
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Recast: 8s  # KEPT — already §25-compliant short tactical CD
+      MoistureCost: 0
+      Effect: "Next melee GCD deals +50% potency and applies Soaked (2 stacks) to target."
+      Description: >
+        Damage buff oGCD. Weave between melee GCDs for burst. Applies double
+        Soaked for Skewering Dive / Torrent Lance synergy. Standard damage oGCD
+        — use on cooldown in single-target, save for priority targets in multi.
+      RankRequired: 1
+
+    - Name: "Brine Armor"
+      ID: brine_armor
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Recast: 3s  # §25 CHANGE: 90s CD → resource-gated (threshold requirement)
+      MoistureCost: 0  # No direct cost — the DAMAGE is the cost (Moisture drain)
+      ActivationRequirement: "Moisture must be >= 60 (minimum threshold)"
+      Effect: "For 10s: damage taken converts to Moisture drain instead of HP loss (up to 40 Moisture)."
+      MoistureConversion: "Each hit converts damage to Moisture loss instead. 1% HP worth = 2 Moisture."
+      Cap: "Maximum 40 Moisture can be drained this way. Excess damage hits HP normally."
+      Section25Note: >
+        Former 90s CD replaced with Moisture >= 60 threshold. Already self-limiting
+        (it drains your Moisture as you take damage). The threshold prevents desperate
+        activation at low Moisture (which would break immediately). Available whenever
+        Moisture is comfortable (>= 60). In practice: ~every 20-30s in combat
+        (time to rebuild 60 after previous use drained it).
+      Description: >
+        Unique survival tool. For 10s, you take hits to your MOISTURE instead of
+        your HP (up to the 40-Moisture cap). This means high Moisture = effective
+        HP buffer. Synergizes with having Slime close (Moisture regenerating while
+        being consumed by damage). At high Moisture + Slime nearby, you're
+        functionally immortal for a few seconds.
+      RankRequired: 3
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 11: RANK PROGRESSION
+# ─────────────────────────────────────────────────────────────────────────────
+
+RankProgression:
+  Rank1:
+    Description: "Core dual-entity loop. Basic combo + Slime modes + Moisture management."
+    SkillsAvailable:
+      GCD: [trident_thrust, barbed_sweep, rising_current, tidal_impale, undertow_slam, torrent_lance, riptide_slash, tidal_rush]
+      SlimeCommands: [direct_spirit, follow_ally, recall_spirit, mode_scout, mode_heal, mode_damage, swell_burst, cleansing_waters]
+      DrakolOGCD: [scale_hardening, drakol_roar, depth_pressure]
+    Complexity: "Moderate. Learn the Moisture loop. Learn Slime positioning basics."
+    CoreLoop: "Melee combo → weave Slime commands → manage Moisture → recall/resend cycle"
+    MoistureBudget: >
+      At Rank 1, Moisture costs are low (Swell Burst = 10, Torrent Lance = 15,
+      Riptide Slash = 20). New players learn the spend/refill cycle with
+      manageable costs that don't instantly punish mistakes.
+
+  Rank2:
+    Description: "Expanded toolkit. Precision commands + water skill expansion."
+    SkillsAdded:
+      GCD: [skewering_dive, geyser_strike]
+      SlimeCommands: [flash_command, torrent_wave, hydro_barrier, spirit_surge]
+      DrakolOGCD: [ancestral_bond]
+    Complexity: "High. Flash Command economy, Surge windows, Geyser crit optimization."
+    NewDecisions:
+      - "Flash Command economy (15 Moisture per use — how many can you afford?)"
+      - "Spirit Surge windows (30 Moisture + sustained drain — when is doubled output worth the cost?)"
+      - "Geyser Strike crit condition (puddle positioning for guaranteed crits)"
+      - "Skewering Dive synergy (set up Soaked THEN gap-close for bonus damage)"
+      - "Ancestral Bond timing (stretched bond + 25 Moisture — when to buff logistics?)"
+    MoistureBudget: >
+      Rank 2 adds significant Moisture sinks (Flash Command 15, Spirit Surge 30,
+      Ancestral Bond 25, Geyser Strike 25). Players must learn to BANK Moisture
+      before spending on powerful tools. The economy becomes the game.
+
+  Rank3:
+    Description: "Mastery. Ultimate ability + advanced defense + terrain mastery."
+    SkillsAdded:
+      GCD: [maelstrom]
+      SlimeCommands: [tidal_convergence, aqua_veil]
+      DrakolOGCD: [brine_armor]
+    Complexity: "Expert. Full dual-entity micro with Moisture economy mastery."
+    MasteryExpression:
+      - "Tidal Convergence timing (100 Moisture full spend — when can you bank full gauge?)"
+      - "Brine Armor synergy (>= 60 threshold — maintaining high Moisture for access)"
+      - "Aqua Veil placement (35 Moisture + 3s setup — party pathing prediction)"
+      - "Maelstrom cost management (30 Moisture per cast — when can you afford the biggest hit?)"
+      - "Pre-fight puddle mapping (saturate the arena before engagement)"
+      - "Cross-class terrain combo coordination (set up for Madolt/Elementalist)"
+    MoistureBudget: >
+      Rank 3 adds the most expensive tools (Convergence 100, Aqua Veil 35,
+      Maelstrom 30, Brine Armor requires 60+). The player must now master
+      the full economy: when to save for Convergence vs when to spend on
+      sustained healing through Surge. The budget pressure IS the mastery test.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 12: SYSTEM INTERACTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+SystemInteractions:
+  AggroSystem:
+    Interaction: >
+      Spiritcaller generates threat from melee DPS (proximity aggro) AND healing
+      (healing aggro via Slime). Split threat source: Drakol's melee hits generate
+      threat ON the Drakol. Slime's healing generates threat on... the Drakol
+      (spirit is untargetable — aggro resolves to the bonded entity).
+    StrategyRank: >
+      High Strategy Rank reduces healing aggro generation. Low Strategy Rank
+      Spiritcallers may pull aggro from combined melee + heal threat. Position
+      awareness (being IN melee = close to boss) compounds the risk.
+    DesignNote: >
+      Spiritcaller's threat profile is unique: melee healer means BOTH threat
+      sources (damage + healing) resolve at close range. Frontliners must maintain
+      clear aggro lead or Spiritcaller becomes the new target. This is intentional
+      pressure — the Drakol needs DR from Moisture because they're ALWAYS a
+      potential aggro target due to proximity + dual threat sources.
+
+  GreaterThan50HPRule:
+    Skills_Affected:
+      - "Tidal Impale: +25% damage against >50% HP targets"
+    Interaction: >
+      Spiritcaller front-loads damage on healthy targets through Tidal Impale.
+      This aligns with the system rule but doesn't dominate the kit — only one
+      finisher benefits. The class cares more about Soaked conditions than HP
+      thresholds for its damage optimization.
+
+  CritSystem:
+    Principle: "Crit is NOT RNG. All critical hits have deterministic conditions."
+    SpiritcallerCritConditions:
+      - Skill: "Rising Current"
+        Condition: "Rear positional (hit enemy from behind)"
+        Result: "Guaranteed critical hit"
+      - Skill: "Geyser Strike"
+        Condition: "Drakol standing in any water puddle while casting"
+        Result: "Guaranteed critical hit"
+      - Skill: "Tidal Impale"
+        Condition: "Enemy above 50% HP"
+        Result: "+25% damage (functions as system-wide bonus, not crit)"
+      - Skill: "Skewering Dive"
+        Condition: "Target has Soaked debuff"
+        Result: "+40% potency bonus"
+      - Skill: "Slime Damage ticks"
+        Condition: "Target is standing in a water puddle AND has Soaked"
+        Result: "+50% tick damage"
+    DesignNote: >
+      All damage bonuses are CONDITIONAL, not random. The player earns crits through
+      positioning (rear), terrain awareness (standing in puddle), debuff setup
+      (Soaked application), and target health awareness (>50% rule). Every "big hit"
+      moment is earned, never lucky.
+
+  ProcgenInteraction:
+    TerrainGeneration: >
+      Spiritcaller's puddle ecosystem interacts with procedurally generated
+      environments. Water sources (rain, rivers) in random zones BUFF the class.
+      Dry/volcanic zones DEBUFF the class. This creates asymmetric difficulty
+      based on environment — intentional variance that rewards adaptability.
+    EncounterScaling: >
+      In Intensity-scaled content, Moisture generation increases +50%. This
+      means harder content gives Spiritcaller MORE access to their powerful
+      tools, not less. The class scales WITH difficulty, not against it.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 13: SCENARIO FLOWS
+# ─────────────────────────────────────────────────────────────────────────────
+
+ScenarioFlows:
+  SingleTarget_Boss:
+    Description: "1 boss. Drakol melees. Slime heals party."
+    Priority:
+      1: "Position Slime in Heal mode near party stack point"
+      2: "Drakol engages boss in melee (Trident combo)"
+      3: "Monitor Moisture — Slime should be ~15-20y away (party usually behind boss)"
+      4: "At Moisture < 50: Recall Slime briefly (3-4s), refill, resend"
+      5: "Use Depth Pressure on cooldown for damage oGCD"
+      6: "Swell Burst for emergency party healing (10 Moisture per burst)"
+      7: "Tidal Convergence for transition phases (bank 100, merge when spike incoming)"
+    DPSOutput: "55-65% of reference (melee uptime good, water skills limited by Moisture)"
+    HealingOutput: "50-60% party HP/min (Slime sustained, periodic recalls reduce uptime)"
+    MoistureManagement: >
+      In single-target, the party usually stacks 15-20y behind the boss.
+      Slime at party = 15-20y from Drakol. Moisture decay is moderate (-5/3s)
+      but generation is still positive if Drakol stands in puddles (+4/3s from
+      puddle). Net: -1/3s decay. Very manageable — 100 to critical in ~50s.
+      Plenty of time before recalls are needed.
+
+  MultiTarget_TrashPull:
+    Description: "5-8 enemies. Frontliner gathers. Spiritcaller AoEs + heals."
+    Priority:
+      1: "Position Slime in Heal mode at party center"
+      2: "Open with Tidal Rush through pack (apply Soaked to all)"
+      3: "Barbed Sweep → Undertow Slam (AoE combo + free puddle)"
+      4: "Riptide Slash for puddle line across the pack"
+      5: "Switch Slime to Damage mode if healing not needed (Soaked + DPS)"
+      6: "Drakol Roar for mass Soaked if Slime is healing (can't damage-mode)"
+    DPSOutput: "60-70% of reference (AoE combo + Slime damage mode)"
+    HealingOutput: "40-50% party HP/min (Slime close to everyone = easy healing)"
+    MoistureManagement: >
+      In AoE, everyone is clustered. Slime near party = Slime near Drakol = 
+      Moisture is FINE. AoE is Spiritcaller's comfortable scenario — the distance
+      problem barely exists when everyone's stacked.
+
+  SplitParty:
+    Description: "Party split into two groups (common raid mechanic). Healing needed on BOTH."
+    Priority:
+      1: "Assign Slime to the group WITHOUT Drakol (they need spirit healing)"
+      2: "Drakol's group relies on puddle regen + Hydro Barrier shields"
+      3: "Drakol's Moisture WILL decay heavily (Slime far away)"
+      4: "Use Scale Hardening + Brine Armor during split phase (if Moisture >= 60)"
+      5: "Recall Slime the INSTANT groups reunite (Moisture recovery priority)"
+    DPSOutput: "40-50% of reference (distracted, defensive)"
+    HealingOutput: "70-80% per group (split healing — Slime on one, puddles on other)"
+    MoistureManagement: >
+      THIS is the hard scenario. Slime at max range (30-40y) = -5 to -10/3s decay.
+      With no puddle available (split = different room/position) = no offset.
+      Drakol hits Desiccated in ~15-20s. MUST pre-bank Moisture to 100 before split.
+      Scale Hardening + Brine Armor covers the vulnerability window.
+      Expert play: pre-place puddles in YOUR group's position before the split
+      happens, giving you +4/3s offset during the mechanic.
+
+  SoloSurvival:
+    Description: "Drakol alone (party dead, or solo content)."
+    Priority:
+      1: "Keep Slime in Heal mode at YOUR position (0-5y)"
+      2: "Moisture stays at 80-100 permanently (Slime close)"
+      3: "Full melee combo uptime (you ARE the damage)"
+      4: "Use water skills freely (Slime refills faster than you spend)"
+      5: "You're a melee fighter with 20% DR and passive self-healing. Durable."
+    DPSOutput: "70% of reference (full melee combo + water skills)"
+    SurvivabilityNote: >
+      Solo Spiritcaller is TANKY. 20% DR from Moisture + passive self-heal from
+      Slime proximity + water skill utility. You can't heal others (Slime is on you)
+      but you can fight indefinitely against moderate threats. This is the "not a
+      squishy caster" payoff — solo Spiritcaller plays like a self-sufficient warrior.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 14: MATCHUP ANALYSIS
+# ─────────────────────────────────────────────────────────────────────────────
+
+MatchupAnalysis:
+  ComparedToOtherHealers:
+    Elementalist:
+      SharedTrait: "Water element healing"
+      Differentiation: "Elementalist casts water spells directly. Spiritcaller's SLIME delivers water healing."
+      PlayerExperience: "Elementalist = reactive caster. Spiritcaller = proactive positioner."
+      StrengthVs: "Spiritcaller maintains DPS while healing (no GCD cost). Elementalist must sacrifice DPS GCDs to heal."
+      WeaknessVs: "Elementalist can burst-heal instantly (direct cast). Spiritcaller needs Slime pre-positioned."
+    Siren:
+      SharedTrait: "Non-traditional healing (not direct heal spells)"
+      Differentiation: "Siren heals through drain-bonds on enemies. Spiritcaller heals through spirit positioning."
+      PlayerExperience: "Siren = plate-spinning timer management. Spiritcaller = spatial micro."
+      StrengthVs: "Spiritcaller healing doesn't depend on enemy proximity to Siren. Independent heal delivery."
+      WeaknessVs: "Siren sustain is free (drain-based). Spiritcaller sustain costs DR (Moisture decay)."
+    DesignNiche: >
+      Spiritcaller occupies the "physical melee healer" niche. The only healer
+      who uses STR as primary stat, wields a melee weapon, and has zero cast bars
+      on their healing. Players who want to heal but hate being a caster — this
+      is their class. The fantasy is "warrior who happens to have a healing spirit"
+      not "mage who happens to have a stick."
+
+  EnvironmentalMatchups:
+    StrongEnvironments:
+      - "Rain zones: +2 Moisture/3s environmental bonus"
+      - "Water terrain (rivers, lakes, underwater): +4-6 Moisture/3s"
+      - "Caves with humidity: neutral (no penalty)"
+    WeakEnvironments:
+      - "Desert/dry: -3 Moisture/3s (faster depletion)"
+      - "Volcanic/fire: -4 Moisture/3s + puddles evaporate faster"
+      - "Indoor fires: -3 Moisture/3s"
+    AdaptationStrategy: >
+      In hostile environments, Spiritcaller must keep Slime closer (can't afford
+      extended deployments) or rely more heavily on Ancestral Bond (doubled gen
+      to offset environmental penalty). Puddle placement becomes critical —
+      standing in your own puddles offsets environmental drain.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 15: ITEM BASELINE COMPARISON
+# ─────────────────────────────────────────────────────────────────────────────
+
+ItemBaseline:
+  Principle: >
+    Items define the BASELINE. Classes REPLACE item functionality permanently.
+    A Trident without the Spiritcaller class is just a polearm with basic attacks.
+    The Spiritcaller class kit completely replaces the Trident's generic abilities
+    with the spirit-bond combat system.
+
+  TridentBaseline:
+    WithoutClass:
+      - "Basic 3-hit melee combo (100 → 120 → 150p)"
+      - "Generic thrust attack (ranged poke, 80p, 8y)"
+      - "Sweep attack (cone AoE, 90p)"
+      - "No companion. No water skills. No Moisture system."
+    WithSpiritcaller:
+      - "Full melee combo with positional crits and terrain generation"
+      - "Water skill suite (Moisture-cost ranged/AoE options)"
+      - "Water Slime companion (entire healing/support system)"
+      - "Moisture Gauge (defensive identity and resource management)"
+      - "Terrain engineering (puddle ecosystem)"
+    Comparison: >
+      The class transforms the Trident from a generic stabby-polearm into a
+      dual-entity combat system with terrain control, healing delegation, and
+      resource management. The weapon is the VEHICLE; the class is the ENGINE.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 16: BALANCE VALIDATION
+# ─────────────────────────────────────────────────────────────────────────────
+
+BalanceValidation:
+  DPSCheck:
+    MeleeComboOnly: "Thrust(100) + Rising(130) + Impale(200) = 430p / 6s = 71.7 PPS"
+    MeleeCombo_AoE: "Thrust(100) + Sweep(120) + Slam(170) = 390p / 6s = 65 PPS + puddle"
+    WithWaterSkills: "Combo + Geyser(250) per cycle = 680p / 8s = 85 PPS (at 25 Moisture cost)"
+    SlimeDamageAdded: "+50-70p per 3s = +17-23 PPS from Slime in Damage mode"
+    TotalDPSMode: "~88-108 PPS (Drakol + Slime) = within 70% healer DPS target"
+    TotalHealMode: "~72 PPS (Drakol only, Slime healing) = within 55% target"
+
+  HealingCheck:
+    SlimeHealMode_Close: "175p average per 3s tick (proximity scaled) = 58 HPS passive"
+    SlimeHealMode_Far: "175p * 0.6 (falloff) = 105p per tick = 35 HPS at 4-6y"
+    SwellBurst_Value: "350p per 5s (if spammed) = 70 HPS burst (at 10 Moisture/5s = 120 Moisture/min)"
+    SpiritSurge_Value: "350-400p per 3s for 12s = 1400-1600p total (at 45 Moisture total cost)"
+    PartyHPS_Sustained: "~58 HPS * 4 allies in range = 232 party HPS = adequate sustain"
+
+  MoistureEconomyCheck:
+    Income_SlimeClose: "+8/3s (proximity) + 1/3s (combat) - 2/3s (evaporation) = +7/3s net = +140/min"
+    Income_SlimeNearby: "+3/3s + 1/3s - 2/3s = +2/3s net = +40/min"
+    Income_SlimeFar: "+0/3s + 1/3s - 2/3s - 5/3s = -6/3s net = -120/min (draining)"
+    Income_MaxRange: "+0/3s + 1/3s - 2/3s - 10/3s = -11/3s net = -220/min (rapid drain)"
+    Spending_Aggressive: "Maelstrom(30) + Surge(30) + Flash(15) + Geyser(25) = 100 in ~10s"
+    Spending_Conservative: "Swell Burst(10) + Torrent Lance(15) = 25 per ~8s cycle"
+    Validation: >
+      At close range, income (+140/min) comfortably exceeds conservative spending
+      (~190/min for frequent small skills). Aggressive spending + distance deployment
+      creates the pressure that makes Moisture management meaningful. The numbers
+      confirm the design: you CAN'T sustain max spending at max distance.
+
+  Section25Validation:
+    Convergence_Cycle: >
+      Bank 100 Moisture: ~20s with Slime close (0 to 100 at +8-2=6 per 3s = 50 ticks).
+      Actually: +7 net per 3s = 100/7 * 3 = ~43s from empty. From 80 (combat start): ~9s.
+      In Intensity: +50% gen = +12-2=10 per 3s = 30s from empty, ~6s from 80.
+      Conclusion: Convergence available every 30-45s in normal play, every 20-30s in
+      hard content. Much more frequent than old 180s CD. §25 fulfilled.
+    NoDeadIdentity: >
+      Test: "Is the player always using or building toward their identity?"
+      Answer: YES. Between Convergences, the player is:
+      - Using Moisture-gated commands (Flash, Surge, Swell, Wave, Bond)
+      - Building Moisture through Slime proximity
+      - Spending Moisture on water attacks
+      - Managing the Slime positioning (identity-expression every second)
+      Zero seconds of "waiting for CD" exist in this kit.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 17: VISUALIZATION HOOKS
+# ─────────────────────────────────────────────────────────────────────────────
+
+VisualizationHooks:
+  MoistureGaugeGraph:
+    Type: "Time-series line chart"
+    XAxis: "Time (seconds)"
+    YAxis: "Moisture (0-100)"
+    Annotations:
+      - "Slime deploy events (vertical lines when Slime sent away)"
+      - "Recall events (vertical lines when Slime recalled)"
+      - "Skill casts (dots on line showing Moisture spend moments)"
+      - "Desiccated zones (red shading when Moisture = 0)"
+      - "Convergence windows (gold band showing merge active)"
+    Purpose: "Post-fight analysis of Moisture management quality"
+
+  SlimePositionHeatmap:
+    Type: "2D spatial heatmap"
+    Data: "Slime position sampled every 1s over fight duration"
+    ColorScale: "Blue (brief presence) → Red (sustained presence)"
+    Overlays:
+      - "Ally positions (green dots)"
+      - "Enemy positions (red dots)"
+      - "Drakol position (white dot)"
+      - "Puddle coverage (blue tint)"
+    Purpose: "Evaluate Slime pathing efficiency and coverage gaps"
+
+  HealingTimelineBreakdown:
+    Type: "Stacked area chart"
+    Layers:
+      - "Slime passive healing (proximity ticks)"
+      - "Swell Burst healing (burst events)"
+      - "Torrent Wave healing (directional)"
+      - "Puddle regen (terrain healing)"
+      - "Aqua Veil healing (curtain passes)"
+    Purpose: "Show healing source distribution over fight"
+
+  MoistureSpendingPie:
+    Type: "Pie / sunburst chart"
+    Categories:
+      - "Water Skills (offensive spending)"
+      - "Slime Commands (Flash, Surge, Bond, Convergence, Veil)"
+      - "Distance Decay (passive drain from deployments)"
+      - "Environmental Drain (if applicable)"
+    Purpose: "Where did your Moisture GO? Identify optimization targets."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 18: CONSTRAINTS & INVARIANTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+Constraints:
+  HardInvariants:
+    - "Drakol has ZERO GCD heals. No exceptions. All healing = Slime."
+    - "Water Slime cannot die, be destroyed, or become unavailable."
+    - "Moisture gauge range is exactly 0-100. No overflow, no negative."
+    - "DR from Moisture is linear (0.2% per point, -10% at zero)."
+    - "Slime commands are oGCD only. Never GCD. Never interrupt melee."
+    - "All Moisture costs are displayed before execution (UI preview)."
+    - "No skill has a cooldown >15s that is identity-defining (§25)."
+    - "Intensity scaling applies to generation ONLY, never reduces costs."
+
+  SoftTargets:
+    - "Slime should be repositioned 8-12 times per minute in active combat"
+    - "Moisture should oscillate between 40-100 in normal play (never flatline)"
+    - "Water skills should consume 30-50% of Moisture income in DPS mode"
+    - "Convergence should be used 1-3 times per boss fight (not saved, not spammed)"
+    - "Puddle coverage should reach 40-60% of arena floor by fight minute 3"
+
+  BalanceLimits:
+    - "Total DPS (Drakol + Slime) must not exceed 75% of pure DPS class"
+    - "Healing throughput must not exceed 120% of caster healer (Elementalist)"
+    - "Moisture DR (20% max) must not stack with class-specific DR above 35% total"
+    - "Slime travel speed (150%) must not trivialize repositioning decisions"
+    - "Flash Command cost (15 Moisture) must remain painful enough to prevent spam"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF DOCUMENT
+# ▲ CONTINUES FROM: Spiritcaller_Design.yaml
+# ═══════════════════════════════════════════════════════════════════════════════

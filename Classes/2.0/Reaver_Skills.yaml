@@ -1,0 +1,507 @@
+# ▲ CONTINUES FROM: Reaver_Design.yaml | THIS FILE COVERS: Ability roster, potencies, rank progression
+# ═══════════════════════════════════════════════════════════════════════════════
+# REAVER / DEEPHUNTER — Skills Specification
+# juice-yaml-library | github.com/marbleperfume/juice-yaml-library
+# ═══════════════════════════════════════════════════════════════════════════════
+
+header:
+  class_name: "Reaver"
+  alternate_name: "Deephunter"
+  race_lock: "Chunkers"
+  tier: "Experienced"
+  role: "DPS"
+  last_updated: "2026-07-14"
+  file_scope: "Ability roster, potencies, gating rules, rank progression"
+  design_authority: "Reaver_Design.yaml"
+  governing_principles:
+    - "FEEDBACK not gauges — gates are state-based and behavioral"
+    - "NO cooldowns >15s — §25 fully applied"
+    - "NO rotation — ability use driven by target behavior"
+    - "Potencies are RELATIVE; absolute tuning deferred to Layer 1"
+    - "Ranks unlock DEPTH not RAW POWER"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# §25 COOLDOWN CONVERSIONS (5 flagged abilities resolved)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+section_25_resolutions:
+  - ability: "Blood Rush"
+    old: "45s CD"
+    new: "Frenzy Stage 2+ required (active Pursuit only). No timer."
+    rationale: "Re-engagement tool during existing Pursuit, not a Calm-state burst cadence."
+
+  - ability: "Adrenal Dump"
+    old: "30s CD"
+    new: "Stage-drop IS the cost. Usable any time at Stage 2+. No timer."
+    rationale: "Stage loss is natural gate. Decision is situational, never 'is it off CD?'"
+
+  - ability: "Pack Signal"
+    old: "45s CD"
+    new: "Pursuit version requires 6 hits on marked target this Pursuit. Calm version free."
+    rationale: "Reaver must earn utility through combat engagement."
+
+  - ability: "Shed Scent"
+    old: "30s CD"
+    new: "Available only below 40% HP. No timer."
+    rationale: "Survival tool unlocks when genuinely threatened — stress response."
+
+  - ability: "Wade In"
+    old: "20s CD"
+    new: "15s CD (reduced to compliance). Water proximity is soft behavioral gate."
+    rationale: "Borderline — reduced below threshold. Water requirement prevents rhythm."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# POTENCY FRAMEWORK
+# ═══════════════════════════════════════════════════════════════════════════════
+
+potency_framework:
+  baseline: "100 potency = one standard GCD of Calm-state auto-attack"
+  frenzy_multipliers: "Stage 1: ×1.2 | Stage 2: ×1.4 | Stage 3: ×1.7 | Stage 4: ×2.0+"
+  hp_costs: "% of MAX HP — the only expendable biological resource"
+  gcd: "2.4s standard. Pursuit abilities share GCD unless noted."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CALM STATE ABILITIES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+calm_abilities:
+
+  - name: "Scent the Weak"
+    id: "RVR-C01"
+    type: "Passive / Always Active"
+    gate: "None — intrinsic"
+    potency: "0 (information)"
+    range: "30m base → 50m at 30% target HP → 60m+ at 10%"
+    effect: "HP overlay on all enemies. Threshold highlighting at 70%. Directional awareness through walls."
+    ranks:
+      1: "Base — HP overlay, threshold highlighting"
+      2: "Shows target's last ability used (1s delay)"
+      3: "Shows target's defensive CD status"
+      4: "Predicts target escape pathing"
+      5: "Warning triggers at 75% (earlier detection)"
+
+  - name: "Test Bite"
+    id: "RVR-C02"
+    type: "Active — Melee Strike (Chain Starter)"
+    gate: "Standard GCD. No commitment active."
+    potency: "120"
+    hp_cost: "0"
+    range: "3m"
+    effect: "Probing strike. If brings target below 70%: 1.5s grace window to confirm/decline commitment. Applies bleed 15 potency/3s."
+    chains_into: "Taste for Blood (if target below 70%)"
+    ranks:
+      1: "120 potency, bleed, threshold trigger"
+      2: "Grace window → 2.0s"
+      3: "+30 potency vs targets already below 70%"
+      4: "Bleed → 5s; Bloodscent range +10m on bleeding target"
+      5: "Range extends to 5m (short lunge)"
+
+  - name: "Taste for Blood"
+    id: "RVR-C03"
+    type: "Active — Conditional Follow-Up (Chain 2)"
+    gate: "Target below 70%. Must follow Test Bite within 3s."
+    potency: "90 + 5% target's missing HP"
+    hp_cost: "0"
+    range: "3m"
+    effect: "Deeper bite. Reveals target's exact HP number. Refreshes Test Bite bleed. Does NOT trigger commitment."
+    chains_into: "Lock Jaw (optional commitment) or disengage"
+    ranks:
+      1: "90 + 5% missing HP"
+      2: "Missing HP bonus → 7%"
+      3: "Reveals target max HP"
+      4: "Below 50%: auto-applies 12s Scent Mark (tracking persists through heal above 70%)"
+      5: "Missing HP bonus → 10%; heals Reaver 3% of damage dealt"
+
+  - name: "Circling Patience"
+    id: "RVR-C04"
+    type: "Active — Positional Buff"
+    gate: "Not in Pursuit. CD: 15s."
+    potency: "0"
+    hp_cost: "0"
+    duration: "12s or until commitment/cancelled by damage/attack"
+    effect: "Slow orbit. Grants: +20% damage on first 3 pursuit abilities, +10% initiation speed 5s, Bloodscent range doubled."
+    ranks:
+      1: "+20% on first 3 pursuit abilities"
+      2: "Not cancelled by chip damage (<5% HP)"
+      3: "+25% on first 4 abilities"
+      4: "Enemies in orbit radius: -10% speed"
+      5: "Full 12s uninterrupted: first commitment ability is guaranteed crit"
+
+  - name: "Sense Vulnerability"
+    id: "RVR-C05"
+    type: "Active — Information"
+    gate: "Target within 20m. CD: 8s."
+    potency: "0"
+    range: "20m"
+    duration: "6s"
+    effect: "Reveals: exact HP, defensive CDs, escape availability, reinforcement proximity."
+    ranks:
+      1: "Base info suite"
+      2: "+target's current attack target"
+      3: "Duration → 10s"
+      4: "+target's healing sources"
+      5: "Usable on TWO targets simultaneously"
+
+  - name: "Shed Scent"
+    id: "RVR-C06"
+    type: "Active — Defensive"
+    gate: "§25 — Below 40% HP only. Not in Pursuit."
+    potency: "0"
+    hp_cost: "0"
+    duration: "6s"
+    effect: "Suppresses threat indicators. Reduced aggro, SR1-2 enemies may ignore. Breaks on attack/damage taken."
+    ranks:
+      1: "6s suppression below 40% HP"
+      2: "Threshold → 45%"
+      3: "Duration → 8s"
+      4: "Breaking via Lock Jaw: +15% speed 3s (ambush)"
+      5: "Threshold → 50%; enemies lose track 1s after Shed breaks"
+
+  - name: "Wade In"
+    id: "RVR-C07"
+    type: "Active — Repositioning"
+    gate: "§25 — Water within 12m. CD: 15s."
+    potency: "0"
+    hp_cost: "0"
+    range: "8m dash to water"
+    effect: "Dash to water → Submerged: +30% speed, enemies lose LoS, Bloodscent range ×3. Until leaving water or committing."
+    ranks:
+      1: "8m dash, Submerged state"
+      2: "Dash → 10m"
+      3: "Submerged grants +5% damage on next commitment"
+      4: "Can dash through shallow water without stopping"
+      5: "Emerging into Lock Jaw: 2s stun on target (breaching shark)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# COMMITMENT TRANSITION ABILITIES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+commitment_abilities:
+
+  - name: "Lock Jaw"
+    id: "RVR-T01"
+    type: "Active — Commitment Trigger (Calm → Pursuit)"
+    gate: "Target below 70% AND within 15m. No CD."
+    potency: "180 (first-bite)"
+    hp_cost: "3%"
+    range: "15m (gap-closes to melee)"
+    effect: "IRREVERSIBLE commitment. Enters Pursuit Stage 1. +30% gap-close speed 3s."
+    ranks:
+      1: "180 potency, Stage 1, +30% speed 3s"
+      2: "Range → 18m"
+      3: "Potency → 210"
+      4: "If target below 50%: Stage 1 starts with 50% progress to Stage 2"
+      5: "Applies 1s micro-stun on arrival"
+
+  - name: "Blood Rush"
+    id: "RVR-T02"
+    type: "Active — Aggressive Re-engagement"
+    gate: "§25 — Frenzy Stage 2+ (active Pursuit only). No CD timer. HP cost limits spam."
+    potency: "150 + 15% target's missing HP"
+    hp_cost: "5%"
+    range: "20m (phases through enemies, ignores terrain except walls)"
+    effect: "Explosive gap-close during active Pursuit. Arrives in 0.5s. NOT usable from Calm."
+    ranks:
+      1: "150 + 15% missing HP, 20m close"
+      2: "Missing HP → 18%"
+      3: "Phasing leaves 1s afterimage (decoy)"
+      4: "From water: range → 25m, arrives with Crimson Wake trail"
+      5: "Missing HP → 22%; arrival knocks non-targets back 3m"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PURSUIT STATE ABILITIES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+pursuit_abilities:
+
+  # ─── CORE DAMAGE ────────────────────────────────────────────────────────────
+
+  - name: "Rend"
+    id: "RVR-P01"
+    type: "Active — Core Damage (Spammable)"
+    gate: "In Pursuit. Target in melee. Standard GCD."
+    potency: "140 base (+8% per consecutive Rend, stacking infinitely)"
+    hp_cost: "0"
+    range: "3m"
+    effect: "Primary damage. Applies Hemorrhage: 30 potency/4s bleed. Consecutive bonus resets after 4s without landing Rend."
+    consecutive_example: "R1:140 → R5:190 → R10:302 → R15:444 (before Frenzy multiplier)"
+    ranks:
+      1: "140, +8%/stack, 30/4s Hemorrhage"
+      2: "Stack window → 5s (harder to lose)"
+      3: "Hemorrhage → 40/4s"
+      4: "Every 5th Rend: +80 potency burst"
+      5: "+10%/stack; Hemorrhage → 5s duration"
+
+  - name: "Thrash"
+    id: "RVR-P02"
+    type: "Active — AoE (Limited)"
+    gate: "Frenzy Stage 2+. Target in melee."
+    potency: "160 marked / 64 non-marked (40%) in 3m radius"
+    hp_cost: "2%"
+    range: "3m AoE"
+    effect: "Full damage to target, 40% to others. Non-marked knocked back 2m. Does NOT accelerate Frenzy from non-marked damage."
+    ranks:
+      1: "160/64, 2m knockback"
+      2: "Knockback → 3m"
+      3: "Non-marked → 50% (80)"
+      4: "3+ non-marked hit: 1s damage immunity"
+      5: "Marked → 190; knockback → 4m"
+
+  - name: "Hamstring Snap"
+    id: "RVR-P03"
+    type: "Active — Anti-Kite"
+    gate: "In Pursuit. Target moving away 2+ seconds."
+    potency: "200 (fleeing) / 110 (stationary)"
+    hp_cost: "1%"
+    range: "4m lunge"
+    effect: "If fleeing: 200 potency + -40% speed 3s. If stationary: 110, no slow."
+    ranks:
+      1: "200/110, -40% slow 3s"
+      2: "Detection window → 1.5s"
+      3: "Slow → -50%"
+      4: "Slowed target in water: 1s root"
+      5: "Fleeing → 240; lunge → 5m"
+
+  - name: "Deathroll"
+    id: "RVR-P04"
+    type: "Active — Finisher"
+    gate: "Frenzy Stage 3+. Target below 25% HP."
+    potency: "450 (highest single-hit)"
+    hp_cost: "4%"
+    range: "2m (contact required)"
+    cast: "1.5s channel — both locked in place"
+    effect: "Grapple-tear execution. If kills: clean exit (skip Adrenal Recovery). If fails: 4s reuse lockout + 0.5s stun-self."
+    ranks:
+      1: "450, 1.5s channel, clean exit on kill"
+      2: "Channel → 1.3s"
+      3: "Potency → 500"
+      4: "Kill grants next Pursuit 30% head start on Stage 2"
+      5: "Potency → 560; survive applies -30% healing received 3s"
+
+  - name: "Adrenal Dump"
+    id: "RVR-P05"
+    type: "Active — Burst (Stage Sacrifice)"
+    gate: "§25 — Frenzy Stage 2+. No CD. Stage-drop IS cost."
+    potency: "200% of current Frenzy bonus as flat hit"
+    hp_cost: "3% + drops one Frenzy stage"
+    range: "3m"
+    effect: "Burst conversion. Stage 2 Dump: ~280 pot. Stage 3: ~340. Stage 4: ~400. Can chain-dump (4→3→2) for all-in burst."
+    ranks:
+      1: "200% Frenzy bonus, drops one stage"
+      2: "HP cost → 2%"
+      3: "Kill via Dump: stage NOT lost (refunded)"
+      4: "Post-Dump: +20% speed 2s"
+      5: "220% Frenzy bonus; 1s grace before stage penalty applies"
+
+  - name: "Apex Pursuit"
+    id: "RVR-P06"
+    type: "Active — Mobility"
+    gate: "Target 8m+ away. CD: 6s."
+    potency: "60 (impact)"
+    hp_cost: "1%"
+    range: "6m toward target (cannot aim elsewhere)"
+    effect: "Dash ignoring collision. In water: +4m range (10m total) + 1.5s stealth on emergence."
+    ranks:
+      1: "6m, 60 pot, 6s CD"
+      2: "CD → 5s"
+      3: "Range → 7m (11m water)"
+      4: "Arrival: 0.5s micro-stagger on target"
+      5: "CD → 4s; third use same Pursuit: 120 potency"
+
+  - name: "Crimson Wake"
+    id: "RVR-P07"
+    type: "Active — Zone Creation (Aquatic)"
+    gate: "In water terrain. CD: 10s."
+    potency: "15/s bleed to enemies in wake"
+    hp_cost: "1%"
+    range: "Self trail (2m wide, persists 8s)"
+    effect: "Water trail: -20% enemy speed, +10% Reaver speed per enemy in Wake (stacks), 15 pot/s bleed."
+    ranks:
+      1: "2m trail, -20% slow, +10% speed/enemy"
+      2: "Width → 3m"
+      3: "Bleed → 20/s"
+      4: "Exiting Wake: -10% slow lingers 2s"
+      5: "Duration → 10s; enemies in Wake cannot stealth"
+
+  - name: "Pack Signal"
+    id: "RVR-P08"
+    type: "Active — Team Utility (Dual Mode)"
+    gate: "§25 — Pursuit: requires 6 hits on target this Pursuit. Calm: free."
+    potency: "0"
+    hp_cost: "2%"
+    range: "15m"
+    effect_calm: "+10% ally damage to marked enemy for 6s (target coordination)"
+    effect_pursuit: "+15% ally speed away from target for 4s (escape signal)"
+    ranks:
+      1: "+10% damage (Calm) / +15% speed (Pursuit)"
+      2: "Calm mark → 8s"
+      3: "Pursuit speed → +20%"
+      4: "Pursuit also grants allies +15% DR 1s"
+      5: "Hit requirement → 4; Calm reveals target HP to all allies"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PURSUIT PASSIVES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+pursuit_passives:
+
+  - name: "Feeding Frenzy"
+    id: "RVR-PP01"
+    gate: "In Pursuit, dealing damage to marked target"
+    effect: "Lifesteal = (Frenzy Stage × 3)% of damage dealt. S1:3% S2:6% S3:9% S4:12%+. Marked target only."
+    ranks:
+      1: "Stage × 3%"
+      2: "Stage × 3.5%"
+      3: "Excess healing → temp HP shield (cap 10% max HP)"
+      4: "Applies to Hemorrhage ticks"
+      5: "Stage × 4%; shield cap → 15%"
+
+  - name: "Tunnel Instinct"
+    id: "RVR-PP02"
+    gate: "In Pursuit, Frenzy Stage 2+"
+    effect: "DR from MARKED TARGET only: S2:15% S3:25% S4:35%. No DR from other sources."
+    ranks:
+      1: "15/25/35% DR from target"
+      2: "S2 → 18%"
+      3: "S3 → 28%"
+      4: "S4: target's CC on Reaver -30% duration"
+      5: "20/30/40%; CC reduction extends to S3+"
+
+  - name: "Refuse to Die"
+    id: "RVR-PP03"
+    gate: "Frenzy Stage 3+. HP drops to 0. ONCE per Pursuit."
+    effect: "Survive at 1 HP for 3s. During: immune to death, Frenzy maxes, +100% damage. After 3s: target dead → survive 15% HP. Target alive → die."
+    ranks:
+      1: "3s, +100%, survive at 15%"
+      2: "Survive → 20%"
+      3: "Window → 3.5s"
+      4: "During window: +30% speed"
+      5: "Survive → 25%; kill during window grants 3s total immunity"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RECOVERY & CRASH STATES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+recovery_state:
+  name: "Adrenal Recovery"
+  id: "RVR-R01"
+  trigger: "Successful pursuit kill"
+  duration: "3s"
+  effect: "-30% speed, no abilities, +15% damage taken, regenerates 5% max HP over duration."
+  ranks:
+    1: "3s, -30%, +15% taken, 5% regen"
+    2: "Regen → 7%"
+    3: "Taken → +10%"
+    4: "Duration → 2.5s"
+    5: "Immune to CC during Recovery"
+
+  post_recovery_buff:
+    name: "Kill Momentum"
+    id: "RVR-R02"
+    trigger: "Adrenal Recovery ends (return to Calm)"
+    duration: "8s"
+    effect: "+10% speed, +15% Calm ability damage, +50% Bloodscent range."
+    ranks:
+      1: "8s duration, +10/+15/+50%"
+      2: "Duration → 10s"
+      3: "Speed → +15%"
+      4: "Lock Jaw during Momentum: 25% Stage 1→2 progress"
+      5: "Duration → 12s; damage → +20%"
+
+crash_state:
+  name: "Adrenal Crash"
+  id: "RVR-X01"
+  trigger: "Target phases/leaves without dying"
+  duration: "8s"
+  effect: "-40% speed, -30% damage, +25% taken, no Pursuit possible, 2%/s HP drain."
+  ranks:
+    1: "Full severity"
+    2: "HP drain → 1.5%/s"
+    3: "Duration → 7s"
+    4: "If ally kills phased target within 4s: severity halved"
+    5: "Duration → 6s; drain → 1%/s; speed → -30%"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AQUATIC EXTENSIONS (conditional bonuses on existing abilities)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+aquatic_extensions:
+  frenzy_in_water: "All accumulation rates DOUBLED. Stage 4 in ~10s vs ~20s on land."
+  ability_bonuses:
+    Rend: "Hemorrhage → 6s duration in water"
+    Thrash: "Knockback → 4m; AoE radius → 4m"
+    Hamstring_Snap: "Slow → -50% in water"
+    Deathroll: "Channel -0.3s in water; +50 potency"
+    Apex_Pursuit: "Range +4m; water emergence = 1.5s stealth"
+    Lock_Jaw: "Gap-close speed +50% from water; first-bite +20% potency"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RANK PROGRESSION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+rank_progression:
+  philosophy: "Ranks unlock DEPTH (new conditions, tools) not RAW POWER (flat +damage)."
+
+  rank_1:
+    name: "Pup"
+    unlock: "Class selection"
+    abilities: ["Scent the Weak", "Test Bite", "Circling Patience", "Sense Vulnerability", "Lock Jaw", "Rend", "Feeding Frenzy", "Apex Pursuit", "Adrenal Recovery", "Adrenal Crash"]
+    identity: "Core loop: observe → commit → ramp → kill → recover. No finisher, no AoE, no utility."
+
+  rank_2:
+    name: "Blooded"
+    unlock: "First successful pursuit kill in real combat"
+    new: ["Hamstring Snap", "Thrash", "Taste for Blood"]
+    identity: "Anti-kite and crowd management. Viable against runners and multi-enemy situations."
+
+  rank_3:
+    name: "Apex"
+    unlock: "Achieve Stage 4 and kill target during it"
+    new: ["Deathroll", "Refuse to Die", "Tunnel Instinct", "Kill Momentum"]
+    identity: "Full execution suite. Finisher, death-defiance, target DR, post-kill momentum."
+
+  rank_4:
+    name: "Deephunter"
+    unlock: "3 pursuit kills in water terrain"
+    new: ["Crimson Wake", "Wade In", "Shed Scent", "Blood Rush"]
+    identity: "Aquatic specialization + survival tools + aggressive re-engagement."
+
+  rank_5:
+    name: "Tidebreaker"
+    unlock: "Kill a target during Refuse to Die window"
+    new: ["Pack Signal", "Adrenal Dump"]
+    identity: "Complete mastery. Team utility + emergency burst. All abilities at final rank."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ABILITY INTERACTION PATTERNS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+interaction_patterns:
+  standard_kill: "Lock Jaw → Rend spam (stack) → Deathroll at 25% → clean exit"
+  chase_pattern: "Apex Pursuit (close) → Hamstring (slow) → Rend stack while slowed"
+  crowd_clear: "Thrash (knockback adds) → Rend (isolated target)"
+  burst_finish: "Adrenal Dump (stage sacrifice) when target is close to death but above 25%"
+  desperate_finish: "Refuse to Die triggers → Frenzy maxes → Deathroll OR chain Dump (4→3→2) for all-in"
+  water_ambush: "Wade In → Submerged → Lock Jaw (stealth commit, +speed, +damage)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# COMPLIANCE SUMMARY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+compliance:
+  section_25: "FULLY COMPLIANT — longest CD is 15s. Zero abilities >15s."
+  anti_rotation: "COMPLIANT — ability selection driven by target behavior, not internal sequence."
+  feedback_system: "COMPLIANT — no gauges, no bars. State + HP + hit-count + behavior = all gates."
+  gate_types:
+    state_requirement: 14
+    frenzy_stage: 5
+    target_behavior: 2
+    hit_count: 1
+    hp_proximity: 1
+    positional: 2
+    short_cooldown_leq_15s: 4
+    long_cooldown_gt_15s: 0
+  total_abilities: 18
+  hp_cost_per_pursuit: "~12% gross, ~3-6% net after Feeding Frenzy lifesteal"
+
+# ▼ CONTINUES IN: (Layer 1 spatial quantification — absolute values, distances, timing frames)
