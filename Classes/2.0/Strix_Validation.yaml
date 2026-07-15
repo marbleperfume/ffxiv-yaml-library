@@ -1,0 +1,378 @@
+# Classes/DPS/Strix_Validation.yaml
+# ══════════════════════════════════════════════════════════════════════════════
+# STRIX (Talon) — VALIDATION & BALANCE VERIFICATION
+# ══════════════════════════════════════════════════════════════════════════════
+# Authority: BalanceTargets.yaml > this file > Strix_Design.yaml
+# Sources:   Strix_Design.yaml, Strix_Skills.yaml, BalanceTargets.yaml
+# Race: Featherin (Biological Lock) | Role: DPS (100% ref) | Tier: Experienced
+# ══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.DPS.Strix.Validation
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1: BALANCE TARGETS
+# ─────────────────────────────────────────────────────────────────────────────
+
+BalanceTargets:
+  RoleBaseline: "DPS = 100% reference. Band: ±12% max deviation."
+  RacialStats: { Race: Featherin, SPD: 15, DEX: 13, STR: 6 }
+  STR6_Note: "Damage from MOMENTUM (altitude×mass×velocity), not raw strength. Elemental weapons on ground."
+  GCD: { Base: 2.0s, HasteCap: 1.4s, Weave: single_only, AnimLock: "0.6s std / 0.3s short" }
+
+  PotencyBands:
+    Filler: "Storm Slash 100p ✓"
+    ComboFinisher: "Updraft Cutter 150p ✓"
+    SpenderSmall: "Raptor Dive 30AU = 300p ✓"
+    SpenderLarge: "Raptor Dive 70AU = 500p ✓"
+    ClassUltimate: "TV + Piercing Plunge 100AU = 850p ✓"
+    Verdict: PASS
+
+  DPSTargets:
+    OpenSky: "100%"
+    PartialCeiling: "80-85%"
+    GroundLocked: "55-60%"
+    Boss_ST: "95-100%"
+    Trash_AoE: "105-110%"
+
+  PPSValidation:
+    Cycle15s: "Mark(0) + Bolt(80) + Spiral(0) + Dive70AU(500) + Ground combo(380) + Poison(125) ≈ 1175p"
+    BasePPS: "~78 PPS raw"
+    WithCrit70: "~100 PPS effective"
+    BurstCeiling: "TV+Accelerant+Mark+>50%HP+Crit = ≈1650-1732p (fully gated)"
+    Verdict: PASS
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2: MATCHUP SCENARIOS
+# ─────────────────────────────────────────────────────────────────────────────
+
+MatchupScenarios:
+
+  SR1_OpenRoom:
+    Environment: "Open sky, 6-8 clustered trash, SR1 (no tactics, no anti-air)"
+    AltitudeAccess: "Full 100 AU"
+    DiveChoice: Scatterfall
+    CycleTime: "12-14s"
+    ExpectedDPS: "105-110%"
+    DiveAccuracy: "95%+ (enemies don't dodge)"
+    KeyMath: "Scatterfall 70AU × 6 targets × 1.25 (>50%HP) = 2325p opener"
+    Risk: LOW
+    Verdict: PASS
+    Note: "Best-case scenario. Strix AoE dominance."
+
+  SR2_Mixed:
+    Environment: "70AU ceiling, 4-5 enemies (2 melee, 2 ranged, 1 elite), SR2"
+    AltitudeAccess: "70 AU max"
+    AntiAir: "Ranged enemies CAN shoot hovering Strix (not dedicated AA)"
+    DiveChoice: "Mix — Raptor Dive groups, Piercing Plunge elite"
+    CycleTime: "15-18s (Barrel Rolls cost stamina)"
+    ExpectedDPS: "90-95%"
+    DiveAccuracy: "85-90%"
+    Counterplay:
+      - "Windshear Bolt slows targets before commit"
+      - "Feint Dive (12s) baits SR2 dodge"
+      - "Barrel Roll i-frame costs 3 stamina per dodge"
+      - "Featherward absorbs 1 ranged hit while hovering"
+    Risk: MODERATE
+    Verdict: PASS
+
+  SR3_Intelligent:
+    Environment: "High ceiling BUT dedicated anti-air enemy, SR3 (flank, coordinate, retreat)"
+    AltitudeAccess: "Physical clearance exists; anti-air PUNISHES >50 AU loitering"
+    AntiAir: "DEDICATED — targets highest-altitude player, fast projectiles"
+    DiveChoice: "Mid-alt Raptor Dives (safer), Piercing Plunge (calculated risks)"
+    CycleTime: "16-20s (forced lower, cautious reads)"
+    ExpectedDPS: "85-90%"
+    DiveAccuracy: "80-85% (SR3 enemies dodge on commit)"
+    ForcedAdaptation: "Cannot sustain >70AU hover. Ascend fast → read fast → commit fast."
+    Counterplay:
+      - "Feint Dive essential for baiting SR3 dodge"
+      - "Party CC/root before commit"
+      - "Quick ascend-scan-descend for Raptor's Eye"
+      - "Terminal Velocity earned slower (fewer marked hits)"
+    Risk: HIGH
+    Verdict: PASS_WITH_SKILL
+    Note: "Designed challenge content. 80% skill expression shows here."
+
+  Corridor_Cave:
+    Environment: "20-30 AU ceiling, 4-6 enemies in corridor line, SR2"
+    AltitudeAccess: "SEVERELY LIMITED — Low Altitude only"
+    DiveChoice: "Shallow Raptor Dive (20-30AU = 250-300p)"
+    GroundEmphasis: "70-80% time grounded"
+    ExpectedDPS: "60-70%"
+    Compensation:
+      - "Wall-jumps (Crag Launch 20 AU) enable mini-dives"
+      - "Updraft Cutter stacking: 3 combos Wind = 30 AU"
+      - "Lightning arcs (Voltaic Strike) for linear enemies"
+      - "Neurotoxin DoT bridges reduced dive output"
+    Risk: MODERATE
+    Verdict: PASS_AT_REDUCED_OUTPUT
+    Note: "INTENTIONAL weakness. Map = primary balance lever for Strix."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3: PASS/FAIL CRITERIA
+# ─────────────────────────────────────────────────────────────────────────────
+
+PassFailCriteria:
+
+  StaminaEconomy:
+    MaxAlt_Cycle: "Ascent -80, Hover -9, Dive 0, Descent +6, Ground +72 = NET -11/cycle"
+    MaxAlt_Verdict: "MARGINAL — two max cycles before pause. By design (expensive)."
+    MidAlt_Cycle: "Ascent -40, Hover -6, Dive 0, Descent +3, Ground +50 = NET +7/cycle"
+    MidAlt_Verdict: "POSITIVE — sustainable indefinitely. ✓"
+    Depletion_Recovery: "0 → 30 stamina (Lift Off req) in 2.5s. Acceptable punishment."
+    UpdraftBurst_Impact: "25 stam escape → reduces next cycle ceiling. Honest tradeoff."
+    WingFatigue_Overall: PASS
+
+  DiveDamageScaling:
+    RaptorDive: "150 + AU×5: 10AU=200p | 50AU=400p | 70AU=500p | 100AU=650p ✓"
+    PiercingPlunge: "200 + AU×6: 20AU=320p | 50AU=500p | 70AU=620p | 100AU=800p ✓"
+    Scatterfall: "100 + AU×3: 30AU=190p | 70AU=310p | 100AU=400p (×N targets) ✓"
+    TerminalVelocity: "150 + AU×7: 100AU=850p (3 Dive Momentum gate) ✓"
+    BandCompliance: "All tiers map to correct PotencyBands from BalanceTargets.yaml"
+    Verdict: PASS
+
+  GroundStateDPS:
+    ComboChain: "100+130+150 = 380p/6s = 63 PPS base"
+    WithPoison: "+Venom Rake(90) + DoT ticking ≈ 75-80 PPS"
+    Ratio: "~55-60% of full-cycle reference ✓"
+    CavePlus: "Shallow dives (+25 PPS bonus) → 60-70% in corridors"
+    Verdict: PASS
+
+  TimeToReascend:
+    LiftOff_Cast: "2.0s (interruptible)"
+    GroundedDuration: "R1:6s / R2:5s / R3:4s"
+    SafetyMethods: "Dash i-frame → Lift Off | Screech (3s lock) → Lift Off | Updraft Burst (emergency)"
+    ToMidAlt: "Lift Off (2s→30AU) + Thermal Spiral (1s→50AU) = 3s to combat altitude"
+    Verdict: PASS
+
+  EvasionReliability:
+    Fresh: "0.3s i-frame, 4.0s CD, 6m → 7.5% coverage (precise)"
+    BiS: "0.5s i-frame, 2.5s CD, 10m → 20% coverage (untouchable feel)"
+    Guarantee: "100% immune during dash. NEVER chance-based."
+    Aerial: "+25% passive evasion above 30AU + Barrel Roll i-frames"
+    StatScaling: "DEX=duration, EVA=CD, SPD=distance"
+    Verdict: PASS
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: §25 COMPLIANCE
+# ─────────────────────────────────────────────────────────────────────────────
+
+Section25_Compliance:
+  Rule: "No CDs >15s on identity-defining skills. Resource-gated preferred."
+  DesignFileFlags: 5
+  AllResolved: true
+
+  Conversions:
+    terminal_velocity:
+      Before: "120s CD"
+      After: "3 Dive Momentum (earned via successful marked dives), NO CD"
+      Gate: "Performance-based escalation resource"
+      Identity: "Always building toward TV or using TV. Zero dead windows."
+      Verdict: PASS
+
+    dive_accelerant:
+      Before: "45s CD"
+      After: "30 AU altitude cost, NO CD"
+      Gate: "Primary class gauge (altitude)"
+      Identity: "Available every cycle at sufficient altitude."
+      Verdict: PASS
+
+    raptors_eye:
+      Before: "60s CD"
+      After: "50+ AU gate + 15 Wing Stamina cost, NO CD"
+      Gate: "Position + resource"
+      Identity: "READ tool available when positioned correctly."
+      Verdict: PASS
+
+    updraft_burst:
+      Before: "30s CD"
+      After: "25 Wing Stamina cost, NO CD"
+      Gate: "Flight fuel resource"
+      Identity: "Escape available whenever stamina exists."
+      Verdict: PASS
+
+    feint_dive:
+      Before: "20s CD"
+      After: "12s CD (within 5-15s tactical range)"
+      Gate: "Tactical CD (acceptable for non-identity ≤15s)"
+      Identity: "~1× per dive cycle."
+      Verdict: PASS
+
+  RemainingCDs: "Neurotoxin Sheath 15s (tactical, non-identity). All others: 0s or resource-gated."
+  Section25_Overall: PASS
+  Summary: "Zero identity skills gated >15s. All converted to resource/performance gates."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 5: ALTITUDE STATE COVERAGE
+# ─────────────────────────────────────────────────────────────────────────────
+
+AltitudeStateCoverage:
+  Requirement: "All 5 altitude states mechanically distinct with clear use cases"
+
+  Ground_0AU:
+    Identity: "Weapon-based elemental/poison melee"
+    Unique: "Only state with melee combo. Fastest stamina regen. Cannot dive."
+    UseCase: "Mandatory recovery + active DPS via Storm Talons"
+
+  LowHop_1to10AU:
+    Identity: "Micro-jump dodge/transition"
+    Unique: "Thermal Kick, Updraft Cutter launch. 1 aerial action mid-combo."
+    UseCase: "Ground AoE dodge, indoor altitude accumulation, aerial GCD access"
+
+  LowAltitude_1to30AU:
+    Identity: "Entry flight — quick-cycle dives"
+    Unique: "Lift Off entry point. Melee-safe, ranged-exposed. Standard stamina drain."
+    UseCase: "Cave play, stamina-conservative cycles, entry after ground"
+
+  MidAltitude_31to70AU:
+    Identity: "Primary combat altitude — bread and butter"
+    Unique: "Raptor's Eye threshold (50+). Only anti-air reaches. +25% passive evasion."
+    UseCase: "Most dives launch here. Best risk/reward ratio. Stamina-positive cycles."
+
+  HighAltitude_71to100AU:
+    Identity: "Apex burst — expensive, devastating"
+    Unique: "Thin-air penalty (+3/s drain). Slow horizontal. Max vision. Near-immunity."
+    UseCase: "Terminal Velocity apex dives. Opener reads. Cannot sustain."
+
+  Verdict: PASS
+  Summary: "Each state has unique mechanics, risk, stamina cost, and strategic value. Zero redundancy."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 6: WEAKNESS BUDGET
+# ─────────────────────────────────────────────────────────────────────────────
+
+WeaknessBudget:
+
+  Indoor_Cave:
+    Severity: MAJOR
+    Impact: "55-70% DPS (altitude denial)"
+    Counterplay: "Wall-jumps, Updraft Cutter stacking, poison DoT, Lightning arcs"
+    DesignRole: "PRIMARY balance lever. Map controls Strix power."
+
+  AntiAir_Enemies:
+    Severity: MAJOR
+    Impact: "85-90% DPS (forced mid-alt, stamina pressure from Barrel Rolls)"
+    Counterplay: "Feint Dive, fast commit, party draws AA attention, mid-alt play"
+    DesignRole: "Prevents infinite high-altitude degenerate play"
+
+  MultiTarget_Ground_Pressure:
+    Severity: MODERATE
+    Impact: "Reduced ground combo completion (forced defensive)"
+    Counterplay: "i-frame dashes, Updraft Burst escape, SPD 15 kiting, frontliner cover"
+    DesignRole: "Ground time = dangerous. Motivates re-ascend."
+
+  Hollow_Bones:
+    Severity: MODERATE
+    Impact: "70% standard HP, lowest physical defense"
+    Counterplay: "Featherward (20% shield + 25% DR), dashes, altitude, descent regen"
+    DesignRole: "Binary survival: dodge everything OR take it (probably die)"
+
+  Dive_Commit_Fixed:
+    Severity: MODERATE
+    Impact: "0p from missed dive + wasted ground time"
+    Counterplay: "Better reads, Windshear slow, Screech lock, Feint Dive, party CC"
+    DesignRole: "Core risk/reward. Pre-calculation mastery = not missing."
+
+  Stamina_Exhaustion:
+    Severity: LOW
+    Impact: "Forced grounding (55-60% DPS for 2.5s recovery)"
+    Counterplay: "Stamina discipline, Thermal Spiral, mid-alt conservative play"
+    DesignRole: "Flight economy management is skill axis"
+
+  Summary: "2 Major + 3 Moderate + 1 Low = appropriate for DPS"
+  AllHaveCounterplay: true
+  EncounterDesignLever: "Ceiling height + anti-air placement"
+  Verdict: PASS
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 7: GROUND STATE VIABILITY (Session 5 Corrections)
+# ─────────────────────────────────────────────────────────────────────────────
+
+GroundStateViability:
+  Requirement: "Ground play FUNCTIONAL — weaker but NOT useless. Active gameplay."
+
+  DPS_Contribution:
+    Target: "55-60% of full-cycle DPS"
+    Evidence: "Storm combo (380p/6s) + Poison + Lightning arcs"
+    Verdict: PASS
+
+  Active_Decisions:
+    - "Stormweave Toggle: Wind vs Lightning per situation"
+    - "Neurotoxin timing: apply before re-ascend for DoT bridge"
+    - "Rear positional crits: SPD 15 enables flanking"
+    - "5 poison stacks → guaranteed crit: stack management"
+    - "Dive Tempo (R3): combo completion → -1s Grounded Duration"
+    - "Updraft Cutter choice: Wind (+10 AU) vs standard (+5 AU)"
+    Verdict: PASS
+
+  Altitude_Feedback:
+    - "Updraft Cutter: +5 AU (Wind: +10 AU) per finisher"
+    - "3 Wind combos = 30 AU → shallow dive without Lift Off"
+    - "Wall-jumps: 20 AU indoor alternative"
+    Verdict: PASS
+
+  Self_Sufficiency:
+    - "i-frame dashes (guaranteed immunity)"
+    - "SPD 15 (outrun most enemies)"
+    - "Featherward barrier"
+    - "Updraft Burst emergency escape"
+    - "Descent regen continues 4s post-landing"
+    Verdict: PASS
+
+  Not_Dead_Time:
+    - "Poison bridges damage between dives"
+    - "Dive Tempo: active ground play shortens ground time"
+    - "Multiple meaningful decisions per phase"
+    - "Active play → faster cycle. Passive → slower. Skill expression."
+    Verdict: PASS
+
+  Overall: PASS
+  Session5_Statement: >
+    Ground Strix = raptor on ground: fast, venomous, dangerous, not in its element.
+    WEAKER (55-60%) but NEVER helpless. Active decisions. Feeds altitude system.
+    Self-sufficient survival. Not dead time between dives.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 8: ADDITIONAL CHECKS
+# ─────────────────────────────────────────────────────────────────────────────
+
+AdditionalChecks:
+  NoBurstCadence: "TV earned via Dive Momentum (~45-50s through play). No fixed 2-min window. ✓"
+  CritNotRNG: "All conditional (>50%HP, rear, marked, 5 poison). Zero random. ✓"
+  HP50Rule: "All dives +25% vs >50% HP. Opener strongest. Add phases excel. ✓"
+  GaugeTiming: "First dive at 9-11s (Lift Off + ascent + prep). Within target. ✓"
+  RacialLock: "TRUE FLIGHT + kinetic dive + hollow bones = Featherin exclusive. ✓"
+  ButtonBudget: "~25 total, 8-12 active per state. Experienced tier appropriate. ✓"
+  ColonyDistinct: "Predatory vs Utility flight. Completely different mechanical identity. ✓"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 9: FINAL SUMMARY
+# ─────────────────────────────────────────────────────────────────────────────
+
+FinalSummary:
+  Verdict: PASS
+
+  Results:
+    BalanceTargets: PASS
+    MatchupScenarios: PASS
+    PassFailCriteria: PASS
+    Section25_Compliance: PASS
+    AltitudeStateCoverage: PASS
+    WeaknessBudget: PASS
+    GroundStateViability: PASS
+
+  MarginalAreas:
+    - "Max-altitude stamina: slightly negative per cycle (intentional)"
+    - "HP rule at 51% without barrier: extremely fragile (glass cannon by design)"
+    - "SR3 anti-air + cave combination: potential 50-55% edge case"
+
+  OpenItems:
+    - "Full 5-min DPS sim for precise PPS confirmation"
+    - "Anti-air enemy frequency in procgen tuning"
+    - "Ceiling distribution target: 60% open / 25% mixed / 15% cave"
+    - "TV apex hit (≈1650-1732p): verify extended ClassUltimate band"
+
+  ReadyFor: { Simulation: true, Playtest: true, Ship: false }
+  ShipBlockers: "Full sim + anti-air tuning + cave content distribution"
+
+# ─────────────────────────────────────────────────────────────────────────────

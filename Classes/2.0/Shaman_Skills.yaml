@@ -1,0 +1,803 @@
+# Classes/Shaman/Shaman_Skills.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+# ▲ CONTINUES FROM: Shaman_Design.yaml
+# ▲ GAP: Sections 1-11 NOT in this file (identity, mechanic, systems, philosophy)
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# This file contains: Full GCD/oGCD skill roster with potencies, rank progression,
+# balance targets, system interactions, matchup analysis, balance validation,
+# visualization hooks, and constraints.
+#
+# SYSTEM RULES (enforced throughout):
+#   - GCD 2.0s base, 1.4s cap, single-weave only
+#   - Crit is NOT RNG — positional/conditional only
+#   - >50% HP rule on ENEMIES (+25% damage above 50%)
+#   - Items define baseline, class replaces permanently
+#   - NO 2-minute burst cycle or fixed cadence
+#   - Zero Freecure, zero RNG procs
+#   - Healers CANNOT replace frontline
+#   - MonsterBone = run-length budget (consumable-gated)
+#   - Curse Explosion = SACRIFICE (lose all debuffs for burst — rarely optimal)
+#   - Zero Stage 3 CC (max Stage 2: Silence + Interrupt)
+#   - Strategy Rank 3+ enemies target and destroy installations
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Shaman.Skills
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1: GCD SKILL ROSTER
+# ─────────────────────────────────────────────────────────────────────────────
+
+Skills:
+  GCD:
+    # ─────────────────────────────────────────────────────────────────────────
+    # CORE DAMAGE GCDs
+    # ─────────────────────────────────────────────────────────────────────────
+    CoreDamage:
+      - Id: effigy
+        Name: Effigy
+        ActionType: GCD
+        CastTime: instant
+        Recast: 2.0s
+        Potency: 100
+        DamageType: magical (dark)
+        TargetType: single (ranged, 20y)
+        Range: 20y
+        AdditionalEffect:
+          - "Applies 1 Hex stack to target (Invested state)"
+        CritCondition: "If target has ≥3 Hex stacks AND is above 50% HP: guaranteed crit"
+        Description: >
+          Basic curse bolt. The filler GCD. Applies Hex while dealing damage.
+          Used to accelerate Hex stack buildup beyond Floating Bone's passive.
+          Efficient and always correct when no higher-priority action exists.
+        RankRequired: 1
+        DesignNote: "100p reference + Hex stack. Crit rewards Investment maintenance."
+
+
+      - Id: curse_explosion
+        Name: Curse Explosion
+        ActionType: GCD
+        CastTime: 2.5s  # HIGH COMMITMENT — longer cast, no weave window
+        Recast: 2.0s
+        Potency: "50 + (Hex Stacks × 50). At 5 stacks: 300p"
+        PotencyScaling:
+          0_stacks: 50
+          1_stack: 100
+          2_stacks: 150
+          3_stacks: 200
+          4_stacks: 250
+          5_stacks: 300
+        DamageType: magical (dark)
+        TargetType: single (ranged, 20y)
+        Range: 20y
+        AdditionalEffect:
+          - "CONSUMES ALL Hex stacks on target (returns enemy to full capability)"
+          - "AoE splash: 50% potency to enemies within 5y of primary target"
+          - "Enemy debuffs (accuracy/speed/attack speed) ALL removed immediately"
+        CritCondition: "If target is below 15% HP: guaranteed crit (execute finisher)"
+        Description: >
+          Detonates accumulated curses for burst damage. SACRIFICES all
+          Invested value — enemy returns to full strength. The same consequence
+          as Harvesting, but provides DAMAGE instead of healing. Rarely optimal
+          except at execute range.
+        RankRequired: 1
+        DesignNote: >
+          TRAP SKILL. 2.5s no-weave commitment. Almost always wrong to Explode
+          at 5 stacks — maintaining +25% amp is superior to one-time 300p burst.
+          Correct only at execute (<15% HP) or forced target swap.
+
+      - Id: dark_theurgy
+        Name: Dark Theurgy
+        ActionType: GCD
+        CastTime: 2.5s
+        Recast: 2.0s
+        Potency: 250
+        DamageType: magical (dark)
+        TargetType: circle (ground-targeted, 5y radius)
+        Range: 20y (ground placement)
+        Cooldown: 15s
+        AdditionalEffect:
+          - "All enemies in area receive 1 Hex stack"
+          - "Leaves persistent ground DoT for 6s (30p/tick, 2 ticks = 60p additional)"
+          - "Ground effect inherits Floating Bone aura: enemies standing in BOTH zones gain stacks from each source independently"
+        TotalPotency: 310  # 250 initial + 60 ground ticks
+        CritCondition: "If 3+ enemies hit by initial impact: guaranteed crit on all"
+        Description: >
+          Calls dark energy from below. AoE damage + mass Hex application +
+          lingering ground damage. The multi-target Hex accelerator for
+          pack encounters and spawning adds.
+        RankRequired: 2
+        DesignNote: "AoE Hex accelerator. Enables mass Harvest or multi-target execute."
+
+
+      - Id: mastema
+        Name: Mastema
+        ActionType: GCD
+        CastTime: 2.5s
+        Recast: 2.0s
+        Potency: 350
+        DamageType: magical (dark)
+        TargetType: single (ranged, 20y)
+        Range: 20y
+        Cooldown: 30s
+        AdditionalEffect:
+          - "If target has 3+ Hex stacks: potency increased to 450"
+          - "Does NOT consume Hex stacks (Investment preserved)"
+          - "Extends all current Hex stack durations by 5s on hit"
+        CritCondition: "If target is above 50% HP AND has 5 Hex stacks: guaranteed crit"
+        Description: >
+          Heavy curse bolt. Enhanced against Invested targets but does NOT
+          consume stacks. The premiere DPS tool during sustained Investment.
+          Rewards the player for MAINTAINING stacks rather than spending them.
+        RankRequired: 2
+        DesignNote: >
+          Non-consuming 450p nuke REWARDS Investment. Compare: Explosion = 300p
+          and LOSES amp. Mastema = 450p and KEEPS amp. Superior in all
+          sustained scenarios. Explosion only at execute range.
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # SUMMON GCDs
+    # ─────────────────────────────────────────────────────────────────────────
+    Summons:
+      - Id: summon_bone_spirit
+        Name: Summon Bone Spirit
+        ActionType: GCD
+        CastTime: 2.0s
+        Recast: 2.0s
+        Potency: 0
+        TargetType: "Point blank (summoned at Shaman's feet)"
+        ResourceCost: {MonsterBone: 1}
+        Cooldown: "10s lockout after previous Bone Spirit destroyed"
+        AdditionalEffect:
+          - "Summons Bone Spirit (25% Shaman max HP, persistent)"
+          - "Auto-attacks Shaman's target (50p/3s)"
+          - "Auto-interrupts casts within 8y (Stage 2 Interrupt, 10s CD)"
+          - "HOLD POSITION command available via Summon Command oGCD"
+        Description: >
+          Deploys Bone Spirit — persistent interrupt sentry with real HP.
+          Follows Shaman by default or holds a commanded position indefinitely.
+        RankRequired: 1
+
+      - Id: bone_pointing
+        Name: Bone Pointing
+        ActionType: GCD
+        CastTime: 2.0s
+        Recast: 2.0s
+        Potency: 0
+        TargetType: "Ground-targeted (within 15y)"
+        ResourceCost: "{MonsterBone: 1} if no Floating Bone; FREE if repositioning existing"
+        AdditionalEffect:
+          - "If no Floating Bone: Summons new Floating Bone (1 Bone cost)"
+          - "If Floating Bone exists: REPOSITIONS it (no Bone cost)"
+          - "Floating Bone: 15% Shaman max HP, persistent, 10y Hex aura"
+        Description: >
+          Deploys or repositions Floating Bone. First use costs a Bone.
+          Subsequent uses (while Floating Bone lives) are free repositions.
+          Spatial adaptation — move curse engine to where enemies ARE.
+        RankRequired: 1
+
+      - Id: spirit_channel
+        Name: Spirit Channel
+        ActionType: GCD
+        CastTime: 2.5s (channeled, interruptible by player or enemy)
+        Recast: 2.0s
+        Potency: 500
+        DamageType: magical (dark)
+        TargetType: single (ranged, 15y, projectile from Bone Spirit)
+        Cooldown: 30s
+        ResourceCost: "CONSUMES Bone Spirit (destroys it permanently)"
+        AdditionalEffect:
+          - "DESTROYS your Bone Spirit (it IS the projectile)"
+          - "10s re-summon lockout applies after"
+          - "Hex bonus: +100p per Hex stack on target"
+        PotencyWithHex:
+          0_stacks: 500
+          1_stack: 600
+          2_stacks: 700
+          3_stacks: 800
+          4_stacks: 900
+          5_stacks: 1000
+        CritCondition: "If target is above 50% HP AND has 5 Hex stacks: guaranteed crit"
+        Description: >
+          Launches Bone Spirit as a devastating projectile. DESTROYS your
+          sentry permanently. The ultimate single-target damage skill but
+          the cost is losing a persistent asset + 1 Bone + 10s lockout.
+        RankRequired: 2
+        DesignNote: "1000p at 5 stacks but LOSES sentry. Only when fight ending, no interrupts needed, or bones flush."
+
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # SPIRIT ASCENSION (GCD — Use-Case Driven)
+    # ─────────────────────────────────────────────────────────────────────────
+    SpiritAscension:
+      - Id: spirit_ascension
+        Name: Spirit Ascension
+        ActionType: GCD
+        CastTime: 1.0s
+        Recast: 2.0s
+        Potency: 0
+        Duration: 15s
+        # §25 FIX: Removed 120s CD. MonsterBone cost (2) is the gate.
+        # Available whenever bones are available — encounter intensity controls access.
+        ResourceCost: {MonsterBone: 2}
+        AdditionalEffect:
+          - "Shaman levitates (immune to ground AoE, melee attacks)"
+          - "All damage dealt +20% (Prana buff)"
+          - "Movement speed +30%"
+          - "CAN be targeted by ranged/magical attacks"
+        CritCondition: "All Shaman attacks crit while levitating IF target has 5 Hex stacks"
+        Description: >
+          Ascends into spiritual form. Use-case driven: floor is lethal,
+          melee enemies are swarming, gap needs crossing, or phase demands
+          maximum DPS. 2-Bone cost makes this a premium, deliberate choice.
+        RankRequired: 2
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # HEALING GCDs (Triage Only — EXPENSIVE by Design)
+    # ─────────────────────────────────────────────────────────────────────────
+    Healing:
+      - Id: ancestral_rite
+        Name: Ancestral Rite
+        ActionType: GCD
+        CastTime: "4.0s (channeled, 2 ticks at 2.0s intervals)"
+        Recast: 2.0s
+        Potency: 0
+        HealingPotency: "250 per tick × 2 ticks = 500 total (AoE: all allies within 10y)"
+        TargetType: "AoE (centered on Shaman, 10y radius, all allies)"
+        Cooldown: none
+        Description: >
+          Channels ancestral energy. 4s lock: ZERO damage output, ZERO
+          repositioning, ZERO weaving. Maximum healing throughput but
+          crippling commitment. Every second channeling is a second NOT
+          cursing, NOT generating Hex stacks, NOT maintaining Investment.
+        RankRequired: 1
+        DesignNote: "Strong AoE heal but 4s of zero damage/zero weaving. Use only when Hex Drain insufficient."
+
+
+      - Id: bone_salve
+        Name: Bone Salve
+        ActionType: GCD
+        CastTime: instant
+        Recast: 2.0s
+        HealingPotency: 350
+        TargetType: single (ally or self, 20y)
+        ResourceCost: {MonsterBone: 1}
+        Cooldown: none
+        Description: >
+          Crushes a MonsterBone into healing dust. Instant, strong, but
+          costs 1 Bone. Emergency heal where the cost is ECONOMIC — that
+          Bone could have been a summon, a Spirit Channel, or Spirit Ascension fuel.
+        RankRequired: 1
+        DesignNote: "Run-length consequence: 'Is this ally's life worth 1 Bone?' Heavy in SR4, free in SR1."
+
+
+      - Id: spirit_vine_barrier
+        Name: Spirit Vine Barrier
+        ActionType: GCD
+        CastTime: 2.5s
+        Recast: 2.0s
+        Potency: 0
+        TargetType: "Ground-targeted (line, 4y wide, within 15y)"
+        Cooldown: 30s
+        Duration: 20s
+        AdditionalEffect:
+          - "Creates vine wall (4y wide) that ROOTS enemies on contact (Stage 1)"
+          - "Root duration: 3s (broken by taking damage)"
+          - "Allies pass freely through the barrier"
+          - "Persists 20s or until destroyed by enemy attacks"
+        Description: >
+          Barrier that blocks enemy pathing while allowing allied movement.
+          Roots on contact. Defensive deployment for protecting backline or
+          creating chokepoints in corridors.
+        RankRequired: 2
+        DesignNote: "Stage 1 only. Combo with Floating Bone behind barrier = root+curse zone."
+
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # oGCD ROSTER
+  # ─────────────────────────────────────────────────────────────────────────
+  oGCD:
+    # ─────────────────────────────────────────────────────────────────────
+    # CORE: Hex Drain (THE Invested/Harvested Toggle)
+    # ─────────────────────────────────────────────────────────────────────
+    HexDrain:
+      - Id: hex_drain
+        Name: Hex Drain
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Cooldown: 12s
+        Range: 20y
+        Condition: "Target must have ≥1 Hex stack"
+        Effect: >
+          HARVESTS all Hex stacks from target enemy. Enemy returns to full
+          capability (all debuffs removed). Heals lowest-HP ally proportional
+          to stacks consumed:
+          - 1 stack: 150 HP
+          - 2 stacks: 300 HP
+          - 3 stacks: 450 HP + 150 overshield
+          - 4 stacks: 600 HP + 225 overshield
+          - 5 stacks: 750 HP + 300 overshield + cleanse 1 debuff
+        TargetSelection: "Heal targets lowest-HP ally automatically"
+        OvershieldCap: "30% Shaman max HP (from any source)"
+        Description: >
+          THE core class decision. Consumes all Invested stacks on an enemy
+          to heal the party. Enemy recovers FULLY. This is the Invest→Harvest
+          conversion — every use sacrifices offensive pressure for survival.
+        RankRequired: 1
+        DesignNote: "12s CD = one Harvest per cycle. 5-stack patience vs 2-stack panic = THE decision."
+
+
+    # ─────────────────────────────────────────────────────────────────────
+    # Interrupt/CC oGCDs
+    # ─────────────────────────────────────────────────────────────────────
+    Interrupts:
+      - Id: nerve_curse
+        Name: Nerve Curse
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Cooldown: 20s
+        Range: 20y
+        TargetType: single
+        Effect: "Silences target for 4s (Stage 2 CC). Applies 1 Hex stack."
+        CCStage: "Stage 2 (Silence)"
+        Description: >
+          Single-target silence. The backup interrupt when Bone Spirit is
+          out of range or on cooldown. 20s CD means choosing targets carefully.
+        RankRequired: 1
+        DesignNote: >
+          Shaman's only DIRECT CC. Stage 2 maximum — no stuns, no roots beyond
+          Spirit Vine Barrier's Stage 1. The Hex stack application means using
+          Nerve Curse also builds toward Investment. Efficient but rate-limited.
+
+    # ─────────────────────────────────────────────────────────────────────
+    # Utility oGCDs
+    # ─────────────────────────────────────────────────────────────────────
+    Utility:
+      - Id: spirit_cleanse
+        Name: Spirit Cleanse
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Cooldown: 30s
+        Range: 20y
+        TargetType: single (ally)
+        Effect: "Removes 1 debuff from target ally. Heals 150p regardless."
+        HealingPotency: 150
+        Description: >
+          Debuff removal + minor heal. The only cleanse in the kit.
+          30s CD means choosing which debuff to cleanse matters in multi-debuff
+          encounters.
+        RankRequired: 1
+
+      - Id: bone_harvest_ogcd
+        Name: Bone Harvest
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        Cooldown: 60s
+        Effect: "Generates 2 MonsterBones immediately."
+        ResourceGrant: {MonsterBone: 2}
+        Description: >
+          Primary bone source in instanced content. 2 Bones per minute.
+          Timing consideration: use immediately for maximum generation over
+          the run, or hold in reserve for emergency re-deployment scenarios.
+        RankRequired: 1
+
+      - Id: summon_command
+        Name: Summon Command
+        ActionType: oGCD
+        AnimationLock: 0.3s
+        Cooldown: 3s
+        Effect: >
+          Commands Bone Spirit: FOLLOW (default) or HOLD POSITION (sentry mode).
+          Toggle. When holding: stays at current location, interrupts anything
+          casting in 8y. When following: returns to Shaman.
+        Description: "Deploy or recall Bone Spirit. Strategic positioning tool."
+        RankRequired: 1
+
+    # ─────────────────────────────────────────────────────────────────────
+    # Invocation (Summon Upgrade — Rank 3)
+    # ─────────────────────────────────────────────────────────────────────
+    Invocation:
+      - Id: invocation
+        Name: Invocation
+        ActionType: oGCD
+        AnimationLock: 0.6s
+        # §25 FIX: Removed 120s CD. Gate = active summon required + MonsterBone 1.
+        # Frequency controlled by summon survival (if summon dies, must redeploy first).
+        ResourceCost: {MonsterBone: 1}
+        Duration: 25s
+        Condition: "At least one summon must be active"
+        Effect: >
+          Upgrades ALL active summons to Greater versions for 25s:
+          - Greater Bone Spirit: HP → 40% Shaman max HP. Auto-attack → 80p.
+            Interrupt CD → 6s.
+          - Greater Floating Bone: HP → 25% Shaman max HP. Hex rate → 1/2.5s.
+            Aura potency → 50/tick.
+          Revert to normal after 25s. No HP penalty on downgrade.
+        Description: >
+          Use-case driven summon enhancement. NOT a burst cadence.
+          Used when summons need to survive AoE, or when doubled Hex rate
+          enables rapid stack rebuilding after a Harvest.
+        RankRequired: 3
+        DesignNote: "Invoke before planned Harvest = 12.5s rebuild vs 25s. Reduces penalty window."
+
+
+    # ─────────────────────────────────────────────────────────────────────
+    # Passive: Bone Scavenge
+    # ─────────────────────────────────────────────────────────────────────
+    Passive:
+      - Id: bone_scavenge
+        Name: Bone Scavenge
+        ActionType: passive
+        Effect: "30% chance to gain 1 MonsterBone when an enemy dies within 15y."
+        Condition: "Shaman must be within 15y of dying enemy"
+        Description: >
+          Incentivizes proximity to kills. In dungeon trash: bone-positive.
+          In boss fights: only triggers during add phases. Positional requirement
+          creates risk/reward — closer to kills = more bones = more danger.
+        RankRequired: 1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2: RANK PROGRESSION
+# ─────────────────────────────────────────────────────────────────────────────
+
+RankProgression:
+  Rank1:
+    Label: "Bone Acolyte"
+    Unlocks:
+      GCDs:
+        - "Effigy (filler + Hex application)"
+        - "Curse Explosion (Hex consumer, burst — rarely optimal)"
+        - "Summon Bone Spirit (persistent interrupt sentry)"
+        - "Bone Pointing / Floating Bone (persistent curse engine)"
+        - "Ancestral Rite (AoE triage heal, channeled)"
+        - "Bone Salve (emergency instant heal, 1 Bone cost)"
+      oGCDs:
+        - "Hex Drain (THE Invested/Harvested toggle)"
+        - "Nerve Curse (Stage 2 Silence, 4s)"
+        - "Spirit Cleanse (debuff removal + minor heal)"
+        - "Bone Harvest (resource generation, 60s)"
+        - "Summon Command (deploy/recall Bone Spirit)"
+      Passives:
+        - "Bone Scavenge (30% bone drop on nearby kill)"
+    DPSProfile: "85-90% of DPS reference (limited Hex economy, fewer tools)"
+    HealingProfile: "Hex Drain + Bone Salve + Ancestral Rite = functional triage"
+    SummonCapability: "Both summons available. Basic HP. Functional sentry."
+    CoreLoop: "Effigy spam → build Hex → Maintain Investment (debuff enemy) → Harvest only when forced"
+
+  Rank2:
+    Label: "Bone Shaman"
+    Unlocks:
+      GCDs:
+        - "Spirit Channel (consume Bone Spirit for 500-1000p burst)"
+        - "Spirit Ascension (levitate + 20% damage + immunity, 2 Bones)"
+        - "Dark Theurgy (AoE Hex applicator, 15s CD)"
+        - "Mastema (450p non-consuming nuke, 30s CD)"
+        - "Spirit Vine Barrier (Stage 1 root wall, 30s CD)"
+      oGCDs: []  # All oGCDs available at Rank 1
+    DPSProfile: "95-105% of DPS reference (overtuned when all axes managed)"
+    HealingProfile: "Same tools but better Hex economy → faster Harvest rebuilds"
+    SummonCapability: "Full toolkit. Spirit Channel enables burst sacrifice."
+    DesignNote: >
+      Rank 2 is where Shaman becomes 'overtuned but difficult.' All axes
+      online. Players who juggle Invested/Harvested + Bone economy + spatial
+      deployment + Hex timing can hit 105%. Players who drop any axis = 85%.
+
+  Rank3:
+    Label: "Bone Elder"
+    Unlocks:
+      oGCDs:
+        - "Invocation (Greater summons for 25s, 120s CD)"
+    DPSProfile: "100-110% of DPS reference (Invocation windows)"
+    HealingProfile: "Greater Floating Bone doubled Hex rate = faster Harvest recovery"
+    SummonCapability: "Greater versions. Summons survive SR4 AoE during Invocation."
+    DesignNote: >
+      Rank 3 gives quality-of-life: Greater summons survive longer in hard
+      content, reducing Bone drain. Doubled Hex rate during Invocation means
+      Harvest penalty windows shrink significantly. Execution complexity
+      unchanged — floor rises because assets are harder to lose.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3: BALANCE TARGETS
+# ─────────────────────────────────────────────────────────────────────────────
+
+BalanceTargets:
+  DPSRole: "100% reference (DPS class first, healer second)"
+  GlobalCooldown:
+    Base: 2.0s
+    HasteCap: 1.4s
+  oGCDAnimationLock: 0.6s
+  WeaveModel: single_weave_only
+  # 2.5s cast GCDs (Curse Explosion, Dark Theurgy, Mastema, Spirit Channel)
+  # deliberately prevent weaving = intentional friction for power.
+
+  PotencyBands:
+    BasicFiller: 100          # Effigy
+    InvestedNuke: 450         # Mastema at 3+ stacks (non-consuming)
+    Sacrifice_LowStack: 150   # Curse Explosion at 2 stacks
+    Sacrifice_HighStack: 300  # Curse Explosion at 5 stacks
+    GaugeSpender_Large: 500-1000  # Spirit Channel (Hex-dependent)
+    ClassUltimate: 600-800    # Invocation total value over 25s
+    HealGCD: 250              # Ancestral Rite per tick (250 × 2 = 500)
+    HealOGCD_Harvest:         # Hex Drain — scales with stacks
+      1_stack: 150
+      3_stacks: "450 + 150 overshield"
+      5_stacks: "750 + 300 overshield + cleanse"
+    HealGCD_Emergency: 350    # Bone Salve (instant, costs Bone)
+
+  DPSModeOutput:
+    PerfectExecution: "100-105% of reference (all axes maintained)"
+    AverageExecution: "85-95% (dropping 1+ axis)"
+    TriageMode: "~40% (when Harvesting + Ancestral Rite priority)"
+  
+  HealingModeOutput:
+    HexDrain_5Stack: "750 HP + 300 overshield per 12s (during Harvest cycles)"
+    AncestralRite: "500 HP/4s (channel, AoE)"
+    BoneSalve: "350 HP instant (1 Bone cost)"
+    Throughput_Sustained: "~150 HP/s when alternating Harvest/rebuild (far below dedicated healer)"
+    Throughput_Emergency: "~300 HP/s for 4s via Ancestral Rite (unsustainable)"
+
+  ResourceTiming:
+    TimeToFirstBoneSpend: "12-16s from combat start (Bone Harvest → deploy)"
+    TimeToFirst5Stack: "25s from Floating Bone passive OR 10s with Effigy acceleration"
+    TimeToRebuildAfterHarvest: "15-25s (Floating Bone passive) OR 10-12s (with Effigy focus)"
+    TimeToRebuildWithInvocation: "~12.5s (Greater Floating Bone doubled rate)"
+    BoneConsumptionRate_Easy: "1 Bone per 90-120s (summons rarely destroyed)"
+    BoneConsumptionRate_Hard: "1 Bone per 20-30s (constant replacement)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: SYSTEM INTERACTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+SystemInteractions:
+  # ─────────────────────────────────────────────────────────────────────────
+  # Aggro / Unfocus Axis
+  # ─────────────────────────────────────────────────────────────────────────
+  AggroUnfocus:
+    Description: >
+      Shaman does NOT contribute to Unfocus (SR suppression). That's Madolt's
+      role. Shaman contributes to the ACCURACY axis of the Impairment system:
+      Hex stacks reduce enemy accuracy (-5% to -25%), making enemies MISS more.
+      This is functionally defensive without being "tanking."
+    AggroGeneration: "Standard DPS-level threat. No reduction tools. If tank dies: Investment = misses."
+    SummonAggro: "Bone Spirit generates own threat (auto-attacks). Can absorb incidental aggro."
+
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # >50% HP Rule (Enemies)
+  # ─────────────────────────────────────────────────────────────────────────
+  HP50Rule:
+    Description: >
+      Enemies above 50% HP take +25% damage from all sources. This creates
+      a natural phase transition for Shaman gameplay:
+    AboveHalfStrategy: "MAINTAIN INVESTMENT. +25% Hex × +25% HP rule = +56% total. Harvesting = catastrophic loss."
+    BelowHalfStrategy: "HP bonus gone. Harvest cost drops from -56% to -25%. Natural Harvest threshold."
+    CurseExplosionTiming: "Execute crit at <15%: Investment minimal, burst finishes the kill."
+
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Crit System (Positional/Conditional — NOT RNG)
+  # ─────────────────────────────────────────────────────────────────────────
+  CritSystem:
+    Rule: "Crit is NEVER random. All crits are positional or conditional."
+    ShamanCritConditions:
+      Effigy: "Target has ≥3 Hex stacks AND is above 50% HP → guaranteed crit"
+      CurseExplosion: "Target is below 15% HP → guaranteed crit (execute)"
+      DarkTheurgy: "3+ enemies hit by initial impact → guaranteed crit on all"
+      Mastema: "Target above 50% HP AND has 5 Hex stacks → guaranteed crit"
+      SpiritChannel: "Target above 50% HP AND has 5 Hex stacks → guaranteed crit"
+      SpiritAscension: "All attacks crit during levitation IF target has 5 stacks"
+    DesignImplication: >
+      Investment = crits. Harvesting removes crit conditions (stacks gone).
+      This is ANOTHER reason Investment is valuable: 5 stacks on a >50% HP
+      enemy means every Effigy, Mastema, Spirit Channel crits. Harvesting
+      removes that crit access for 15-25s until stacks rebuild. The crit
+      system reinforces "maintain Investment as long as possible."
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Procgen Map Interaction
+  # ─────────────────────────────────────────────────────────────────────────
+  ProcgenInteraction:
+    DeploymentStrategy: "Mini-RTS layer: Floating Bone for zone coverage, Bone Spirit for sentry."
+    CorridorControl: "T-intersection: Spirit holds left, Bone curses right, Shaman pushes forward."
+    PartySplitRole: "Solo via Investment (enemies miss). Unique: leaves functional rear-guard asset."
+
+    StrategyRankScaling:
+      Rank1_2: "Trivial management. Summons never die. Pure DPS focus."
+      Rank3: "Moderate management. Plan placement. Occasional reposition."
+      Rank4: "Intense. Summons actively hunted. Invocation critical. Placement = survival."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 5: MATCHUP ANALYSIS / ITEM BASELINE COMPARISON
+# ─────────────────────────────────────────────────────────────────────────────
+
+MatchupAnalysis:
+  VsItems:
+    ScatterlungPhial:
+      ItemEffect: "-30% accuracy, 12s, single-use, stationary"
+      ShamanAdvantage: "Sustained -25% accuracy (permanent while Invested). Follows target."
+      ItemAdvantage: "INSTANT -30% without buildup. Useful before Hex reaches 5 stacks."
+      Coexistence: "Phial covers the 15-25s Hex buildup window. Shaman covers indefinitely after."
+    
+    ThickglassFlask:
+      ItemEffect: "-50% move speed puddle, 20s, positional"
+      ShamanAdvantage: "Speed curse follows target (-25% persistent). No terrain required."
+      ItemAdvantage: "Higher reduction (-50% vs -25%). Immediate. No buildup."
+      Coexistence: "Flask for instant denial of a specific path. Hex for sustained pressure."
+    
+    WitcherfieldTotem:
+      ItemEffect: "Multi-debuff zone, 25s duration, destroyable by enemy"
+      ShamanAdvantage: "Floating Bone is PERMANENT. Free reposition. Scales with Hex system."
+      ItemAdvantage: "No class resource required. Any party member can deploy."
+      Coexistence: "Backup if Floating Bone destroyed and Bones depleted."
+    
+    StasisPin:
+      ItemEffect: "3s total freeze (Stage 3 CC), single-use"
+      ShamanAdvantage: "NONE — Shaman has zero Stage 3 CC"
+      ItemAdvantage: "Hard lockdown. Only source of Stage 3 in Shaman parties."
+      Coexistence: "MANDATORY for parties needing hard CC. Shaman provides attrition, not lockdown."
+    
+    RejuvenationFlask:
+      ItemEffect: "20% HP burst heal, 2y AoE, single-use"
+      ShamanAdvantage: "Repeatable healing via Harvest. Scales with Investment."
+      ItemAdvantage: "Immediate, no setup required, any party member can use."
+      Coexistence: "Flask for instant out-of-combat healing. Shaman for in-combat sustained triage."
+    
+    HollowformDecoy:
+      ItemEffect: "Aggro redirect, 15s, consumable"
+      ShamanAdvantage: "Bone Spirit provides interrupt denial, not aggro redirect. Different function."
+      ItemAdvantage: "Draws attacks away from allies. Shaman can't redirect aggro."
+      Coexistence: "Complementary: Decoy = 'hit this instead.' Spirit = 'you can't cast here.'"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 6: BALANCE VALIDATION
+# ─────────────────────────────────────────────────────────────────────────────
+
+BalanceValidation:
+  Methodology: >
+    All DPS validation against SINGLE TARGET, FULL UPTIME, both summons
+    alive, Hex stacks maintained at 5 (Invested state, no Harvesting).
+
+  STRotationMath:
+    EffigyPPS: "100p / 2.0s = 50 PPS (filler, includes crit bonus at 3+ stacks)"
+    MastemaPPS: "450p / 30s CD = 15 PPS (non-consuming)"
+    DarkTheurgyPPS: "310p / 15s CD = 20.7 PPS"
+    FloatingBonePPS: "30p / 3s = 10 PPS (passive aura, always running)"
+    BoneSpiritPPS: "50p / 3s = 16.7 PPS (auto-attacks)"
+    SpiritChannelPPS: "1000p (at 5 stacks) / ~60s usage rate = 16.7 PPS"
+    HexAmpContribution: "+25% on all Shaman damage while at 5 stacks"
+    HP50BonusContribution: "+25% additional on all damage while enemy >50% HP"
+    TheoreticalST_PPS: "~160 PPS (with both multipliers active)"
+    
+    RealWorldAdjustments:
+      - "2.5s casts reduce effective GCD throughput ~15%"
+      - "Harvest interruptions (forced healing removes Investment for 15-25s)"
+      - "Re-summoning destroyed assets costs 2-3 GCDs per encounter"
+      - "Spirit Channel consumes sentry → 10s lockout → DPS gap"
+      - "Bone Pointing repositions = DPS-neutral GCDs"
+      - "Ancestral Rite channels = ZERO DPS for 4s per use"
+    PracticalST_PPS: "~110-115 PPS = 100-105% of reference"
+    
+    ExecutionTaxBreakdown:
+      PerfectPlay_AllAxes: "105% DPS reference"
+      DropHexMaintenance: "-15% (lose damage amp)"
+      DropSummonUptime: "-10% (lose passive DPS from summons)"
+      ForcedHarvesting: "-20% (lose amp for rebuild window)"
+      SingleAxisDrop: "~90% DPS"
+      MultipleAxisDrop: "~80-85% DPS"
+
+  ValidationChecklist:
+    - Check: "ST DPS (perfect, Invested maintenance)"
+      Target: "100-105%"
+      Status: "PASS — 110 PPS = 100% reference"
+    - Check: "ST DPS (average execution)"
+      Target: "85-95%"
+      Status: "PASS — drops rapidly with forced Harvests"
+    - Check: "AoE DPS (Dark Theurgy + Floating Bone + splash)"
+      Target: "≥100% per target"
+      Status: "PASS — mass Hex application via Dark Theurgy + Floating Bone"
+    - Check: "Time to first Bone spend"
+      Target: "12-16s"
+      Status: "PASS — Bone Harvest oGCD → deploy at 12s"
+    - Check: "Hex Drain healing output"
+      Target: "Functional triage (NOT primary healer)"
+      Status: "PASS — 750 HP + 300 overshield per 12s at max (below dedicated healer throughput)"
+    - Check: "Spirit Channel burst"
+      Target: "ClassUltimate band (600-800p effective)"
+      Status: "PASS — 1000p at 5 stacks (above band but requires consuming a persistent asset)"
+    - Check: "Invocation total value"
+      Target: "600-800p"
+      Status: "PASS — accelerated Hex economy + survival + enhanced auto damage over 25s"
+    - Check: "Triage penalty"
+      Target: "Significant DPS loss"
+      Status: "PASS — ~60% DPS loss while Harvesting + healing"
+    - Check: "No 2-minute burst cadence"
+      Target: "Invocation/Ascension are use-case, not burst alignment"
+      Status: "PASS — both have resource costs (Bones) that prevent on-CD usage"
+    - Check: "Zero Freecure/RNG procs"
+      Target: "No random proc mechanics"
+      Status: "PASS — all healing is deliberate Harvest decisions"
+    - Check: "Zero Stage 3 CC"
+      Target: "Max Stage 2"
+      Status: "PASS — Nerve Curse (Silence) + Bone Spirit (Interrupt) = Stage 2 max"
+    - Check: "Items define baseline"
+      Target: "Class replaces item catalog permanently"
+      Status: "PASS — replaces Scatterlung, Thickglass, Witherfield, Drainwick, Lockjaw"
+    - Check: "MonsterBone = run-length budget"
+      Target: "Not per-fight timer"
+      Status: "PASS — 8 cap, generation via 60s CD + kills, consumption is encounter-dependent"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 7: VISUALIZATION HOOKS
+# ─────────────────────────────────────────────────────────────────────────────
+
+VisualizationHooks:
+  HexStackDisplay:
+    Location: "Enemy nameplate / debuff bar"
+    Visual: "1-5 dark skull icons, growing in intensity with stack count"
+    InvestedIndicator: "Skulls glow purple when maintained (no consumption pending)"
+    HarvestIndicator: "Skulls pulse gold briefly during Hex Drain animation"
+    ExplosionIndicator: "Skulls shatter visually during Curse Explosion cast"
+  
+  BoneReserveDisplay:
+    Location: "Class gauge (quest item counter)"
+    Visual: "8 bone icons, filled = available, empty = spent"
+    CriticalThreshold: "≤2 bones: gauge pulses red (low reserve warning)"
+  
+  SummonHealthBars:
+    Location: "Party frame area OR above summon model"
+    BoneSpirit: "Small HP bar with skull icon, 25% of Shaman max HP"
+    FloatingBone: "Small HP bar with bone icon, 15% of Shaman max HP"
+    InvocationGlow: "Both bars glow during Greater upgrade window"
+  
+  InvestedVsHarvestedFeedback:
+    Invested: "Shaman's hands glow dark purple (curse energy stored in enemy)"
+    Harvested: "Shaman's hands pulse green/gold (life energy flowing to ally)"
+    NeutralPost: "Glow fades over 5s after Harvest (visual indicator of rebuild phase)"
+  
+  SpiritAscensionVisual:
+    Active: "Shaman levitates 1m above ground, spiritual afterimage trails"
+    GroundImmunity: "Ground beneath Shaman shimmers (cannot be hit by ground AoE)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 8: CONSTRAINTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+Constraints:
+  SystemRuleCompliance:
+    GCD_Base: "2.0s ✓"
+    GCD_Cap: "1.4s ✓"
+    WeaveModel: "single_weave_only ✓ (2.5s casts deliberately prevent weaving)"
+    CritSystem: "Positional/conditional only ✓ (no RNG crits anywhere)"
+    HP50Rule: ">50% enemy HP = +25% damage ✓ (integrated into strategy)"
+    ItemBaseline: "Class replaces item catalog permanently ✓"
+    NoBurstCadence: "No 2-minute or fixed-timer burst windows ✓"
+    ZeroFreecure: "No RNG procs, no random healing triggers ✓"
+    NoFrontlineReplacement: "Shaman cannot solo-frontline sustainably ✓"
+    MonsterBoneScope: "Run-length budget, not per-fight timer ✓"
+    CurseExplosion: "SACRIFICE mechanic, rarely optimal ✓"
+    CCCap: "Zero Stage 3 CC (max Stage 2: Silence + Interrupt) ✓"
+    SR3Targeting: "Rank 3+ enemies target and destroy installations ✓"
+  
+  DesignConstraints:
+    MaxSimultaneousSummons: 2  # One Bone Spirit + One Floating Bone
+    MaxHexStacksPerTarget: 5
+    HexDrainCooldown: 12s  # Prevents spam Harvesting
+    BoneSalveBoneCost: 1   # Economic consequence for emergency heal
+    SpiritAscensionBoneCost: 2  # Premium cost prevents on-CD usage
+    InvocationRequiresSummon: true  # Can't Invoke with nothing deployed
+    SpiritChannelRequiresBoneSpirit: true  # Must have Spirit to consume
+    HarvestRemovesALLStacks: true  # Cannot partial-Harvest
+    PostHarvestRebuildTime: "15-25s baseline, 10-12.5s with Invocation"
+    NoSelfHealing_HexDrain: true  # Heals lowest-HP ALLY, not Shaman
+    CannotHealWithoutCursedEnemy: true  # No enemies = no Harvest possible
+
+  PerformanceConstraints:
+    MaxSummonCount: 2  # Cap for performance
+    AuraTickRate: "3.0s minimum (no sub-second ticks)"
+    GroundEffectDuration: "6s max for Dark Theurgy zone"
+    MaxHexTargetsFromBone: "All enemies in 10y (no target cap on debuff)"
+    SpiritVineBarrierDuration: "20s or destroyed"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# END OF FILE
+# ─────────────────────────────────────────────────────────────────────────────

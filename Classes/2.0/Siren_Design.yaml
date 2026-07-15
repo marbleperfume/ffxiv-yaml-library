@@ -1,0 +1,698 @@
+# Classes/Healer/Siren_Design.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+# SIREN (Cantor) — Charm Healer | DESIGN SPEC
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Design lineage:
+#   Mythology: Sirens (Greek — irresistible song), Succubi (drain-through-desire),
+#              Anglerfish (lure), Pitcher plants (trap + dissolve), Fae glamour
+#   FFXIV AST: party-buff healer with card management (multi-target maintenance)
+#   WoW Discipline Priest: heal-through-damage (atonement model — closest parallel)
+#   LoL Evelynn: charm buildup mechanic (stages of escalating CC)
+#   GW2 Mesmer: illusion/clone management (multi-entity plate-spinning)
+#
+# Core identity: "Boyfriend/girlfriend healer"
+#   Sustain through emotional attachment bonds — not free healing.
+#   Charm takes TIME and ACTIONS to build. Once flowing, healing is passive
+#   and very strong. If Charm breaks, everything collapses INSTANTLY.
+#   The Siren is the predator who needs prey nearby to function.
+#   Isolation = death. Crowds = paradise.
+#
+# Fantasy: Life essence stolen through attachment bond.
+#   The enemy doesn't realize they're dying because they WANT to be near you.
+#   Your allies heal because the stolen life flows through your Charm network.
+#
+# References:
+#   - Combat/BalanceTargets.yaml (all numeric targets)
+#   - Combat/AggroSystem.yaml (Charm interaction with Strategy Rank targeting)
+#   - Combat/ClassMechanicModuleDesign.md (mechanic type taxonomy)
+#   - Roles/Healer_RoleMechanic.yaml (shared healer systems)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Healer.Siren
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1: CLASS IDENTITY
+# ─────────────────────────────────────────────────────────────────────────────
+
+Identity:
+  Name: Siren
+  AlternateName: Cantor
+  Role: Healer
+  SubRole: Sustain Healer (Drain-Bond)
+  DamageType: magical
+  ExecutionArchetype: Adaptive Plate-Spinning
+  ExecutionTier: Experienced
+  # Experienced tier justified by:
+  # - Managing multiple simultaneous Charm bonds on different targets
+  # - Adaptive rotation that NEVER stabilizes into one sequence
+  # - Position × Action × Time trilemma (any wrong axis = collapse)
+  # - Range dependency creates constant repositioning pressure
+  # - Charm decay punishes inattention on INDIVIDUAL TARGETS (not global resource)
+
+  Description: >
+    A vocal-magic healer who sustains allies by draining life from charmed
+    enemies. Charm stacks on BOTH enemies (drain + CC) and allies (passive
+    healing recipients). The Siren's rotation is a plate-spinning exercise:
+    maintaining multiple Charm bonds simultaneously, refreshing before decay,
+    repositioning to keep targets in range, and adapting to which targets
+    enter/leave the field. Once the Charm economy is flowing, healing output
+    is excellent and PASSIVE — the Siren's GCDs go to maintaining bonds and
+    dealing damage through drain, not casting explicit heal spells. But if
+    Charm breaks (enemy resists, Siren dies, targets leave range), ALL
+    sustain collapses simultaneously with zero fallback.
+
+  CoreFantasy: >
+    You are the predator who looks like prey. Enemies approach you because
+    they cannot help themselves. Your allies heal because stolen life flows
+    through your bond network. You are at your strongest surrounded by
+    bodies — enemies charmed and draining, allies bonded and receiving.
+    You are at your weakest ALONE. A Siren with no one to charm is just
+    a fragile caster with no healing and no defense.
+
+  InputModality:
+    PrimaryFocus: charm_bond_timers_and_proximity_radar
+    SecondaryFocus: enemy_positions_relative_to_self
+    TertiaryFocus: ally_positions_within_aura_range
+    DecisionType: adaptive_maintenance
+    # Siren watches BOND STATUS — "which Charms are about to expire? Which targets
+    # are drifting out of range? Which new enemies just entered Charm range?"
+
+  StatPriority:
+    Primary: MED  # Healing potency. Drain-to-heal conversion scales from MED.
+    Secondary: MAG  # Barrier/damage potency. Drain DAMAGE scales from MAG.
+    Tertiary: SPD  # Haste reduces GCD → more maintenance actions per cycle.
+    DumpStat: STR  # Physical stats irrelevant to vocal caster.
+
+  DesignStatement: >
+    Siren is the STABLE healer that gets STRONGER as the player understands
+    the adaptive rotation. Unlike Elementalist (burst/triage reactive) or
+    Shaman (aggression-rewards-defense), Siren provides CONSISTENT sustain
+    that scales with field density. More bodies in range = more Charm bonds
+    = more drain = more healing flowing. The skill expression is MAINTAINING
+    the Charm network — a plate-spinning exercise where you never stop
+    refreshing, never stop repositioning, and never let any single bond drop.
+    The rotation is ADAPTIVE — it responds to field state and NEVER stabilizes
+    into a fixed sequence.
+
+  FailureStates:
+    CharmCollapse:
+      Cause: "Charm bonds expire simultaneously (failed to stagger refreshes)"
+      Cost: "ALL healing stops. ALL drain stops. Siren becomes targetable."
+      Recovery: "8-12s to rebuild minimum viable Charm economy (2+ enemy bonds)"
+      Severity: "CATASTROPHIC — equivalent to healer dying for 10s"
+    RangeBreak:
+      Cause: "Siren or targets move out of Charm maintenance range"
+      Cost: "Affected bonds decay rapidly. Partial healing loss."
+      Recovery: "Reposition immediately. 4-6s to refresh dropped bonds."
+      Severity: "HIGH — but recoverable if only 1-2 bonds break"
+    IsolationDeath:
+      Cause: "No enemies within Charm range (kiting phase, adds dead, solo split)"
+      Cost: "ZERO healing, ZERO drain, ZERO defense. Siren is a 0-toolkit character."
+      Recovery: "Wait for enemies to spawn/approach, or reposition TO enemies."
+      Severity: "EXTREME — Siren has NO fallback healing without Charm targets"
+    FocusMisallocation:
+      Cause: "Refreshing wrong target while a critical bond expires"
+      Cost: "One bond drops. That enemy becomes untargeted → aggros freely."
+      Recovery: "2-4s to re-charm. Enemy may have already hit an ally."
+      Severity: "MODERATE — the bread-and-butter execution failure"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2: RACIAL LOCK — MERRYIN
+# ─────────────────────────────────────────────────────────────────────────────
+
+RacialLock:
+  Race: Merryin
+  Enforcement: hard_lock  # Players MUST be Merryin to play Siren. No exceptions.
+  BiologicalLock: vocal_organ
+  LockJustification: >
+    The Siren class requires the Merryin vocal organ — a biological structure
+    unique to the Merryin race that produces subsonic and ultrasonic frequencies
+    simultaneously with audible song. Charm is NOT "magic anyone could learn" —
+    it is a PHYSIOLOGICAL capability built into Merryin anatomy. Other races
+    literally cannot produce the frequencies required to establish Charm bonds.
+    This is a biological lock, not a cultural or traditional one.
+  NPCException: >
+    Non-Merryin "charm-like" abilities in NPCs exist as magical imitations
+    (enchantment spells, alchemical pheromones, etc.) but these are narratively
+    distinct from Siren Charm and NEVER available to players.
+  RacialSynergy:
+    - "Tri-frequency vocal output (subsonic + audible + ultrasonic) — required for Charm bond establishment"
+    - "Natural empathic sensitivity — lore justification for reading Charm bond status (UI bond timers)"
+    - "Evolved social predator — the 'boyfriend/girlfriend' archetype IS the Merryin survival strategy"
+    - "Proximity-dependent biology — Merryin naturally operate in close social clusters (matches range dependency)"
+    - "Vocal endurance — sustained song without fatigue (matches maintenance-over-time rotation)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3: ROLE OBJECTIVE FUNCTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+RoleObjective:
+  Type: sustain_through_drain
+  PrimaryMetric: healing_per_second_through_charm_bonds
+  SecondaryMetric: charm_economy_efficiency
+  TertiaryMetric: damage_dealt_through_drain
+
+  Constraints:
+    - "party_hp >= survival_threshold AT all_damage_events"
+    - "charm_bond_count >= minimum_viable_economy (2 enemy bonds active)"
+    - "maximize: charm_uptime (each dropped bond = lost healing throughput)"
+    - "ALL healing costs Charm maintenance actions — zero free healing"
+
+  HealingModel:
+    FreeHealingBudget: "ZERO. All healing flows from active Charm bonds."
+    GCDHealCost: "Every GCD spent on Charm maintenance IS the heal cost — no separate heal buttons"
+    DirectHealFallback: "ONE emergency direct heal (Desperate Aria). It is bad and intentionally so."
+    OverhealPenalty: false  # Drain-to-heal cannot overheal — excess becomes barrier
+    HealingSource: >
+      Healing is a BYPRODUCT of enemy Charm drain. The Siren casts "drain
+      enemy" and the stolen life automatically flows to charmed allies:
+      1. No enemies = no healing (isolation vulnerability)
+      2. More enemies charmed = more healing (scales with field density)
+      3. Higher Charm stage = more drain per tick = more healing
+      4. More allies charmed = wider healing distribution
+    HealingPriority: [enemy_charm_drain > ally_bond_passive > desperate_aria_emergency]
+
+  TargetDPS:
+    WhileHealing: "55% of DPS reference"
+    # Drain damage counts toward DPS AND generates healing simultaneously.
+    # The 55% reflects GCDs spent on Charm MAINTENANCE (refresh actions that
+    # don't deal damage) in addition to drain GCDs.
+    PureDPSUptime: "70% of DPS reference"
+    CharmEconomyFlowing: "65% of DPS reference (optimal drain + maintenance uptime)"
+
+  HealingSustain:
+    Minimum_2Bonds: "30% party HP per minute (barely viable — emergency state)"
+    Standard_3Bonds: "55% party HP per minute (comfortable sustain)"
+    Optimal_4PlusBonds: "85% party HP per minute (excellent — Siren at full power)"
+    FieldDensity_6Plus: "120%+ party HP per minute (overflowing — chaotic fights are paradise)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: CLASS MECHANIC — CHARM SYSTEM
+# ─────────────────────────────────────────────────────────────────────────────
+
+ClassMechanic:
+  Type: multi_target_bond_maintenance
+  Name: "Charm Bonds"
+  Description: >
+    Charm stacks accumulate on BOTH enemies AND allies within range, with
+    entirely different effects per target type. Enemy Charm progresses through
+    3 stages (Fascination → Infatuation → Devotion) that escalate CC and drain.
+    Ally Charm is passive accumulation that designates healing recipients.
+    Core loop: charm enemies (drain life) → charmed allies receive that
+    drained life as healing → maintain both sets of bonds simultaneously.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # ENEMY CHARM (Drain + CC Progression)
+  # ─────────────────────────────────────────────────────────────────────────
+
+  EnemyCharm:
+    MaxStage: 3
+    StacksPerStage: [3, 3, 4]  # 10 total stacks to max
+    BuildRate: "1 stack per Charm GCD cast on target"
+    DecayRate: "1 stack per 4s/6s/8s (Rank 1/2/3) if not refreshed"
+    Range: "20y (Charm application AND maintenance range)"
+    PracticalLimit: "3-4 enemy bonds maintained simultaneously at Experienced tier"
+
+    Stage1_Fascination:
+      StackThreshold: 3
+      CCEffect: >
+        Enemy DEPRIORITIZES Siren as target. Drops 2 positions in targeting
+        priority (effectively invisible to Rank 1-2 enemies). Against Rank 3+:
+        reduced to 1 position drop.
+      DrainTier: "Trickle — enough to top off chip damage, not sustain through heavy hits"
+      HealConversion: "100% of drain → healing to charmed allies"
+      DesignRole: >
+        SAFETY stage. Fascination buys time to build deeper Charm. This is
+        the "I'm working on it" phase.
+
+    Stage2_Infatuation:
+      StackThreshold: 6
+      CCEffect: >
+        Enemy APPROACHES Siren at 70% movement speed (50% vs Rank 3+).
+        Repositioning tool — pull enemies out of bad positions, group them
+        near you, or drag them away from allies. SIMULTANEOUSLY useful
+        (grouping) and DANGEROUS (enemies now closer to a healer).
+      DrainTier: "Moderate — functional sustain, comfortable healing with 2-3 bonds"
+      HealConversion: "100% of drain → healing to charmed allies"
+      DesignRole: >
+        CONTROL stage. The player decides: do I want this enemy near me?
+        Positioning matters most at Stage 2.
+
+    Stage3_Devotion:
+      StackThreshold: 10
+      CCEffect: >
+        FULL BEHAVIORAL OVERRIDE. Enemy stops attacking allies, moves to
+        melee range of Siren and PROTECTS her. Against Rank 3+: 50% resist
+        per tick. Against Rank 4: hard 8s cap. CRITICAL RISK: devoted enemy
+        is IN MELEE WITH THE SIREN. If Devotion breaks, enemy is hostile at
+        point-blank range.
+      DrainTier: "Maximum — strongest healing output, bonus conversion multiplier"
+      HealConversion: "150% of drain → healing (bonus at max Charm)"
+      BonusEffect: "Devoted enemy takes +15% damage from all sources"
+      DesignRole: >
+        ULTIMATE POWER and ULTIMATE RISK. Maximum drain, maximum CC, damage
+        amp — but enemy in melee with you. Siren is NOT a frontliner.
+        Calculated risk, not a free win.
+      CCBudget: >
+        HEAVILY CONSTRAINED: 5+ GCDs to reach, Rank 3+ resist (avg 6s),
+        Rank 4 hard 8s cap, ONLY 1 Devotion target simultaneously,
+        4s lockout after Devotion target dies. Prevents "charm everything
+        to Stage 3" from being viable.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # ALLY CHARM (Passive Healing Recipient Bonds)
+  # ─────────────────────────────────────────────────────────────────────────
+
+  AllyCharm:
+    MaxStacks: 5
+    BuildRate: "1 stack per 6s while ally within 15y (passive — no action required)"
+    DecayRate: "1 stack per 4s when ally leaves 15y range"
+    Range: "15y (proximity-based passive accumulation)"
+    HealDistribution: >
+      AllyHealShare = (ally_charm_stacks / total_ally_charm_stacks) × total_drain_healing.
+      Allies who STAY NEAR Siren get healed MORE — rewarding party clustering.
+
+    AggroRedirection: >
+      Charmed allies draw indirect aggro from Stage 2+ enemies who can't path
+      to Siren. Creates the "she attracts trouble but heals through it" loop.
+      If Charm breaks, aggro redirect becomes a LIABILITY.
+
+    StackBonuses:
+      1_Stack: "Eligible for drain healing. Minimum share."
+      2_Stacks: "10% damage reduction aura from Siren proximity."
+      3_Stacks: "+15% healing received from Siren's drain."
+      4_Stacks: "Siren senses ally HP without LoS (UI: bond-linked HP bar)."
+      5_Stacks: "Full bond — 20% DR, +25% drain healing, HP visibility, auto-triage."
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # CHARM DECAY AND MAINTENANCE
+  # ─────────────────────────────────────────────────────────────────────────
+
+  CharmMaintenance:
+    Philosophy: >
+      Charm requires ACTIVE MAINTENANCE. The rotation is ADAPTIVE — it responds
+      to which bonds expire soonest, which targets enter/leave range, which
+      resist, and party HP state. There is NO fixed sequence. The rotation
+      changes every GCD based on field state. This is what makes Siren
+      Experienced tier.
+
+    DecayRules:
+      EnemyCharm:
+        InRange: "1 stack per 4s/6s/8s (Rank 1/2/3)"
+        OutOfRange: "2 stacks per 3s (rapid collapse — range is CRITICAL)"
+        FullDecay: "Stacks reach 0 → bond BREAKS. Siren visible to that enemy."
+      AllyCharm:
+        InRange: "No decay (infinite bond while in 15y)"
+        OutOfRange: "1 stack per 4s (gradual — allies can briefly leave and return)"
+
+    MaintenanceBudget: >
+      3 enemy bonds at Rank 1 (4s decay): 3 maintenance GCDs per 8s cycle,
+      leaving ~1 GCD free. At Rank 3 (8s decay): 3 GCDs per 16s cycle =
+      4-6 free GCDs for drain/damage. THIS is the Rank progression payoff.
+
+    DroppedCharmConsequences: >
+      Bond drops to 0: enemy becomes aware of Siren (priority resets), drain
+      healing stops, and if Stage 2+ the enemy gains +30% damage for 8s
+      ("jilted" fury). Stage 3 drop = hostile enemy IN MELEE with Siren.
+      Dropped bonds create ACTIVE DANGER, not just lost healing.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 5: RESOURCE SYSTEM — RESONANCE
+# ─────────────────────────────────────────────────────────────────────────────
+
+ResourceSystem:
+  Name: "Resonance"
+  Type: generated_gauge
+  MaxResonance: 100
+  Description: >
+    Resonance = vocal stamina. Generates passively through active bonds,
+    spends on powerful Charm abilities. Basic Charm maintenance is free
+    (mana-cost only); Resonance gates SPECIAL abilities (amplifiers and
+    emergency tools). The "gear shift" from maintenance to power mode.
+
+  Generation:
+    PassivePerBond: "5 Resonance per 3s per active enemy Charm bond"
+    # 3 bonds = 5/s → full gauge in 20s. 1 bond = 1.67/s → full in 60s.
+    # Rewards maintaining MORE bonds.
+    OnCharmStageUp: "10 Resonance when any enemy advances a Charm stage"
+    OnKill_CharmedEnemy: "25 Resonance when a charmed enemy dies"
+    OutOfCombat: "Resets to 0 after 15s out of combat"
+
+  Spending:
+    Philosophy: >
+      Resonance spends are AMPLIFIERS and EMERGENCY tools. Siren functions
+      on basic GCDs alone, but Resonance abilities provide burst healing,
+      AoE charm, emergency recovery, and powerful utility.
+
+  ManaEconomy:
+    MaxMana: 10000
+    RegenRate: "67 mana/s passive"
+    Philosophy: >
+      Mana gates VOLUME (how many GCDs you can sustain). Resonance gates
+      POWER (special abilities). 3-bond maintenance is mana-sustainable.
+      Maximum-rate spam drains mana in ~90s — incentivizing efficient timing.
+    CostTiers:
+      CharmMaintenance: "200-300 mana (cheap — constant use)"
+      DrainAbilities: "300-400 mana (moderate)"
+      SpecialAbilities: "400-600 mana (expensive)"
+      EmergencyTools: "600-800 mana (premium)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 6: RANK PROGRESSION
+# ─────────────────────────────────────────────────────────────────────────────
+
+RankProgression:
+  Philosophy: >
+    Rank unlocks MAINTENANCE EFFICIENCY and POWER CEILINGS, not fundamentally
+    new gameplay. A Rank 1 Siren manages bonds with tight windows. A Rank 3
+    Siren manages the SAME bonds with more breathing room and stronger payoffs.
+    Core loop identical — margins improve.
+
+  Rank1:
+    Name: "Apprentice Cantor"
+    CharmDecayRate: "1 stack per 4s (tight)"
+    MaxEnemyCharmStage: 2  # Devotion locked. Safer but lower ceiling.
+    ContentViability: "Normal dungeons, open world, story content"
+    DesignIntent: "Full maintenance loop + Stage 1-2. True plate-spinning at tight timing."
+
+  Rank2:
+    Name: "Adept Cantor"
+    CharmDecayRate: "1 stack per 6s (breathing room)"
+    MaxEnemyCharmStage: 3  # Devotion unlocked — risk/reward ceiling opens.
+    NewMechanics: ["Stage 3 Devotion", "Veil of Adoration (bond freeze)", "Vampiric Crescendo (drain finisher)", "Harmonic Ward (party barrier)"]
+    ContentViability: "Hard dungeons, Trials, entry Raids"
+    DesignIntent: "Risk/reward ceiling + defensive tools. Devotion = 'am I brave enough?'"
+
+  Rank3:
+    Name: "Archon Cantor"
+    CharmDecayRate: "1 stack per 8s (generous)"
+    NewMechanics: ["Siren's Crescendo (ultimate)", "Resonant Echo passive (drain HoT trail)", "Bond Intuition passive (predictive UI)"]
+    ContentViability: "Extreme difficulty, Savage Raids, all content"
+    DesignIntent: "Mastery. 4-6 free GCDs per cycle. Fight-defining ultimate."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 7: CLASS-SPECIFIC SYSTEMS
+# ─────────────────────────────────────────────────────────────────────────────
+
+ClassSpecificSystems:
+
+  AggroInteraction:
+    Principle: >
+      Charm adds a FOURTH targeting axis (emotional manipulation) to the
+      Strategy Rank AI system. No enmity table — Charm modifies AI priority.
+    OverridePriority:
+      - "Force Targeting (Adafold) OVERRIDES Stage 1-2 Charm"
+      - "Stage 3 Devotion OVERRIDES Force Targeting (emotion at max > physical)"
+      - "Unfocus (Madolt) STACKS with Charm (both suppress enemy intelligence)"
+      - "Capacitor Pull conflicts with Stage 2 Infatuation (resolves to nearest)"
+    PartySynergies:
+      WithAdafold: "Excellent. Siren charms behind Adafold; Stage 2 funnels enemies INTO kill zone. Avoid Stage 3 (overrides Force Targeting)."
+      WithMadolt: "Good. Unfocus makes enemies dumber → easier Charm. Coordinate Stage 2 + Pull direction."
+      WithShaman: "Incredible zone control. Siren passifies, Shaman curses freely. RISK: both squishy, need frontliner."
+
+  EnemyHP50Rule:
+    Principle: >
+      Class-specific mirror of the player >50% HP rule: Siren's drain deals
+      +25% potency against enemies above 50% HP. Creates natural front-loaded
+      healing that tapers as enemies weaken (self-balancing: reduced drain
+      matches reduced incoming damage).
+    DesignImplications:
+      - "Establish Charm EARLY for maximum healing (enemies still at high HP)"
+      - "Add phases with fresh enemies = drain spike (multiple full-HP targets)"
+      - "Boss below 50% = tighter healing; compensated by reduced party damage"
+
+  CritInteraction:
+    Principle: "Crit is NOT RNG. Crit is positional/conditional."
+    SirenCritConditions:
+      PositionalCrit: "Drain skills crit from BEHIND charmed enemy (rear positional)"
+      ConditionalCrit: "Maintenance skills crit when refreshing within 1s of expiry (clutch refresh)"
+      StageCrit: "Any skill targeting Stage 3 Devotion enemy auto-crits"
+    Multiplier: "1.4× (system standard)"
+    SkillGap: "Skilled Siren crits 30-40% of GCDs. Lazy Siren crits 5-10%. ~15% output gap."
+
+  ProcgenInteraction:
+    PartySplitRole: >
+      Siren NEVER goes solo. Solo = 0 toolkit. Always paths with the sub-group
+      that has the MOST enemy density + at least 1 frontliner. This is the
+      intentional weakness — Shaman/Elementalist can solo, Siren cannot.
+    ByEnvironment:
+      Corridors: "Excellent. Enemies can't escape range. Stage 2 funnels into kill zone."
+      OpenArenas: "Moderate. Scatter risk. Requires aggressive positioning + Stage 2 pull."
+      MultiRoom: "Moderate. Bonds break between rooms. 6-12s ramp per pull."
+
+  VulnerabilityDesign:
+    CoreVulnerability: PROXIMITY
+    Description: >
+      Not HP, not mana, not cooldowns — PROXIMITY. Everything requires bodies
+      in range. Remove targets and Siren becomes NOTHING. This is the defining
+      class weakness that makes Charm economy meaningful.
+    Trilemma:
+      Position: "Must be within 20y of enemies AND 15y of allies simultaneously"
+      Action: "Each refresh GCD is a choice — wrong target = another bond drops"
+      Timing: "Per-target decay (independent timers). Late by 1 GCD = bond drops."
+    SkillExpressionCeiling: >
+      Multi-target tracking, adaptive decisions, positional requirements,
+      failure cascade, recovery execution, Stage 3 risk/reward. Fixed-rotation
+      players DETERIORATE on Siren. Success requires reading live field state.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 8: ROTATION PHILOSOPHY
+# ─────────────────────────────────────────────────────────────────────────────
+
+RotationPhilosophy:
+  CorePrinciple: >
+    There is NO fixed rotation. GCD priority is determined by
+    BOND STATUS × FIELD STATE × PARTY HEALTH simultaneously:
+    "Expiring bond? → Refresh. All stable? → Drain. New target? → Establish.
+     Leaving range? → Emergency refresh or detonate. Party critical? → Max drain."
+    A fixed sequence is IMPOSSIBLE because targets move, spawn, die, and decay
+    on independent timers.
+
+  AdaptiveRotation_NOT_FixedSequence: >
+    EXPLICIT: Two pulls with identical enemies produce DIFFERENT GCD sequences
+    because positioning, decay timing, and target HP differ. This is the
+    Experienced tier justification. A Siren on autopilot operates at 60%.
+
+  ScenarioArchetypes:
+    SingleTarget_Boss:
+      Economy: "Tight. 1 bond = minimum viable. Stage 3 push for adequate healing."
+      DesignNote: "Siren's WEAKEST scenario. Intentional — THRIVES in target-rich environments."
+    MultiTarget_Trash:
+      Economy: "Paradise. 5+ bonds = massive passive drain = party unkillable."
+      DesignNote: "Big pulls are trivial healing. Challenge shifts to maximizing DPS."
+    BossWithAdds:
+      Economy: "Ideal. Boss = permanent bond. Add waves = healing bursts."
+      DesignNote: "Add phases are HEALING burst windows (not damage bursts). Natural rhythm."
+    CharmCollapse_Recovery:
+      Economy: "Emergency. 8-12s of zero healing. Rebuild from scratch."
+      DesignNote: "PUNISHMENT for letting bonds drop. MOTIVATION for perfect maintenance."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 9: ANTI-PATTERNS (EXPLICIT)
+# ─────────────────────────────────────────────────────────────────────────────
+
+AntiPatterns:
+  Explicit:
+    - Pattern: "Casting Desperate Aria as primary heal"
+      Why: "Routine use means Charm economy is broken. Siren is NOT a traditional healer."
+
+    - Pattern: "Free healing expectation"
+      Why: "ALL sustain costs maintenance GCDs. Healing IS the rotation. No oGCD healing with DPS GCDs."
+
+    - Pattern: "Fixed rotation that stabilizes"
+      Why: "Adaptive plate-spinning. Same sequence = ignoring field state = 60% effectiveness."
+
+    - Pattern: "Burst/trough healing cycle"
+      Why: "Siren provides STABLE throughput. Stacking drain windows creates troughs. Stagger refreshes."
+
+    - Pattern: "Replacing frontline with Stage 3 Devotion"
+      Why: >
+        Enemy in melee with a healer. If Devotion breaks: hostile enemy at point-blank
+        with +30% jilted fury. Stage 3 is a ticking time bomb, not a free tank.
+
+    - Pattern: "2-minute burst alignment"
+      Why: "No 120s cycle. No party buff window. Use abilities when field state demands them."
+
+    - Pattern: "Solo lane / isolation play"
+      Why: "No enemies in range = ZERO toolkit. Siren ALWAYS paths with enemies."
+
+    - Pattern: "Ignoring ally Charm stack management"
+      Why: "Allies without stacks get zero healing. Frontliner must stay within 15y aura."
+
+    - Pattern: "Panic-refreshing all bonds simultaneously"
+      Why: "Causes synchronized decay → synchronized drop risk. STAGGER refreshes across GCDs."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 9b: ITEM BASELINE — WHAT THIS CLASS REPLACES
+# ─────────────────────────────────────────────────────────────────────────────
+
+ItemBaseline:
+  Philosophy: >
+    A party without a Siren relies on consumables for aggro redirection, brief
+    movement overrides, and separate healing items. NO item provides precision
+    command sequencing — not just "redirect aggro" but "YOU, attack HIM, with
+    THAT ability, NOW." The Siren also heals WHILE commanding — same vocalization.
+    No item combines offensive behavior control with healing delivery.
+
+  Replaces:
+    - Item: "Pheromone Tag"
+      Function: "Forces enemies in 10m to prioritize tagged target for 8s"
+      WhyClassBetter: >
+        Single-use, 8s only, cannot specify WHICH action enemies take (just who
+        they target). Siren commands specific behaviors, not just targeting. CC Stage 2.
+
+    - Item: "Rivalmark Dust"
+      Function: "Two enemies prioritize attacking each other for 10s"
+      WhyClassBetter: >
+        Requires two enemies near each other, breaks if you hit either, no control
+        over WHO attacks whom beyond the pair. Siren dictates with precision.
+
+    - Item: "Compulsion Chime"
+      Function: "Forces one enemy to use its NEXT ability immediately (even if suboptimal)"
+      WhyClassBetter: >
+        Single-target, 1 forced action, consumed on use, 1.5s activation. Siren
+        commands continuously without consumable cost.
+
+    - Item: "Sycophant Incense"
+      Function: "3m radius, 10s — enemies path toward incense instead of players"
+      WhyClassBetter: >
+        Stationary, only commands PATHING (not actions), 10s duration, SR3 resists
+        after 4s. Siren commands actions AND pathing simultaneously.
+
+    - Item: "Harmony Draught"
+      Function: "Ally-consumed regen (3% HP/s for 12s)"
+      WhyClassBetter: >
+        Fixed rate, single target, consumed by RECIPIENT not healer, doesn't scale
+        with danger. Siren heals passively through drain bonds — adaptive throughput.
+
+    - Item: "Resonance Crystal"
+      Function: "4m radius installation, +15% healing received for 15s"
+      WhyClassBetter: >
+        Positional (allies must stay inside), provides ZERO healing without another
+        source, 15s duration, destroyable. Siren IS the healing source + amplifier.
+
+    - Item: "Taunt Cracker"
+      Function: "All enemies in 6m path toward detonation point for 3s"
+      WhyClassBetter: >
+        3s only, only forces MOVEMENT (not actions), cannot chain commands.
+        Siren maintains continuous behavioral override.
+
+    - Item: "Hollowform Decoy"
+      Function: "Deployed decoy draws aggro within 8m for 15s"
+      WhyClassBetter: >
+        Enemies choose to attack decoy but aren't COMMANDED — normal patterns
+        toward wrong target. Destructible. No healing component. Siren
+        commands precision actions, not just attention diversion.
+
+  ClassAdvantage: >
+    Precision command sequencing — dictate specific actions, chain commands,
+    maintain continuous control over MULTIPLE enemies simultaneously. Heals
+    WHILE commanding via same vocalization. Never runs out, never expires,
+    adapts in real-time. No item combines behavior control + healing delivery
+    in a single action economy.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 10: DESIGN NOTES & OPEN QUESTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+DesignNotes:
+  CharmUI:
+    Recommendation: >
+      Bond tethers (visible lines, color-coded by stage) + peripheral timer
+      arcs (curved bars at screen edge showing decay). Spatial awareness +
+      numerical tracking combined.
+
+  AllyCharmVisibility:
+    Recommendation: >
+      Partial. Allies see "Siren's Grace" buff with potency indicator
+      (faint/strong). Exact stack count is Siren-UI-only information.
+      Thematically: you don't KNOW how charmed you are.
+
+  PvPBalance:
+    Recommendation: >
+      Stage 1: reduced targeting clarity. Stage 2-3: DISABLED in PvP (forced
+      movement/behavioral override on players = unacceptable). PvP Siren
+      operates on Stage 1 deprioritization + drain damage only.
+
+  MerryinWorldbuilding:
+    Recommendation: >
+      Symbiotic predators. Genuine emotional bonds that serve biological function
+      (life-energy exchange). Isolation genuinely hurts them. Charm isn't malicious —
+      it's how they connect. The predatory element: connection ALSO feeds them.
+      Mutualistic parasite, not pure predator.
+
+  TuningKnobs:
+    CharmDecayRate: "4/6/8s per rank. Range 3-10s."
+    StageThresholds: "3/6/10. Could reduce to 2/5/8 for faster staging."
+    MaxDevotionTargets: "1. Could allow 2 at Rank 3 (massive risk increase)."
+    ResonanceGenRate: "5/bond/3s. Range 3-8."
+    CharmRange: "20y enemy, 15y ally."
+    JiltedFury: "8s +30% after break. Range 5-12s."
+
+  FutureDesignSpace:
+    - "Rank 4: AoE Charm maintenance (refresh all in range, 1 GCD, weaker per-target)"
+    - "Duet mechanic: bond with another healer for combined Charm economy"
+    - "Environmental Charm: charm non-combat fauna for utility"
+    - "Charm specialization traits: Stage 1 breadth vs Stage 3 depth"
+    - "Cross-class: Shaman hex + Siren Charm = amplified drain"
+
+  WhatSirenIsNOT:
+    - "NOT a traditional healer (no ally-targeted heal buttons)"
+    - "NOT a frontliner (Stage 3 ≠ tanking)"
+    - "NOT viable in isolation"
+    - "NOT a burst healer"
+    - "NOT a fixed-rotation class"
+    - "NOT alignment-dependent (no 2-min cycle)"
+
+  WhatSirenIS:
+    - "A drain-bond sustain healer (healing = byproduct of enemy manipulation)"
+    - "A plate-spinning adaptive executor (never settles into fixed sequence)"
+    - "A proximity-dependent social predator (thrives in crowded chaos)"
+    - "A class with VERY low floor (broken bonds = 0) and VERY high ceiling"
+    - "The 'boyfriend/girlfriend healer' — enemies love you to death (literally)"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # §25 AUDIT: COOLDOWN → RESOURCE GATING CONVERSION
+  # ─────────────────────────────────────────────────────────────────────────
+
+  Section25_Audit:
+    Description: >
+      §25 mandates identity skills use resource gating (Resonance) instead of
+      long cooldowns. The following identity skills have BOTH a long CD AND a
+      Resonance cost — the CD is redundant. Skills task should convert to
+      Resonance-only gating.
+
+    NeedsResourceGatingConversion:
+      - Skill: "Resonance Cascade"
+        CurrentGating: "90s CD + 40 Resonance"
+        Issue: "Identity skill (Charm economy recovery). CD makes it an 'emergency button' rather than resource-gated tool."
+        Recommendation: "Remove CD. 40 Resonance cost alone. At 3 bonds = available every ~8s. At 1 bond = every ~24s."
+
+      - Skill: "Irresistible Cadence"
+        CurrentGating: "60s CD + 25 Resonance"
+        Issue: "Identity skill (ramp accelerator). CD prevents reactive use when field state demands it."
+        Recommendation: "Remove CD. 25 Resonance cost alone. Frequent with healthy economy, scarce when broken."
+
+      - Skill: "Veil of Adoration"
+        CurrentGating: "120s CD + 30 Resonance"
+        Issue: "Identity skill (maintenance pause). 120s CD forces pre-planning — contradicts adaptive philosophy."
+        Recommendation: "Remove CD. 30 Resonance cost alone. Frequent at 3+ bonds, rare at 1."
+
+    Excluded_AcceptableCDs:
+      - "Siren's Crescendo (180s): Ultimate — CDs permitted on ultimates."
+      - "Desperate Aria (45s): Emergency fallback, not identity skill."
+      - "Lullaby (40s): Standard CC utility."
+
+    Note: >
+      Skills task implements these conversions. Removing CDs makes power
+      abilities feel like natural extensions of healthy Charm economy —
+      reinforcing adaptive maintenance identity over cooldown tracking.
+      Attempted as CD-gated in original spec, superseded by §25 resource
+      philosophy.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF SIREN DESIGN SPEC
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ▼ CONTINUES IN: Siren_Skills.yaml

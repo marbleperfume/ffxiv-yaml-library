@@ -1,0 +1,434 @@
+# Classes/Support/Colony_Validation.yaml
+# ══════════════════════════════════════════════════════════════════════════════
+# COLONY (Harvesters) — BALANCE VALIDATION & SCENARIO TESTING
+# ══════════════════════════════════════════════════════════════════════════════
+# Validates against: BalanceTargets.yaml, DESIGN_OVERRIDE_SYSTEMS.md §25
+# Sources: Colony_Design.yaml, Colony_Skills_Builder/Flutter/Nightfly.yaml
+# ══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Support.Colony.Validation
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1: BALANCE TARGETS — Support/DPS Role Compliance
+# ─────────────────────────────────────────────────────────────────────────────
+
+BalanceTargets:
+  RoleBaseline:
+    ColonyRole: Support
+    Target: "60% of DPS reference (35% direct + 25% infrastructure)"
+    Band: "±12% → acceptable range 54-66%"
+    AllPhenotypes: "65% total (25-40% direct + 25-40% infra) — PASS"
+
+  PhenotypeSplit:
+    Builder: { direct: "25%", infra: "40%", total: "65%", verdict: PASS }
+    Flutter: { direct: "40%", infra: "25%", total: "65%", verdict: PASS }
+    Nightfly: { direct: "30%", infra: "35%", total: "65%", verdict: PASS }
+    CrossVariance: "0% — PASS"
+
+  GCDTiming:
+    Base: 2.0s
+    HasteCap: 1.4s
+    Checks:
+      - "All deployment GCDs respect 2.0s base recast — PASS"
+      - "No skill below 1.4s at max haste — PASS"
+      - "Flutter instant GCDs (Pollen Puff, Seeds) still use 2.0s GCD recast — PASS"
+      - "Apex casts (3.0s) = high-commitment per spec — PASS"
+    Verdict: PASS
+
+  oGCDModel:
+    Lock: 0.6s
+    Weave: single_weave_only
+    Check: "No Colony oGCD enables double-weave. All at 0.6s lock — PASS"
+
+  PotencyBands:
+    BaseFiller_100p:
+      Builder_ResinSpike: "130p (180-220p positional) — Biomass-costed, above filler but gated"
+      Flutter_SeedDrop: "150p (195p in pollen) — ammo-costed"
+      Nightfly_LuminousStrike: "140p (196-235p conditional) — Biomass-costed"
+      Verdict: "PASS — all gated, slight above 100p justified by resource cost"
+    GaugeSpender_Large_400_500p:
+      Builder_Collapse: "Up to 1200p — costs entire structure (25+ Biomass investment consumed)"
+      Nightfly_BlightPod: "440p total (burst + puddle)"
+      Flutter_SeedBarrage: "360-468p (3 seeds × 120-156p)"
+      Verdict: "PASS — Collapse exceeds band but consumes real infrastructure"
+    ClassUltimate_600_800p:
+      PredatorsMaze: "~800p per full-path enemy — resource-gated (100 Bio + 3 charges)"
+      ArchitectsDomain: "No direct damage — 8000 HP fortress (value = absorption + geometry)"
+      SwarmCloud: "Escalating CC + 50% seed bonus (indirect DPS amplification)"
+      Verdict: PASS
+
+  CritSystem:
+    Rule: "NOT RNG — all positional/conditional"
+    Conditions: ["Elevation 4y+", "2+ deployment overlap", "Enemy in Colony CC"]
+    Multiplier: 1.4
+    RNG_Present: false
+    Verdict: PASS
+
+  HP50Rule:
+    Effect: "Enemies >50% HP take +25% damage from all sources"
+    ColonyBenefit: "Front-load deployments while enemies healthy = amplified infra damage"
+    Verdict: "PASS — rewards Colony's setup-first playstyle"
+
+  Survivability:
+    Target: "85% of frontliner baseline"
+    Method: "Flight + positioning + deployments-as-shields (not raw tankiness)"
+    Tools: ["Chitin Mend (400p heal, 15s CD, 25 Bio)", "Chitin Harden (15% DR, 12s)", "Shed Chitin (decoy, 15s)"]
+    Verdict: PASS
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2: MATCHUP SCENARIOS (3-4 per phenotype vs SR1-SR3)
+# ─────────────────────────────────────────────────────────────────────────────
+
+MatchupScenarios:
+
+  Builder:
+    B1_Corridor_6SR1:
+      Setup: "3m corridor, 6 SR1 melee rushing"
+      Play: "Seal Path midpoint (20 Bio) → Wall behind (25 Bio) → Resin Spike from elevation"
+      ChargeGen: "6 enemies × constant bumping = 3 charges by 25-30s"
+      ApexAt: "~30s — PASS"
+      Result: "Enemies never reach party. Complete blocking."
+
+    B2_OpenArena_4SR2:
+      Setup: "15m×15m arena, 4 SR2 enemies with repath AI"
+      Play: "Pillar center → Wall to edge (splits arena) → Seal repath route → adapt"
+      Challenge: "SR2 repaths around obstacles. Must re-seal new vectors."
+      ApexAt: "~50s (fewer interactions in open) — PASS"
+      Result: "Arena split forces chokepoints. Less efficient than corridors."
+
+    B3_Boss_SR3:
+      Setup: "SR3 boss actively destroys structures. High HP."
+      Play: "Deploy pillars → Boss attacks them → Collapse dying structures for burst → Rebuild"
+      Insight: "SR3 targeting structures = faster destruction BUT faster charge gen. Counter-play fuels Builder."
+      ApexAt: "~45s — PASS"
+      Result: "Fortress creates 45s party DPS window. Boss distracted by 8000 HP."
+
+    B4_WorstCase_MobileFlyer:
+      Setup: "Flying SR3 enemy ignores ground structures entirely"
+      Play: "Adapt to elevated construction (Bridge Spans, ceiling pillars). Charge gen slow."
+      ApexAt: "~55-60s (worst case) — PASS (still <180s old design)"
+      WeaknessExposed: "Mobile enemies bypassing structures = designed weakness"
+      Result: "Degraded (50% contribution) but functional."
+
+  Flutter:
+    F1_Corridor_6SR1:
+      Setup: "Same corridor, 6 SR1 rushing"
+      Play: "Pollen Trail → Pollen Puff × 2 → Seed Drop into slowed cluster → bomb run"
+      ChargeGen: "6 enemies × 3 clouds × 0.33/interaction = 3 charges by 20-25s"
+      ApexAt: "~25-30s — PASS"
+      Result: "Enemies crawling at -40%. Bombed from untouchable height."
+
+    F2_OpenPursuit_3SR2:
+      Setup: "3 fast SR2 enemies chasing healer, open field"
+      Play: "Tailwind intercept → Pollen carpet on approach vector → Root Seed → kite above"
+      Challenge: "SR2 pursues optimal targets. Flutter must cut off approach."
+      ApexAt: "~35-40s — PASS"
+      Result: "Healer untouched. Flutter's mobility creates protective umbrella."
+
+    F3_Boss_SR3_AntiAir:
+      Setup: "SR3 boss with ranged anti-air (20% accuracy penalty vs flyers)"
+      Play: "Pollen Storm at feet → maintain 8-10y altitude → Divebomb burst → Updraft"
+      ChargeDecision: "Spend 1 on Paralysis Burst at 20s vs save 3 for Swarm Cloud at 35s?"
+      ApexAt: "~35s — PASS"
+      Result: "Sustained aerial DPS + CC. Boss can't reliably hit Flutter."
+
+    F4_WorstCase_IndoorWind:
+      Setup: "3m ceiling (no elevation crit) + crosswind (pollen drifts off-target)"
+      Play: "Concentrated Burst for guaranteed CC. Lead pollen into wind. Reduced altitude."
+      ApexAt: "~50s — PASS (degraded, still under 70s worst case)"
+      WeaknessExposed: "Indoor + wind = no elevation crit, reduced coverage, limited kiting"
+      Result: "40-60% effectiveness. Functional via Concentrated Burst bypass."
+
+  Nightfly:
+    N1_Corridor_6SR1:
+      Setup: "Same corridor. 15s advance warning via Antennae Sweep."
+      Play: "Devour Light mid → 3 Blight Pods in darkness → 2 Snare Webs at entry → Anglerlight far end"
+      ChargeGen: "5-trap chain + darkness = ~3.5 charges in 8s of triggering"
+      ApexAt: "~28-30s (setup + trigger time) — PASS"
+      Result: "~2600p from trap chain alone. Enemies destroyed in ambush."
+
+    N2_OpenArena_4SR2:
+      Setup: "15m×15m arena, SR2 enemies seeking shortest path"
+      Play: "Darkness center + Eclipse spawn-side → Dancing Lights into dark → traps along path"
+      ChargeGen: "Alarm Thread (+1 full) + trap triggers. Charges by 35-40s."
+      ApexAt: "~38-40s — PASS"
+      Result: "Information asymmetry. Enemies blind, Nightfly sees all, traps trigger."
+
+    N3_Boss_Adds_SR3:
+      Setup: "SR3 boss (destroys darkness) + SR2 add waves every 30s"
+      Play: "Darkness on add paths (not boss). Traps for adds. Luminous Strike boss (235p)."
+      Insight: "Boss counter-play (targeting darkness) offset by add waves feeding charges rapidly."
+      ApexAt: "~30s (add wave chain triggers) — PASS"
+      ChargeDecision: "Abyssal Beacon on boss vs save for Predator's Maze on next wave?"
+
+    N4_WorstCase_TightGroup_SR3:
+      Setup: "4 SR3 enemies in tight formation, partial non-visual detection, lure-resistant"
+      Play: "Darkness partially effective. Place traps on natural movement. Flashbang Cocoon (4m AoE)."
+      ApexAt: "~50-55s — PASS (degraded, still under 70s)"
+      WeaknessExposed: "Tight formation + lure resistance = slower charge gen"
+      Result: "Nightfly adapts to prediction placement. Functional but slower."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3: PASS/FAIL CRITERIA
+# ─────────────────────────────────────────────────────────────────────────────
+
+PassFailCriteria:
+
+  BiomassGeneration:
+    Rates: { base: "5/s", airborne: "7/s", intensity_max: "+5/s", ceiling: "12/s" }
+    Checks:
+      - { test: "Sustain 1 medium/8-10s", calc: "35 Bio ÷ 7/s = 5s regen", verdict: PASS }
+      - { test: "Recovery from 0→30", calc: "30 ÷ 7/s = 4.3s airborne", verdict: PASS }
+      - { test: "8 deployments maintenance", calc: "8 × 3/5s = 4.8/s drain vs 7/s regen", verdict: "PASS (net +2.2/s)" }
+      - { test: "Overcap risk at Rank3", calc: "150 max ÷ 12/s = 12.5s to full", verdict: "MARGINAL — must spend actively" }
+
+  PheromoneUptime:
+    ApexCost: "3 charges"
+    IntenseTimelines:
+      Builder: "8 enemies × wall bumps → 3 charges in ~25-30s — PASS"
+      Flutter: "8 enemies × 4 clouds → 3 charges in ~20-25s — PASS"
+      Nightfly: "5-trap chain → 3.5 charges in ~3s of triggers — PASS"
+    WorstCaseTimelines:
+      Builder: "2 enemies, scattered → ~80s — PASS (<180s old)"
+      Flutter: "2 enemies, spread → ~70s — PASS"
+      Nightfly: "Open arena, few triggers → ~70s — PASS"
+
+  StructureDurability:
+    - { test: "Wall vs SR1 trash (100 DPS)", calc: "1200 HP → 12s survive", verdict: PASS }
+    - { test: "Wall vs SR2 elite (300 DPS)", calc: "1200 HP → 4s. Need Fortify (2400 → 8s)", verdict: "PASS with maintenance" }
+    - { test: "Fortress vs SR3 boss (500 DPS)", calc: "8000 HP → 16s minimum", verdict: PASS }
+    - { test: "Decay without maintenance", calc: "15s gradual. Not instant loss.", verdict: PASS }
+
+  ApexSkillFrequency:
+    Target: "Every 25-40s in intense fights (per §25)"
+    Results:
+      ArchitectsDomain: { intense: "~35s", moderate: "~50s", light: "~80s", verdict: PASS }
+      SwarmCloud: { intense: "~30s", moderate: "~45s", light: "~70s", verdict: PASS }
+      PredatorsMaze: { intense_chain: "~25s", intense_scattered: "~35s", moderate: "~50s", light: "~70s", verdict: PASS }
+    Verdict: "ALL within 25-40s target for intense content — PASS"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: ANTI-PATTERN VERIFICATION
+# ─────────────────────────────────────────────────────────────────────────────
+
+AntiPatternVerification:
+
+  No2MinBurst:
+    Check: "Any Colony ability on 120s CD?"
+    Answer: "NO. Longest tactical CD = 15s. Apex skills resource-gated."
+    ExternalAlignment: "Colony has no shared burst timer. Operates on own resource economy."
+    Verdict: PASS
+
+  NoFixedCadence:
+    Check: "Can Colony be described as repeating button sequence?"
+    Answer: >
+      NO. Every deployment is spatial decision responding to enemy pathing,
+      structure HP states, charge count, Biomass pool, and party positioning.
+      Procedural geometry ensures no two encounters play identically.
+    Verdict: PASS
+
+  NoFreecure:
+    Check: "Any passive proc granting free deployments?"
+    Answer: >
+      NO. Every deployment costs Biomass. Hover regen (+60%) requires stationary
+      airborne positioning (trade safety for income). No random procs exist.
+    Verdict: PASS
+
+  ApexResourceGated:
+    Skills:
+      ArchitectsDomain: { cd: "null", gate: "100 Bio + 3 charges + 5 structures", verdict: PASS }
+      SwarmCloud: { cd: "null", gate: "90 Bio + 3 charges + 4 clouds", verdict: PASS }
+      PredatorsMaze: { cd: "null", gate: "100 Bio + 3 charges + 3 darkness zones", verdict: PASS }
+    PowerSkills:
+      ParalysisBurst: { cd: "5s (anti-spam)", gate: "1 Pheromone Charge", verdict: PASS }
+      ParalysisDust: { cd: "5s (anti-spam)", gate: "1 Pheromone Charge", verdict: PASS }
+      AbyssalBeacon: { cd: "null", gate: "40 Bio + 1 charge", verdict: PASS }
+    Summary: "Zero identity skills on long CDs. All resource + field-state gated — PASS"
+
+  NoRNGCrit:
+    Check: "Any crit determined by RNG?"
+    Answer: "NO. All deterministic: elevation, deployment overlap, CC state."
+    Verdict: PASS
+
+  FlightLoadBearing:
+    Check: "Is flight meaningful or cosmetic?"
+    Bonuses: ["+40% Biomass regen", "ground AoE immunity", "elevation crit", "pollen expansion", "silent approach"]
+    GroundedPenalty: "60-70% potential (Flutter: 40%)"
+    Verdict: "PASS — flight is default state, not optional bonus"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 5: §25 COMPLIANCE — Resource Gating > Cooldowns
+# ─────────────────────────────────────────────────────────────────────────────
+
+Section25Compliance:
+
+  Requirement: >
+    Identity-defining skills gated by resources earned through active play,
+    NOT long cooldowns (90s+). Identity present every engagement.
+
+  ApexAudit:
+    ArchitectsDomain:
+      Old: "180s CD → identity 25% uptime"
+      New: "Resource-gated → Apex every 30-50s intense. Identity CONSTANT."
+      Gate: "Construction generates charges. Building IS the gate."
+      Verdict: PASS
+
+    SwarmCloud:
+      Old: "180s CD → identity 11% uptime"
+      New: "Resource-gated → Apex every 30s intense (20s duration = 67% uptime)"
+      Gate: "Pollen deployment generates charges. Crop-dusting IS the gate."
+      Verdict: PASS
+
+    PredatorsMaze:
+      Old: "180s CD → identity 14% uptime"
+      New: "Resource-gated → Apex every 25-35s intense (25s duration = ~50-100% uptime)"
+      Gate: "Trap triggers generate charges EXPLOSIVELY. Patience IS the gate."
+      Verdict: PASS
+
+  TacticalCDs:
+    Longest: 15s
+    Examples: ["Collapse Structure 15s", "Pollen Storm 15s", "Eclipse 15s", "Flashbang Cocoon 10s"]
+    Rule: "All under 15s. None identity-defining. Acceptable per §25."
+    Verdict: PASS
+
+  IntensityScaling:
+    Principle: "Harder fights = faster resources = more Apex access"
+    Biomass: "+1/s per enemy in 15y (max +5/s)"
+    Charges: "More enemies × more deployments = exponential charge acceleration"
+    Result: "Easy content: Apex ~70-80s. Hard content: Apex ~25-35s."
+    Verdict: PASS
+
+  NeverShutDown:
+    MissedApex: "Rebuild charges in 15-30s of active play (not 3-min lockout)"
+    Death: "Worst case rebuild from scratch = 40-60s (still half of old 180s)"
+    Verdict: PASS
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 6: WEAKNESS BUDGET
+# ─────────────────────────────────────────────────────────────────────────────
+
+WeaknessBudget:
+
+  Builder:
+    Primary:
+      Counter: "Mobile/flying enemies that bypass structures"
+      Effect: "Walls don't redirect. Charge gen drops (fewer bumps/attacks)."
+      Degradation: "Apex delayed to 55-60s. Contribution drops to ~50%."
+      Adaptation: "Elevated construction (Bridge Spans, ceiling pillars). Functional but slower."
+    Secondary:
+      Counter: "SR3+ targeting structures for destruction"
+      Effect: "Walls die faster. Field state harder to maintain."
+      Note: "ACTUALLY FUELS Builder — destruction = interaction = charge gen. Net neutral."
+    Tertiary:
+      Counter: "Wide open spaces with no natural chokepoints"
+      Effect: "Must create geometry from scratch. Higher Biomass cost per unit of control."
+
+  Flutter:
+    Primary:
+      Counter: "Indoor/low-ceiling environments (≤3m)"
+      Effect: "No elevation crit. Reduced pollen expansion. Melee can reach. Kiting limited."
+      Degradation: "Drops to 40-60% effectiveness. Apex delayed to ~50s."
+      Adaptation: "Concentrated Burst (guaranteed CC without cloud). Divebomb still functions."
+    Secondary:
+      Counter: "Wind/environmental effects displacing pollen clouds"
+      Effect: "Pollen drifts off-target. Fewer enemy-cloud interactions. Slower charges."
+      Adaptation: "Lead placement into wind. Pollen Storm too large to fully displace."
+    Tertiary:
+      Counter: "Anti-air enemies with ranged attacks targeting flyers"
+      Effect: "Forces altitude management trade-offs."
+      Note: "20% accuracy penalty vs flying + 120% speed = manageable."
+
+  Nightfly:
+    Primary:
+      Counter: "Groups that stay tight and ignore lures"
+      Effect: "Tight formation = fewer trap triggers per enemy. Lures don't separate."
+      Degradation: "Apex delayed to 50-55s. Chain bonus reduced."
+      Adaptation: "Flashbang Cocoon (4m AoE hits whole group). Prediction-based placement."
+    Secondary:
+      Counter: "Non-visual detection (SR4 tremorsense, echolocation)"
+      Effect: "Darkness partially negated (3m detect instead of 2m). Traps 50% detected."
+      Note: "SR4 challenges ALL classes. Not Nightfly-specific shutdown."
+    Tertiary:
+      Counter: "Brightly-lit environments"
+      Effect: "Cosmetic concern only — Nightfly darkness is photon absorption, not shadow."
+      Note: "Per lore: functions in any lighting. NOT a real weakness."
+
+  SharedWeakness:
+    AllPhenotypes: "Zero-setup-time rush enemies + anti-deployment AI"
+    Effect: "Colony needs 15-30s to establish. Instant rush denies this window."
+    Mitigation: "Party covers setup window. Shed Chitin (escape). Dart (reposition)."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 7: PHENOTYPE COMPARISON TABLE
+# ─────────────────────────────────────────────────────────────────────────────
+
+PhenotypeComparison:
+
+  QuickReference:
+    #                    Builder              Flutter              Nightfly
+    MapChange:         [ "Physical walls",    "Pollen zones",      "Darkness + lures" ]
+    ControlType:       [ "Hard block",        "Soft slow",         "Info asymmetry" ]
+    FlightUse:         [ "Crane (build up)",  "Combat home",       "Silent approach" ]
+    FlightSpeed:       [ "80%",              "120%",              "100%" ]
+    DirectDPS:         [ "25%",              "40%",               "30%" ]
+    InfraValue:        [ "40%",              "25%",               "35%" ]
+    MaxCC:             [ "Root (Stage 1→2)",  "Paralysis (S3)",    "Paralysis+Blind (S3)" ]
+    CCDelivery:        [ "Terrain contact",   "Pollen area",       "Trap trigger" ]
+    ApexSkill:         [ "Architect's Domain", "Swarm Cloud",      "Predator's Maze" ]
+    ApexBiomass:       [ 100,                90,                  100 ]
+    ApexCharges:       [ 3,                  3,                   3 ]
+    ApexFieldReq:      [ "5 structures",     "4 clouds",          "3 darkness zones" ]
+    ApexFreq_Intense:  [ "~35s",             "~30s",              "~25-35s" ]
+    ChargePattern:     [ "Steady stream",    "Steady stream",     "Explosive bursts" ]
+    GroundedPenalty:   [ "70%",              "40%",               "80%" ]
+    BestTerrain:       [ "Corridors",        "Open sky/outdoor",  "Enclosed corridors" ]
+    WorstTerrain:      [ "Open arenas",      "Low-ceiling indoor", "Bright open spaces" ]
+    PartySynergy:      [ "Funnels for AoE",  "CC enables burst",  "Scout + lure ctrl" ]
+    SoloViability:     [ "HIGH",             "MEDIUM",            "HIGH" ]
+
+  SameEncounter_Corridor6SR1:
+    Builder: "BLOCKS corridor. Enemies physically cannot advance. Zero party damage."
+    Flutter: "SLOWS corridor. Pollen carpet + bombing. Enemies crawl and die."
+    Nightfly: "TRAPS corridor. Pre-placed ambush. Enemies walk into ~2600p chain."
+    Takeaway: "Same problem — three completely different solutions. Three different player experiences."
+
+  SameEncounter_OpenArena4SR2:
+    Builder: "Creates chokepoints from scratch (75% effectiveness, extra Biomass cost)"
+    Flutter: "Dominates — open sky is ideal. Full speed, altitude, coverage (100%)"
+    Nightfly: "Creates darkness islands with lure paths (80%, fewer natural corridors)"
+    Takeaway: "Terrain NATURALLY favors one phenotype without making others unviable."
+
+  SameEncounter_SR3Boss:
+    Builder: "Structures tank hits. Boss attacking walls = charge fuel. Fortress for party window."
+    Flutter: "Untouchable at altitude. Sustained pollen CC. Paralysis for burst windows."
+    Nightfly: "Controls add waves. Vision denial. Abyssal Beacon manipulates boss pathing."
+    Takeaway: "Different contribution angles — absorption vs CC vs add control — all at ~65%."
+
+  MultiColonySynergy:
+    Example: "Builder + Nightfly in same party"
+    Combo: "Builder walls + Nightfly darkness = enemies blind AND physically trapped"
+    Bonus: "+10% Biomass regen each, +50% charge gen. Apex in ~20s together."
+    Fantasy: "Superorganism: more Colony = exponentially more control."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 8: SUMMARY VERDICT
+# ─────────────────────────────────────────────────────────────────────────────
+
+SummaryVerdict:
+  BalanceTargets: PASS
+  §25Compliance: PASS
+  AntiPatternFree: PASS
+  PhenotypeBalance: "PASS (0% cross-phenotype variance)"
+  WeaknessPresent: "PASS (each phenotype has exploitable counters)"
+  ScenarioViability: "PASS (all functional SR1-SR3)"
+  ResourceEconomy: "PASS (sustains continuous identity play)"
+  ApexFrequency: "PASS (25-40s intense, 50-80s worst, never 180s)"
+
+  OpenQuestions:
+    - "Collapse at 1200p exceeds 400-500p band — justified by structure cost?"
+    - "Flutter Rank3: Swarm Cloud every 25s + Paralysis every 8s — CC overload?"
+    - "Nightfly 5-trap chain → 3.5 charges in 3s — Apex too fast at Rank 3?"
+    - "8-structure maintenance (4.8 Bio/s) — enough leftover for offense?"
+    - "Triple-Colony party (+100% charge gen) — encounter-breaking?"
+
+  Confidence: HIGH

@@ -1,0 +1,594 @@
+# Classes/Frontliner/Siegebreaker_Design.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+# SIEGEBREAKER (Wyrpincers) — Momentum Frontliner [DESIGN HALF]
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Design lineage:
+#   Mythology: Rhinoceros beetles, siege rams, juggernauts
+#   MH Uragaan: massive hitbox, rolls in committed direction, armor plating
+#   Dark Souls Havel: poise-tanking through hits, no dodging, heavy swings
+#   WoW Protection Warrior: Charge + Intercept (directional commitment)
+#   Overwatch Reinhardt: shield-walk, commit to direction, Charge pin
+#   LoL Sion: unstoppable ult, builds momentum, CC immune while charging
+#
+# Core identity: "The simplest class in the game."
+#   Low ceiling, high floor. 8-10 abilities. Simple decisions.
+#   Skill expression = decision QUALITY, not execution speed.
+#
+# Fantasy: "I walk at normal speed. I can't dodge, can't react, can't be
+#   stopped. Once I pick a direction and start building momentum, I get
+#   FASTER. Anything in my path dies or moves."
+#
+# Critical distinction from other frontliners:
+#   Adafold: "I physically block the path." (corridor king / defense)
+#   Madolt:  "I keep enemies stupid." (arena king / suppression)
+#   Siegebreaker: "I walk THROUGH enemies." (siege king / OFFENSE)
+#
+# References:
+#   - Combat/BalanceTargets.yaml
+#   - Combat/AggroSystem.yaml
+#   - Roles/Frontliner_RoleMechanic.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Frontliner.Siegebreaker.Design
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1: CLASS IDENTITY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Identity:
+  Name: Siegebreaker
+  Role: Frontliner
+  SubRole: Offensive Frontliner (Momentum / Breach)
+  DamageType: physical
+  ExecutionArchetype: Commitment
+  ExecutionTier: Base
+  # Base tier: 8 abilities, no execution speed, no complex rotation,
+  # no reaction-based gameplay. Veteran vs newbie gap = SMALLEST of all classes.
+
+  Description: >
+    A massive exoskeletal frontliner who advances through enemy formations
+    by building momentum in a committed direction. The body IS the weapon —
+    large hitbox means everything in front gets hit, everything the enemy
+    throws hits them back. Trade: absolute CC immunity in exchange for zero
+    reactive tools (no dodging, no parrying, no quick repositioning).
+
+    Does not "tank" traditionally. Doesn't hold a position — ADVANCES through
+    one. Enemies attack Siegebreaker because it's walking directly into them
+    and they physically cannot ignore a beetle the size of a doorframe.
+
+  CoreFantasy: >
+    You are a living siege engine. You pick a direction. You start walking.
+    You get faster. Nothing stops you. Your exoskeleton shrugs off everything.
+    Enemies in your path break or get shoved aside. You are not fast. You are
+    not clever. You are INEVITABLE. The skill is knowing WHERE to walk.
+
+  InputModality:
+    PrimaryFocus: directional_commitment_assessment
+    SecondaryFocus: momentum_gauge_management
+    TertiaryFocus: target_priority_evaluation
+    DecisionType: commitment_based
+    # Cognitive load is PRE-COMMITMENT, not during execution.
+
+  StatPriority:
+    Primary: STR   # STR 18 — maximum physical force
+    Secondary: VIT  # Raw HP pool (takes every hit)
+    Tertiary: END  # Endurance sustain
+    DumpStat: SPD  # SPD 5 — no dodge, no parry, slow recovery
+    DumpStat2: NTU # NTU 3 — non-reactive class
+
+  DesignStatement: >
+    Siegebreaker is the ENTRY POINT frontliner. Strips away execution
+    complexity and asks one question: "Where should I go?" Correct answer
+    = win. Wrong answer = wasted commitment, rebuild momentum. A newbie who
+    reads the field well performs at 90% of a veteran. Decision quality IS
+    the class.
+
+  SkillExpressionAxis: >
+    Rewards JUDGMENT, not execution:
+    - Which direction do I commit?
+    - When do I start building momentum?
+    - Do I commit NOW or wait?
+    - Is this a fight where I advance or hold?
+    All answered BEFORE pressing buttons. Post-commitment is trivially simple.
+
+  FailureStates:
+    WrongCommitment:
+      Cost: "6-8s reduced effectiveness. Momentum wasted."
+      Severity: MODERATE
+    OvercommitIntoNothing:
+      Cost: "Full momentum wasted. 8-10s to rebuild from zero."
+      Severity: HIGH
+    FlankIgnored:
+      Cost: "Party takes unmitigated damage. Must abort momentum to turn."
+      Severity: "HIGH — THE clear limitation."
+    EnduranceExhaustion:
+      Cost: "CC immunity lapses 3-4s. Pacing issue."
+      Severity: MODERATE
+
+  SingleLimitation: >
+    COMMITMENT DIRECTION. ONE limitation. Once you pick a direction, you're
+    going THAT way. CC immunity, massive hitbox damage, unstoppable advance —
+    all in exchange for being directionally committed. Entire counterplay:
+    don't be in the lane.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 2: RACIAL LOCK — WYRPINCERS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+RacialLock:
+  Race: Wyrpincers
+  Enforcement: hard_lock
+  BiologicalLock: exoskeleton
+
+  LockJustification: >
+    Requires the Wyrpincers exoskeleton — biological full-body armor that
+    IS the offensive weapon surface. Does not CARRY a weapon — the body IS
+    the weapon. Other races lack skeletal density to survive momentum forces
+    and lack natural armor for the no-dodge survival model. This is BEING
+    armor, not wearing it. Abilities are biological capability, not technique.
+
+  NPCException: >
+    Non-Wyrpincers "heavy charger" NPCs exist (armored cavalry, mechanical
+    siege units) but are narratively distinct and NEVER available to players.
+    Their charging CAN be stunned/interrupted. The CC immunity IS the
+    exoskeleton, not a learned skill.
+
+  RacialSynergy:
+    - "Exoskeleton = natural Super Armor (CC immunity is BIOLOGY, not a buff)"
+    - "Large body = large hitbox = symmetric trade (hit everything, get hit by everything)"
+    - "Segmented carapace = momentum storage via biological springs"
+    - "Density absorbs kinetic energy without pain response (no flinch)"
+    - "CC immunity can NEVER be stripped by dispel — it's anatomy"
+
+  SizeModel:
+    CharacterSize: Large
+    HitboxImplications: >
+      Mechanical, not cosmetic:
+      - Gets hit by EVERY attack aimed vaguely at them
+      - EVERY enemy in front is within melee range
+      - Cannot fit through small gaps (corridor disadvantage)
+      - Body blocks paths by sheer MASS
+      - AoE attacks ALWAYS hit (no dodging telegraphs)
+      Trade is SYMMETRIC: hit everything, get hit by everything.
+
+    BodyAsWeapon: >
+      Exoskeleton IS the weapon. Advances INTO enemies. Carapace grinds,
+      crushes, shoves. "Weapon damage" stat = exoskeleton hardness.
+      Gear = biological augments enhancing the carapace, not external weapons.
+
+    BodyAsWall: >
+      Body physically occupies space. Enemies cannot path through Large hitbox.
+      PASSIVE frontline presence without ability activation. Advancing INTO
+      a group physically displaces them.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 3: ROLE OBJECTIVE FUNCTION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+RoleObjective:
+  Type: maximize_dps_through_correct_commitment
+  PrimaryMetric: potency_per_second_during_advance
+  SecondaryMetric: momentum_efficiency (% spent on correct targets)
+  TertiaryMetric: frontline_uptime (% of fight advancing into enemies)
+  Constraints:
+    - "hp > 0 (no invulns — raw HP + exoskeleton DR)"
+    - "momentum_not_wasted (building toward targets that persist)"
+    - "endurance_never_zero (CC immunity requires endurance > 0)"
+    - "correct_direction (advancing toward highest-priority threat)"
+
+  SurvivalModel:
+    Philosophy: >
+      No cooldown-mapped mitigation buttons. Survival = exoskeleton passive
+      DR + massive HP pool + CC immunity (can't be burst-comboed). Kill
+      threats before accumulated damage matters.
+    TankbusterResponse: "Take it. No special action required."
+    InvulnBudget: "0. No invulnerability. Ever."
+    UniqueAdvantage: >
+      CC immunity prevents burst-combos (Stun → Burst → Kill). Uniquely
+      resilient against CC-chain enemies. MORE vulnerable to sustained chip
+      damage (takes everything, heals nothing, mitigates only passively).
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 4: CLASS MECHANIC — SUPER ARMOR + RESOURCE SYSTEM
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ClassMechanic:
+  Name: "Super Armor"
+  Type: passive_state_with_resource_gate
+
+  CorePrinciple: >
+    Exoskeleton IS CC immunity — not a buff, not a window, not a proc.
+    ALWAYS ON while Endurance > 0. Walk through stun, root, fear. The march
+    continues. THE trade for SPD 5 and NTU 3.
+
+  CCImmunities:
+    - "Stun: IMMUNE (exoskeleton prevents neural disruption)"
+    - "Knockback: IMMUNE (mass + anchoring)"
+    - "Root: IMMUNE (legs break through bindings)"
+    - "Fear: IMMUNE (NTU 3 = no emotional combat response)"
+    - "Sleep: IMMUNE (locomotion autonomous)"
+    - "Pull/Grip: IMMUNE (mass exceeds pull threshold)"
+    - "Silence: IMMUNE (no vocal abilities)"
+    - "Slow: IMMUNE (momentum cannot be externally reduced)"
+
+  WhatStillWorks:
+    - "Damage: ALL damage applies normally (DR, not immunity)"
+    - "Debuffs: Non-CC debuffs apply (damage amp, defense down)"
+    - "Terrain: Environmental hazards still affect"
+    - "Death: HP = 0, dies like anyone"
+
+  EnduranceGate:
+    Description: >
+      Super Armor requires Endurance > 0. Endurance drains from ability use
+      and CC absorption. If depleted: Super Armor drops 3-4s (RARE — only in
+      extreme sustained fights with poor pacing).
+    RecoveryRate: "5/s passive, 10/s while not attacking"
+    DesignNote: >
+      Soft gate. Normal play = never hit 0. Extreme content = pacing matters.
+
+  VsOtherDefenses:
+    Adafold: "SHIELD (blocks damage directionally). Siegebreaker ABSORBS hits."
+    Madolt: "ELECTRON GUARD (timed blocks for counters). Siegebreaker has NO guard."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RESOURCE SYSTEM
+# ─────────────────────────────────────────────────────────────────────────────
+
+ResourceSystem:
+  DualResource: true
+
+  Momentum:
+    Type: gauge (0-100)
+    Description: >
+      Kinetic energy in exoskeleton springs. Builds while advancing + hitting.
+      Higher = faster movement toward target + stronger hits + wider impact.
+      REWARD for correct commitment.
+    Generation:
+      - "GCD ability while advancing: +10-15"
+      - "Each enemy hit: +5 per target"
+      - "Sustained advance: +3/s"
+      - "Passive (not advancing): +0"
+    Decay:
+      - "Stopping: -10/s"
+      - "Changing direction: INSTANT reset to 0"
+      - "CC'd (Endurance = 0): INSTANT reset to 0"
+      - "Out of combat 5s: reset to 0"
+    Thresholds:
+      Tier0: {range: "0", effect: "Base damage, normal speed"}
+      Tier1: {range: "1-30", effect: "+10% speed, +5% damage"}
+      Tier2: {range: "31-60", effect: "+20% speed, +10% damage, wider cleave"}
+      Tier3: {range: "61-90", effect: "+30% speed, +15% damage, shove on contact"}
+      Tier4: {range: "91-100", effect: "+40% speed, +20% damage, displace all"}
+    CriticalNote: >
+      Speed bonuses = TOWARD COMMITTED DIRECTION ONLY. Not lateral, not
+      retreat. Base movement (walking between pulls) is NORMAL for all classes.
+      SPD ≠ movement speed. Momentum speed = combat-only acceleration.
+
+  Endurance:
+    Type: gauge (0-100)
+    Description: >
+      Exoskeleton structural integrity. Gates Super Armor, funds abilities,
+      determines advance duration. Physical stamina, not mana.
+    Generation:
+      - "Passive: +5/s"
+      - "Not attacking: +10/s"
+      - "Kill enemy: +15 instant"
+    Costs:
+      - "GCD abilities: 8-15 each"
+      - "CC absorption: 3-5 per instance"
+      - "Tier 3-4 advance maintenance: +2 drain/s"
+    DepletionConsequence: >
+      Endurance = 0: Super Armor drops (CC vulnerable 3-4s), cannot use
+      abilities, momentum decays. The PACING tool. Smart play = advance,
+      kill, pause, recover, recommit. Dumb play = hold forward until 0.
+    DesignNote: >
+      SIMPLEST resource in the game. Down when you act, up when you don't.
+      No procs, no conditional generation. One decision: keep going or pause?
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STATE MACHINE
+# ─────────────────────────────────────────────────────────────────────────────
+
+  StateMachine:
+    States:
+      Idle:
+        Condition: "Momentum = 0, no Commit active"
+        Behavior: "Assess field. Pick target."
+        Transition: "→ Advancing (press Commit)"
+      Advancing:
+        Condition: "Commit active, Momentum > 0, Endurance > 0"
+        Behavior: "GCDs to advance, deal damage, build Momentum"
+        Transition: "→ Idle (change dir / Endurance depletion) | → CashingOut (Flare)"
+      CashingOut:
+        Condition: "Flare used OR target dead OR reposition needed"
+        Behavior: "Momentum spent/decaying"
+        Transition: "→ Idle (reassess) | → Advancing (rebuild)"
+    CoreLoop: >
+      Idle → Commit → Advancing → build Momentum → Cash Out/Target Dead → Idle
+      Cycle length: 10-20s depending on distance and target health.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 5: SPD/NTU SYSTEM RULES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+SPDClarification:
+  CriticalRule: "SPD does NOT affect movement speed."
+  WhatSPDDoes:
+    - "Reaction time (dodge windows, parry frames) — SPD 5 = ZERO reactive capability"
+    - "Dodge i-frames — SPD 5 = NO dodge whatsoever"
+    - "Animation recovery speed — SPD 5 = long commitment windows per action"
+    - "GCD haste — SPD 5 = fixed 2.0s GCD, slow and deliberate"
+  WhatSPDDoesNOT:
+    - "Movement speed (walking, running, traversal = NORMAL, same as all classes)"
+    - "Momentum acceleration (class resource, not stat-derived)"
+  NTU3: >
+    No intuition-based mechanics. No "sense danger" proc. No reactive
+    indicators. Class is explicitly NON-REACTIVE. Read field BEFORE
+    committing, not during.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 6: CLASS-SPECIFIC SYSTEMS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ClassSpecificSystems:
+
+  CCBudget:
+    StageAllocation: "Stage 1 ONLY"
+    Type: "Physical displacement through mass and momentum"
+    Description: >
+      Purely physical, purely incidental. Not TRYING to control — trying to
+      advance through. Displacement = side effect of mass in motion. No stuns,
+      no roots, no disables. Bodies get shoved. That's it.
+    Limits:
+      - "No stun component — displaced enemies act immediately"
+      - "No follow-up CC chain"
+      - "Mass-gated (heavy enemies resist, except Rank 3 Tier 4)"
+      - "Cannot interrupt enemy casts"
+
+  RankProgression:
+    Philosophy: >
+      Enhances QUALITY, not COMPLEXITY. No new abilities at Rank 2-3.
+      Same buttons, better outputs. Full kit from Rank 1.
+    Rank1: "All 8 abilities. Momentum cap 70 (Tier 1-3 only)."
+    Rank2: "Passive upgrades. Momentum cap 100 (Tier 4 accessible)."
+    Rank3: "Trait passives: terrain destruction, proximity AoE, +10% phys vuln debuff."
+
+  ProcgenMapInteraction:
+    Corridors: "HIGH for clearing (hitbox fills space), LOW for holding."
+    OpenArenas: "MODERATE. Must choose ONE angle to commit toward."
+    SiegeScenarios: "HIGHEST of all classes. Breaks barriers, creates breaches."
+    Niche: "BREAK fortifications. Advance through. Create openings."
+
+  StrategyRankInteraction:
+    Rank1: "Trivial — always closest target. Just walk forward."
+    Rank2: "Easy — advance INTO flanking paths. Block by existing."
+    Rank3: "Moderate — must choose WHICH angle. Party handles the rest."
+    Rank4: "High — enemies BAIT wrong commitment. Initial read must be correct."
+    CCImmunityValue: >
+      Most valuable at Rank 3-4 where enemies use CC tactically.
+      Only frontliner GUARANTEED to reach the target.
+
+  CritSystem:
+    ZeroRNG: "No random procs. Every outcome deterministic."
+    Conditions:
+      - "Carapace Slam: crits on rear positional"
+      - "Thorax Crush: crits against >50% HP targets"
+      - "All others: fixed potency, no crit"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 7: ROTATION PHILOSOPHY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+RotationDesign:
+  Philosophy: >
+    NO rotation. NO fixed sequence. A DECISION TREE:
+    1. Not committed? → Commit toward priority target.
+    2. Not in range? → Grinding Advance to close.
+    3. Pack or single? → Pack: Steamroll. Single: Carapace Slam.
+    4. High Momentum + target healthy? → Thorax Crush.
+    5. Endurance low? → Entrench.
+    6. Done with cluster? → Exoskeletal Flare (cash out).
+    7. Big hit telegraphed? → Brace.
+    Each GCD = independent decision. "Optimal" is usually OBVIOUS.
+
+  DecisionTree:
+    Commit: "Target to advance toward? → Commit. Nothing worthwhile? → Hold."
+    Advance: "In melee range? → Slam/Steamroll. Too far? → Grinding Advance."
+    BigHit: "Tier 2+ Momentum AND target >50% HP? → Thorax Crush."
+    Breathe: "Endurance below 30? → Entrench."
+    CashOut: "Tier 3+ AND about to reposition? → Flare."
+    Emergency: "Major hit in 3-4s? → Brace."
+
+  NoRotationStatement: >
+    No opener. No burst phase. No raid buff alignment. No fixed cadence.
+    No sequence memorization. Good vs bad = WHICH target they Commit toward
+    and WHEN they Entrench — not HOW they sequence buttons.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 8: ANTI-PATTERNS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+AntiPatterns:
+  - Pattern: "SPD affecting movement speed"
+    Fix: "Normal walk/run. Momentum adds speed DURING ADVANCE ONLY."
+    Severity: CRITICAL
+
+  - Pattern: "Stacking multiple weaknesses"
+    Fix: "ONE limitation: directional commitment. That's the ONLY weakness."
+    Severity: CRITICAL
+
+  - Pattern: "Giving Siegebreaker a dodge or parry"
+    Fix: "Take every hit. DR + HP. Zero reactive defense."
+    Severity: CRITICAL
+
+  - Pattern: "'Beaten by ranged' as primary counter"
+    Fix: "Momentum acceleration catches them. CC immunity means you GET there."
+    Severity: HIGH
+
+  - Pattern: "Complex rotation or burst cadence"
+    Fix: "8 abilities, decision tree, no fixed sequence."
+    Severity: HIGH
+
+  - Pattern: "CC immunity as a buff window"
+    Fix: "ALWAYS ON while Endurance > 0. Biology, not buff."
+    Severity: HIGH
+
+  - Pattern: "2-minute burst cycle alignment"
+    Fix: "Flare is Momentum-gated, not time-gated."
+    Severity: HIGH
+
+  - Pattern: "Making commitment unbreakable"
+    Fix: "CAN re-commit (Momentum resets). Choice, not lock."
+    Severity: MEDIUM
+
+  - Pattern: "Frontliner without party value"
+    Fix: "Body-blocking + Rending Plates debuff + breach creation."
+    Severity: MEDIUM
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 8b: ITEM BASELINE — WHAT THIS CLASS REPLACES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ItemBaseline:
+  Philosophy: >
+    A party without a Siegebreaker relies on consumables for temporary tankiness
+    and one-shot displacement. NO item creates sustained directional threat
+    pressure. The Siegebreaker IS a moving wall that threatens everything it
+    approaches — items can only approximate fragments of this.
+
+  Replaces:
+    - Item: "Hardshell Powder"
+      Function: "Party-wide defense boost AoE — temporary tankiness"
+      WhyClassBetter: >
+        Fixed magnitude, doesn't scale with momentum, provides damage REDUCTION
+        but not IMMUNITY through sustained forward pressure, doesn't threaten enemies.
+        Siegebreaker's exoskeleton is permanent and offensive simultaneously.
+
+    - Item: "Quartzwall Capsule"
+      Function: "Crystal wall (4m wide, 2.5m tall) — blocks movement and projectiles"
+      WhyClassBetter: >
+        Static, blocks BOTH teams, destructible. Siegebreaker IS a moving wall
+        that only blocks enemies. Cannot be destroyed by normal damage.
+
+    - Item: "Ironhide Tincture"
+      Function: "+50% DR for 8s, -40% movement speed during effect"
+      WhyClassBetter: >
+        8s duration only, slows without compensating threat of inevitable arrival,
+        no offensive component. Siegebreaker is permanently tanky AND dangerous.
+
+    - Item: "Ramcharge Capsule"
+      Function: "Single-use directional charge with impact damage + knockback"
+      WhyClassBetter: >
+        One use, fixed direction, no ongoing momentum, no super armor during charge
+        (can be interrupted), doesn't get stronger the longer it travels.
+        Siegebreaker's momentum BUILDS over distance.
+
+    - Item: "Concussion Charge"
+      Function: "Directional blast pushing entities 4m — clear a path"
+      WhyClassBetter: >
+        2s delay, doesn't move WITH you, only displaces once (enemies return),
+        no sustained area denial. Siegebreaker displaces AND occupies simultaneously.
+
+    - Item: "Barricade Foam"
+      Function: "Custom-shaped barrier — block a corridor"
+      WhyClassBetter: >
+        Defensive only, 2s harden time, destructible, stationary. Siegebreaker IS
+        the barricade AND the battering ram simultaneously.
+
+    - Item: "Stoneskin Scroll"
+      Function: "Resistance to nonmagical physical damage"
+      WhyClassBetter: >
+        Doesn't provide offensive presence, doesn't force enemies to respect
+        approach, duration-limited. Enemies ignore you and target backline.
+        Siegebreaker CANNOT be ignored — CC immunity + inevitable arrival.
+
+  ClassAdvantage: >
+    Items create temporary tankiness or one-shot displacement. Siegebreaker creates
+    SUSTAINED DIRECTIONAL THREAT PRESSURE — the combination of unkillable, unstoppable,
+    and increasingly dangerous as it builds momentum. This cannot be replicated by
+    any item combination because items lack the PERSISTENCE and ESCALATION.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 9: DESIGN NOTES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+DesignNotes:
+
+  WhatSiegebreakerIsNOT:
+    - "NOT a tank that holds position (ADVANCES, not HOLDS)"
+    - "NOT a complex execution challenge (8 abilities, simplest kit)"
+    - "NOT a reaction-based class (SPD 5, NTU 3)"
+    - "NOT slow at walking (SPD ≠ movement speed)"
+    - "NOT a burst-cadence class (no 2-minute cycle)"
+    - "NOT kitable as primary counter (CC immunity)"
+    - "NOT a solo sustain class (zero self-healing)"
+    - "NOT a multi-angle controller (ONE direction)"
+
+  WhatSiegebreakerIS:
+    - "Directional commitment class rewarding field-reading"
+    - "Lowest floor/ceiling gap in the game"
+    - "Living battering ram through chosen path"
+    - "CC immune at all times (trade for zero reactive tools)"
+    - "Entry-point frontliner for new role players"
+    - "Healer's best friend (predictable intake, no CC spikes)"
+    - "Siege engine creating openings for party"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # §25 AUDIT: LONG COOLDOWNS ON IDENTITY SKILLS
+  # ─────────────────────────────────────────────────────────────────────────
+
+  Section25Audit:
+    ExoskeletalFlare:
+      OriginalCD: "20s (Rank 1), 15s (Rank 2)"
+      IdentitySkill: true
+      Note: >
+        ATTEMPTED, SUPERSEDED BY §25: 20s CD is time-gated. Momentum
+        consumption IS a resource gate (need 60+ for meaningful damage),
+        but CD adds redundant time restriction. Skills task should evaluate:
+        convert to Momentum-only gating (require 60+ Momentum, no CD) or
+        reduce to ≤15s at all ranks.
+
+    Brace:
+      OriginalCD: "30s"
+      IdentitySkill: partial
+      Note: >
+        ATTEMPTED, SUPERSEDED BY §25/§23: 30s on only active mitigation.
+        May be acceptable because survival model is passive DR + HP and
+        Brace is explicitly "optimization, not survival-mandatory." Skills
+        task should evaluate: convert to Endurance-gated (costs 20 END,
+        no CD) or retain with justification that Brace is safety valve,
+        not identity skill.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # OPEN QUESTIONS
+  # ─────────────────────────────────────────────────────────────────────────
+
+  OpenQuestions:
+    - topic: "Wyrpincers worldbuilding"
+      status: TBD
+      note: "Culture should match playstyle: decisive, committed, present."
+
+    - topic: "PvP CC immunity"
+      status: TBD
+      note: "Likely CC resistance (-75% duration) or conditional at Tier 3+."
+
+    - topic: "Rank progression ability count"
+      status: "HOLD at 8"
+      note: "If engagement flags, consider ONE situational GCD at Rank 3."
+
+    - topic: "Healer pairing"
+      status: "Design exploration"
+      note: "Proactive HoTs ideal. Zero self-heal = most healer-dependent."
+
+    - topic: "Destructible terrain scope"
+      status: TBD
+      note: "BONUS path only. Never gates required progress."
+
+    - topic: "Dual-frontliner (Siegebreaker + Adafold)"
+      status: "Design exploration"
+      note: "Hammer and anvil. Siegebreaker advances, Adafold holds."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ▼ CONTINUES IN: Siegebreaker_Skills.yaml

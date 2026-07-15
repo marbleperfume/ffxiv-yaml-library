@@ -1,0 +1,444 @@
+# ▲ CONTINUES FROM: Grappler_Design.yaml, Grappler_Skills.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+# GRAPPLER (Iblis Grabbers) — Pre-Commitment Frontliner [VALIDATION]
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Numbers-first reference. Minimal prose.
+#
+# References:
+#   - Grappler_Design.yaml (identity, resources, state machine, stance lock)
+#   - Grappler_Skills.yaml (ability roster, potencies, §25 fixes)
+#   - Combat/BalanceTargets.yaml (global targets)
+#   - unified_item_catalog.md (consumable baselines)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Frontliner.Grappler.Validation
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1: BALANCE TARGETS REFERENCE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+BalanceTargets:
+
+  DPS_Reference:
+    Reference_PPS: 110
+    Role_Baseline: "85% (Frontliner standard)"
+    Grappler_Band: "80-87%"
+    GCD: {Base: 2.0s, Haste_Cap: 1.4s, Weave: single_weave_only}
+
+  By_Stance:
+    Stealth:
+      Opener_Burst: "620p / 8s (Ambush 280 + Drag 120 + 2× Strike 110)"
+      Post_Opener: "~110 PPS (conventional)"
+      Fight_Avg: "~82%"
+    Long_Range:
+      Cycle: "Extend(0) → Reel-In(130) + displacement bonus / 6s = ~91 PPS"
+      Fight_Avg: "~83%"
+    Ink:
+      Sustained: "~60 PPS personal + zone debuff value"
+      Eruption_Spike: "288p per detonation (120 × 3 × 0.7)"
+      Fight_Avg: "~80% personal (party debuff compensates)"
+    Melee_Grapple:
+      Pin_Personal: "90 PPS (Crush only)"
+      Pin_Party_Effective: "~232 PPS (Crush + 2 allies × 150 × 1.25)"
+      Post_Pin: "Suplex 200-300p burst"
+      Fight_Avg: "~84%"
+
+  Grip_Gauge_Economy:
+    Start: 30
+    Max: 100
+    Generation: "5/hit + 2/s = ~7 per GCD"
+    First_Spend: "0s (starts at 30; Lash=10, Seize=20, Extend=15)"
+    Full_From_Start: "~10s (30→100)"
+    Equilibrium: "1 tentacle action per 2 GCDs (alternate weapon/tentacle)"
+    Overcap_Risk: "LOW — always have sink abilities"
+
+  Ink_Charge_Economy:
+    Max: 4
+    Regen: "1 per 8s (base); 1 per 4s under pressure"
+    Full_Refill: "32s from empty (base)"
+    Eruption_Cycle: "3 zones + 2 Eruption = 5 charges → ~40s natural, ~20s pressured"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 2: MATCHUP SCENARIOS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+MatchupScenarios:
+
+  SR1_Cluster:
+    Name: "6 SR1 trash, melee cluster"
+    Behavior: "Attack closest. No tactics."
+    Best_Stance: "Stealth (2 kills from opener) or Ink (AoE debuff)"
+    Worst_Stance: "Melee Grapple (pin wasted on 5-8s TTK enemies)"
+    Expected_TTK: "5-8s ✓"
+    Items_Saved: "0-1 (SR1 needs no consumables)"
+
+  SR2_Elite_Plus_Adds:
+    Name: "1 elite + 3 adds, SR2 pathfinding"
+    Behavior: "Adds seek casters. Elite attacks frontliner."
+    Best_Stance: "Melee Grapple"
+    Timeline: |
+      0s: Seize elite (20 Grip). 4s: Full Pin. 4-18s: Crush while party burns adds+elite.
+      18s: Suplex into wall (+300p). Elite at ~30%. Party finishes.
+    Alt_Stances:
+      Long_Range: "Pull adds into kill zone. Good for add management."
+      Ink: "Screen between adds and casters. Degrades, doesn't stop."
+      Stealth: "Burst opener on elite. No sustained CC contribution."
+    Expected_TTK: "20-30s ✓"
+    Items_Saved: "3-5 (replaces Frostweave Net ×2, Stasis Pin, Blindveil)"
+
+  SR3_Veteran_Squad:
+    Name: "4 SR3 coordinated enemies, targeting installations"
+    Behavior: "Flank, focus fire, retreat low HP, destroy deployables."
+    Best_Stance: "Melee Grapple (pin leader → squad de-coordinates)"
+    Critical_Risk: "3 SR3 enemies attack pinned Grappler during escalation"
+    Required_Party_Play: "Allies MUST protect during 4s Seize → Pin escalation"
+    Alt_Analysis:
+      Ink: "Territory forces corridor paths. SR3 may split around zones."
+      Long_Range: "Pulls flankers back. Vulnerable during 2s retraction."
+      Stealth: "Kill one from stealth → 3v4. High risk if detected early."
+    Expected_TTK: "45-60s"
+    Items_Saved: "6-10 (replaces Stasis Pin ×2, Net ×2, Blindveil ×3, Charge ×2)"
+    Numeric_Check: |
+      3 SR3 enemies × 50 dmg/2s = 75 DPS on Grappler during pin.
+      15s × 75 = 1125 damage vs ~3000 HP = 37.5%. Pin breaks at 30%.
+      Result: UNPROTECTED pin = forced break. Party peel required.
+
+  SR4_Raid_Boss:
+    Name: "1 SR4 boss + adds on 2-min spawn cycle"
+    Behavior: "Boss destroys deployables, calls reinforcements, exploits positioning."
+    Best_Stance: "Melee Grapple (pin adds, not boss — boss Grip Immune)"
+    Timeline: |
+      0-120s: Conventional DPS on boss. Main-hand + Lash.
+      120s: Add spawns. Seize immediately. Pin. Party burns (+25%).
+      ~135s: Suplex. Resume boss. Repeat at 240s.
+    Boss_Limitations:
+      Long_Range: "Large enemy = half pull, no throw. Reduced value."
+      Ink: "SR4 destroys zones. Zones become bait/distraction only."
+      Stealth: "Opener diluted over 8-10 min. Worst stance for long fights."
+    Expected_TTK: "8-10 min ✓"
+    Items_Saved: "8-12 over full fight"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 3: PASS/FAIL CRITERIA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+PassFailCriteria:
+
+  # --- Gauge Timing ---
+  - Id: grip_first_spend
+    Target: "0-2s"
+    FailIf: ">4s"
+    Status: "PASS — starts at 30, cheapest ability = 10"
+    Severity: CRITICAL
+
+  - Id: grip_equilibrium
+    Target: "Gauge stabilizes at 40-60 during sustained combat"
+    FailIf: "Hits 0 for >6s in normal play"
+    Status: "PASS — 7/GCD gen vs 10-15 avg spend = positive"
+    Severity: HIGH
+
+  - Id: grip_overcap
+    Target: "<10% generation wasted"
+    FailIf: ">15%"
+    Status: "PASS — tentacle sinks always available"
+    Severity: MEDIUM
+
+  # --- Stance Effectiveness ---
+  - Id: stance_spread
+    Target: "All stances within ±12% DPS in SR2 content"
+    FailIf: "One stance >20% above others"
+    Status: "PASS — spread is 80-84% = 4% variance"
+    Severity: CRITICAL
+
+  - Id: wrong_stance_penalty
+    Target: "Wrong stance = 15-25% less effective (not useless)"
+    FailIf: "<50% OR 0% penalty"
+    Status: "PASS — wrong stance = 70-85% effective"
+    Severity: HIGH
+
+  # --- Tentacle Uptime ---
+  - Id: tentacle_uptime_long_range
+    Target: ">60% engagement (4s active / 6s cycle = 67%)"
+    FailIf: "<50%"
+    Status: "PASS — 67% base, 70%+ at Rank 4"
+    Severity: HIGH
+
+  - Id: tentacle_uptime_melee
+    Target: ">75% of grapple cycle (19s active / 25s full = 76%)"
+    FailIf: "<60%"
+    Status: "PASS — 76%"
+    Severity: HIGH
+
+  - Id: tentacle_uptime_ink
+    Target: ">75% zone field coverage"
+    FailIf: "<50%"
+    Status: "PASS — 3 zones × 30s = perpetual once established"
+    Severity: MEDIUM
+
+  # --- CC Budget ---
+  - Id: cc_ceiling_adherence
+    Target: "Stealth≤2, Long-Range≤2, Ink≤1, Melee=3"
+    FailIf: "Any ability exceeds stance CC ceiling"
+    Status: "PASS — verified all abilities"
+    Severity: CRITICAL
+
+  - Id: pin_duration_bounds
+    Target: "15-18s pin, 6s immunity"
+    FailIf: "Pin >20s OR Immunity <5s"
+    Status: "PASS — 15-18s, 6s immunity, 25s cycle"
+    Severity: CRITICAL
+
+  - Id: cc_uptime_single_target
+    Target: "Stage 3 uptime ≤60% per target (15/25)"
+    FailIf: ">65%"
+    Status: "PASS — 60% theoretical, 50-55% realistic"
+    Severity: HIGH
+
+  # --- DPS Band ---
+  - Id: dps_role_band
+    Target: "80-87% of reference"
+    FailIf: "Any stance <75% or >90%"
+    Status: "PASS — 80% (Ink) to 84% (Melee)"
+    Severity: CRITICAL
+
+  - Id: party_amp_justification
+    Target: "Pin +25% ally damage ≈ 15-20% effective party boost"
+    FailIf: "<10% party benefit"
+    Status: "PASS — 2 allies × 1.25 = +37% redirected"
+    Severity: HIGH
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 4: ITEM BASELINE COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ItemBaselineComparison:
+
+  Party_Without_Grappler:
+    SR2_Budget: "3-5 consumables per encounter"
+    SR3_Budget: "6-10 consumables per encounter"
+    Typical_CC_Loadout:
+      - "Stasis Pin ×2 (3s Stage 3 freeze, single-use)"
+      - "Frostweave Net ×2 (70% slow, Stage 1-2)"
+      - "Thickglass Flask ×1 (-50% move/25% attack speed)"
+      - "Blindveil Powder ×2 (-60% detection, 12s)"
+      - "Scatterlung Phial ×1 (-30% accuracy, 3m)"
+      - "Ripcord Harpoon ×1 (8m pull, single-use)"
+      - "Concussion Charge ×1 (4m push, 2s delay)"
+      - "Smokebreak Ampule ×1 (escape)"
+    Total_Per_SR3: "~12-14 CC/utility items"
+
+  Grappler_Replaces:
+    Stealth:
+      - "Phantom Echo → Silent Approach (permanent vs 3s)"
+      - "Numbsense Spike → native stealth"
+      - "Smokebreak Ampule → Vanish Retreat (infinite, resource-gated)"
+      Items_Saved: "4-6/run"
+
+    Long_Range:
+      - "Ripcord Harpoon → Reel-In (15m, unlimited)"
+      - "Concussion Charge → Sling Launch (10m, bowling, instant)"
+      - "Flashstep Cartridge → Tether Drag (directional, damaging)"
+      Items_Saved: "4-5/run"
+
+    Ink:
+      - "Blindveil Powder → Ink Spray (larger, 30s vs 12s, renewable)"
+      - "Scatterlung Phial → Ink Spray (combined vision+accuracy)"
+      - "Thickglass Flask → Ink Slick (renewable, displacement amp)"
+      - "Bogcrust Grenade → Ink Slick (superior slow terrain)"
+      Items_Saved: "5-8/run"
+
+    Melee_Grapple:
+      - "Stasis Pin → Full Pin (15s vs 3s, unlimited cycles)"
+      - "Frostweave Net → Seize (escalates to Stage 3)"
+      - "Ironvine Snare → Submission Hold (targeted Stage 2)"
+      - "Stupor Bell → Arm Lock silence (precision CC)"
+      Items_Saved: "6-10/run"
+
+  Comparison_Note: |
+    Shaman replaces 8-12 items/encounter (broad debuff coverage).
+    Grappler replaces 4-10 items/encounter (stance-narrow but deeper quality).
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 5: ANTI-PATTERN VERIFICATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+AntiPatternVerification:
+
+  No_2Min_Burst_Cycle:
+    Stealth_Opener: "One-time per combat, not recurring. ✓"
+    Long_Range_Cycle: "4-6s physics-paced, not timer-paced. ✓"
+    Ink_Eruption: "Resource-gated (2 charges), no CD. ✓"
+    Melee_Pin: "Opportunity-gated (target + immunity). ✓"
+    Anchor_Point: "12s CD — tactical utility, not DPS identity. ✓"
+    Result: "PASS — Zero 90s+ timer-based burst."
+
+  No_Fixed_Cadence:
+    Stealth: "Paced by enemy patrol patterns. External. ✓"
+    Long_Range: "Paced by retraction physics + enemy positioning. ✓"
+    Ink: "Paced by biological regen + enemy movement. ✓"
+    Melee_Grapple: "Paced by immunity timers + target availability. ✓"
+    Result: "PASS — All tempo is externally driven."
+
+  No_Freecure_Equivalents:
+    Grip_Gauge: "Earned by hitting (deliberate). No random procs. ✓"
+    Ink_Charges: "Biological timer. No proc chance. ✓"
+    Crit: "Positional/conditional only. Zero RNG. ✓"
+    Triggers: "Battlefield-state conditions, not % chances. ✓"
+    Result: "PASS — Zero RNG reward mechanics."
+
+  No_Rotation:
+    Stealth: "Decision tree (target selection). ✓"
+    Long_Range: "Branch per node (pull/throw/tether/self). ✓"
+    Ink: "Spatial puzzle + Eruption timing. ✓"
+    Melee_Grapple: "Pin vs Submission + target selection per grab. ✓"
+    Result: "PASS — All stances are decision trees."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 6: §25 COMPLIANCE CHECK
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Section25_Compliance:
+
+  Rule: "No identity skills gated by 90s+ cooldowns. Resource/state gates only."
+
+  Audit:
+    Shared:
+      Anchor_Point: {Gate: "12s CD", Identity: false, Verdict: "PASS (utility, not identity)"}
+    Stealth:
+      Silent_Approach: {Gate: "8s out-of-combat timer (state)", Identity: true, Verdict: PASS}
+      Ambush_Crush: {Gate: "First Blood trigger + 30 Grip", Identity: true, Verdict: PASS}
+      Drag_Under: {Gate: "Isolation trigger + 25 Grip", Identity: true, Verdict: PASS}
+      Vanish_Retreat: {Gate: "25 Grip + Blown Cover trigger", Previous: "30s CD (REMOVED)", Verdict: "PASS — §25 fix applied"}
+    Long_Range:
+      Tentacle_Extend: {Gate: "15 Grip + LoE + range", Identity: true, Verdict: PASS}
+      Reel_In: {Gate: "Attachment state", Identity: true, Verdict: PASS}
+      Sling_Launch: {Gate: "Attachment state", Identity: true, Verdict: PASS}
+      Tether_Drag: {Gate: "Immovable attachment state", Identity: false, Verdict: PASS}
+    Ink:
+      Ink_Spray: {Gate: "1 Ink Charge", Identity: true, Verdict: PASS}
+      Murk_Bomb: {Gate: "1 Ink Charge + 8m range", Identity: true, Verdict: PASS}
+      Ink_Slick: {Gate: "1 Ink Charge + ground area", Identity: true, Verdict: PASS}
+      Ink_Eruption: {Gate: "2 Ink Charges + Saturation trigger", Previous: "20s CD (REMOVED)", Verdict: "PASS — §25 fix applied"}
+    Melee_Grapple:
+      Seize: {Gate: "20 Grip + 2m range", Identity: true, Verdict: PASS}
+      Full_Pin: {Gate: "Escalation Complete trigger (4s hold)", Identity: true, Verdict: PASS}
+      Crush: {Gate: "Pin active state", Identity: false, Verdict: PASS}
+      Suplex_Release: {Gate: "Pin/Seize active state", Identity: true, Verdict: PASS}
+      Submission_Hold: {Gate: "15 Grip + Seize active", Identity: true, Verdict: PASS}
+
+  Summary:
+    Audited: 17
+    With_Cooldowns: "1 (Anchor Point, 12s, non-identity)"
+    With_90s_Plus_CD: 0
+    Section_25_Fixes: "2 (Vanish Retreat 30s→resource, Ink Eruption 20s→resource)"
+    Result: "FULL COMPLIANCE"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 7: WEAKNESS BUDGET
+# ═══════════════════════════════════════════════════════════════════════════════
+
+WeaknessBudget:
+
+  Primary_Weaknesses:
+
+    Multi_Target_During_Pin:
+      Affects: "Melee Grapple (primary)"
+      Mechanism: "Pin locks Grappler in place. Adds attack freely. Breaks at 30% HP damage."
+      Numeric: "3 SR3 × 50dmg/2s = 75 DPS × 15s = 1125 vs ~3000 HP = 37.5% → BREAK"
+      Severity: HIGH
+      Player_Counter: "Party peels. Short pins. Target selection."
+      Design_Hook: "Add spawns during pin windows."
+
+    Ranged_Enemies_vs_Melee_Commitment:
+      Affects: "Melee Grapple, Stealth (approach)"
+      Mechanism: "Must close to 2m. No gap closer in Melee stance. Ranged enemies free-fire."
+      Numeric: "12m approach at 5m/s = 2.4s exposed + 4s escalation = 3 free ranged attacks"
+      Severity: HIGH
+      Player_Counter: "Choose Long-Range stance (correct pre-read)."
+      Design_Hook: "Mixed ranged/melee compositions."
+
+    Stance_Lock_No_Adaptation:
+      Affects: "ALL stances (meta-weakness)"
+      Mechanism: "Locked PRE-INSTANCE. Wrong read = 70-85% effectiveness entire run."
+      Severity: CRITICAL
+      Player_Counter: "Game knowledge. Community info. Prior runs on other classes."
+      Bad_Matchups:
+        - "Stealth vs long instance (opener diluted)"
+        - "Long-Range vs tight corridors (no room to extend)"
+        - "Ink vs fire enemies (zones cleaned)"
+        - "Melee Grapple vs many weak enemies (pin wasted)"
+
+    Retraction_Vulnerability:
+      Affects: "Long-Range"
+      Mechanism: "2.0s retraction — no tentacle abilities, exposed to closers"
+      Severity: MEDIUM
+      Player_Counter: "Anchor Point during retraction. Party peel."
+
+    Ink_Depletion_Window:
+      Affects: "Ink"
+      Mechanism: "All charges spent → 32s refill. No zones, no Murk, no Eruption."
+      Severity: MEDIUM
+      Player_Counter: "Reserve 1 charge. Never fully deplete."
+
+    Post_Pin_Fatigue:
+      Affects: "Melee Grapple"
+      Mechanism: "3s Fatigue (-30% attack speed, no grab) + 6s target Immunity = 9s dead"
+      Severity: MEDIUM
+      Player_Counter: "Allies cover. Pre-select next target."
+
+  Secondary_Weaknesses:
+    No_Self_Healing: "Zero sustain. Fully healer-dependent."
+    Single_Target_Lock: "Can only pin ONE target. Multi-grab impossible."
+    Friendly_Fire_Ink: "Allies suffer 60% vision penalty in ink (40% at Rank 3)."
+    Tentacle_Dependency: "Future design space: tentacle-disable debuffs remove offhand entirely."
+
+  Counter_Summary:
+    Melee_Grapple: "Multi-target, ranged, fast adds during pin, Fatigue windows"
+    Long_Range: "Tight rooms, fast closers, large displacement-immune enemies"
+    Ink: "Fire/wind elements, SR4 destruction, depletion pressure"
+    Stealth: "Long instances, AoE detection sweeps, SR4 detection"
+    Universal: "Wrong stance choice, no sustain, single-target CC only"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 8: >50% HP RULE INTERACTION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Over50Rule:
+  Rule: "Enemies above 50% HP take +25% incoming damage"
+
+  Per_Stance:
+    Stealth: "Ambush Crush 280 × 1.25 = 350p effective on fresh targets. Confirms first-blood fantasy."
+    Long_Range: "Prioritize displacing healthy enemies into kill zones for +25% window."
+    Ink: "Eruption early (enemies >50%) > Eruption late. Opener-phase tool confirmed."
+    Melee_Grapple: "Pin + >50% = 1.25 × 1.25 = 1.5625× ally damage on fresh targets. Pin healthiest threat first."
+
+  Grappler_HP_Management: |
+    Grappler has no sustain. Above 50% = +25% incoming damage from un-CCed enemies.
+    Optimal: enter pin at 40-50% HP. Healer should NOT top Grappler pre-pin.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 9: OPEN BALANCE QUESTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+OpenQuestions:
+
+  - Id: Q1
+    Question: "Is 15s Full Pin too long? 2 Grapplers alternating = 60% perma-lock."
+    Proposed: "Grapple Immunity is TARGET-SIDE (6s immune from ALL grabs, not just source)."
+
+  - Id: Q2
+    Question: "Are ink zones destroyable by SR4 enemies?"
+    Proposed: "Ink = terrain modification, not installation. Only countered by element (fire/wind/water)."
+
+  - Id: Q3
+    Question: "Stealth stance viability beyond opener?"
+    Proposed: "Post-opener = 110 PPS Frontliner DPS. Re-stealth between combats = scout + target selection."
+
+  - Id: Q4
+    Question: "Grip Gauge feels too fast for Special tier?"
+    Proposed: "Intentional. Knowledge gate = stance selection, not resource starvation. Gauge prevents spam, doesn't gate identity."
+
+  - Id: Q5
+    Question: "Long-Range vs large/boss enemies (can't throw)?"
+    Proposed: "Reel-In pulls half. Tether Drag self-pull works. Value shifts to add management + repositioning."
