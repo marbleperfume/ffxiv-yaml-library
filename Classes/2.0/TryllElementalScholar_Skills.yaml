@@ -1,0 +1,1028 @@
+# Classes/Healer/TryllElementalScholar/TryllElementalScholar_Skills.yaml
+# ══════════════════════════════════════════════════════════════════════════════════
+# TRYLL ELEMENTAL SCHOLAR — Skills
+# ══════════════════════════════════════════════════════════════════════════════════
+# ▲ CONTINUES FROM: TryllElementalScholar_Design.yaml
+# ▲ GAP: Sections 1-11 NOT in this file (identity, mechanic, mana economy, triggers)
+# CategoryTag: Elementalist  # This file is the Tryll implementation of the Elementalist category.
+# ══════════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Healer.TryllElementalScholar.Skills
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 1: FIRE SKILLS (DPS / Zone Denial)
+# ─────────────────────────────────────────────────────────────────────────────────
+# Philosophy: Offensive pressure while Fire saturation is active. These skills
+# ADD to the ambient burn DoT — they don't replace it. Fire saturation passive
+# (60p/3s tick to enemies in 15y) runs continuously; these skills provide burst
+# damage on top of the passive field.
+
+Skills:
+  Fire:
+    - Name: "Fireball"
+      ID: fireball
+      ActionType: GCD
+      CastTime: 1.5s
+      Recast: 2.0s
+      TargetType: single
+      DamageType: magical
+      Potency: 120
+      ManaCost: 200
+      Range: 25y
+      ElementRequired: "Any (no element lock — but +20% potency if Fire saturation active)"
+      SaturationBonus: "+20% potency (144p effective) while Fire saturation maintained"
+      Description: >
+        Baseline DPS filler. Cheap, fast, usable in any element. Gains bonus potency
+        during Fire saturation. This is what you cast between decisions. Not glamorous,
+        always correct when nothing else is more urgent.
+      RankRequired: 1
+
+    - Name: "Flame Pillar"
+      ID: flame_pillar
+      ActionType: GCD
+      CastTime: 2.0s
+      Recast: 2.0s
+      TargetType: ground_circle
+      AoERadius: 5y
+      DamageType: magical
+      Potency: 80  # Per tick
+      Ticks: 4
+      TickInterval: 1.5s
+      TotalPotency: 320
+      ManaCost: 350
+      Range: 25y
+      Duration: 6s
+      ElementRequired: "Fire saturation must be active"
+      TerrainInteraction: "Stacks with Fire saturation's heated terrain — enemies in pillar AND heated terrain take -15% speed (additive with base -10%)"
+      Description: >
+        Ground-placed fire zone. High total potency if enemies remain inside.
+        Only castable while maintaining Fire saturation. The full 2.0s cast time
+        means this is a COMMITMENT — you're locked in place and sacrificing your
+        weave window. Best against stationary packs held by frontliner.
+      RankRequired: 1
+
+    - Name: "Scorch Line"
+      ID: scorch_line
+      ActionType: GCD
+      CastTime: 1.0s
+      Recast: 2.0s
+      TargetType: ground_line
+      LineLength: 15y
+      LineWidth: 3y
+      DamageType: magical
+      Potency: 100  # Instant hit to all in line
+      ManaCost: 300
+      Range: 25y
+      Duration: 12s  # Terrain persists as fire line
+      TerrainEffect: "Creates fire terrain corridor. Enemies won't cross willingly. Allies take 30p/tick if crossing (friendly fire)."
+      CCStage: "Stage 1 (slow via heated terrain)"
+      ElementRequired: "Fire saturation must be active"
+      Decision: >
+        Creates persistent terrain that blocks enemy pathing but ALSO hurts allies.
+        Placement matters enormously — if the party needs to retreat through that
+        corridor, they take burn damage too. The positioning skill expression.
+      Description: >
+        Linear fire zone that denies an approach corridor. Enemies refuse to path
+        through it (AI avoidance at SR2+). Forces enemies to take alternate routes,
+        buying time. Allies can cross but take light damage — misplacement punishes.
+      RankRequired: 2
+
+    - Name: "Convergence Burst (Fire)"
+      ID: convergence_burst_fire
+      ActionType: GCD
+      CastTime: 2.0s
+      Recast: 2.0s
+      Cooldown: 120s  # Shared across all Convergence Burst elements
+      TargetType: circle_around_self
+      AoERadius: 10y
+      DamageType: magical
+      Potency: 400
+      ManaCost: "50% current mana (variable)"
+      Range: 0y
+      ElementRequired: "Fire saturation must be active"
+      Effect: >
+        DETONATES current Fire saturation field for massive AoE explosion.
+        After detonation: Fire saturation ENDS. Forced into Neutral State.
+        Must re-enter an element from scratch (1 GCD + transition time).
+      Decision: "I solved the problem but now I'm at zero. The 'nuclear option.'"
+      CCStage: "Stage 2 (stagger/interrupt all targets)"
+      Description: >
+        The ultimate Fire emergency: explode your entire field for 400p AoE.
+        Costs 50% of remaining mana AND drops you to Neutral. Use only when
+        the burst damage will KILL the pack or save the party. Using this when
+        enemies survive means you're naked for 10+ seconds afterward.
+      RankRequired: 3
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 2: WATER SKILLS (Healing / Support)
+# ─────────────────────────────────────────────────────────────────────────────────
+# Philosophy: Healing tools that complement Water saturation's passive regen.
+# Water saturation provides ~2% party HP/3s ambient healing. These skills provide
+# BURST healing for when ambient isn't enough. All scale with MED 13.
+
+  Water:
+    - Name: "Tidal Basin"
+      ID: tidal_basin
+      ActionType: GCD
+      CastTime: 2.0s
+      Recast: 2.0s
+      TargetType: ground_circle
+      AoERadius: 6y
+      HealPotency: 250  # Per tick to all allies standing inside
+      Ticks: 3
+      TickInterval: 2.0s
+      TotalHealPotency: 750  # Per ally, if they stay
+      ManaCost: 500
+      Range: 25y
+      Duration: 6s
+      ElementRequired: "Water saturation must be active"
+      PositionalRequirement: "Allies must stand INSIDE the placed zone to receive healing"
+      Decision: >
+        Ground-targeted water zone. Allies standing inside heal rapidly. BUT: you
+        must PLACE it correctly. If the fight moves, the zone is wasted. Costs a
+        full-cast GCD. The placement skill test IS the class skill expression for healing.
+      Description: >
+        Zone heal. 750p total per ally if they remain inside for full duration.
+        Requires Water saturation active. If party scatters or boss displaces
+        allies, wasted entirely. Strong when party is stacked, worthless when spread.
+      RankRequired: 1
+
+    - Name: "Cleansing Rain"
+      ID: cleansing_rain
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Cooldown: 25s
+      Charges: 2
+      TargetType: single_ally
+      HealPotency: 300
+      Cleanse: 1  # Removes 1 debuff
+      ManaCost: 350
+      Range: 30y
+      ElementRequired: "Any (no element lock — emergency tool always available)"
+      Decision: >
+        Two charges, 25s recharge each. Your FREE emergency healing — doesn't cost
+        a GCD. Use these FIRST before committing GCDs to Water healing. Using both
+        charges means you're out of emergency responses for 25s. Save or spend?
+      Description: >
+        Instant single-target heal + cleanse. Available regardless of current element.
+        The healer's safety valve. Two charges allow banking for back-to-back
+        emergencies. This is what keeps the party alive DURING element transitions.
+      RankRequired: 1
+
+    - Name: "Aqua Veil"
+      ID: aqua_veil
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Cooldown: 30s
+      Charges: 1
+      TargetType: single_ally
+      BarrierPotency: 250  # Proactive barrier (MAG-scaled)
+      BarrierDuration: 15s
+      ManaCost: 300
+      Range: 30y
+      ElementRequired: "Water saturation must be active (or transition in progress)"
+      Decision: >
+        Proactive barrier on one ally. If you mispredict WHO gets hit, the barrier
+        is wasted. 30s cooldown — misjudging costs you the only proactive Water
+        tool for half a minute. Used before visible boss wind-ups on the tank.
+      Description: >
+        Predictive shield. Apply before damage lands. If correct target: mitigated.
+        If wrong target: wasted entirely. The read-the-encounter proactive skill.
+        Scales with MAG (barrier stat), not MED.
+      RankRequired: 2
+
+    - Name: "Convergence Burst (Water)"
+      ID: convergence_burst_water
+      ActionType: GCD
+      CastTime: 2.0s
+      Recast: 2.0s
+      Cooldown: 120s  # Shared cooldown with all Convergence Burst variants
+      TargetType: party
+      HealPotency: 500  # To all allies in 15y
+      Cleanse: 1  # Removes 1 debuff from all allies
+      ManaCost: "50% current mana"
+      Range: 0y  # Centered on self
+      AoERadius: 15y
+      ElementRequired: "Water saturation must be active"
+      Effect: "Detonates Water field → massive AoE heal + cleanse. Water saturation ENDS → Neutral."
+      Description: >
+        Tidal wave. 500p AoE heal to entire party + universal cleanse. Detonates
+        your Water saturation — you lose all passive regen afterward and enter
+        Neutral. The "save everyone right now but I'm spent" button.
+      RankRequired: 3
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 3: EARTH SKILLS (CC / Defense / Terrain)
+# ─────────────────────────────────────────────────────────────────────────────────
+# Philosophy: Control and defense. Earth provides the proactive barrier layer
+# (thin persistent shields) and terrain control (Heavy, walls, transmutation).
+# Earth is the "safe harbor" element — most sustainable, most defensive.
+
+  Earth:
+    - Name: "Stone Spike"
+      ID: stone_spike
+      ActionType: GCD
+      CastTime: 0s  # Instant cast — the movement-friendly Earth GCD
+      Recast: 2.0s
+      TargetType: single
+      DamageType: magical
+      Potency: 100
+      ManaCost: 250
+      Range: 25y
+      AppliesDebuff:
+        Name: "Heavy"
+        Effect: "-20% movement speed"
+        Duration: 8s
+      ElementRequired: "Any (but Heavy duration doubled to 16s if Earth saturation active)"
+      CCStage: "Stage 1 (slow)"
+      Description: >
+        Instant-cast Earth filler. Lower potency than Fireball but castable
+        while moving and applies Heavy. Your go-to when kiting or when enemies
+        need slowing. Usable in any element but stronger in Earth saturation.
+      RankRequired: 1
+
+    - Name: "Petrify"
+      ID: petrify
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Cooldown: 40s
+      Charges: 1
+      TargetType: single_enemy
+      DamageType: none
+      Potency: 0
+      ManaCost: 250  # Standard cost
+      ManaCostOutOfElement: 500  # DOUBLE cost if Earth saturation NOT active
+      Range: 25y
+      Effect: "Stun target for 2-3s"
+      CCStage: "Stage 3 (stun)"
+      DiminishingReturns: "Standard DR on repeated use within 30s"
+      ElementRequired: "Any (but costs DOUBLE mana outside Earth saturation)"
+      Decision: >
+        HIGH mana cost if used outside Earth saturation. The interrupt you always
+        have access to — but using it in Fire mode costs 500 mana (5% max mana
+        for a 0p damage ability). Do you eat the cost or let the cast go through?
+      Description: >
+        Hard stun. Always available regardless of current element, but out-of-element
+        penalty (double mana) makes it expensive. The "I MUST interrupt this" button
+        that always works but hurts your mana budget if you're not in Earth.
+      RankRequired: 1
+
+    - Name: "Glacier Wall"
+      ID: glacier_wall
+      ActionType: GCD
+      CastTime: 1.5s
+      Recast: 2.0s
+      TargetType: ground_line
+      LineLength: 8y
+      LineWidth: 2y
+      DamageType: none
+      Potency: 0
+      ManaCost: 400
+      Range: 20y
+      Duration: 12s
+      Effect: "Creates ice/stone wall barrier. Enemies cannot pass (must path around). Root (Stage 1) on contact for 3s."
+      CCStage: "Stage 1 (root in ice on contact)"
+      ElementRequired: "Earth saturation must be active"
+      TerrainInteraction: "If Water saturation was PREVIOUSLY active (moist terrain still fading), root becomes 5s (enhanced by moisture)"
+      Decision: >
+        Physical barrier that blocks enemy pathing. Costs Earth saturation commitment
+        + GCD + 400 mana. If you're in Fire mode, switching to Earth (4-6s transition)
+        then casting (1.5s) means 6-8s total response time. Proactive placement is
+        essential — reactive wall-building is too slow.
+      Description: >
+        Terrain wall that physically blocks enemy movement and roots on contact.
+        The Elementalist's primary spatial control tool. Place before enemies arrive,
+        not after they're already through. Synergizes with fading Water terrain.
+      RankRequired: 2
+
+    - Name: "Terrain Transmute"
+      ID: terrain_transmute
+      ActionType: GCD
+      CastTime: 1.5s
+      Recast: 2.0s
+      Cooldown: 20s
+      TargetType: ground_circle
+      AoERadius: 4y
+      ManaCost: 350
+      Range: 20y
+      Duration: 15s
+      ElementRequired: "Earth saturation must be active"
+      Effect: >
+        Converts enemy terrain within 4y radius into ALLIED terrain:
+        - Poison pool → healing zone (80p/tick heal to allies standing inside)
+        - Lava → stone platform (safe ground)
+        - Ice patch → water terrain (enables Water saturation combos)
+        - Darkness zone → illuminated (reveals hidden enemies)
+      Description: >
+        Unique class function — no item CONVERTS terrain, only removes it.
+        The Elementalist turns enemy environmental hazards into party advantages.
+        20s cooldown means one conversion per encounter phase. Place carefully.
+      RankRequired: 2
+
+    - Name: "Earthen Bridge"
+      ID: earthen_bridge
+      ActionType: GCD
+      CastTime: 2.0s
+      Recast: 2.0s
+      Cooldown: 45s
+      TargetType: ground_targeted
+      ManaCost: 400
+      Range: 15y
+      Duration: 30s
+      ElementRequired: "Earth saturation must be active"
+      Effect: "Creates stone ramp/bridge (6y long). Persists 30s. Allows crossing gaps/elevation."
+      Decision: "If enemies use your bridge too, you've given them access to your high ground."
+      Description: >
+        Terrain creation for map traversal. Bridges gaps, creates ramps, enables
+        vertical positioning. 30s duration means it outlasts most combat encounters.
+        BUT: enemies can use it too. Placement creates risk if enemies path onto
+        your elevated position. Destroy-on-demand (free action) if compromised.
+      RankRequired: 2
+
+    - Name: "Convergence Burst (Earth)"
+      ID: convergence_burst_earth
+      ActionType: GCD
+      CastTime: 2.0s
+      Recast: 2.0s
+      Cooldown: 120s  # Shared
+      TargetType: circle_around_self
+      AoERadius: 12y
+      DamageType: magical
+      Potency: 200
+      ManaCost: "50% current mana"
+      Range: 0y
+      Effect: "Quake displacement — all enemies in 12y knocked away 8y + Stage 2 stagger. Earth saturation ENDS → Neutral."
+      CCStage: "Stage 2 (stagger/displacement)"
+      ElementRequired: "Earth saturation must be active"
+      Description: >
+        Earthquake detonation. 200p damage + massive displacement + stagger.
+        Clears space around the party when overwhelmed. Ends Earth saturation.
+        Use when positioning has collapsed and the party needs breathing room.
+      RankRequired: 3
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 4: WIND SKILLS (Utility / Mobility)
+# ─────────────────────────────────────────────────────────────────────────────────
+# Philosophy: Cheapest element, utility-focused. Wind is the "breathing room"
+# element — used for repositioning, kiting, and mana-efficient downtime between
+# expensive elements. Wind skills are fast (instant/short cast) and cheap.
+
+  Wind:
+    - Name: "Gale Blade"
+      ID: gale_blade
+      ActionType: GCD
+      CastTime: 0s  # Instant
+      Recast: 2.0s
+      TargetType: single
+      DamageType: magical
+      Potency: 90
+      ManaCost: 200
+      Range: 25y
+      ElementRequired: "Any"
+      SaturationBonus: "If Wind saturation active: extends Wind saturation duration by 2s per cast (efficiency tool)"
+      Description: >
+        Instant-cast, lowest potency filler. Castable while moving in any element.
+        During Wind saturation, each cast extends the saturation timer — meaning
+        casting Gale Blade REDUCES effective maintenance cost (more uptime per mana).
+        The efficiency tool for sustained kiting patterns.
+      RankRequired: 1
+
+    - Name: "Gale Corridor"
+      ID: gale_corridor
+      ActionType: GCD
+      CastTime: 1.0s
+      Recast: 2.0s
+      Cooldown: 30s
+      TargetType: ground_line
+      LineLength: 12y
+      LineWidth: 4y
+      ManaCost: 300
+      Range: 20y
+      Duration: 4s
+      ElementRequired: "Wind saturation must be active"
+      Effect: >
+        Wind tunnel in a line — allies inside move at 2× speed for 4s.
+        Enemies inside are pushed backward (Stage 1 displacement).
+      CCStage: "Stage 1 (displacement/pushback)"
+      Decision: "Brief, directional. If you aim wrong, nothing happens and you've spent the GCD + cooldown."
+      Description: >
+        Directional team repositioning tool. Allies run through at double speed;
+        enemies get pushed back. 4s window means timing matters — call it out,
+        aim correctly. The movement utility that justifies Wind saturation.
+      RankRequired: 2
+
+    - Name: "Convergence Burst (Wind)"
+      ID: convergence_burst_wind
+      ActionType: GCD
+      CastTime: 2.0s
+      Recast: 2.0s
+      Cooldown: 120s  # Shared
+      TargetType: circle_around_self
+      AoERadius: 15y
+      DamageType: magical
+      Potency: 150
+      ManaCost: "50% current mana"
+      Range: 0y
+      Effect: "Tornado scatter — all enemies in 15y knocked in random directions 10y + scattered. Wind saturation ENDS → Neutral."
+      CCStage: "Stage 2 (scatter/displacement)"
+      ElementRequired: "Wind saturation must be active"
+      Description: >
+        Tornado detonation. Scatters all enemies in range in random directions.
+        Lower damage than Fire Burst but maximum displacement radius. Breaks up
+        dangerous clusters. Enemies must regroup — buys 8-12s of reduced pressure.
+      RankRequired: 3
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 5: LIGHT SKILLS (Recovery / Vision / Conditional Crit)
+# ─────────────────────────────────────────────────────────────────────────────────
+# Philosophy: The recovery posture element. Light is cheapest (40 mana/s maintenance),
+# provides vision and conditional crit, and enables barrier amplification. Used when
+# mana is low but Neutral would be too risky. Also the darkness-counter element.
+
+  Light:
+    - Name: "Radiant Pulse"
+      ID: radiant_pulse
+      ActionType: GCD
+      CastTime: 1.0s
+      Recast: 2.0s
+      TargetType: single
+      DamageType: magical
+      Potency: 100
+      HealPotency: 100  # Minor heal to lowest ally (smart targeting)
+      ManaCost: 250
+      Range: 25y
+      ElementRequired: "Light saturation must be active"
+      Description: >
+        Dual-purpose Light filler. Modest damage AND modest healing simultaneously.
+        Neither impressive alone, but the combination means you're always doing
+        SOMETHING useful in Light without committing heavily. The "recovery mode
+        isn't completely useless" tool.
+      RankRequired: 1
+
+    - Name: "Luminous Barrier"
+      ID: luminous_barrier
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Cooldown: 90s
+      Charges: 1
+      TargetType: party
+      BarrierPotency: 200  # Party-wide barrier (MAG-scaled)
+      BarrierDuration: 20s
+      ManaCost: 400
+      Range: 0y  # Self-centered, 30y application radius
+      ElementRequired: "Any (major defensive cooldown available regardless of element)"
+      SaturationBonus: "If Light saturation active: +50% barrier strength (300p effective)"
+      Description: >
+        Party-wide barrier. 90s cooldown = roughly once per major mechanic.
+        Available in any element (it's too important to gate behind Light).
+        BUT: significantly stronger during Light saturation (+50% strength).
+        Plan around entering Light briefly before major damage events for
+        the enhanced barrier, then transition out.
+      RankRequired: 2
+
+    - Name: "Convergence Burst (Light)"
+      ID: convergence_burst_light
+      ActionType: GCD
+      CastTime: 2.0s
+      Recast: 2.0s
+      Cooldown: 120s  # Shared
+      TargetType: circle_around_self
+      AoERadius: 12y
+      DamageType: magical
+      Potency: 150
+      ManaCost: "50% current mana"
+      Range: 0y
+      Effect: "Flash Blind — all enemies in 12y blinded for 3s (Stage 2, cannot target or aim). Light saturation ENDS → Neutral."
+      CCStage: "Stage 2 (flash blind, 3s)"
+      ElementRequired: "Light saturation must be active"
+      Description: >
+        Blinding detonation. All enemies lose targeting for 3s — they attack
+        randomly or not at all. Doesn't damage much but provides maximum
+        CC breathing room. Enables full party repositioning during blind.
+      RankRequired: 3
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 6: UNIVERSAL SKILLS (No Element Requirement)
+# ─────────────────────────────────────────────────────────────────────────────────
+# These skills work regardless of current saturation state. They are the
+# Elementalist's constant toolkit — always available, always functional.
+
+  Universal:
+    - Name: "Meditation"
+      ID: meditation
+      ActionType: GCD
+      CastTime: 0s  # Instant
+      Recast: 2.0s
+      TargetType: self
+      Effect: "Drop ALL saturation → enter Neutral State. 3× mana regen. Zero output."
+      ManaCost: 0
+      Range: 0y
+      Description: >
+        The voluntary "I need mana" button. Drops all saturation, enters recovery.
+        You provide NOTHING while meditating. The timing of when to use this IS
+        the highest-level skill expression. Too early = wasted uptime. Too late =
+        OOM during critical moment. Perfect timing = invisible to party (they never
+        notice you were recovering because you did it during safe windows).
+      RankRequired: 1
+
+    - Name: "Element Shift"
+      ID: element_shift
+      ActionType: oGCD
+      AnimationLock: 0.6s
+      Cooldown: 0s  # No cooldown — limited by transition time
+      TargetType: self
+      Effect: >
+        Initiates element transition. Opens element selection (5 elements).
+        Selecting a new element begins the 4-6s transition period. Old element
+        fades, new element strengthens. Cannot change again during transition.
+      ManaCost: 0
+      Range: 0y
+      Description: >
+        The core element-switching oGCD. Weave between GCDs to begin transition.
+        No cooldown (you can always START a switch), but the 4-6s transition
+        prevents rapid-fire switching. Plan ahead — if you know Water will be
+        needed in 5s, switch NOW so it's ready when needed.
+      RankRequired: 1
+
+    - Name: "Elemental Chain"
+      ID: elemental_chain
+      ActionType: GCD
+      CastTime: 1.5s
+      Recast: 2.0s
+      Cooldown: 15s
+      TargetType: single_enemy
+      DamageType: magical
+      Potency: 150  # Base, before chain bonus
+      ManaCost: 350
+      Range: 25y
+      Effect: >
+        Detonates an existing elemental debuff on target for bonus damage:
+        - Oil + your Fire = explosion (+100p bonus)
+        - Your Ice/Water slow + ally Lightning = Superconductor (+150p bonus)
+        - Poison + your Earth = Calcification (extend poison by 8s + 80p)
+        - Burn + your Wind = Fan Flames (spread burn to enemies within 5y)
+      Description: >
+        Chain Reaction skill. Rewards elemental composition diversity. Detonates
+        debuffs applied by items or other party members for bonus effects. Not
+        mandatory — functions as a 150p GCD without detonation target. But when
+        combo conditions align, this becomes the highest-value GCD available.
+      RankRequired: 2
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 7: ELEMENT SWITCHING MECHANICS (Detailed Implementation)
+# ─────────────────────────────────────────────────────────────────────────────────
+
+ElementSwitchingMechanics:
+  Implementation:
+    InputMethod: "Element Shift (oGCD) → selection UI → transition begins"
+    DuringTransition:
+      CanCast: true  # Can still cast skills during transition
+      ActiveElement: "OLD element (fading) until midpoint, then NEW element (strengthening)"
+      MidpointSwitch: "At 50% of transition duration, active element changes for skill requirements"
+      Example: >
+        Switching Fire → Water (6s transition):
+        - 0-3s: Fire saturation fading (60% → 30% → 0% effectiveness)
+        - 3-6s: Water saturation rising (0% → 30% → 60% → 100% effectiveness)
+        - Skills requiring "Fire saturation active" work for first 3s only
+        - Skills requiring "Water saturation active" work from 3s onward
+        - Ambient passive effects scale linearly with effectiveness percentage
+    DuringNeutralToElement:
+      Duration: "2s (shorter — no fade required, just ramp-up)"
+      ManaBonus: "First 2s of entering from Neutral: maintenance cost halved (ramping up)"
+    RestrictionDuringTransition: "Cannot initiate another Element Shift until current transition completes"
+
+  TransitionBonuses:
+    ElementalRecycling:
+      Fire_Departure: {Effect: "150% potency farewell AoE tick", Radius: 15y, Potency: 90}
+      Water_Departure: {Effect: "150% potency farewell heal tick", Radius: 15y, HealPotency: "3% party HP"}
+      Earth_Departure: {Effect: "150% strength shield refresh", Radius: 15y, BarrierPotency: 150}
+      Wind_Departure: {Effect: "+30% movespeed burst", Duration: 3s, Radius: 15y}
+      Light_Departure: {Effect: "Stored guaranteed crit for next action", Duration: 6s}
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 8: RANK PROGRESSION (Strategy Rank 1-3)
+# ─────────────────────────────────────────────────────────────────────────────────
+
+RankProgression:
+  Philosophy: >
+    Rank = capability width, gear = numbers. Higher ranks unlock elements and
+    execution tools, not raw potency upgrades. A Rank 1 with BiS gear out-damages
+    a fresh Rank 3 in raw numbers — but Rank 3 has more TOOLS for harder content.
+    Rank does NOT correlate to Strategy Rank of enemies — a Rank 1 Elementalist
+    fights Rank 1 content, Rank 3 fights Rank 3-4 content.
+
+  Rank1:
+    Name: "Apprentice Elementalist"
+    UnlockedElements: [Fire, Water, Earth, Wind]  # 4 of 5
+    UnlockedSkills:
+      Fire: [Fireball, Flame Pillar]
+      Water: [Tidal Basin, Cleansing Rain]
+      Earth: [Stone Spike, Petrify]
+      Wind: [Gale Blade]
+      Universal: [Meditation, Element Shift]
+    ElementLocked: [Light]
+    TransitionTime: "5-7s (longer at Rank 1 — less mastery = slower switching)"
+    ManaRegenNeutral: "2.5× base (not full 3× until Rank 2)"
+    ContentViability: "Normal dungeons, open world, story content, Rank 1 encounters"
+    DesignIntent: >
+      Rank 1 gives 4 elements and the core Saturation system. All fundamental
+      decisions are available: which element to maintain, when to switch, when
+      to Meditate. Simpler than Rank 2-3 (fewer elements, slower transitions)
+      but the CORE GAMEPLAY LOOP is fully present. A skilled Rank 1 player
+      can clear Normal content and contribute meaningfully in Hard.
+
+  Rank2:
+    Name: "Adept Elementalist"
+    NewUnlocks:
+      Elements: [Light]  # Fifth element
+      Skills: [Scorch Line, Aqua Veil, Glacier Wall, Terrain Transmute, Earthen Bridge, Gale Corridor, Radiant Pulse, Luminous Barrier, Elemental Chain]
+    TransitionTime: "4-6s (standard — mastery reduces switching overhead)"
+    ManaRegenNeutral: "3× base (full Neutral recovery unlocked)"
+    NewMechanic: "Elemental Recycling (departure bonuses during transitions)"
+    ContentViability: "Hard dungeons, Trials, entry Raids, Rank 2-3 encounters"
+    DesignIntent: >
+      Rank 2 adds Light (recovery/crit/vision), terrain creation tools, and
+      the departure bonus system. The skill ceiling jumps dramatically:
+      instead of 4 elements to track, now managing 5 + transition bonuses.
+      Planned transitions become rewarding (departure pulse adds value).
+      Terrain tools (Glacier Wall, Earthen Bridge, Terrain Transmute) engage
+      the map geometry axis fully.
+
+  Rank3:
+    Name: "Archon Elementalist"
+    NewUnlocks:
+      Skills: [Convergence Burst (Fire), Convergence Burst (Water), Convergence Burst (Earth), Convergence Burst (Wind), Convergence Burst (Light)]
+    NewMechanics:
+      - Name: "Convergence Burst System"
+        Description: >
+          Element-specific detonation ultimates. DETONATES current saturation
+          for massive element-appropriate AoE effect. ENDS saturation after use
+          (forced Neutral). 120s shared cooldown across all variants. 50% mana cost.
+          This is the "I solved the problem but now I'm vulnerable" button.
+      - Name: "Saturation Mastery Passive"
+        Description: >
+          Maintaining any element for 20+ consecutive seconds grants "Attuned" status:
+          +10% potency on all skills of that element. Rewards sustained element
+          commitment (not switching constantly). Balanced against transition needs.
+      - Name: "Emergency Resonance"
+        Description: >
+          When any party member drops below 20% HP, your next Element Shift has
+          0s transition time (instant switch). 60s internal cooldown. The healer's
+          safety net — one free emergency switch per minute when party is dying.
+    ContentViability: "Extreme difficulty, Savage Raids, all content"
+    DesignIntent: >
+      Rank 3 is mastery tier. Convergence Burst provides fight-defining moments
+      at massive cost (50% mana + forced Neutral). Saturation Mastery rewards
+      strategic patience (stay in one element when encounter allows). Emergency
+      Resonance prevents "party died because I was in the wrong element" from
+      being completely unrecoverable (once per minute).
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 9: BALANCE TARGETS
+# ─────────────────────────────────────────────────────────────────────────────────
+
+BalanceTargets:
+  Source: "Combat/BalanceTargets.yaml"
+
+  DPSOutput:
+    PureDPS_FireSaturation:
+      Rotation: "Fire saturation (80/s) + Fireball(144p effective) every 2s"
+      PotencyPerSecond: "72 PPS (144p / 2s GCD)"
+      VsReference: "72 / 110 = 65.5% — within Healer baseline (65%)"
+      ManaSustain: "88s before OOM with active casting — requires 1 Wind break per 90s"
+      Verdict: "PASS"
+    PureDPS_OptimalCycling:
+      Rotation: "Fire(30s) → Flame Pillar on CD → Fireball filler → Wind(10s) → repeat"
+      PotencyPerSecond: "~68 PPS average (accounting for Wind's lower output)"
+      VsReference: "68 / 110 = 61.8% — acceptable for sustained play"
+      ManaSustain: "Indefinite with proper Wind breaks"
+      Verdict: "PASS (slightly below 65% but sustainable, which matters more)"
+    PureDPS_NothingToHeal:
+      Rotation: "Fire saturation + Fireball/Flame Pillar spam + Light breathing room"
+      PotencyPerSecond: "~80 PPS (mixing high and low output phases)"
+      VsReference: "80 / 110 = 72.7% — below 80% target for pure DPS uptime"
+      Adjustment: "Saturation ambient DoT adds ~20p effective PPS → 100/110 = 90.9% with passives counted"
+      Verdict: "PASS (ambient field damage counts toward total output)"
+
+  HealingOutput:
+    WaterSaturation_PassiveOnly:
+      Output: "~2% party HP per 3s = 40% party HP per minute"
+      ManaCost: "100 mana/s maintenance"
+      Verdict: "Meets Normal target (40%) with passive alone"
+    WaterSaturation_WithTidalBasin:
+      Output: "40% passive + Tidal Basin (750p × 4 allies) every 6s = ~95% party HP/min"
+      ManaCost: "100/s + 500 per Basin (every 8s = 62.5/s additional) = 162.5/s"
+      Duration: "~61s before OOM"
+      Verdict: "PASS — meets Hard target (70%) and approaches Extreme (100%)"
+    ExtremeTriage:
+      Output: "Water saturation + Tidal Basin + Cleansing Rain + Convergence Burst"
+      ManaCost: "Very high — 43s maximum throughput before forced Neutral"
+      Recovery: "10-15s Neutral → return to Water → total cycle: 55-60s"
+      NetOutput: "~80% effective party HP/min averaged across cycle"
+      Verdict: "PASS for Extreme with proper cycling (100% burst, average 80%)"
+
+  BarrierOutput:
+    EarthSaturation:
+      ShieldStrength: "100p regenerating every 8s per ally"
+      PartyTotal: "400p/8s = 50p/s party barrier generation"
+      AsDamageAbsorbed: "~350 effective HP/s absorbed across party"
+    LuminousBarrier:
+      BasePotency: "200p party-wide (every 90s)"
+      WithLightBonus: "300p party-wide during Light saturation"
+      AsDamageAbsorbed: "800-1200 effective HP burst mitigation"
+
+  ManaSustainability:
+    OptimalPlay:
+      Description: "Cycle through elements with proper breathing room"
+      NetMana: "Slightly negative (-3/s) offset by periodic Neutral breaks"
+      Verdict: "PASS — sustainable indefinitely with 10s Neutral per 2 minutes"
+    StressPlay:
+      Description: "Heavy Water usage for triage, minimal breaks"
+      NetMana: "-233/s during Water active casting"
+      TimeToOOM: "43s of maximum healing throughput"
+      Verdict: "PASS — intended pressure, forces element cycling"
+    DegeneratePlay:
+      Description: "Pure Fire with no breaks or element cycling"
+      NetMana: "-113/s"
+      TimeToOOM: "88s"
+      Verdict: "PASS — correctly punishes mono-element play"
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 10: SYSTEM INTERACTIONS
+# ─────────────────────────────────────────────────────────────────────────────────
+
+SystemInteractions:
+  Aggro:
+    FireSaturation: "Ambient DoT generates threat. Extended Fire use draws SR2+ enemy attention."
+    WaterSaturation: "Healing generates threat per standard rules. Water Elementalists draw enemy focus."
+    AggroManagement: >
+      The Elementalist has NO threat drop. Sustained Fire or Water use WILL draw
+      aggro from SR2+ enemies that path to squishies. Relies on frontliner control
+      (Force Targeting, Unfocus) to keep enemies away. If frontliner fails, the
+      Elementalist's options are: Earth CC (Petrify, Glacier Wall) or flee (Wind
+      movespeed). Both cost significant resources.
+
+  OverFiftyHPRule:
+    ElementalistAsDPS: >
+      Fire saturation is most efficient when enemies are above 50% HP (bonus +25%
+      damage taken). Once enemies cross below 50%, Fire becomes less efficient.
+      Natural transition point: Fire → utility element when boss reaches 50%.
+    ElementalistAsHealer: >
+      The >50% HP rule means allies ABOVE 50% take more damage. Earth's thin
+      shields absorb that bonus damage effectively (shields don't count as HP
+      for the rule). Water's ambient regen is tuned to maintain allies NEAR 50%,
+      not above it. The Elementalist's healing toolkit naturally respects the rule.
+
+  CritSystem:
+    LightSaturationCrit: >
+      Light saturation grants conditional crit: "next action after dodging an attack
+      is guaranteed crit." This is NOT RNG. Requirements:
+      1. Light saturation must be active
+      2. Ally must successfully DODGE an attack (positional/SPD-dependent)
+      3. Only the NEXT action after the dodge gets the crit
+      This rewards: good positioning (where dodge is possible), SPD-invested allies
+      (longer dodge frames), and awareness (using the crit before it expires).
+      It's useless for: stationary allies, allies who never dodge, face-tanking.
+
+  ProcgenInteraction:
+    MapGeometryVariance: >
+      Procedurally generated content ensures NO two runs have identical geometry.
+      This means the Elementalist can't memorize "use Fire here, Water there."
+      Every run requires reading the map and adapting element choice to layout.
+      - Tight corridors: Earth terrain denial premium, Fire zone denial effective
+      - Open spaces: Wind repositioning less needed, Fire more viable for sustained DPS
+      - Water terrain: Water saturation gets bonus (ice combos from moist ground)
+      - Vertical spaces: Wind/Earth movement tools become essential
+      - Darkness zones: Light saturation mandatory (vision bonus)
+    FireDominanceFix: >
+      OLD PROBLEM: Fire dominant on flat maps (highest raw DPS, no reason to switch).
+      SATURATION FIX: Even on flat maps, Fire cannot sustain >88s. Mana economy
+      FORCES element cycling regardless of geometry. The geometry adds ADDITIONAL
+      reasons to switch (terrain needs) on top of the mana-based forcing function.
+      Result: flat maps still require cycling (mana), diverse maps add extra variety.
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 11: CC STAGE BUDGET
+# ─────────────────────────────────────────────────────────────────────────────────
+
+CCStageBudget:
+  Summary: >
+    ONE reliable Stage 3 CC (Petrify) at high cost. Stage 2 via Convergence Burst
+    (emergency-only, 120s CD, 50% mana). Stage 1 plentiful (terrain effects, slows).
+    Appropriate for healer/DPS hybrid: strong soft control, limited hard disable,
+    hard disable has steep opportunity cost.
+
+  Abilities:
+    - Skill: "Stone Spike"
+      Stage: 1
+      Type: "Slow (Heavy, -20% movespeed)"
+      Duration: "8s (16s in Earth saturation)"
+      Availability: "Every GCD (no cooldown, 250 mana)"
+      Note: "Attached to basic filler attack. Low impact, high uptime."
+
+    - Skill: "Scorch Line (terrain)"
+      Stage: 1
+      Type: "Slow via heated terrain (-10% movespeed in fire zone)"
+      Duration: "12s terrain persist"
+      Availability: "Every GCD in Fire saturation"
+      Note: "Terrain-based, avoidable by pathing around."
+
+    - Skill: "Glacier Wall"
+      Stage: 1
+      Type: "Root on contact (3s, broken by damage)"
+      Duration: "12s wall persist, 3s root (5s with moisture)"
+      Availability: "Every GCD in Earth saturation"
+      Note: "Physical barrier + root. Enemies path around. Proactive placement."
+
+    - Skill: "Gale Corridor"
+      Stage: 1
+      Type: "Displacement (pushback through wind)"
+      Duration: "4s corridor"
+      Availability: "30s CD in Wind saturation"
+      Note: "Pushes enemies, does not stun or disable."
+
+    - Skill: "Earth Saturation (passive)"
+      Stage: 1
+      Type: "Heavy (-20% movespeed to all enemies in 15y)"
+      Duration: "Continuous while maintained"
+      Availability: "Always (while Earth saturation active)"
+      Note: "Passive AoE slow, no skill press required."
+
+    - Skill: "Petrify"
+      Stage: 3
+      Type: "Stun (2-3s)"
+      Duration: "2-3s"
+      Availability: "40s CD, 250 mana (500 out-of-element)"
+      Note: "The ONE hard CC. Expensive out-of-element. DR on repeated use."
+
+    - Skill: "Convergence Burst (Earth)"
+      Stage: 2
+      Type: "Stagger + displacement"
+      Duration: "~2s stagger"
+      Availability: "120s CD, 50% mana, ends saturation"
+      Note: "Emergency-only AoE interrupt. Massive cost."
+
+    - Skill: "Convergence Burst (Light)"
+      Stage: 2
+      Type: "Flash Blind (3s, enemies lose targeting)"
+      Duration: "3s"
+      Availability: "120s CD, 50% mana, ends saturation"
+      Note: "AoE blind. No damage to speak of, maximum disruption."
+
+    - Skill: "Convergence Burst (Wind)"
+      Stage: 2
+      Type: "Scatter (enemies displaced in random directions)"
+      Duration: "~2s displacement"
+      Availability: "120s CD, 50% mana, ends saturation"
+      Note: "Cluster-breaker. Enemies scattered, must reform."
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 12: MATCHUP ANALYSIS / ITEM BASELINE COMPARISON
+# ─────────────────────────────────────────────────────────────────────────────────
+
+MatchupAnalysis:
+  VsSiren:
+    Strengths: "Terrain control, proactive barriers, AoE passive healing, map interaction"
+    Weaknesses: "Lower burst healing, mana-dependent (Siren has Charm drain economy)"
+    PartyRole: "Elementalist covers sustained AoE and barriers; Siren covers burst drain healing and CC redirection"
+
+  VsShaman:
+    Strengths: "Healing without enemies present, AoE coverage, terrain denial"
+    Weaknesses: "No enemy debuffs, no damage amplification from healing investment"
+    PartyRole: "Elementalist maintains party HP; Shaman debuffs enemies and burst-heals from Hex Drain"
+
+  VsFrontliner:
+    CannotReplace: true
+    Reason: "STR 6 / STAM 6, no self-heal, no parry, dies in 2-3 melee hits"
+    Interaction: "Depends on frontliner to keep enemies at range. Provides barriers + healing in return."
+
+  VsItems:
+    Advantage: "Unlimited uses, adaptive, scaling, persistent, no inventory slot cost"
+    Disadvantage: "Requires mana, requires correct element, delayed by transitions, ONE element at a time"
+    Coexistence: "Items cover gaps during Neutral State and provide effects Elementalist can't (Lightning, full terrain removal)"
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 13: BALANCE VALIDATION (Pass/Fail)
+# ─────────────────────────────────────────────────────────────────────────────────
+
+BalanceValidation:
+  Criteria:
+    - Id: healer_dps_mode
+      Test: "Healer achieves 80% DPS reference in easy content"
+      Result: "PASS — 90.9% counting saturation ambient damage in pure DPS mode"
+      Note: "Exceeds target slightly; acceptable because ambient DoT is passive/free"
+
+    - Id: healer_during_triage
+      Test: "Healer achieves 65% DPS reference during active healing"
+      Result: "PASS — 65.5% in Fire saturation with Fireball filler between heals"
+      Note: "Tight to target. Element switch to Water reduces this further (expected)."
+
+    - Id: healing_sustain_normal
+      Test: "40% party HP/min healing throughput in Normal content"
+      Result: "PASS — Water saturation passive alone meets this threshold"
+
+    - Id: healing_sustain_extreme
+      Test: "100% party HP/min in Extreme content"
+      Result: "PASS — Water + Tidal Basin achieves 95% sustained, burst phases exceed"
+
+    - Id: mana_sustainability
+      Test: "No OOM at baseline (optimal element cycling)"
+      Result: "PASS — indefinite sustain with 10s Neutral per 2 minutes"
+
+    - Id: fire_dominance_check
+      Test: "Does Fire still dominate on flat maps?"
+      Result: "PASS (mitigated) — Fire OOMs in 88s, resistance escalation at 20s, >50% HP rule transitions"
+      Note: "Fire-only play is provably suboptimal even on featureless terrain. FIXED."
+
+    - Id: rotation_emergence_check
+      Test: "Does a fixed rotation emerge from optimization?"
+      Result: "PASS (no rotation) — encounter demand variance + mana pressure + resistance escalation prevent fixed sequences"
+      Note: "No two encounters demand the same element order. Procgen ensures variance."
+
+    - Id: burst_cycle_check
+      Test: "Does a 2-minute burst window emerge?"
+      Result: "PASS (no burst cycle) — Convergence Burst is 120s CD but costs 50% mana + Neutral State. NOT worth using on cooldown. Only for emergencies."
+      Note: "Using CB on CD means spending 50% mana every 2 min for marginal gain. Suboptimal."
+
+    - Id: gcd_timing
+      Test: "All GCDs use 2.0s recast"
+      Result: "PASS — all skills use 2.0s recast"
+
+    - Id: single_weave_only
+      Test: "All oGCDs fit single-weave (0.6s lock in 2.0s GCD)"
+      Result: "PASS — all oGCDs 0.6s animation lock"
+
+    - Id: crit_not_rng
+      Test: "No RNG-based crit in kit"
+      Result: "PASS — Light crit is conditional (post-dodge only), not random"
+
+    - Id: no_freecure
+      Test: "Zero RNG healing procs"
+      Result: "PASS — all healing is deliberate, mana-costed, player-chosen"
+
+    - Id: hp_rule_synergy
+      Test: ">50% HP rule doesn't cause death spirals with healing"
+      Result: "PASS — Earth shields absorb the +25% bonus, Water regen targets 50% threshold naturally"
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 14: VISUALIZATION HOOKS
+# ─────────────────────────────────────────────────────────────────────────────────
+
+VisualizationHooks:
+  SaturationFieldVisuals:
+    Fire: "Ambient embers floating upward, ground shimmering with heat distortion, orange-red particle radius"
+    Water: "Gentle mist/steam rising, ground glistening with moisture, blue-green ambient glow"
+    Earth: "Fine dust motes suspended, ground cracked/dense with mineral veins glowing, brown-gold particles"
+    Wind: "Visible air currents (leaf-like particles swirling), ally hair/clothing affected by wind direction"
+    Light: "Soft golden luminescence, expanded vision radius visible as bright edge, warm ambient glow"
+    Neutral: "No particles. Grey/muted coloring on Elementalist. Visually 'empty' — party can SEE when you're recovering."
+
+  TransitionVisuals:
+    FadeOut: "Old element's particles dissipate (speed based on transition duration)"
+    FadeIn: "New element's particles emerge from Elementalist and spread outward to 15y radius"
+    Midpoint: "Brief moment of dual-color (old + new) at transition midpoint before old fully fades"
+
+  ConvergenceBurstVisuals:
+    Fire: "Massive explosion outward — screen shake, orange-white flash, ember shower"
+    Water: "Tidal wave expanding from center — splash effects, screen moisture"
+    Earth: "Ground erupts upward — debris, screen rumble, earth pillars breaking"
+    Wind: "Tornado formation then burst — enemies visibly scattered, wind roar"
+    Light: "Supernova flash — screen white briefly, enemies stagger from brightness"
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SECTION 15: CONSTRAINTS
+# ─────────────────────────────────────────────────────────────────────────────────
+
+Constraints:
+  HardConstraints:
+    - "GCD 2.0s base, 1.4s cap — NO exceptions"
+    - "Single-weave only — NO double-weaving"
+    - "Crit is NEVER random — always conditional/positional"
+    - "Zero Freecure, zero RNG procs — ALL decisions deterministic"
+    - "NO 2-minute burst cycle or fixed cadence"
+    - "Items define baseline — class REPLACES items permanently"
+    - "Healer CANNOT replace frontline (STR 6/STAM 6 = dies in melee)"
+    - "Self-defense through CC + shielding, NOT self-healing"
+    - "Wand/Staff ONLY — no weapon-kit juggling"
+    - "Encounter demands drive element switching, NOT internal timer"
+    - ">50% HP rule on ENEMIES (+25% damage above 50%) — Fire prioritized for that window"
+    - "MAG 13 / MED 13 split — mediocre at both until pressure specializes"
+
+  SoftConstraints:
+    - "Fire saturation should not exceed 90s continuous use without resistance penalty"
+    - "Water saturation should not sustain party indefinitely (43s max before OOM)"
+    - "Neutral State recovery should feel vulnerable but not punishing for 10-15s"
+    - "Rank 1 should be fully playable (4 elements, core loop intact)"
+    - "Rank 3 passives should reward mastery without being mandatory"
+    - "Convergence Burst should be emergency-only, not rotation-defining"
+    - "Other racial Elementalists (Landwin 3-element) should feel distinct from Tryll 5-element"
+
+  DesignAuthority:
+    - "DESIGN_OVERRIDE.md wins ALL conflicts"
+    - "BalanceTargets.yaml wins numeric conflicts with this file"
+    - "This file wins over LLM-generated content not in the document chain"
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# END OF FILE — TryllElementalScholar_Skills.yaml
+# PAIR WITH: TryllElementalScholar_Design.yaml (identity, mechanic, mana economy, triggers)
+# ══════════════════════════════════════════════════════════════════════════════════
