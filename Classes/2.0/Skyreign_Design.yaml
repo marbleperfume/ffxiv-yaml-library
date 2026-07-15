@@ -1,0 +1,585 @@
+# Classes/Frontliner_DPS/Skyreign_Design.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+# SKYREIGN (HBD) — Three-Form Dragonkin Shapeshifter [DESIGN FILE]
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Lineage: Divinity OS2 lizard terrain, AQ Draconian hybrid,
+#   NOT Shyvana/Deathwing/Nidalee/Jayce/Elise
+#
+# Core identity: "Three forms, three problems, one dragon."
+#   Dragon:       "I am the artillery." (AoE / CC / VULNERABLE)
+#   Dragonguard:  "I am the soldier." (terrain hybrid / default)
+#   Draconite:    "I am the blade." (claw DPS / reaction engine)
+#
+# References:
+#   - Combat/BalanceTargets.yaml (potency bands, GCD, role baselines)
+#   - DESIGN_OVERRIDE.md (§3, §5, §9, §12, §25)
+#   - DESIGN_OVERRIDE_SYSTEMS.md (§16, §23, §25)
+# Authority: DESIGN_OVERRIDE.md > BalanceTargets.yaml > this file > LLM.md
+#
+# Scope: SHARED SYSTEMS ONLY. Form-specific skill lists deferred to:
+#   Skyreign_Skills_Dragon.yaml / _Dragonguard.yaml / _Draconite.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Frontliner_DPS.Skyreign.Design
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1: CLASS IDENTITY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Identity:
+  Name: Skyreign
+  Role: Frontline/DPS (form-dependent)
+  DamageType: mixed (physical claws + elemental breath)
+  Weapon: biological (claws, wings, breath organ, tail)
+  ExecutionArchetype: Form-Cycling Opportunist
+  ExecutionTier: Base (dragon fantasy sells itself, low floor, high ceiling)
+
+  Description: >
+    HBD dragonkin whose BODY is the weapon. Three forms solve three different
+    problems — not three power levels. The cycle between forms IS the identity.
+
+  CoreFantasy: >
+    You ARE a dragon. Wings, claws, breath organ attached to you. Shifting
+    reshapes your own body: full dragon, armored draconian, sleek claw-fighter.
+
+  InputModality:
+    PrimaryFocus: form_selection_for_encounter_geometry
+    SecondaryFocus: breath_gauge_management
+    TertiaryFocus: stack_cycling_for_dragon_cd_refresh
+
+  StatPriority:
+    Primary: MAGICCAP  # 18 — breath potency ceiling
+    Secondary: MAG     # 15 — breath/elemental damage
+    Tertiary: STR      # 15 — claw/physical damage
+    DumpStat: MED      # No healing
+
+  SkillExpressionAxis: >
+    - What geometry am I in? (corridor=Dragon, open=Dragonguard, boss=Draconite)
+    - Are Dragon CDs ready? (stacks earned?)
+    - Breath gauge progress — stay or swap? (resets on swap)
+    - Black Lightning reactions available? (team element, terrain, items?)
+
+  FailureStates:
+    DragonInOpenSpace: {Cost: "Enemies scatter, can't chase, eating all AoE.", Severity: HIGH}
+    SwapWithFullGauge: {Cost: "Breath gauge resets. Wasted buildup.", Severity: HIGH}
+    DraconiteAlone: {Cost: "Black Lightning no reaction source. DoT only.", Severity: MODERATE}
+    DragonCDsNotReady: {Cost: "Dragon with no abilities ready. Basic attacks only.", Severity: MODERATE}
+
+  SingleLimitation: >
+    FORM COMMITMENT. Each form has progress (breath gauge, combo stacks,
+    Dragon CDs) that rewards STAYING. Shifting resets breath gauge.
+    Ping-ponging wastes everything.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 2: RACIAL LOCK — HBD
+# ═══════════════════════════════════════════════════════════════════════════════
+
+RacialLock:
+  Race: HBD
+  ParentCategory: Dragonkin
+  Enforcement: biological_lock  # Body IS the class
+  TeachableInTheory: "Impossible. Requires breath organ, wing musculature, claw keratin, shapeshifting biology."
+
+  RacialSynergy:
+    - "Wings = flight (Dragon form)"
+    - "Claws = racial weapon (Draconite — NOT gauntlets like Midnights)"
+    - "Breath organ = elemental projection (all forms)"
+    - "Shapeshifting = innate (form swap is FREE because natural)"
+    - "MAGICCAP 18 = highest elemental ceiling"
+    - "Tail = combat appendage (Draconite strikes)"
+
+  RacialStats: {MAGICCAP: 18, MAG: 15, STR: 15}
+
+  SizePerForm:
+    Dragon: "Large — 2x hitbox. Eats AoE that misses smaller targets."
+    Dragonguard: "Medium — standard humanoid with wings folded."
+    Draconite: "Small-Medium — sleek, lowest profile."
+
+  ClawDistinction: >
+    HBD claws = actual keratin over bone, harder than steel at maturity,
+    naturally conductive. Midnights use GAUNTLETS to simulate this. HBD
+    claw attacks benefit from racial weapon scaling — no crafted weapon needed.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 3: ROLE OBJECTIVE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+RoleObjective:
+  PrimaryMetric: potency_per_second_across_encounter
+  SecondaryMetric: form_appropriateness_percentage
+
+  DPSTarget:
+    Dragon: "85-90% (AoE inflates total, ST below)"
+    Dragonguard: "90-95% (general purpose)"
+    Draconite: "100-105% (conditional on reactions)"
+    WeightedDungeon: "93-97% (form cycling overhead). Sloppy play: 88%."
+
+  SurvivalModel:
+    Dragon: "High HP, party heals work, NO self-sustain. Most vulnerable."
+    Dragonguard: "Middle durability. Standard melee sustain."
+    Draconite: "Agile, dodge-based. Smallest hitbox. Standard melee risk."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 4: THE FORM CYCLE (Core Mechanic)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+FormCycle:
+  CoreLoop: "Dragon (spend CDs) → other forms (earn stacks) → stacks refresh Dragon CDs → re-enter."
+
+  WhyThreeFormsNotOne:
+    Dragon: "Linear rooms, AoE trash, CC (breath + roar + smoke). WORST: bosses, open space."
+    Dragonguard: "General dungeon, terrain control, navigation. WORST: nothing (never exceptional)."
+    Draconite: "Bosses, mobile targets, tight spaces. WORST: trash packs, solo without element."
+
+  FormSwap:
+    Cost: "FREE. No resource, no CD."
+    Animation: "0.5s morph (oGCD lock)."
+    AntiSpam: >
+      Dragon skills use COOLDOWNS refreshed ONLY by stacks earned elsewhere.
+      Breath gauge resets on swap. Both mechanisms reward staying, punish ping-pong.
+
+  WhyNotPingPong:
+    Mechanism1: "Dragon CDs not ready until stacks earned in other forms."
+    Mechanism2: "Breath gauge resets to 0 on any swap."
+    Result: "Shift when the PROBLEM changes, not every 2 GCDs."
+
+# ───────────────────────────────────────────────────────────────────────────────
+# STACK SYSTEM (Draconic Momentum)
+# ───────────────────────────────────────────────────────────────────────────────
+
+  StackSystem:
+    Name: "Draconic Momentum"
+    Type: counter (0-25)
+    Purpose: "Refreshes Dragon-form cooldowns."
+
+    Sources:
+      Dragonguard_MeleeGCD: "+1 per hit"
+      Dragonguard_TerrainTick: "+1 per enemy tick on breath terrain"
+      Draconite_ClawCombo: "+2 per claw hit (fastest earner)"
+      DamageReceived_AnyForm: "+1 per significant hit taken"
+
+    Thresholds:
+      Partial_8: "Refreshes 1 Dragon CD (player chooses)"
+      Full_20: "Refreshes ALL Dragon CDs simultaneously"
+      Cap_25: "5 buffer above full (overcap forgiveness)"
+
+    R1Floor: "Facetank → take hits → stacks build passively. Low-skill viable with healer."
+    R3Reality: "Facetank = suicide (traps). Must earn stacks through combo combat."
+
+    DragonCDsRefreshed: [FullBreath, Roar, SmokeBreath, WingBuffet]
+    CDBaseTimers: "30-45s. Stacks bypass timer entirely."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 5: BREATH SYSTEM (Shared Resource)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+BreathSystem:
+  Type: gauge (0-100)
+  FormLocal: true  # Resets to 0 on swap. Cannot bank across forms.
+
+  BreathPrep:
+    Type: oGCD
+    Slow: "40% movement speed while charging"
+    MeleeLock: "Cannot melee until gauge ≥50%"
+    Cancel: "Any time (loses progress)"
+    Tell: "Audible directional rumble + visible shimmer. Enemies HEAR this."
+
+  ChargeRate:
+    Dragon: "Fast passive — full in 3s"
+    Dragonguard: "Moderate — +15% per melee GCD (7 GCDs to full)"
+    Draconite: "+25% per claw combo finisher (4 finishers to full)"
+
+  Delivery:
+    Dragon: "AoE Select — wide cone / area bombardment"
+    Dragonguard: "Path Breath — ground terrain placement (fire/ice/poison)"
+    Draconite: "Black Lightning — damage DoT with reaction potential"
+
+  FormLocalJustification: >
+    Breath organ RECONFIGURES during shapeshift. Dragon's massive chest cavity
+    ≠ Draconite's compact throat. Different anatomy = different charge state.
+
+  Section25: "Gauge-gated, not CD-gated. Prep available anytime. §25 compliant."
+
+# ───────────────────────────────────────────────────────────────────────────────
+# BREATH TELLS & ENEMY REACTIONS (SR-scaled)
+# ───────────────────────────────────────────────────────────────────────────────
+
+  EnemyReactions:
+    SR1: "No reaction. Stand in breath."
+    SR2: "Scatter AFTER breath begins (rev sound recognized). Already-hit enemies take full."
+    SR3: "Preemptively scatter on rev SOUND alone. Must Smoke first or use corridors."
+    SR4: "Recognize dragon FORM itself. Breath nearly unusable in open. Corridor-only."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 6: VULNERABILITY (Stated ONCE)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Vulnerability:
+  Inversion: "Dragon = MOST VULNERABLE. Big ≠ tanky. Big = eats everything."
+
+  Dragon:
+    Hitbox: "Large (2x). Every AoE connects."
+    Dodge: "Cannot."
+    RagdollImmunity: "None. Explosions connect fully."
+    SpeedBuffs: "Party movement buffs IGNORED (flight ≠ ground speed)."
+    HealBarrier: "Works. Only external mitigation available."
+    Chase: "Cannot pursue scattered enemies."
+
+  Dragonguard:
+    Hitbox: "Standard medium."
+    Dodge: "Standard i-frames."
+    Durability: "Middle. Self-sufficient."
+
+  Draconite:
+    Hitbox: "Small-medium. Hardest to hit."
+    Dodge: "Full capability. Best animation recovery."
+    Durability: "Lowest HP. Survives via agility."
+
+  OverFiftyHP: "§9: enemies >50% take +25% damage. Dragon breath vs fresh packs = massive burst."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 7: FORM PROFILES (Unique Content Only)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Forms:
+
+  Dragon:
+    Role: "Flying artillery / AoE CC"
+    Movement: "Can fly (no speed bonus). QoL ground dash. Slow overall."
+    BestFor: "Corridors, trash packs, AoE CC."
+    WorstFor: "Bosses, mobile targets, open spaces."
+    SkillGating: "COOLDOWNS (30-45s base). Refreshed by stacks only."
+
+    UniqueCapabilities:
+      Flight: "Altitude + angle access. NOT speed advantage."
+      BreathAoE: "Wide cone. Fills corridor width."
+      Roar: "Fear scatter. Feared enemies can't dodge breath."
+      SmokeBreath: "Accuracy debuff + Suffocation (coughing interrupt every 2s for 8s). 50% gauge cost."
+      WingBuffet: "Knockback repositioning."
+      Presence: "SR2+: shape itself triggers enemy caution."
+
+    FearScatterProblem: >
+      SR2+ enemies flee on breath rev. Scattered = can't be breathed. Solutions:
+      Smoke first, Roar INTO corridor geometry, accept scatter + breathe remainder.
+
+    PartyBuffRule: "Movement buffs don't apply. Heals/barriers/damage buffs work."
+
+  Dragonguard:
+    Role: "Fast melee hybrid / terrain controller. THE DEFAULT."
+    Movement: "Ground-based, medium. Hawk-dive for short aerial repositioning."
+    BestFor: "General dungeon, mixed encounters, terrain denial."
+    WorstFor: "Nothing specific — never exceptional."
+    SkillGating: "Standard GCD/oGCD."
+
+    UniqueCapabilities:
+      BreathTerrain: >
+        DOS2-style ground placement. Breath creates persistent terrain (8-12s).
+        Fire=damage, Ice=slow, Poison=accuracy debuff. Element depends on equip.
+      HawkDive: "Short leap-dive. Gap closer + landing damage."
+      FastMelee: "Reliable combo. Steady stack generation."
+
+    WhyDefault: >
+      General purpose, generates stacks steadily, terrain has ongoing value,
+      hawk-dive keeps pace with party, self-sufficient durability.
+
+  Draconite:
+    Role: "DPS specialist / boss killer / reaction engine."
+    Movement: "Ground-based, fastest feel (dodge-cancels, low animation commitment)."
+    BestFor: "Bosses, mobile targets, tight spaces, coordinated burst."
+    WorstFor: "Trash (no AoE), solo without element sources."
+    SkillGating: "Combo system. Chains → finishers → breath gauge."
+
+    UniqueCapabilities:
+      DragonClaws: "Racial weapon. Fast multi-hit chains. Racial scaling (no crafted weapon)."
+      TailStrikes: "Combo extenders. Sweep for positioning, stab for finishers."
+      DefenseManeuvers: "Dodge-cancels, slides, wing-tuck rolls."
+
+    BlackLightning:
+      Standalone: "Below-average DoT. Nothing special alone."
+      Reaction: "External element touches afflicted target → burst damage."
+      CriticalRule: "Draconite CANNOT self-trigger. Requires outside source."
+      ValidSources: [teammate_elemental, Dragonguard_terrain, environment, items]
+      InvalidSources: [own_claw_attacks, own_BL_ticks, non-elemental_damage]
+      SelfCombo: "Place Dragonguard terrain → swap Draconite → apply BL → kite into terrain."
+      SoloPenalty: "Without reactions: 70-75% DPS ceiling. With reactions: 100-105%."
+
+    KiteCombo:
+      Rule: "Combo stacks maintained while hitting + moving. Decay ONLY on full disengage (4s no hits)."
+      Implication: "Can pursue repositioning bosses without losing stacks."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 8: ANTI-PATTERNS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+AntiPatterns:
+  - Pattern: "Shyvana (one form strictly better)"
+    Fix: "Three forms with different niches. No universal best."
+    Severity: CRITICAL
+
+  - Pattern: "Deathwing (cool 5s, boring 55s, massive CD)"
+    Fix: "Dragon always available. CDs refreshed by stacks, not time."
+    Severity: CRITICAL
+
+  - Pattern: "Nidalee/Jayce (0-cost ping-pong rotation)"
+    Fix: "Gauge resets on swap. Dragon CDs need stacks. Ping-pong = waste."
+    Severity: CRITICAL
+
+  - Pattern: "Always Dragon"
+    Fix: "Most vulnerable + CDs expire + enemies scatter. Must cycle."
+    Severity: CRITICAL
+
+  - Pattern: "Long CDs on identity (90s+)"
+    Fix: "30-45s base, bypassed by gameplay stacks. §25 compliant."
+    Severity: CRITICAL
+
+  - Pattern: "Solo Draconite = full power"
+    Fix: "Reactions require EXTERNAL sources. Solo = 70-75%."
+    Severity: HIGH
+
+  - Pattern: "Dragon = invincible (big=tanky)"
+    Fix: "Big = most vulnerable. Eats all AoE. No dodge."
+    Severity: HIGH
+
+  - Pattern: "Crit as RNG"
+    Fix: "Conditional: reactions, combo finishers, terrain-standing. Never random."
+    Severity: HIGH
+
+  - Pattern: "Form swap has cooldown"
+    Fix: "Free. Anti-spam is mechanical (gauge reset + stacks)."
+    Severity: HIGH
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 9: ITEM BASELINE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ItemBaseline:
+  Philosophy: "Without Skyreign: party uses one-shot consumables. No item provides sustained multi-form pressure."
+
+  Replaces:
+    - Item: "Napalm Flask"
+      Function: "Ground fire, 6y, 8s, 30s CD"
+      WhyClassBetter: "Dragonguard terrain larger, longer, repeatable, multi-element."
+
+    - Item: "Smoke Bomb"
+      Function: "Accuracy debuff, 5s, 45s CD"
+      WhyClassBetter: "Smoke Breath adds Suffocation interrupt + longer + no item slot."
+
+    - Item: "Portable Siege Mortar"
+      Function: "AoE, 3 shots, heavy, 90s CD"
+      WhyClassBetter: "Dragon IS the siege weapon. Continuous, repositionable, alive."
+
+    - Item: "Fear Totem"
+      Function: "Mass fear 3s, 60s CD, destructible"
+      WhyClassBetter: "Dragon Roar instant, targeted, indestructible source, stack-repeatable."
+
+    - Item: "Elemental Terrain Capsule"
+      Function: "Single patch, 10s, 45s CD, one element"
+      WhyClassBetter: "Dragonguard places at will. Multiple patches. Element-selectable."
+
+    - Item: "Anti-Air Ballista Bolt"
+      Function: "Forces aerial target to ground, single-use"
+      WhyClassBetter: "Dragon aerial presence contests airspace by existing."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 10: §25 COMPLIANCE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Section25:
+  Rule: "No 90s+ CDs on identity skills."
+  DragonCDs: "30-45s base. Stacks bypass timer. Skilled cycling = never waiting."
+  BreathGauge: "Earned through combat. Not time-gated."
+  FormSwap: "Free. Always accessible."
+
+  EmptyState: >
+    0 stacks, 0 gauge, Dragon CDs on timer: still has form swap, Dragonguard
+    melee + hawk-dive, Draconite claws, breath prep. Weakened, not helpless.
+    Identity (shapeshifter who fights in multiple forms) preserved at rock bottom.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 11: STRATEGY RANK SCALING
+# ═══════════════════════════════════════════════════════════════════════════════
+
+StrategyRankScaling:
+  CoreStatement: "Form SELECTION becomes the difficulty axis."
+
+  SR1:
+    DragonViability: "HIGH — enemies don't scatter, stand in breath."
+    FormCycling: "Optional. Can stay Dragon with healer."
+    Stacks: "Facetank viable."
+    Difficulty: TRIVIAL
+
+  SR2:
+    DragonViability: "MODERATE — scatter on rev sound. Smoke first or corridors."
+    FormCycling: "Natural. Dragon=hallways, Dragonguard=open, Draconite=elites."
+    Stacks: "Facetank inefficient. Combo faster."
+    Difficulty: MODERATE
+    Note: "Design target — form-cycling identity STARTS here."
+
+  SR3:
+    DragonViability: "LOW — preemptive scatter. Traps kill facetankers."
+    FormCycling: "Mandatory. Dragon ONLY in corridors or with Roar setup."
+    Stacks: "Facetank = suicide. Must earn through combat."
+    Difficulty: HIGH
+
+  SR4:
+    DragonViability: "MINIMAL — enemies recognize form itself."
+    FormCycling: "Expert. Dragon = 2-3 specific corridor moments per dungeon."
+    Stacks: "Pure combo mastery."
+    Difficulty: VERY_HIGH
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 12: PROCGEN DUNGEON INTERACTION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ProcgenInteraction:
+  CoreNiche: "GEOMETRY-ADAPTIVE — fills whatever role the room demands."
+
+  Corridors:
+    Effectiveness: HIGHEST
+    PreferredForm: Dragon
+    Why: "Enemies can't scatter. Breath fills width. Roar has nowhere to flee."
+
+  OpenArenas:
+    Effectiveness: MODERATE
+    PreferredForm: "Dragonguard (terrain) or Draconite (single target)"
+    Why: "Dragon scatter problem. Terrain denies ground. Draconite good if boss."
+
+  BranchingPaths:
+    Effectiveness: HIGH
+    PreferredForm: "Dragonguard default until room identified."
+    Why: "Adapts to whatever branch reveals."
+
+  BossRooms:
+    Effectiveness: HIGHEST
+    PreferredForm: "Draconite primary, brief Dragon for add CC."
+    Why: "Reaction DPS ceiling. Pre-placed terrain enables self-combo."
+
+  PartyComp:
+    Ideal: "Skyreign + elemental DPS (free reaction triggers)"
+    Good: "Skyreign + any party (self-combo via Dragonguard terrain)"
+    Nightmare: "Solo without element sources"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 13: CRIT SYSTEM
+# ═══════════════════════════════════════════════════════════════════════════════
+
+CritSystem:
+  ZeroRNG: true
+  Reference: "DESIGN_OVERRIDE.md §12"
+
+  Conditions:
+    DragonBreath: "Target standing in allied terrain (cross-form setup)"
+    DragonguardTerrainTick: "Enemy >50% HP (§9 synergy)"
+    DragonguardHawkDive: "Landing on target from above (altitude positional)"
+    DraconiteClawFinisher: "Combo count ≥5 (sustained engagement)"
+    DraconiteReaction: "Always crits (external source condition IS the crit)"
+    BreathGeneral: "Target under Suffocation (Smoke synergy)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 14: ROTATION PHILOSOPHY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+RotationDesign:
+  Philosophy: "NO fixed rotation. Form selection IS the rotation. Encounter determines form."
+
+  DecisionFramework:
+    P1: "Corridor + packed enemies → Dragon"
+    P2: "General / terrain needed → Dragonguard"
+    P3: "Boss / elite ST → Draconite"
+    P4: "Dragon CDs on timer → swap out, earn stacks"
+    P5: "Breath gauge high → stay (don't waste progress)"
+    P6: "BL on target + element available → Draconite STAY"
+
+  ExampleEncounter:
+    Corridor: "Dragon: Smoke → Full Breath → Roar stragglers into wall."
+    OpenRoom: "Dragonguard: Place terrain. Hawk-dive elite. Combo for stacks."
+    Boss: "Draconite: Claws → BL → teammate fire flask → REACTION. Kite into pre-placed terrain → REACTION."
+    Adds: "Brief Dragon swap (stacks were full) → Roar → back to Draconite."
+
+  NoRotationStatement: "No opener. No fixed order. Two minutes as Dragonguard is correct if geometry never changes."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 15: REACTION SYSTEM (Black Lightning Detail)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ReactionSystem:
+  CoreRule: "BL DoT on target + EXTERNAL element = Reaction burst. Draconite alone CANNOT trigger."
+
+  ValidSources:
+    - "Teammate elemental attacks"
+    - "Skyreign's own Dragonguard terrain (self-combo via form swap)"
+    - "Environmental elements (water, fire hazards, electrical)"
+    - "Elemental items (flasks, grenades, coated arrows)"
+
+  Invalid: "Own claw attacks, own BL ticks, non-elemental damage."
+
+  Damage:
+    Potency: "250-350 (GaugeSpender_Small band)"
+    Scaling: "More BL ticks remaining = stronger reaction"
+    Crit: "Always (external-source condition IS the crit condition)"
+    Frequency: "1 per element source per BL application"
+    MultiElement: "Fire + ice on same BL = 2 separate reactions"
+
+  R1Floor: "Party throws cheap elemental items. Accidental triggers common."
+  R3Ceiling: "Deliberate multi-element stacking. Timed with encounter burst windows."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 16: SMOKE BREATH & SUFFOCATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+SmokeBreath:
+  Form: Dragon
+  BreathCost: "50% gauge (half-charge viable)"
+  AccuracyDebuff: "-40% for duration"
+  Suffocation: "Cough every 2s for 8s. Each cough = 0.5s interrupt. 25% action time lost."
+  VisionBlock: "SR3+ enemies lose tracking in smoke (can't path toward unseen targets)."
+  TacticalUse:
+    PreBreath: "Smoke → enemies can't hear rev → full breath connects at SR2+."
+    Interrupt: "Breaks castbars, cancels charges."
+    Escape: "Cover for repositioning."
+  Limitation: "Stationary cloud. Enemies walk out. 8s duration. Uses breath gauge."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 17: TIER & EXECUTION JUSTIFICATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+TierJustification:
+  Tier: Base
+  Reasoning: "Dragon is universally appealing. No explanation needed for wanting to play this."
+
+  Floor: "R1: stay Dragon, breathe things, take hits for stacks, swap when CDs expire, mash melee, swap back."
+  Ceiling: "R3+: precise form per room, pre-placed terrain for reactions, Smoke→Breath combos, multi-reaction team burst."
+  Progression: "Session 1: dragon breathes fire. Session 10: Draconite for bosses. Session 100: terrain→BL→kite chains."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 18: IDENTITY COHERENCE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+IdentityCoherence:
+  OneLineIdentity: "Three forms, three problems, one dragon."
+
+  WhatMakesItOneClass:
+    - "Breath system shared (different delivery, same gauge)"
+    - "Stack system links forms (earn in A, spend in B)"
+    - "Body is continuous (same creature, different shape)"
+    - "The CYCLE is the class identity"
+    - "No form is complete alone"
+
+  WhenToSwap:
+    ToDragon: "Corridor. Stacks full. Need AoE/CC."
+    ToDragonguard: "New room, unknown. General traversal. Need terrain."
+    ToDraconite: "Boss/elite. Reactions available. Sustained DPS."
+    AwayFromDragon: "Open space. Scattered enemies. CDs spent. Too much damage."
+    AwayFromDragonguard: "Specific problem clearly needs Dragon or Draconite."
+    AwayFromDraconite: "Target dead. AoE needed. No reaction sources."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FOOTER
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ▼ CONTINUES IN:
+#   - Skyreign_Skills_Dragon.yaml (Dragon skill list, potencies, CDs)
+#   - Skyreign_Skills_Dragonguard.yaml (Dragonguard skills, terrain types)
+#   - Skyreign_Skills_Draconite.yaml (Draconite skills, combo trees, reactions)
+#   - Skyreign_Validation.yaml (balance targets, matchups, simulation criteria)
