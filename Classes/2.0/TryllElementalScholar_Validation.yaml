@@ -1,0 +1,405 @@
+# ▲ CONTINUES FROM: TryllElementalScholar_Design.yaml + TryllElementalScholar_Skills.yaml
+# ══════════════════════════════════════════════════════════════════════════════════
+# TRYLL ELEMENTAL SCHOLAR — Validation & Balance Specification
+# juice-yaml-library | github.com/marbleperfume/juice-yaml-library
+# ══════════════════════════════════════════════════════════════════════════════════
+
+header:
+  class_name: "Tryll Elemental Scholar"
+  category_tag: Elementalist
+  file_scope: "Balance, matchups, pass/fail, §25 audit, saturation validation, weakness budget, healer comparison"
+  design_authority: "TryllElementalScholar_Design.yaml"
+  skills_authority: "TryllElementalScholar_Skills.yaml"
+  last_updated: "2026-07-14"
+  validation_status: "Qualitative Complete — Awaiting Layer 1 Numerical Pass"
+  role: Healer
+  sub_role: DPS Hybrid
+  tier: Experienced
+  race_lock: [Tryll, Landwin]
+  cultural_lock: academic_tradition
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# §1 — BALANCE TARGETS
+# ══════════════════════════════════════════════════════════════════════════════════
+
+balance_targets:
+  reference: "Generic Experienced-tier DPS = 100%"
+
+  stat_line: {MAG: 13, MED: 13, MAGICCAP: 12, STR: 6, STAM: 6, SPD: 9, NTU: 8}
+  racial_bonus: "+15% magic potency (compensates STR 6 / STAM 6)"
+
+  gcd: {base: 2.0s, haste_cap: 1.4s, weave: single_only, anim_lock: 0.6s}
+
+  dps_targets:
+    while_healing: "65% of reference"
+    pure_dps_mode: "80% of reference (Fire saturation, no healing needed)"
+
+  mana_economy:
+    max: 10000
+    base_regen: "67/s"
+    neutral_regen: "201/s (3×)"
+    maintenance_per_sec: {Fire: 80, Water: 100, Earth: 60, Wind: 50, Light: 40, Neutral: 0}
+    oom_timers:
+      fire_active: "~88s (80 maint + 100 cast = 180/s drain, 67 regen → -113/s net)"
+      water_triage: "~43s (100 maint + 200 cast = 300/s drain → -233/s net)"
+      earth_sustained: "~107s (60 maint + 100 cast = 160/s → -93/s net)"
+      wind_passive: "mana-positive (+17/s net with minimal casting)"
+      light_passive: "mana-positive (+27/s net)"
+    optimal_cycle: "Fire(30s)→Wind(15s)→Water(20s)→Earth(30s)→Wind(10s) + 10s Neutral = infinite"
+    neutral_cadence: "1 break/90-120s at SR2; 2-3 breaks/3min at SR3-4"
+
+  healing_throughput:
+    normal: "40% party HP/min"
+    hard: "70% party HP/min"
+    extreme: "100% party HP/min (mana crash risk)"
+
+  potency_check:
+    fireball: "120p base / 144p in Fire (BaseFiller band ✓)"
+    tidal_basin: "750p total per ally (HealGCD band ✓)"
+    convergence_fire: "400p AoE (GaugeSpender_Large band ✓)"
+    convergence_water: "500p AoE heal (GaugeSpender_Large band ✓)"
+    fire_passive_dot: "60p/3s (DoT_PerTick band ✓)"
+    verdict: "All within BalanceTargets §2 bands"
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# §2 — MATCHUP SCENARIOS
+# ══════════════════════════════════════════════════════════════════════════════════
+
+matchup_scenarios:
+
+  scenario_1_sr1_fire_dominance:
+    rank: SR1
+    question: "Does Saturation solve 'stay in Fire forever'?"
+    analysis: >
+      Active Fire play (Fireball spam) costs 180/s vs 67/s regen = OOM in 88s.
+      After 3-4 trash packs, mana hits 30%. Must cycle to Wind/Light or Neutral.
+      Fire→Water panic switch = 6s dead zone if party HP dips unexpectedly.
+      Even SR1 chip damage punishes pure-Fire players who ignore proactive shields.
+    verdict: "PASS — Fire dominance solved via:"
+    mechanisms:
+      - "88s OOM ceiling with active casting"
+      - "6s Fire→Water panic cost punishes greedy DPS"
+      - "Wind/Earth breathing room is OPTIMAL for mana, not optional"
+      - "Departure pulse rewards planned exits over forced ones"
+
+  scenario_2_sr2_forced_transitions:
+    rank: SR2
+    question: "Can Scholar handle forced transitions without cascade failure?"
+    encounter: "Boss + add spawn. Tank damage → AoE telegraph → add charges backline."
+    analysis: >
+      Phase A: Earth shields (proactive). Phase B: Light for +50% Luminous Barrier.
+      Phase C: Light→Water (5s) for post-AoE healing. Phase D: Add spawns during Water.
+      CRISIS: Need Earth CC but maintaining Water. Solution: Petrify oGCD at double
+      mana cost (500) stuns add while staying in Water. OR if HP stable, 4s Water→Earth
+      transition (both defensive = shortest path).
+    verdict: "PASS — Cascade manageable via:"
+    mechanisms:
+      - "Petrify available in ANY element (double cost = expensive, not impossible)"
+      - "Cleansing Rain (2 charges, element-free) covers healing during transitions"
+      - "Water→Earth = 4s (same-purpose = short transition)"
+      - "Read → triage → execute = preserved skill expression"
+
+  scenario_3_sr3_sustained_mana_crash:
+    rank: SR3
+    question: "Does Scholar mana-crash under 90s sustained pressure?"
+    encounter: "Constant raid AoE (2% HP/tick) + tank damage for 90s, no lull."
+    analysis: >
+      0-20s: Water triage (−233/s) → 5340 mana at 20s.
+      20-35s: Earth shields (−93/s) → 3945 at 35s.
+      35-50s: Back to Water (−233/s) → ~455 at 50s.
+      50-60s: Forced Neutral (+201/s) → 2465 at 60s.
+      60-70s: Water again → ~135 at 70s.
+      70-80s: Second Neutral → 2145 at 80s.
+      80-90s: Final Water push. Scholar runs on fumes.
+      RESULT: 2 forced Neutrals (10s each) = 20s of zero output in 90s.
+      Cleansing Rain (2 charges) bridges worst gaps. Party mitigation required.
+    verdict: "PASS (conditional) — Mana crash is intentional pressure"
+    mechanisms:
+      - "2 Neutral breaks per 90s = expected, not failure"
+      - "Cleansing Rain bridges gaps (25s recharge)"
+      - "Party contribution required at SR3 — Scholar cannot solo carry"
+    content_requirement: "SR3+ bosses MUST have ≥2 animation locks (3-4s) per 90s phase"
+
+  scenario_4_multi_element_demand:
+    rank: SR3
+    question: "Wind (deflection) + Water (heals) needed simultaneously — what happens?"
+    encounter: "Ranged projectile phase + party HP dropping."
+    analysis: >
+      Cannot provide both. Decision: if deflection saves more HP than healing restores,
+      enter Wind and use Cleansing Rain for spot heals. If HP is critical, enter Water
+      and let party dodge manually. Optimal: brief Wind (5-8s, departure pulse = +30%
+      speed to reach cover) → transition to Water (5s) for sustained healing.
+      If encounter demands BOTH for entire phase with no cover = Scholar inadequate.
+      Party must compensate. This is the designed limitation.
+    verdict: "PASS — Single-element constraint is intentional team dependency"
+    mechanisms:
+      - "One element at a time = CORE CONSTRAINT"
+      - "Cleansing Rain provides element-free healing"
+      - "Departure pulses partially bridge transitions"
+      - "Content must not permanently require two conflicting elements with zero alternative"
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# §3 — PASS/FAIL CRITERIA
+# ══════════════════════════════════════════════════════════════════════════════════
+
+pass_fail_criteria:
+
+  mana_burn_rates:
+    # Element      | Drain/s | Net/s  | OOM Timer | Pass?
+    fire_active:    [180,     -113,    "88s",      true]
+    water_triage:   [300,     -233,    "43s",      true]
+    earth_active:   [160,      -93,   "107s",      true]
+    wind_minimal:   [ 50,      +17,   "never",     true]
+    light_minimal:  [ 40,      +27,   "never",     true]
+    optimal_cycle:  [ 70,       -3,   "~55min raw; infinite w/ Neutral", true]
+    verdict: "PASS — Economy forces element cycling. No element permanent."
+
+  transition_costs:
+    # Pair             | Duration | Rationale
+    fire_water:         [6s,       "max — offense↔defense"]
+    fire_earth:         [5s,       "moderate"]
+    fire_wind:          [5s,       "moderate"]
+    fire_light:         [4s,       "short — both energy"]
+    water_earth:        [4s,       "short — both defensive"]
+    water_wind:         [5s,       "moderate"]
+    water_light:        [5s,       "moderate"]
+    earth_wind:         [4s,       "short — both utility"]
+    earth_light:        [5s,       "moderate"]
+    wind_light:         [4s,       "short — both low-commit"]
+    from_neutral:       ["6-8s total (1 GCD + 4-6s ramp)"]
+    verdict: "PASS — Opposite-purpose switches costly, same-purpose cheap."
+
+  neutral_recovery:
+    regen: "201/s (3× base)"
+    time_to_30pct: "~15s from 0"
+    practical_break: "10s = +2010 mana (enough for 15-20s active play)"
+    risk: "Zero output during. Emergency = 6-8s response time."
+    verdict: "PASS — Recoverable but dangerous. Timing = skill expression."
+
+  barrier_vs_damage:
+    earth_shield: "100p absorb, regenerates every 8s"
+    sr1_coverage: "Absorbs 1 trash auto per cycle — sufficient for chip"
+    sr2_coverage: "Breaks in 1 boss hit, regenerates — covers ~12% intake"
+    sr3_coverage: "Breaks instantly — proactive layer only, not primary defense"
+    verdict: "PASS — Earth shield is Phase 1 proactive. Break triggers Phase 2 reactive."
+
+  element_coverage:
+    fire: ["Boss >50% HP window", "Clustered enemies", "Pack clearing SR1"]
+    water: ["Party HP dropping", "Sustained AoE phases", "Debuff encounters", "Ice combos"]
+    earth: ["Proactive barriers", "Charging enemies", "Terrain control", "Interrupts (cheap)", "Safe harbor"]
+    wind: ["Repositioning", "Kiting", "Mana recovery (net positive)", "Projectile deflection"]
+    light: ["Mana recovery posture", "Darkness counter", "Luminous Barrier setup", "Conditional crit"]
+    verdict: "PASS — All 5 elements ≥3 unique use cases. None vestigial. Fire/Water not dominant."
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# §4 — §25 COMPLIANCE
+# ══════════════════════════════════════════════════════════════════════════════════
+
+section_25_compliance:
+  rule: "Identity skills ≠ CD-gated. Must be resource-gated (mana)."
+
+  identity_system: "Elemental Saturation switching + maintenance"
+  identity_gating: "Mana drain (continuous) + transition time (4-6s). ZERO cooldown on switching."
+  verdict_identity: "PASS — Core identity purely mana-gated."
+
+  cd_audit:
+    convergence_burst: {cd: 120s, identity: false, reason: "Emergency detonation that ENDS saturation. Anti-identity tool."}
+    luminous_barrier: {cd: 90s, identity: false, reason: "Party-wide defensive CD. Available in any element. Standard major mitigation timing."}
+    petrify: {cd: 40s, identity: false, reason: "CC tool. Under threshold."}
+    terrain_transmute: {cd: 20s, under_threshold: true}
+    earthen_bridge: {cd: 45s, under_threshold: true}
+    gale_corridor: {cd: 30s, under_threshold: true}
+    cleansing_rain: {cd: "25s/charge", under_threshold: true}
+    aqua_veil: {cd: 30s, under_threshold: true}
+
+  saturation_gating:
+    switching_cd: "ZERO"
+    maintenance: "Continuous mana drain (40-100/s)"
+    sustain_ceiling: "Expensive elements force cycling in 43-88s"
+    neutral_exit: "1 GCD only — no resource gate to re-enter"
+
+  overall: "§25 COMPLIANT — Identity is mana-driven. Long CDs only on non-identity emergency tools."
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# §5 — SATURATION SYSTEM VALIDATION
+# ══════════════════════════════════════════════════════════════════════════════════
+
+saturation_validation:
+
+  trigger_distinctness:
+    fire: {trigger: "Boss >50% HP / clustered enemies", force_exit: "88s OOM or healing demand"}
+    water: {trigger: "Party HP dropping / AoE phase", force_exit: "43s OOM at full triage"}
+    earth: {trigger: "Charging enemies / interrupt / terrain hazard", force_exit: "107s OOM or damage demand"}
+    wind: {trigger: "Repositioning / ranged phase / mana recovery", force_exit: "No damage/healing output"}
+    light: {trigger: "Mana-starved / darkness / pre-barrier setup", force_exit: "Minimal output, demand escalates"}
+    verdict: "PASS — Each element has external encounter triggers AND internal exit pressure."
+
+  fire_dominance_solved:
+    problem: "GW2 Elementalist stays in Fire because highest DPS + no cost."
+    solution:
+      - "80/s maintenance = highest combat drain"
+      - "Active play OOM in 88s"
+      - "6s Fire→Water panic switch = longest possible transition"
+      - "Boss crosses 50% = damage window ends, Fire value drops"
+      - "SR2+ enemies path around Fire terrain (diminishing zone denial)"
+    verdict: "PASS — Fire is an expensive CHOICE, not a default."
+
+  transition_rewards:
+    departure_pulses:
+      fire: "150% final AoE burn tick"
+      water: "150% final heal tick to allies"
+      earth: "150% shield refresh"
+      wind: "+30% movespeed 3s burst"
+      light: "Guaranteed crit stored 6s"
+    design_effect: "Planned transitions > staying put. Strategic cycling rewarded."
+    verdict: "PASS — Transitions incentivized, not just penalized."
+
+  neutral_state:
+    purpose: "Mana recovery (3× regen) at zero output cost"
+    forced_when: "Mana = 0 (bad play) or voluntary timing (good play)"
+    recovery: "10s Neutral = +2010 mana"
+    risk: "Emergency during Neutral = 6-8s response delay"
+    verdict: "PASS — Meaningful risk/reward tradeoff."
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# §6 — WEAKNESS BUDGET
+# ══════════════════════════════════════════════════════════════════════════════════
+
+weakness_budget:
+
+  mana_exhaustion:
+    severity: HIGH
+    cause: "Maintaining expensive elements (Fire/Water) too long"
+    timing: "43-88s active expensive-element play → forced Neutral"
+    cost: "10-15s zero output. Emergency during = party death."
+    player_control: "Cycle through cheap elements (Wind/Light) between expensive ones"
+    recoverable: true
+
+  transition_dead_zones:
+    severity: MEDIUM
+    cause: "4-6s vulnerability during every element switch"
+    timing: "Every switch. 6s worst case (Fire↔Water)."
+    cost: "Reduced effectiveness. Party takes partially unmitigated damage."
+    player_control: "Route through intermediate elements. Plan transitions proactively."
+    recoverable: true
+
+  no_self_healing:
+    severity: HIGH
+    cause: "Water heals ALLIES only. Scholar = source, not recipient."
+    timing: "Constant — cannot self-heal efficiently ever"
+    cost: "If focused and no peel → death. No recovery once HP critical."
+    player_control: "CC (Petrify), shields (Earth/Luminous Barrier), positioning."
+    recoverable: "Conditional — depends on ally assistance"
+
+  physical_fragility:
+    severity: CRITICAL
+    cause: "STR 6 / STAM 6 — lowest physical stats, zero mitigation"
+    timing: "Constant — dies in 2-3 hits from SR2+ melee enemies"
+    cost: "Death if caught in melee without peel."
+    player_control: "Stay behind frontliner. Earth Heavy terrain slows approach."
+    recoverable: false (if positioning collapses)
+
+  cascade_vulnerability:
+    severity: MEDIUM-HIGH
+    cause: "Each element choice creates vulnerability to the NEXT problem"
+    timing: "Every decision. Water → can't CC. Earth → can't heal. Fire → can't do either."
+    cost: "Sub-optimal sequencing compounds delays. 3+ bad transitions = wipe."
+    player_control: "Solve problems in optimal order. Use element-free oGCDs to bridge."
+    recoverable: true
+
+  summary:
+    total: 5
+    critical: 1
+    high: 2
+    medium_high: 1
+    medium: 1
+    design_position: "Correctly balanced — high adaptability trades for physical helplessness + mana vulnerability"
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# §7 — HEALER COMPARISON
+# ══════════════════════════════════════════════════════════════════════════════════
+
+healer_comparison:
+  #                    | Scholar                    | Siren                       | Spiritcaller
+  healing_model:       ["Proactive barriers→reactive zones→emergency burst", "Passive drain bonds (continuous siphon)", "Companion delivery (summon carries heals)"]
+  primary_stat:        ["MAG 13 / MED 13 split",   "MED-dominant",               "MAG-dominant"]
+  skill_expression:    ["Element selection + mana budget", "Bond targeting + Charm layering", "Summon positioning + routing"]
+  failure_mode:        ["Mana crash → 10-15s zero output", "Bond target dies → throughput loss", "Companion killed → no delivery"]
+  dps_while_healing:   ["65%", "65%", "65%"]
+  self_sustain:        ["NONE (Water heals allies only)", "HIGH (drain heals self)", "MODERATE (companion can heal caster)"]
+  proactive_reactive:  ["70/30", "20/80", "50/50"]
+  aoe_healing:         ["STRONG (zone heals + ambient regen)", "MODERATE (bonds = ST)", "WEAK (companion = ST delivery)"]
+  unique_contribution: ["Terrain control + 5-element adaptability", "Charm CC + drain economy", "Remote healing + split-party"]
+
+  niche_differentiation: >
+    Scholar = most FLEXIBLE (5 elements, terrain mastery, Swiss army knife).
+    Siren = most SUSTAINABLE (drain = healing, self-sustaining, no mana crash).
+    Spiritcaller = most RANGE (companion reaches isolated allies, split-push).
+    Zero overlap in primary identity.
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# VALIDATION SUMMARY
+# ══════════════════════════════════════════════════════════════════════════════════
+
+validation_checks:
+  identity:
+    VAL-ID-01: {check: "Saturation replaces rotation", status: "PASS"}
+    VAL-ID-02: {check: "5 elements have distinct triggers", status: "PASS"}
+    VAL-ID-03: {check: "Transition cost = meaningful vulnerability", status: "PASS"}
+    VAL-ID-04: {check: "Mana forces cycling (no camping)", status: "PASS"}
+    VAL-ID-05: {check: "Neutral = recoverable but dangerous", status: "PASS"}
+    VAL-ID-06: {check: "Fire dominance solved", status: "PASS"}
+  mechanical:
+    VAL-MC-01: {check: "§25 compliant (mana-gated identity)", status: "PASS"}
+    VAL-MC-02: {check: "Anti-rotation (demand-driven)", status: "PASS"}
+    VAL-MC-03: {check: "No build-spend (Saturation ≠ stacks)", status: "PASS"}
+    VAL-MC-04: {check: "Crit = conditional (post-dodge in Light)", status: "PASS"}
+    VAL-MC-05: {check: "GCD 2.0s / 1.4s cap", status: "PASS"}
+  balance:
+    VAL-BL-01: {check: "65% DPS while healing", status: "PASS (qual)"}
+    VAL-BL-02: {check: "80% DPS in pure mode", status: "PASS (qual)"}
+    VAL-BL-03: {check: "Mana-positive cycling achievable", status: "PASS"}
+    VAL-BL-04: {check: "Water OOMs in 43s (intentional)", status: "PASS"}
+    VAL-BL-05: {check: "Potencies within BalanceTargets bands", status: "PASS"}
+    VAL-BL-06: {check: ">50% HP rule compatible", status: "PASS"}
+  party_role:
+    VAL-PR-01: {check: "Clear healer identity", status: "PASS"}
+    VAL-PR-02: {check: "Not redundant with Siren/Spiritcaller", status: "PASS"}
+    VAL-PR-03: {check: "Party survives Scholar Neutral windows", status: "CONDITIONAL"}
+    VAL-PR-04: {check: "Requires frontliner protection", status: "PASS"}
+  content_design:
+    VAL-CD-01: {check: "SR3+ must have micro-lulls for Neutral", status: "REQUIREMENT"}
+    VAL-CD-02: {check: "No permanent dual-element demand", status: "REQUIREMENT"}
+    VAL-CD-03: {check: "SR3+ AI reacts to saturation fields", status: "REQUIREMENT"}
+  summary: {total: 22, pass: 17, pass_qual: 2, conditional: 1, requirements: 3, fail: 0}
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# TUNING LEVERS
+# ══════════════════════════════════════════════════════════════════════════════════
+
+tuning_levers:
+  if_too_strong:
+    - "Increase maintenance costs (+20/s across board)"
+    - "Extend transitions (+1-2s)"
+    - "Reduce passive effects (Fire DoT: 60p→45p)"
+    - "Reduce racial bonus (+15%→+10%)"
+  if_too_weak:
+    - "Reduce maintenance costs (−15/s across board)"
+    - "Shorten transitions (−1s)"
+    - "Increase departure pulse (150%→200%)"
+    - "Increase Neutral regen (3×→4×)"
+
+open_questions:
+  - "Earth barrier vs actual enemy damage at each SR"
+  - "Tidal Basin radius vs party spread at SR3+"
+  - "Luminous Barrier 90s vs boss mechanic cadence"
+  - "Fire DoT vs enemy HP pools at SR3 (meaningful or chip?)"
+  - "Scholar mana at end of 8-10min raid boss (cycle holds?)"
+
+integration_tests:
+  - "Scholar + Frontliner: Earth Heavy assists control?"
+  - "Scholar + Reaver: Fire during >50% HP window synergy"
+  - "Scholar vs SR4 targeting during Neutral (exploitation)"
+  - "2× Scholar: saturation fields override (don't stack)"
+
+# ▼ AWAITING: Layer 1 Spatial Quantification Pass
