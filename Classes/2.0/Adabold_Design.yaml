@@ -1,0 +1,664 @@
+# Classes/Frontliner/Adabold_Design.yaml
+
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ADABOLD (Rawrotin) — Bodyguard / Interception Frontliner
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Lineage: Braum (LoL dash-to-ally + barrier), FFXIV Cover (intercept damage
+#   FOR ally), My Body As A Shield (YGO — negate targeting ally), For Honor
+#   bash/wallsplat, Reinhardt barrier, Sivir ricochet (Shield Bomb multi-hit)
+#
+# Core identity: "I put my body between danger and my team."
+#   Adabold:       "Nothing gets past me." (bodyguard / INTERCEPTION)
+#   Metaknight:    "Nothing near me can move." (CC / lockdown)
+#   Siegebreaker:  "Nothing in front of me survives." (offense / breakthrough)
+#
+# References:
+#   - Combat/BalanceTargets.yaml (potency bands, GCD, role baselines)
+#   - DESIGN_OVERRIDE.md (§3b, §3c, §3d, §5, §6, §9, §12, §25)
+# Authority: DESIGN_OVERRIDE.md > BalanceTargets.yaml > this file > LLM.md
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Frontliner.Adabold.Design
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1: CLASS IDENTITY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Identity:
+  Name: Adabold
+  Role: Frontliner
+  SubRole: Bodyguard / Interception Frontliner
+  DamageType: physical
+  Weapon: shield_and_short_blade
+  ExecutionArchetype: Reactive Positioning + Interception
+  ExecutionTier: Experienced
+  # 11 abilities, constant repositioning, ally-awareness, threat prioritization.
+
+  Description: >
+    Rawrotin pack-bonded bodyguard who physically interposes between threats
+    and allies. Rushes TO allies (not enemies), intercepts incoming damage,
+    and smacks threats away or rotates their facing. High sustain, high
+    mobility toward friendlies. "Frontliner" NOT "Tank" — damage-first,
+    survives by positioning and shield geometry, protects by BEING THERE.
+
+  CoreFantasy: >
+    Your shield is not for you — it is for them. You hear the warning,
+    you dash across the field, you arrive between the attack and your
+    healer with your shield already raised. The enemy's strike lands on
+    you instead. Then you smack it sideways and it is facing the wall
+    wondering what happened.
+
+  InputModality:
+    PrimaryFocus: ally_awareness_and_interception_timing
+    SecondaryFocus: shield_gauge_economy
+    TertiaryFocus: knockback_angle_geometry
+    DecisionType: reactive_prioritization
+
+  StatPriority:
+    Primary: STA    # High sustain — can EAT hits on approach and while covering
+    Secondary: SPD  # Rush speed, repositioning between allies
+    Tertiary: STR   # Shield strikes, knockback force
+    DumpStat: MAG   # Pure physical
+
+  DesignStatement: >
+    The BODYGUARD frontliner. "Who is about to get hit, and can I get there
+    first?" Success = allies never take hits Adabold could have intercepted.
+    Failure = ally takes a hit Sentinel Instinct warned about and Adabold
+    was out of position or out of gauge to respond.
+
+  SkillExpressionAxis: >
+    Rewards AWARENESS and POSITIONING:
+    - Who needs covering RIGHT NOW? (Sentinel Instinct feed)
+    - Can I reach them in time? (MBAS range check)
+    - After intercepting, which direction do I redirect this threat?
+    - When to project barrier vs stay mobile?
+
+  FailureStates:
+    OutOfPosition: {Cost: "Ally takes full hit. MBAS out of range. Warning wasted.", Severity: HIGH}
+    GaugeStarved: {Cost: "Cannot MBAS, cannot project, basic attacks only.", Severity: HIGH}
+    WrongPriority: {Cost: "Covered the wrong ally. Other ally dies.", Severity: HIGH}
+    OverCommit: {Cost: "Projected barrier but threat came from another angle.", Severity: MODERATE}
+
+  SingleLimitation: >
+    SINGLE DIRECTION. Shield Projection covers ONE angle. Adabold cannot
+    protect against threats from multiple directions simultaneously. Must
+    constantly reposition to face the active threat vector. Surrounded = exposed.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 2: RACIAL LOCK — RAWROTIN
+# ═══════════════════════════════════════════════════════════════════════════════
+
+RacialLock:
+  Race: Rawrotin
+  ParentCategory: Landwin
+  Enforcement: biological_lock
+  Tradition: pack_bond
+
+  LockJustification: >
+    Rawrotin pack-bond instinct — Sentinel Instinct is a biological sense
+    that cannot be taught. The class REQUIRES reading threats to allies at
+    a subconscious level. Other races can hold a shield, but they cannot
+    FEEL when a packmate is about to be struck.
+
+  TeachableInTheory: >
+    Non-Rawrotin could learn the shield techniques (Lob, Bash, Bomb,
+    Projection) but would lack Sentinel Instinct entirely. Without the
+    warning system, MBAS becomes guess-work instead of reactive bodyguarding.
+
+  RacialSynergy:
+    - "Pack-bond = Sentinel Instinct (biological threat awareness FOR allies)"
+    - "High STA racial = sustain to absorb intercepted hits repeatedly"
+    - "SPD racial = reach allies fast enough for interception to matter"
+    - "Pack mentality = protecting others is INSTINCTIVE, not trained"
+    - "Rawrotin Mark (combo finisher) = pack-hunting coordination"
+
+  RacialStats:
+    STA: 16
+    SPD: 14
+    STR: 12
+
+  SizeModel:
+    CharacterSize: Medium
+    ShieldIdentity: >
+      Oversized shield relative to body — clearly the focal point of the class.
+      Shield IS the class. Blade is secondary (combo filler). All identity
+      abilities involve the shield: lob it, bash with it, project it, bomb it,
+      cover behind it. Gear progression = shield quality.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 3: FRONTLINER CONTRACT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+FrontlinerContract:
+  Universal: >
+    Frontliners redirect traffic. DPS and healers need to be unbothered.
+    Frontliners force enemy MOVEMENT or answer enemy INTERACTIONS directly.
+
+  AdaboldExpression: >
+    Adabold redirects traffic by PHYSICALLY INTERCEPTING it. Enemies targeting
+    allies hit Adabold instead (MBAS). Enemies that get through get knocked
+    back (Shield Lob, Shooting Star), rotated away (Redirection), or
+    wall-pinned (Shield Bash). Enemies in corridors hit a projected barrier
+    they cannot pass. Every tool answers: "How do I put myself between
+    the threat and my team?"
+
+  PartyValue: >
+    Without Adabold: allies must self-manage every incoming attack. Healers
+    spend mana on themselves. DPS interrupt rotations to dodge. Everyone
+    is distracted by personal survival. WITH Adabold: allies focus on their
+    jobs because hits aimed at them land on the bodyguard instead.
+
+  CCThreatScoring: >
+    Enemy AI recognizes INTERCEPTION capability as threat. Adabold's ability
+    to nullify attacks on others (via MBAS) registers as HIGH threat because
+    it invalidates enemy targeting decisions. Enemies learn to target Adabold
+    directly — which is what he wants (high sustain handles it).
+
+  VsMetaknight: >
+    MetaKnight: "Nothing near me can move." CC lockdown — enemies are STUCK.
+    Adabold: "Nothing gets past me." Interception — enemies are REDIRECTED.
+    MetaKnight prevents action. Adabold allows action but intercepts the result.
+    Both redirect traffic. Different methods, same contract.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 4: CORE MECHANIC — SHIELD GAUGE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ShieldGauge:
+  Type: "0-100 gauge (80 cap at Rank 1, 100 at Rank 2+)"
+  Philosophy: >
+    ALL identity abilities cost gauge. No cooldowns (§25). Gauge builds
+    through combat engagement — hitting things, blocking things, being
+    in the fight. Passive play = no gauge = cannot bodyguard.
+
+  Generation:
+    Passive: "+2/s in combat"
+    BasicGCD: "+6/hit"
+    PackFang_Marked: "+16 total (combo finisher on marked target)"
+    HitReceived: "+4/hit taken (being targeted feeds the system)"
+    MBAS_Intercept: "+8 per hit intercepted for ally"
+
+  Costs:
+    ShieldLob: 15
+    ShieldBash: 15
+    ShootingStar: 25
+    ShieldBomb: 20
+    Redirection: 10
+    ShieldProjection: "4/s sustained"
+    MBAS: 20
+
+  SustainMath: >
+    Generation ~10-14/s while actively fighting and taking hits.
+    Spend varies by threat frequency. Key: BEING HIT generates gauge.
+    Adabold WANTS to take hits — it fuels his protection abilities.
+    This is the bodyguard loop: intercept → take hit → gauge → protect again.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 5: CORE MECHANIC — MBAS (MY BODY AS A SHIELD)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+MBAS:
+  Name: "MBAS (My Body As A Shield)"
+  Type: oGCD
+  GaugeCost: 20
+  Range: "15y (dash to ally)"
+  AnimationLock: "0.4s (fast — must arrive before hit lands)"
+  Targets: "Self (dash to targeted ally's position)"
+
+  CorePrinciple: >
+    THE identity skill. Adabold dashes to an ALLY and interposes himself
+    between them and the incoming threat. He takes the hit instead. This is
+    Braum E + FFXIV Cover + My Body As A Shield combined: ally-targeted dash
+    that converts their incoming damage into YOUR incoming damage.
+
+  Mechanic:
+    Trigger: "Targeted on ally (not enemy)"
+    DashBehavior: "Instant dash to ally's position, arrive between ally and threat source"
+    Interception: "For 2s after arrival, attacks targeting that ally hit Adabold instead"
+    DRDuringIntercept: "30% DR on intercepted hits (you chose to take this — rewarded)"
+    GaugeOnIntercept: "+8 per hit intercepted"
+    Positioning: "Adabold arrives facing the threat source (shield toward danger)"
+
+  FeedFromSentinel: >
+    Sentinel Instinct warns 1.5-2s before threat arrives. MBAS dash takes ~0.3s.
+    Net reaction window: 1.2-1.7s to press the button. Generous but not free —
+    must be watching the warning feed and choosing correctly.
+
+  Limitations:
+    - "15y range — cannot cover allies across the entire arena"
+    - "20 gauge — cannot spam without starving other abilities"
+    - "2s interception window — if threat is delayed, window expires"
+    - "Single ally — cannot cover two allies simultaneously"
+    - "Adabold takes the hit (DR'd but real) — sustain must handle it"
+    - "Cannot MBAS while Shield Projection is active (committed to barrier)"
+
+  RankScaling:
+    Rank1: "15y range, 30% DR on intercept, 2s window"
+    Rank2: "Range → 18y. DR → 35%."
+    Rank3: "Intercepting a hit that would have killed ally: +50 gauge instantly (Pack Fury)."
+
+  DesignNote: >
+    This is what makes Adabold a BODYGUARD and not a zone controller.
+    MetaKnight says "come into my field and suffer." Adabold says "you
+    aimed at my friend and I'm already there." The ally-targeted dash is
+    the key distinction — he moves TOWARD friendlies, not enemies.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 6: SHIELD PROJECTION — DIRECTIONAL BARRIER
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ShieldProjection:
+  Name: "Shield Projection"
+  Type: oGCD (stance toggle)
+  GaugeCost: "4/s sustained"
+  AnimationLock: "0.3s toggle"
+
+  CorePrinciple: >
+    Adabold projects an expanded shield barrier in a single direction.
+    Wider than his body — covers a corridor or shields allies behind him.
+    This is Reinhardt barrier meets FFXIV Cover: a WALL that blocks
+    projectiles and melee from passing through in that direction.
+
+  Mechanic:
+    Coverage: "120° frontal arc, extends 3y to each side of Adabold (6y total width)"
+    BlockType: "Blocks projectiles and melee attacks passing through the plane"
+    Durability: "Absorbs damage — NOT infinite. Breaks at threshold, reforms after 4s."
+    HP_Pool: "Shield HP = Adabold's max HP × 0.4 (40% — substantial but breakable)"
+    Movement: "Adabold moves at 40% speed while projecting (slower than Iron Body was)"
+    Direction: "Fixed to Adabold's facing. He turns = barrier turns."
+
+  PartyUse:
+    CorridorBlock: "Stand in doorway, project. Nothing passes. Allies shoot from behind."
+    CoverFire: "Project toward ranged enemies. Allies behind barrier are safe from projectiles."
+    BossPhase: "Block cone attack aimed at group. Adabold eats shield HP, team takes zero."
+    Retreat: "Project backward while team retreats through a corridor."
+
+  TradeOff: >
+    Cannot MBAS while projecting (committed to barrier position). Cannot
+    reposition quickly (40% speed). Gauge drains at 4/s. Choosing to project
+    means choosing NOT to intercept individually — area defense vs personal
+    bodyguarding. This is the core decision: wide coverage or targeted saves?
+
+  Limitations:
+    - "Single direction — flanking bypasses entirely"
+    - "40% move speed — planted, not mobile"
+    - "4/s gauge drain — 25s max from full"
+    - "Breakable — focused fire destroys it, 4s downtime"
+    - "Cannot MBAS during projection (locked into position)"
+    - "Does not block AoEs that originate BEHIND the barrier"
+
+  RankScaling:
+    Rank1: "6y width, 40% HP, 40% move speed"
+    Rank2: "Shield HP → 50%. Reform time → 3s."
+    Rank3: "Broken shield detonates: 150p AoE + 2s slow to enemies within 4y (punishes breakers)."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 7: REDIRECTION — 360° FACING CONTROL
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Redirection:
+  Name: "Redirection"
+  Type: GCD
+  GaugeCost: 10
+  Potency: 100
+  Range: "3y melee"
+  Targets: 1
+
+  CorePrinciple: >
+    Shield smack that ROTATES enemy facing without displacing them. Fighting
+    game back-turned archetype applied to 360 degrees. Enemy was facing your
+    healer — now it is facing left. Its next action goes in THAT direction.
+    No knockback, no stun — pure facing manipulation.
+
+  Mechanic:
+    Input: "Player aims direction (360° wheel, like Shooting Star aim)"
+    Effect: "Target is rotated to face the chosen direction"
+    Duration: "Facing is forced for 1s (cannot rotate back). After 1s, normal AI resumes."
+    NoDisplacement: "Enemy stays in place. Only their FACING changes."
+    Interaction: >
+      Enemies mid-action (casting, charging, winding up) have their action
+      REDIRECTED to the new facing. Charging enemy aimed at healer? Redirect
+      and it charges into a wall. Casting enemy? Cone now points at nothing.
+
+  TacticalApplications:
+    - "Redirect charge/dash attacks into walls (enemy charges the wrong direction)"
+    - "Turn cone attacks away from allies (enemy casts cone at empty space)"
+    - "Create back-turned state for ally DPS to exploit (positional bonus)"
+    - "Chain: Redirect (face wall) → Shooting Star (KB into wall) → Shield Bash (Pin)"
+    - "Interrupt without stopping — enemy keeps acting, just aimed wrong"
+
+  VsInterrupt: >
+    Shield Lob is a hard interrupt (stops the action). Redirection is a SOFT
+    interrupt — the action CONTINUES but is aimed wrong. Both have value:
+    Lob when you need the action to stop, Redirection when you want the
+    action to fire harmlessly or into a wall.
+
+  Limitations:
+    - "1s forced facing — short window, must capitalize immediately"
+    - "Low potency (100p) — this is utility, not damage"
+    - "Melee range required"
+    - "Boss enemies: facing forced 0.5s (reduced, not immune)"
+    - "Does not work on stationary/turret enemies (they have no facing)"
+
+  RankScaling:
+    Rank1: "1s forced facing, 100p"
+    Rank2: "Forced facing → 1.5s"
+    Rank3: "Redirected actions that hit walls: target takes 80p self-damage (own force used against them)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 8: SHIELD LOB — RANGED INTERRUPT + KNOCKBACK
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ShieldLob:
+  Name: "Shield Lob"
+  Type: GCD
+  GaugeCost: 15
+  Potency: 120
+  Range: "15y (Rank 2: 20y)"
+  Targets: 1
+  CastTime: Instant
+
+  CorePrinciple: >
+    Throw shield at single target — interrupts + knocks back. Fast execution,
+    weaker than MetaKnight's charged ranged shot. No setup required, no
+    tether, no charge time. Just throw and disrupt. The bodyguard's ranged
+    answer to "something is threatening my ally from 15y away."
+
+  Effect:
+    Interrupt: "Cancels enemy's current action (hard interrupt)"
+    Knockback: "3y knockback (away from Adabold)"
+    ShieldAbsent: "Shield absent 1.2s (returns via recall). No Projection during gap."
+
+  ComparedToMetaknight: >
+    MetaKnight EC Discharge: 20y, 0.8s cast, 280p, no interrupt.
+    Adabold Shield Lob: 15y, instant, 120p, hard interrupt + 3y KB.
+    Faster, weaker, but INTERRUPTS. Different tool, different job. MK does
+    damage at range. Adabold does DISRUPTION at range.
+
+  Limitations:
+    - "Shield absent 1.2s after throw (vulnerability window)"
+    - "Only 3y knockback (not a launcher — just disruption)"
+    - "120p is low — this is utility, not damage"
+    - "Cannot lob while Projection active (shield is busy)"
+
+  RankScaling:
+    Rank1: "15y, 120p, 3y KB, interrupt"
+    Rank2: "Range → 20y. Shield return → 0.8s."
+    Rank3: "Interrupted targets: +10% damage taken from all sources, 4s (Disrupted debuff)."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 9: SHIELD BOMB — MULTI-TARGET RICOCHET
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ShieldBomb:
+  Name: "Shield Bomb"
+  Type: GCD
+  GaugeCost: 20
+  Potency: "100 (primary) + 80 per ricochet target"
+  Range: "12y (initial throw)"
+  RicochetRange: "6y between targets"
+  MaxBounces: "Up to 4 additional targets (1 bounce each, NO repeated hits)"
+  CastTime: Instant
+
+  CorePrinciple: >
+    Sivir W model — thrown shield ricochets to nearby enemies ONCE each,
+    then returns to Adabold. Single set of bounces, no repetitive loops.
+    AoE pressure and multi-interrupt for when multiple threats need
+    answering simultaneously.
+
+  Mechanic:
+    Throw: "Shield launched at primary target (12y range)"
+    Ricochet: "After hitting primary, bounces to nearest unhit enemy within 6y"
+    MaxTargets: "Primary + up to 4 ricochets = 5 targets max"
+    Return: "After final bounce (or no more targets), shield returns to Adabold"
+    ShieldAbsent: "Shield absent during flight (~1.5-2s depending on bounces)"
+    EachHit: "Minor knockback (1.5y) + brief flinch (0.3s — not a full interrupt)"
+
+  VsShieldLob: >
+    Shield Lob: single target, hard interrupt, 3y KB. For THE priority threat.
+    Shield Bomb: multi-target, flinch (soft interrupt), 1.5y KB. For mob packs.
+    Lob is precision disruption. Bomb is area disruption.
+
+  TacticalApplications:
+    - "5 enemies rushing backline — Bomb flinches all, buys 0.3s each (1.5s total team breathing room)"
+    - "Pack pulling: hit frontrunner, bounces tag stragglers, all nudged back"
+    - "Combo: Bomb (flinch group) → MBAS to ally if one got through → Shooting Star the closest"
+
+  Limitations:
+    - "Shield absent during flight — longer than Lob (~1.5-2s)"
+    - "1.5y KB is minimal — disruption, not displacement"
+    - "0.3s flinch is NOT a full interrupt — does not cancel long casts"
+    - "Ricochet requires enemies within 6y of each other (spread = fewer hits)"
+    - "Cannot use while Projection active"
+
+  RankScaling:
+    Rank1: "5 targets max, 100/80p, 1.5y KB per hit"
+    Rank2: "Ricochet range → 8y (catches wider groups)"
+    Rank3: "Primary target takes full interrupt (same as Lob). Ricochets remain flinch."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 10: SENTINEL INSTINCT — THREAT WARNING (PASSIVE)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+SentinelInstinct:
+  Name: "Sentinel Instinct"
+  Type: Passive (always active, no cost)
+  Source: "Rawrotin pack-bond (biological, unteachable)"
+
+  CorePrinciple: >
+    Adabold perceives threats to allies that would normally require THEIR
+    OWN NTU to detect. He reads danger FOR his team. The healer does not
+    need high NTU because Adabold's Sentinel Instinct covers their blind
+    spots. This is the BODYGUARD SENSE — he knows who is about to get hit
+    before they do.
+
+  Mechanic:
+    WarningTime: "1.5s before impact (2.0s at Rank 2, 2.5s at Rank 3)"
+    Information:
+      - "WHICH ally is targeted"
+      - "FROM which direction"
+      - "WHAT type of attack (melee/ranged/ability)"
+      - "Estimated SEVERITY (light/heavy/lethal)"
+    NTU_Proxy: >
+      Reads threats that the targeted ally would need NTU 8+ to detect
+      themselves. Adabold with Sentinel Instinct effectively gives his
+      entire team NTU coverage for incoming threats — they don't need to
+      read danger because HE reads it for them.
+    MultiThreat: "Shows ALL concurrent threats. Adabold must PRIORITIZE."
+
+  FeedsMBAS: >
+    Sentinel warns → Adabold has 1.5-2.5s to press MBAS → arrives in time.
+    Without Sentinel, MBAS is reactive guessing. WITH Sentinel, MBAS is
+    informed bodyguarding. The passive makes the active skill WORK.
+
+  ContentScaling:
+    SR1: "Rarely triggers (enemies attack closest = usually Adabold already)"
+    SR2: "Core value — warns when flankers find paths to backline"
+    SR3: "Frequent, simultaneous warnings. Must triage: who gets covered?"
+    SR4: "Coordinated multi-angle. Cannot cover all — CHOICE is the skill expression."
+
+  Limitations:
+    - "Warning ONLY — no auto-intercept, no DR, no mitigation"
+    - "Player must physically respond (MBAS, run, Lob, etc.)"
+    - "Cannot warn about threats Adabold cannot perceive (invisible/phased)"
+    - "Information overload at SR4 — too many warnings = must prioritize"
+
+  RankScaling:
+    Rank1: "1.5s warning, direction + target + type"
+    Rank2: "2.0s warning. Adds severity estimate."
+    Rank3: "2.5s warning. Coordinated threats (3+) get [AMBUSH] tag + 0.5s extra warning."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 11: SHOOTING STAR + SHIELD BASH (RETAINED)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ShootingStar:
+  Name: "Shooting Star"
+  Type: GCD
+  GaugeCost: 25
+  Potency: 180
+  Range: "3y melee"
+  Targets: 1
+  KnockbackDistance: "6y in PLAYER-CHOSEN direction"
+
+  CorePrinciple: >
+    Directional knockback — player aims where the enemy goes. The strongest
+    displacement tool. Use to punt threats away from allies (emergency peel)
+    or into walls (setup for Pin).
+
+  DualPurpose:
+    Emergency: "Punt enemy 6y away from ally"
+    Setup: "Punt into wall → Shield Bash Pin"
+
+  ExploitCondition: "Crits if target within 4y of protected ally (proximity — bodyguard reward)"
+
+  RankScaling:
+    Rank1: "180p, 6y KB"
+    Rank2: "No change"
+    Rank3: "On crit: [Rush] — next GCD has 0 gauge cost."
+
+ShieldBash:
+  Name: "Shield Bash"
+  Type: GCD
+  GaugeCost: 15
+  Potency: "150 (200 on Pin)"
+  Range: "3y melee"
+  Targets: 1
+
+  CorePrinciple: >
+    Knockback toward nearest wall + Pin (immobilize on wall-splat).
+    The PUNISH for enemies near walls. Shooting Star puts them near walls,
+    Shield Bash locks them there.
+
+  CCComponent:
+    Normal: "3y knockback toward nearest wall"
+    Pin: "1.5s immobilize (wall within 4y behind target)"
+    MassGate: "Boss immune to displacement, damage applies"
+
+  ExploitCondition: "Always crits on Pin (positional wall-splat — 1.4x on 200p)"
+
+  RankScaling:
+    Rank1: "150/200p, Pin 1.5s"
+    Rank2: "No change"
+    Rank3: "Pin → 2.0s. Pin grants +10 bonus gauge."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 12: NTU EXPRESSION — SENTINEL INSTINCT (EXPANDED)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+NTUExpression:
+  DesignPhilosophy: >
+    Adabold has LOW personal NTU — he does not need to read enemies because
+    he can TAKE the hit regardless (high sustain, high DR). His NTU expression
+    is ENTIRELY about reading threats TO OTHERS. Sentinel Instinct is his
+    NTU — but it reads ALLY danger, not self danger. This is the inversion:
+    glass cannons (Strix) have high NTU to avoid damage. Adabold has high
+    PROXY NTU to intercept damage aimed at others.
+
+  RawrotinNTU: 8
+  # Lower than Strix (12) or Madolt (16) — he does not need personal reads.
+  # Sentinel Instinct REPLACES personal NTU need for the bodyguard role.
+
+  WhyLow: >
+    Adabold can afford to be hit. STA 16 + Shield Projection + DR means
+    incoming damage is manageable. He does not need to know "will this
+    counter me?" because the answer is "I can take it." His NTU budget
+    goes to Sentinel Instinct (ally threat detection) instead of self-preservation.
+
+  PartyNTUContribution: >
+    Adabold's Sentinel Instinct effectively gives the party NTU coverage
+    they do not personally have. A healer with NTU 5 cannot see incoming
+    threats — but Adabold sees them FOR the healer and responds with MBAS.
+    The healer does not need high NTU because Adabold IS their NTU.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 13: ANTI-PATTERNS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+AntiPatterns:
+
+  - Pattern: "Enmity table / aggro mechanic"
+    Why: "Adabold does not TAUNT. He physically INTERPOSES. Enemies target whoever they want — Adabold just arrives first."
+    Fix: "CC threat scoring handles AI targeting. MBAS handles ally protection. No aggro table."
+
+  - Pattern: "Shield = personal DR stance (old Iron Body)"
+    Why: "Personal DR is selfish. Bodyguard shield protects OTHERS."
+    Fix: "Shield Projection is directional barrier for the TEAM. Not self-buff."
+
+  - Pattern: "Zone control (Consecrate)"
+    Why: "Zone control is MetaKnight's domain (CC field). Adabold is mobile interception, not planted area denial."
+    Fix: "All abilities are targeted or positional. No ground-placed persistent zones."
+
+  - Pattern: "Tether mechanics (pull enemy to self)"
+    Why: "Pulling enemies TO you is a tank conceit. Adabold goes TO allies, not the reverse."
+    Fix: "Movement is toward ALLIES (MBAS). Displacement is ON enemies (Lob, Star, Bash). Never 'come to me.'"
+
+  - Pattern: "Passive mitigation as a SKILL mechanic (DR-as-ability)"
+    Why: "DR from abilities removes decisions. Shield Projection is a CHOICE with trade-offs."
+    Fix: "Gear/shield-based DR is expected and fine (Adabold has no armor restrictions unlike MK/Skyreign). Skill-based DR only during active decisions: Projection (committed), MBAS intercept (reactive). Numbers test, not concept test."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 14: DESIGN NOTES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+DesignNotes:
+
+  IdentitySummary: >
+    Adabold is the REACTIVE BODYGUARD. MetaKnight proactively locks areas
+    down. Adabold reactively responds to threats as they emerge. His kit
+    reads threat → dash to ally → intercept → redirect/punt the threat away.
+    The shield is not armor — it is a tool (throw it, project it, bash with it).
+
+  DesignPillars:
+    Pillar1: "Bodyguard fantasy — I protect others by being there first"
+    Pillar2: "Shield as tool — thrown, projected, bashed, bombed, never passive"
+    Pillar3: "Reactive prioritization — Sentinel warns, player chooses who to save"
+    Pillar4: "Directional commitment — barrier covers one angle, must choose correctly"
+    Pillar5: "Sustain supports role — can afford to take intercepted hits repeatedly"
+
+  BalanceKnobs:
+    - "MBAS range (15-18y)"
+    - "MBAS intercept window (2s)"
+    - "Shield Projection width (6y) and HP pool (40-50%)"
+    - "Projection gauge drain (4/s)"
+    - "Sentinel warning time (1.5-2.5s)"
+    - "Shield absent windows (Lob 0.8-1.2s, Bomb 1.5-2s)"
+    - "Gauge generation from hits received (+4) and intercepts (+8)"
+
+  ContrastTable:
+    Adabold: {Method: "Interception + redirection", Strength: "Ally protection, reactive saves, any terrain", Weakness: "Multi-angle (single direction), SR4 triage overload", Identity: "Nothing gets past me."}
+    MadoltMetaknight: {Method: "Escalating CC + pull", Strength: "Area lockdown, scales with SR, arenas", Weakness: "SR1 wasted, ranged enemies outside field", Identity: "Nothing near me can move."}
+    Siegebreaker: {Method: "Offensive pressure", Strength: "Highest DPS, breakthrough", Weakness: "Cannot protect if bypassed", Identity: "Nothing in front of me survives."}
+
+  MovementPhilosophy: >
+    Adabold is FAST toward allies. MBAS is a 15-18y instant dash. SPD 14
+    gives high base movement. He does not need a special gap-closer to ENEMIES
+    because his job is not to reach enemies — it is to reach FRIENDS. He
+    reaches enemies incidentally (they are near his friends when he arrives).
+
+  ExploitSystem:
+    ZeroRNG: true
+    Reference: "DESIGN_OVERRIDE.md §12"
+    Conditions:
+      PackFang: "Marked target (racial combo)"
+      ShieldBash_Pin: "Wall-splat achieved (positional)"
+      ShootingStar: "Target within 4y of protected ally (proximity)"
+      ShieldLob: "Target actively casting (interrupt bonus)"
+      ShieldBomb_Primary: "3+ targets hit by ricochet chain"
+
+  SimulationTargets:
+    gauge_first_spend: "8-10s"
+    gauge_full: "30-35s"
+    dps_output: "80-85% (positioning-dependent)"
+    solo_SR2: "Indefinite (high sustain + self-heal combo)"
+    mbas_coverage: "85%+ of Sentinel warnings answered (optimal)"
+    projection_uptime: "15-20% of fight (corridor phases, cover phases)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF DOCUMENT
+# ═══════════════════════════════════════════════════════════════════════════════
+# Last updated: 2026-07-15
+# Authority: DESIGN_OVERRIDE.md > BalanceTargets.yaml > this file > LLM.md
