@@ -1,0 +1,847 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# GRAPPLER (Iblis Grabbers) — Crane Frontliner / Displacement Predator
+# juice-yaml-library | Classes/2.0/Grappler_Design.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Design lineage:
+#   Biology: Octopus (multi-arm independent control, chromatophore camouflage,
+#            ink production, boneless extension, chemoreceptor sensing)
+#   Crane archetype: Claw machine (select specific target, grab, relocate to
+#            chosen destination). Multiple arms = multiple simultaneous grabs.
+#   MH Khezu/Lagiacrus: tentacle-style attacks, whip lashing, constriction
+#   Fighting games: grappler archetype (read → commit → punish), command grabs
+#   Sekiro Grapple: positional tool that creates openings, not damage itself
+#   Splatoon Ink: area denial as combo setup (not the kill, the SETUP)
+#
+# Core identity: "The invisible crane operator."
+#   Disappear. Reach out with multiple arms. Grab 2-4 targets simultaneously.
+#   Deposit them where they DON'T want to be — ink clouds, party AoE, hazards,
+#   each other. Then close distance and whip-lock the priority target.
+#   No traditional gameplay loop. A unique construct that defies standard
+#   class patterns.
+#
+# Fantasy: "I am the octopus in the reef. You don't see me until arms are
+#   already around you. By then you're being carried somewhere terrible."
+#
+# Critical distinction from other frontliners:
+#   Adabold: "I rush TO allies and intercept hits." (Pinpoint Defense)
+#   MetaKnight: "I make THIS POSITION deadly." (Zone Control)
+#   Siegebreaker: "I walk THROUGH everything in my path." (Battering Ram)
+#   Grappler: "I GRAB you and PUT you somewhere worse." (Crane)
+#
+# References:
+#   - Guidebooks/DESIGN_OVERRIDE_FRONTLINE.md (Crane subcategory definition)
+#   - Combat/BalanceTargets.yaml
+#   - Combat/AggroSystem.yaml
+#   - Attributes/Base_Attributes.yaml (Exploit system, GCD 1.2s floor)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Key: Classes.Frontliner.Grappler.Design
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 1: CLASS IDENTITY                                               ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+Identity:
+  Name: Grappler
+  Role: Frontliner
+  SubRole: "Crane Frontliner (Displacement / Multi-Grab / Forced Repositioning)"
+  Race: Iblis Grabbers
+  DamageType: physical
+  ExecutionArchetype: "Read → Commit → Relocate"
+  ExecutionTier: Special
+  # Special tier justified by:
+  # - No traditional gameplay loop (unique construct)
+  # - Multi-grab coordination (controlling 2-4 independent tentacle targets simultaneously)
+  # - Tension Gauge mastery under pressure (active pin management with enemy scaling)
+  # - Reading enemy AI for mode-swap timing (Fisher ↔ Holder)
+  # - Stealth → multi-grab → relocation combos require high game sense
+  # - NOT a knowledge-gate-before-entry anymore — knowledge expressed MID-COMBAT
+
+  Description: >
+    An octopus-humanoid frontliner who disappears into terrain, extends multiple
+    arms to grab 2-4 enemies simultaneously, and deposits them into disadvantaged
+    positions — ink clouds, party AoE, environmental hazards, or clustered together
+    for cleave. Operates in two fluid modes: The Fisher (ranged displacement at
+    8-15m) and The Holder (close-range whip strikes escalating to single-target
+    pin). Stealth is a universal tool available in either mode, not a dedicated
+    stance. Ink is a skill utility for area denial combos, not a gameplay state.
+
+  CoreFantasy: >
+    You are the invisible crane operator. Your arms reach from nowhere, seize
+    multiple targets at once, and carry them to where YOUR team wants them.
+    The battlefield rearranges itself according to your grabs. When one target
+    demands personal attention, you close distance and lock it down with whip
+    strikes that escalate into a full-body pin — maintaining tension through
+    active effort, not passive waiting. You don't fight enemies where they
+    stand. You move them to where they die.
+
+  InputModality:
+    PrimaryFocus: target_selection_and_destination_planning
+    SecondaryFocus: mode_swap_timing_and_tension_management
+    TertiaryFocus: stealth_positioning_for_multi_grab_setup
+    DecisionType: opportunistic_commitment
+    # Cognitive load is distributed: WHAT to grab (target selection),
+    # WHERE to put it (destination), WHEN to swap modes (AI reading),
+    # and HOW LONG to hold (tension gauge management).
+
+  StatPriority:
+    Primary: STR    # Grip force, displacement distance, whip strike damage
+    Secondary: NTU  # Reads enemy AI patterns for mode-swap timing, threat assessment
+    Tertiary: SPD   # Retraction speed, whip strike tempo, stealth repositioning
+    DumpStat: MAG   # Zero magic. Purely biological/physical.
+    DumpStat2: MED  # No healing output. Predator endures, not regenerates.
+    # Iblis Grabbers base: STR 14, NTU 12, SPD 10, STA 10, DEX 8, MAG 4, MED 4
+
+  DesignStatement: >
+    Grappler is the class that MOVES the problem. Other frontliners solve
+    enemy positioning by blocking paths (Adabold), making positions lethal
+    (MetaKnight), or advancing through formations (Siegebreaker). Grappler
+    solves it by picking enemies up and putting them somewhere else. The
+    multi-grab from stealth is the signature moment: invisible, then suddenly
+    2-4 enemies are airborne and landing in your party's kill zone. Special
+    tier because coordinating multiple independent grab targets while managing
+    mode swaps and tension gauge has no parallel in any other class.
+
+  FailureStates:
+    BadDestination:
+      Cause: "Grabbed targets deposited in neutral/safe positions"
+      Cost: "Grip Gauge spent, grab cooldown used, zero positional value created"
+      Severity: "HIGH — the Grappler's ENTIRE value is destination quality"
+    ModeSwapMistiming:
+      Cause: "Switched to Holder when Fisher displacement was still needed, or stayed Fisher when pin opportunity expired"
+      Cost: "Lost pin window OR team takes uncontrolled damage from unmanaged threats"
+      Severity: "MODERATE — recoverable but wastes 4-6s"
+    TensionFailure:
+      Cause: "Failed tension gauge management during pin"
+      Cost: "Full 3s fatigue — cannot grab, mode-swap, or stealth. Vulnerable."
+      Severity: "HIGH — full punishment window, enemies free + Grappler debuffed"
+    StealthBroken:
+      Cause: "Detected before multi-grab setup completes"
+      Cost: "Multi-grab opportunity lost. Must wait for stealth cooldown."
+      Severity: "MODERATE — falls back to single-tentacle Fisher grabs"
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 2: FRONTLINER SUBCATEGORY                                       ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+FrontlinerSubcategory:
+  Primary: Crane
+  Secondary: Zone Control
+  Definition: "Grab target, carry, relocate elsewhere. Single-target forced repositioning."
+  SecondaryJustification: >
+    Ink utility creates area denial that combos with displacement — grab targets
+    and deposit them in disadvantaged zones. The Grappler doesn't just MAKE
+    dangerous positions (that's MetaKnight). It makes dangerous positions AND
+    fills them with grabbed enemies.
+  Distinction:
+    vs_BatteringRam: >
+      Ram commits to a DIRECTION and displaces everything in path. Crane selects
+      SPECIFIC targets and moves them to CHOSEN destinations. Ram is a bowling
+      ball; Crane is a claw machine.
+    vs_ZoneControl: >
+      Zone Control makes positions dangerous (persistent). Crane MOVES enemies
+      INTO those positions (active repositioning). Grappler does both — creates
+      ink zones AND fills them with grabbed enemies.
+    vs_PinpointDefense: >
+      Pinpoint Defense intercepts threats TO allies. Crane removes threats FROM
+      the battlefield entirely (relocated, pinned, deposited in hazards).
+    vs_Cropduster: >
+      Cropduster passes over areas dropping denial. Crane reaches INTO specific
+      spots and EXTRACTS targets from them.
+  Reference: "Guidebooks/DESIGN_OVERRIDE_FRONTLINE.md"
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 3: RACIAL LOCK — IBLIS GRABBERS                                ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+RacialLock:
+  Race: Iblis Grabbers
+  Enforcement: hard_lock
+  BiologicalLock: tentacles + chromatophores + ink sacs
+
+  Physiology: >
+    Octopus-humanoid predator. Upper body humanoid frame (bipedal, Spine
+    Launcher wielded in main hand). Lower/lateral body features 2-4 combat tentacles that
+    function as a unified "offhand system." Tentacles possess:
+    - Chromatophores (color/texture shift — full-body terrain camouflage)
+    - Ink sacs (biological ink production for area denial)
+    - Suckers with chemoreceptors (taste/grip/sense through contact)
+    - Muscular hydrostat structure (boneless extension 8-15m / contraction to whip)
+    - Proprioceptive nerve density 4x humanoid baseline (independent arm control)
+
+  LockJustification: >
+    The class requires SIMULTANEOUS INDEPENDENT CONTROL of 2-4 prehensile
+    appendages plus chromatophore activation across the entire body surface.
+    No other race possesses: (1) multiple independently controllable grasping
+    limbs, (2) full-body chromatophore camouflage, (3) biological ink
+    production, (4) boneless extension capable of 8-15m reach. All four
+    systems are required for the class to function. The appendages must be
+    alive, evolved, and neurologically integrated.
+
+  WhyNotEquipment: >
+    A mechanical grappling arm replicates extension and grip. It CANNOT
+    replicate: chromatophore stealth (biological light manipulation across
+    the full body), ink production (biological fluid synthesis), chemoreceptor
+    sensing (contact-based awareness), proprioceptive feedback enabling
+    INDEPENDENT simultaneous control of multiple arms without conscious
+    per-arm attention, or the muscular hydrostat toggle between rigid whip
+    and flexible grabber in the same appendage.
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 4: MODE SYSTEM (Fisher / Holder)                                ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+ModeSystem:
+  Philosophy: >
+    Two fluid combat modes that alternate based on opportunity, not timers.
+    No pre-instance lock. No stance commitment gate. The Grappler reads enemy
+    AI patterns mid-combat and swaps when the moment demands it. Long-Range
+    (Fisher) is the primary operating mode — ranged displacement control.
+    Melee Grapple (Holder) is the opportunistic escalation — whip strikes
+    into single-target lockdown when a high-value pin presents itself.
+    Stealth is a universal tool layered on top of either mode.
+
+  ModeSwapRules:
+    SwapCondition: "Fluid — player-initiated based on range and opportunity"
+    SwapCost: "0.5s transition GCD (tentacles reconfigure: extend→tense or tense→extend)"
+    SwapCooldown: "None — but mode swap DURING an active grab/pin is impossible"
+    DesignIntent: >
+      Mode swap is the READING skill. Fisher handles groups and positioning.
+      Holder handles the ONE target that needs to be locked. Knowing WHEN to
+      swap — not whether you CAN — is the Special tier expression.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # MODE A: THE FISHER (Long-Range Displacement) — Primary Mode
+  # ─────────────────────────────────────────────────────────────────────────
+
+  TheFisher:
+    Name: "The Fisher"
+    Range: "8-15m (tentacle extension range)"
+    TentacleState: "Extended and loose — reaching, grabbing, pulling, throwing"
+    GameplayIdentity: >
+      Ranged displacement predator. Extend tentacles to bind targets at
+      distance, then relocate them — pull toward self, throw into hazards,
+      tether in place, or deposit into ink clouds. Multiple tentacles can
+      extend to different targets simultaneously for weaker but broader
+      control. This is the default operating state.
+
+    CoreLoop: >
+      EXTEND → BIND → DECIDE DESTINATION → RELOCATE → RETRACT → REPEAT
+      - Extend: project tentacle(s) to target(s) at 8-15m
+      - Bind: target seized (reduced mobility, Grappler connected)
+      - Decide: pull? throw? tether? deposit into ink/AoE?
+      - Relocate: execute chosen displacement
+      - Retract: 2.0s vulnerability window, tentacle returns
+      - Repeat: continuous displacement control cycle (every 4-6s)
+
+    MultiTentacleControl:
+      SingleTarget: "One tentacle = full grip strength. Maximum displacement distance."
+      SplitTargets: "2-4 tentacles to 2-4 targets = reduced grip per target. Shorter displacement, easier break-free."
+      DesignIntent: >
+        Single tentacle grabs are precise and powerful (Crane: one target to
+        one destination). Multi-tentacle grabs from Fisher mode are weaker
+        versions of the stealth multi-grab — useful for disruption but not
+        full relocation. Stealth multi-grab is where the FULL simultaneous
+        crane fantasy lives.
+
+    VulnerabilityWindow:
+      Trigger: "Tentacle retraction after displacement"
+      Duration: "2.0s"
+      Effect: "+15% damage taken, cannot use tentacle abilities"
+      Counterplay: "Enemies who close during retraction punish overextension"
+      EnemyReaction:
+        Description: >
+          At Rank 2+, enemies REACT to visible tentacle extensions. A tentacle
+          reaching across 8-15m is a telegraph — competent enemies will:
+          dodge (sidestep), block (absorb on shield), sever (attack the tentacle),
+          or bait (let it connect, then punish). Naked Fisher grabs become
+          CONTESTED ACTIONS against reactive AI.
+        Solutions:
+          SpineLauncher: "CC the target BEFORE extending (flinch/slow/freeze → grab uncontested)"
+          Stealth: "Targets can't react to what they can't see (bypass reaction entirely)"
+          MultiTentacle: "Overwhelm — react to one arm, three others still grabbing"
+          Timing: "Extend during enemy recovery frames (post-attack, mid-animation)"
+        TentacleSeverConsequence: >
+          Severed tentacles regenerate over time but reduce grab capacity until
+          regrown. Losing arms to reckless extensions is a PLAYER MISTAKE.
+          Spine Launcher exists to prevent this — CC first, grab safe.
+      ExploitInteraction: >
+        If an enemy FAILS to punish the retraction window, the Grappler
+        applies CounterWindow exploit condition on next grab (the enemy
+        missed their chance — now they're read).
+
+    InkCombo: >
+      Fisher mode has full access to ink utility skills. Primary combo:
+      Bind target → Spray Ink at destination → Throw target INTO ink cloud.
+      Target lands blinded, slowed, in denial zone. Party capitalizes.
+      Multi-target version: bind 2 targets, ink between them, throw both in.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # MODE B: THE HOLDER (Melee Whip / Pin) — Opportunistic Mode
+  # ─────────────────────────────────────────────────────────────────────────
+
+  TheHolder:
+    Name: "The Holder"
+    Range: "Melee (adjacent, 0-4m)"
+    TentacleState: "Tensed, rigid, whip-ready — cracking, lashing, constricting"
+    GameplayIdentity: >
+      Close-range whip striker that escalates into single-target lockdown.
+      Feel is DISTINCT from Fisher: cracking lashes, rapid tentacle strikes,
+      percussive slaps — not extending grabs. Whip strikes build toward grab
+      opportunity. When the moment is right, grab → escalate → Full Pin.
+      NOT cycled on cooldown. NOT forced. Player reads enemy AI and commits
+      when the opening presents itself.
+
+    CoreLoop: >
+      CLOSE → WHIP → READ → SEIZE (opportunistic) → PIN → MANAGE TENSION → RELEASE
+      - Close: enter melee range (mode swap from Fisher or natural approach)
+      - Whip: lashing strikes (distinct GCD feel — fast, crackling, percussive)
+      - Read: watch enemy AI for pin opportunity (telegraphed vulnerability)
+      - Seize: grab when opening presents (NOT on cooldown rotation)
+      - Pin: Full Pin — both locked, Tension Gauge active
+      - Manage: maintain Tension Gauge via timed inputs
+      - Release: controlled release (success) or forced break (failure)
+
+    WhipStrikes:
+      Purpose: "Define Holder's moment-to-moment DIFFERENTLY from Fisher"
+      Feel: "Cracking, percussive, rapid. Tentacle used as rigid weapon, not flexible grabber."
+      Damage: "Moderate sustained DPS — higher than Fisher's displacement (which is utility-focused)"
+      GaugeGeneration: "Each whip strike generates Grip Gauge (fueling eventual Seize)"
+      DesignIntent: >
+        Fisher EXTENDS tentacles (loose, flexible, reaching). Holder WHIPS
+        tentacles (rigid, fast, impactful). Same biological appendage, completely
+        different mechanical expression. The mode swap changes how the tentacle
+        BEHAVES, not just what buttons are available.
+
+    PinEscalation:
+      Stage1_Seize:
+        Trigger: "Player-initiated when read confirms opening (oGCD command grab)"
+        Cost: "20 Grip Gauge"
+        Effect: "Target seized — reduced mobility for both. 4s escalation window."
+        Decision: "Escalate to Full Pin? Or apply Submission Hold and release?"
+      Stage2_SubmissionHold:
+        Effect: "Short CC (2s) + target debuffed. Grappler released to continue whipping."
+        Purpose: "Low-commitment option when Full Pin is too risky"
+      Stage3_FullPin:
+        Effect: "Both locked. Allies deal +25% to pinned target. Tension Gauge activates."
+        Duration: "Variable — sustained as long as Tension Gauge is maintained"
+        SelfCost: "Grappler cannot act except manage Tension Gauge. True self-CC."
+
+    OpportunismPhilosophy: >
+      The Holder does NOT cycle Seize on cooldown. Enemy AI presents pin
+      opportunities through telegraphed states: post-ability recovery, failed
+      dodge, grouped-with-allies moments, casting channels. The Grappler READS
+      these and commits. A Holder who grabs on cooldown is playing it WRONG —
+      the grab must answer a SPECIFIC opening. This is the knowledge expression.
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 5: STEALTH — UNIVERSAL TOOL                                     ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+StealthSystem:
+  Classification: "Universal tool — available in either mode, not a stance"
+  Mechanism: "Full-body chromatophore activation — Grappler disappears into terrain"
+  Purpose: >
+    CRANE SETUP. Stealth exists to enable the signature multi-grab moment:
+    disappear → position → extend ALL arms simultaneously → seize 2-4 targets
+    at once → deposit them where the team needs them. This is NOT an assassin
+    tool. There is no "opener burst damage." The value is POSITIONAL — targets
+    are grabbed and moved, not ambushed and killed.
+
+  MultiGrab:
+    Mechanic: "While stealthed, ALL tentacles can independently grab different enemies simultaneously"
+    MaxTargets: "Equal to arm count (2-4 depending on Iblis Grabber individual — controllable variable)"
+    GripStrength: "Divided across targets — each grab is weaker than a single-tentacle grab"
+    Coordination: >
+      Player selects up to [arm count] targets while stealthed. On activation,
+      ALL grabs execute simultaneously. Targets are seized at once — no
+      sequential grabbing. The multi-grab is ONE decision point (target
+      selection) with ONE execution moment (simultaneous seizure).
+    Destination: >
+      After multi-grab, player chooses destination(s) for all seized targets:
+      - Deposit all into one point (cluster for cleave/AoE)
+      - Spread to different positions (isolate healers from tanks)
+      - Throw into ink cloud (blinded + denial)
+      - Throw into party AoE (damage)
+      - Throw into environmental hazard (terrain damage)
+
+  StealthRules:
+    Activation: "Channel 2s while out of combat, or 4s while in combat (can be interrupted)"
+    Duration: "Until grab is initiated, movement breaks proximity threshold, or enemy detection"
+    Cooldown: "12s after stealth breaks (whether by grab or detection)"
+    Detection: "Enemies with high NTU or detection abilities can reveal. SR3+ enemies have enhanced detection."
+    ModeInteraction: "Stealth is layered ON TOP of current mode. Breaks into whichever mode is active."
+
+  DesignIntent: >
+    The stealth multi-grab is the Grappler's ULTIMATE crane moment. It answers
+    the question: "What if a claw machine had 4 claws, was invisible, and could
+    grab 4 prizes at once?" Every other class creates kill conditions by dealing
+    damage or CC-ing one target. The Grappler creates kill conditions by
+    physically rearranging 2-4 enemies into positions where the PARTY kills them.
+    Stealth enables this by removing the "enemies avoid your grabs" problem.
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 6: TENSION GAUGE (Pin Management)                               ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+TensionGauge:
+  Purpose: >
+    Replaces flat 3s fatigue. During Full Pin, the player actively manages
+    a balance meter through timed inputs. The pin is NOT a "press button and
+    wait" state — it's the gameplay CLIMAX. Holding a thrashing target down
+    requires continuous physical effort expressed as player input.
+
+  Mechanic:
+    Display: "Oscillating bar — must be kept within a center zone via timed inputs"
+    InputType: "Rhythmic button presses — not mashing, TIMING. Press on rhythm = stable. Desync = drift."
+    SuccessState: "Bar stays centered → pin holds, no fatigue on release"
+    FailureState: "Bar hits edge → forced release + full 3s fatigue"
+    PartialSuccess: "Bar drifts but doesn't hit edge → release with 0.5-1.5s reduced fatigue"
+
+  EnemyScaling:
+    Principle: "Stronger enemies are HARDER to hold"
+    Implementation:
+      BaseEnemy: "Slow oscillation, wide center zone. Easy to maintain."
+      EliteEnemy: "Faster oscillation, narrower center zone. Requires focus."
+      BossEnemy: "Rapid oscillation, very narrow zone. Extremely demanding. Short pin duration before forced break."
+      SRScaling: "SR3+ enemies add random rhythm disruptions (target thrashes unpredictably)"
+    DesignIntent: >
+      The difficulty of HOLDING a pin scales with target value. Pinning a
+      trash mob is trivial (free +25% for party). Pinning an elite requires
+      sustained attention. Pinning a boss is a brief, intense skill test that
+      rewards with a short but valuable +25% window. You can't just Full Pin
+      every boss for free — the tension demands earn the reward.
+
+  CCInterrupt:
+    Rule: "If the Grappler takes hard CC (stun, knockback, root) during pin, Tension Gauge BREAKS"
+    Result: "Forced release + FULL 3s fatigue (worst outcome)"
+    CounterplayImplication: >
+      Enemies with CC abilities can rescue pinned allies. The Grappler must
+      either pin when CC threats are handled, or accept the risk. Party
+      peeling for the Grappler during pin is a valid coordination pattern.
+      This prevents "just pin the boss and ignore everything else."
+
+  FatigueSpectrum:
+    PerfectRelease: "0s fatigue — Tension Gauge maintained flawlessly. Immediate re-engagement."
+    GoodRelease: "0.5s fatigue — minor drift, controlled voluntary release."
+    PoorRelease: "1.5-2.0s fatigue — significant drift, released before edge but struggling."
+    ForcedBreak: "3.0s fatigue — bar hit edge OR CC interrupt. Full punishment."
+    DuringFatigue: "Cannot grab, mode-swap, stealth, or use tentacle abilities. Spine Launcher only."
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 7: INK UTILITY (Skills, Not Stance)                             ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+InkSystem:
+  Classification: "Utility skills — available in either mode, not a dedicated stance"
+  Resource: "Ink Charges (4 max, regenerates 1 per 8s — biological sac refill)"
+  Purpose: >
+    Area denial that COMBOS with displacement. The Grappler creates ink zones,
+    then grabs enemies and throws them INTO the ink. Ink is never the primary
+    gameplay — it's the DESTINATION for crane operations. "I grabbed you.
+    Where am I putting you? In the ink."
+
+  CoreCombos:
+    FisherInk: "Bind target at range → Spray Ink at landing point → Throw target into ink"
+    StealthInk: "Stealth → Spray Ink → Multi-grab 2-4 targets → Deposit ALL into ink cloud"
+    HolderInk: "Spray Ink behind target → Whip strikes push target backward into ink → Pin in ink zone"
+
+  InkEffects:
+    InZone: "-40% accuracy, -30% movement speed, vision reduced to 4m radius"
+    Duration: "8s per cloud (persistent area, not attached to targets)"
+    Friendly: "Iblis Grabbers see THROUGH ink (chemoreceptor sensing). Allies cannot."
+    AllyMitigation: "Allies take 50% reduced ink penalty (game balance — not full friendly fire)"
+
+  ZoneControlSecondary: >
+    Ink is what makes the Grappler's secondary subcategory Zone Control.
+    The ink clouds themselves create persistent dangerous positions. But unlike
+    MetaKnight (who makes positions dangerous and KEEPS enemies there via CC
+    stacks), the Grappler makes positions dangerous and PUTS enemies there
+    via grabs. Create zone → fill zone. Zone Control PLUS Crane.
+
+  DesignNote: >
+    Ink abilities are detailed in Grappler_Skills.yaml. This section defines
+    the ROLE ink plays in the Design — it is a destination/combo tool, not
+    a standalone gameplay system. Full ability descriptions, costs, and
+    interactions belong in the Skills file.
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 8: RESOURCE SYSTEM                                              ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+ResourceSystem:
+  PrimaryResource:
+    Name: Grip Gauge
+    Maximum: 100
+    CombatStartBaseline: 30
+    Generation:
+      PerSpineHit: 5  # Spine Launcher hits generate gauge (CC + resource in one action)
+      PerWhipStrike: 7  # Holder generates faster (melee commitment rewarded)
+      PassiveInCombat: "2 per second"
+    Spending:
+      TentacleLash: 10
+      SingleGrab: 15
+      MultiGrab: "10 per target (2-4 targets = 20-40 total)"
+      Seize: 20
+      InkSpray: 10
+    CrossCombatBehavior: >
+      Resets to 30 at combat start. Does NOT carry between encounters.
+      Prevents banking gauge in easy fights for free multi-grabs in hard fights.
+    DesignPurpose: >
+      Ensures the Grappler must fire spines (Fisher mode) or use whip
+      strikes (Holder mode) to fuel tentacle abilities. Pure grab spam is
+      impossible. The weapon and the tentacles feed each other.
+
+  SecondaryResource:
+    Name: Ink Charges
+    Maximum: 4
+    Regeneration: "1 per 8s (biological sac refill)"
+    Spending: "1 per ink skill use"
+    DesignPurpose: >
+      Limits area denial spam. 4 charges = 4 ink deployments before waiting.
+      Forces the Grappler to be DELIBERATE about where ink goes — every cloud
+      must be a planned destination for a future grab.
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 9: EQUIPMENT & AUGMENTS                                         ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+Equipment:
+  PrimaryWeapon:
+    Name: Spine Launcher
+    Type: "Racial weapon — harvested from deep-sea venomous fauna"
+    Description: >
+      Crafted from harvested sea fauna (urchin spines, cone snail barbs,
+      jellyfish nematocysts). Only Iblis Grabbers can retrieve these —
+      they survive the crushing depths, navigate venomous reefs with
+      chromatophore camouflage, and handle toxic materials safely via
+      chemoreceptor feedback. Ammunition is renewable but LOCATION-GATED:
+      restock requires returning to deep-sea harvesting grounds.
+
+    RacialJustification: >
+      Not grown from the body (that's tentacles). FETCHED from the sea.
+      Other races cannot: survive harvesting depths, handle venomous spines
+      without chemoreceptor guidance, or navigate the reef structures where
+      these creatures live. The weapon is racial because the SUPPLY CHAIN
+      is racial.
+
+    WeaponSwap:
+      Method: "oGCD quick-swap (no cast time) — spine type switches instantly"
+      Carry: "All types carried simultaneously in quiver/bandolier"
+      Philosophy: >
+        Each spine type serves a different COVERAGE role in multi-target
+        engagements. Swapping is tactical — respond to what the field needs
+        RIGHT NOW. Not a rotation; a response to spatial pressure.
+
+    SpineTypes:
+      UrchinSpine:
+        CCStage: 0 (soft — flinch/interrupt)
+        Coverage: "Single-target rapid fire"
+        Effect: "Flinch/interrupt (~0.3-0.5s) — cancels enemy's current action"
+        Role: >
+          REACTIVE DENIAL. Poke the one enemy trying to sever your tentacle
+          mid-grab. Protect ongoing tentacle operations. Cheapest, most
+          spammable. The 'keep your hands off my arms' tool.
+        Economy: "Abundant (dozens per restock). Functionally unlimited in combat."
+        EnablesGrab: "Interrupts the sever/dodge/block animation — tentacle completes uncontested"
+
+      JellyfishNematocyst:
+        CCStage: 1 (slow/root — AoE cloud)
+        Coverage: "AoE burst radius on impact (4-5m cloud, lingers 2-3s)"
+        Effect: "Slow + reaction speed debuff to all enemies in cloud"
+        Role: >
+          AREA LOCKDOWN. The ZONE CONTROL weapon. Blanket 3+ active targets
+          so none can simultaneously react to tentacles. Enables stealth
+          multi-grab (slow cluster → disappear → grab all at once). Herds
+          enemies into ink zones (can't escape in time).
+        Economy: "Moderate (6-8 per restock). Meaningful cost per use."
+        EnablesGrab: "Multiple targets too slow to dodge — tentacles grab 2-4 simultaneously"
+
+      ConeSnailBarb:
+        CCStage: 2 (hard CC — penetrating line)
+        Coverage: "Penetrating line (passes through multiple enemies in a lane)"
+        Effect: "Brief paralysis (~1-1.5s) on all targets hit in the line"
+        Role: >
+          LANE DENIAL. Locks an approach vector. Lurkers at range can't
+          advance through a frozen lane. Buys time to finish relocating
+          the active targets. Also punishes tight formations (line hits
+          multiple = multiple brief freezes).
+        Economy: "Rare (2-3 per restock). Must be deliberate about when to spend."
+        EnablesGrab: "Frozen targets = guaranteed grab window. Lane frozen = no reinforcements"
+
+    CCStageRule: >
+      Spine weapons cap at Stage 2. Stage 3 is ALWAYS the tentacle pin
+      (Tension Gauge). Spines ENABLE pin, never replace it. The escalation
+      ladder: poke (Stage 0) → slow area (Stage 1) → freeze lane (Stage 2)
+      → tentacle seizes (Stage 3 pin).
+
+    EngagementFlow:
+      MultiTarget: >
+        Nematocyst cloud (slow cluster) → Stealth → Multi-grab all slowed
+        targets → Deposit in ink/AoE → Urchin any that resist
+      LaneControl: >
+        Cone Snail through approach lane (freeze reinforcements) → Fisher
+        binds active targets → relocate into ink → lane thaws but targets
+        already repositioned
+      TentacleProtection: >
+        Tentacles working (grabbing/binding) → enemy moves to sever →
+        Urchin spine (flinch) → sever interrupted → grab completes
+      SingleTargetEscalation: >
+        Nematocyst (slow) → Fisher bind → drag toward Grappler →
+        Mode swap to Holder → Whip strikes → Cone Snail (freeze) →
+        Seize → Pin (Tension Gauge)
+
+    DesignStatement: >
+      The Spine Launcher is NOT a damage weapon — it is a FIELD CONTROL tool.
+      Every spine type answers the question: "How do I make the battlefield
+      safe for my tentacles to work?" Urchin protects active grabs. Nematocyst
+      enables multi-grab. Cone Snail denies reinforcement. The tentacles do
+      the Crane work; the spines ensure the Crane can operate undisturbed
+      across multiple targets.
+
+  Offhand:
+    Description: "The tentacles themselves. Cannot be unequipped or replaced."
+    AugmentSlot: "Tentacle Augment — biological modifications that enhance tentacle performance"
+    Note: >
+      Tentacles are the PRIMARY tool. Spine Launcher is the ENABLER.
+      When tentacles are severed/regenerating, Spine Launcher maintains
+      frontline presence (still applies CC to enemies) but Crane functionality
+      is degraded until regrowth completes.
+
+  TentacleAugments:
+    Categories:
+      GripAugments: "Stronger grab — harder break-free, longer displacement distance"
+      ReachAugments: "Farther extension (Fisher) — 15m → 18m, faster retraction"
+      WhipAugments: "Harder strikes (Holder) — increased whip damage, faster whip tempo"
+      ChromatophoreAugments: "Tighter stealth detection radius, faster stealth activation"
+      InkAugments: "More charges (4→5), faster regen, larger cloud radius"
+    Philosophy: >
+      Augments ENHANCE the Grappler's chosen playstyle emphasis. A Fisher-focused
+      player stacks Reach + Grip augments. A Holder-focused player stacks Whip +
+      Grip augments. Chromatophore augments benefit all playstyles (stealth is
+      universal). No augment grants abilities from a different class.
+
+  TentacleRegeneration:
+    Description: >
+      Severed tentacles regenerate over time. Losing arms reduces simultaneous
+      grab capacity but does NOT fully disable the class — Spine Launcher still
+      functions, remaining tentacles still grab (fewer targets), and the main
+      body is still a frontliner.
+    Mechanic: >
+      Each tentacle regenerates independently. Regen time scales with how much
+      was lost (tip snip = fast, base sever = slow). Losing ALL tentacles due
+      to reckless play is possible (Special tier — you need to know what you're
+      doing) and results in a pure Spine Launcher fighter until regrowth.
+    SkillExpression: >
+      Managing tentacle health IS part of the class. Don't extend into enemies
+      that will sever. Use stealth to bypass reactors. Use Urchin spines to
+      interrupt sever attempts. Losing arms is a PLAYER MISTAKE, not RNG.
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 10: EXPLOIT SYSTEM INTERACTION                                  ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+ExploitSystem:
+  Philosophy: >
+    The Grappler applies Exploit conditions through DISPLACEMENT and POSITIONING,
+    not through raw damage. Every grab that relocates an enemy creates an
+    exploitable state. The party then capitalizes with damage. Grappler is
+    the SETUP; party is the PAYOFF.
+
+  ConditionsApplied:
+    OffBalance:
+      Source: "Any displacement (throw, pull, multi-grab deposit)"
+      Duration: "2s after landing"
+      Effect: "Target exploitable — DEX-scaled bonus damage from any source"
+      Reference: "Conditions/Exploit.PlayerInflicted.yaml"
+    Surrounded:
+      Source: "Multi-grab deposit clusters 3+ enemies in 4m radius"
+      Duration: "3s after deposit (while still clustered)"
+      Effect: "All clustered targets exploitable — AoE abilities gain Exploit bonus"
+      Reference: "Conditions/Exploit.PositionallyInflicted.yaml"
+    CounterWindow:
+      Source: "Enemy fails to punish Grappler's retraction vulnerability window"
+      Duration: "Until Grappler's next grab (one-use)"
+      Effect: "Next grab deals bonus damage + extended bind duration"
+      Reference: "Conditions/Exploit.PlayerInflicted.yaml"
+
+  NoCritAntiPattern: >
+    The Grappler NEVER relies on random critical hit chance. Every Exploit
+    condition is positional, displacement-triggered, or AI-read-based. If
+    bonus damage occurs, the player CREATED the condition deliberately through
+    grab placement, mode-swap timing, or enemy AI reading.
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 11: NTU EXPRESSION                                              ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+NTUExpression:
+  BaseNTU: 12  # Iblis Grabbers — predator perception, chemoreceptor sensing
+  Name: "Prey Sense"
+  Description: >
+    The Grappler's NTU reads are focused on TARGET VULNERABILITY — when enemies
+    are grabbable, when they'll break free, and when pin opportunities present.
+    Predator perception through chemoreceptor contact and proprioceptive
+    spatial awareness.
+
+  Thresholds:
+    NTU5_GrabWindow:
+      UIElement: "Tentacle icon pulses green/yellow/red on potential targets"
+      Reads: "Green = freely grabbable. Yellow = will resist (reduced displacement). Red = grab-immune or will counter."
+    NTU8_BreakFreeWarning:
+      UIElement: "Grip bar shows break-free proximity during holds"
+      Reads: "How close is the target to escaping? Warns before break so Grappler can release voluntarily vs forced."
+    NTU12_PinTiming:
+      UIElement: "Subtle flash on enemy during AI vulnerability states"
+      Reads: "Shows WHEN the target is in a state that won't immediately counter a Seize attempt. The pin opportunity window."
+    NTU15_FormationRead:
+      UIElement: "Ghost outlines showing where multi-grab deposit would cluster enemies"
+      Reads: "Previews the RESULT of a multi-grab before executing. Shows landing positions so player can evaluate destination quality."
+
+  DesignNote: >
+    NTU 12 (base) gives the Grappler immediate access to Pin Timing reads —
+    critical for the "read enemy AI for mode-swap timing" Special tier
+    expression. Without NTU reads, the Grappler couldn't distinguish between
+    "safe to Seize" and "Seize will be countered." NTU IS the knowledge gate
+    made visible.
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 12: VULNERABILITY DESIGN                                        ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+Vulnerability:
+  Universal: >
+    NO SELF-HEAL. The Grappler has zero self-healing across all modes.
+    No lifesteal, no regeneration, no tentacle-based recovery. Depends
+    entirely on allies and items for sustain. The predator endures or dies.
+
+  PerMode:
+    Fisher:
+      Window: "2.0s retraction vulnerability"
+      Effect: "+15% damage taken, no tentacle abilities"
+      Counter: "Enemies who close distance during retraction punish greed"
+      CounterContent: "Melee-rush enemies, cluttered maps blocking LoE, displacement-immune targets"
+    Holder:
+      Window: "Self-CC during Full Pin + Fatigue post-release"
+      Effect: "Cannot act during pin (except Tension). Fatigue disables tentacles 0-3s."
+      Counter: "Enemies CC the Grappler during pin → forced break + max fatigue"
+      CounterContent: "Multi-enemy with no ally peel, ranged enemies, high-CC content"
+    Stealth:
+      Window: "12s cooldown after break"
+      Effect: "Cannot re-stealth. Multi-grab unavailable. Falls to single-tentacle Fisher grabs."
+      Counter: "Detection abilities, SR3+ enhanced senses, AoE reveals"
+      CounterContent: "Detection-heavy content, dense packs with overlapping perception cones"
+
+  PartyDependency: >
+    The Grappler is MORE party-dependent than other frontliners:
+    - Adabold protects HIMSELF while protecting allies (Shield Projection, passive DR)
+    - MetaKnight generates threat that makes enemies target HIM (self-reinforcing)
+    - Grappler SELF-CC's during Full Pin and depends on allies to not let other
+      enemies hit them. In exchange: +25% party damage on pinned target + constant
+      enemy relocation into kill zones. The trade is real.
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 13: ANTI-PATTERNS                                               ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+AntiPatterns:
+  - Name: "No Traditional Rotation"
+    Rule: >
+      The Grappler has no fixed ability sequence. Each mode creates a decision
+      TREE based on battlefield state. Fisher: extend where? Deposit where?
+      Holder: whip or seize? Escalate or submit? Every node branches.
+
+  - Name: "No Burst Cycle"
+    Rule: >
+      No 2-minute burst window. No recurring damage spike. Stealth multi-grab
+      is the closest to "burst" but its value is POSITIONAL, not damage, and
+      its timing is stealth-cooldown-gated (12s), not burst-cadence-aligned.
+
+  - Name: "No Pin Cycling"
+    Rule: >
+      The Holder does NOT grab on cooldown. Seize answers SPECIFIC AI openings.
+      Grabbing a target that will immediately break free or that doesn't need
+      pinning is a waste of 20 Grip Gauge and a potential fatigue punishment.
+      OPPORTUNISM, not rotation.
+
+  - Name: "No RNG Crits"
+    Rule: >
+      Zero random critical hit chance. All bonus damage is Exploit-conditional:
+      OffBalance (displacement), Surrounded (cluster deposit), CounterWindow
+      (enemy failed to punish retraction). Player CREATES conditions.
+
+  - Name: "No Self-Heal"
+    Rule: >
+      Zero self-healing. No lifesteal, no regeneration, no tentacle-based
+      recovery. Depends entirely on allies and items. The predator endures.
+
+  - Name: "No Assassin Identity"
+    Rule: >
+      Stealth is for CRANE SETUP (multi-grab positioning), NOT for burst
+      damage openers. The Grappler does not deal bonus damage from stealth.
+      It deals bonus DISPLACEMENT from stealth. Value is positional, not
+      lethal. "I grabbed you from invisibility" not "I one-shot you from
+      invisibility."
+
+  - Name: "No Stance Lock"
+    Rule: >
+      SUPERSEDED from old design. Modes are fluid. No pre-instance commitment.
+      The Special tier expression is now mid-combat reading + tension mastery,
+      not pre-combat stance selection.
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 14: PARTY FUNCTION & ROLE OBJECTIVE                             ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+PartyFunction:
+  RoleObjective: >
+    MAXIMIZE enemy displacement into disadvantaged positions. The Grappler's
+    value is measured by HOW MANY enemies are in positions they don't want to
+    be in, and how VALUABLE those positions are for the party.
+
+  PartyValue:
+    ForDPS: "Enemies deposited into AoE kill zones. Clustered via Surrounded exploit. Pinned for +25% single-target."
+    ForHealers: "Threats physically removed from healer proximity. Dangerous enemies relocated away."
+    ForOtherFrontliners: "Feeds MetaKnight zones (throw into CC field). Sets up Adabold corridor blocks (deposit enemies in lane)."
+
+  WhenToInvite: >
+    Parties invite Grappler for:
+    - Multi-target content where enemy POSITIONING matters (throw adds into kill zone)
+    - Boss fights with high-value pin windows (burst phase enabler via +25%)
+    - Content with dangerous enemy formations that need BREAKING (multi-grab scatter)
+    - Zone-combo content (MetaKnight field + Grappler deposit = guaranteed CC stacks)
+
+  WhenNotToInvite: >
+    Grappler struggles when:
+    - All enemies are grab-immune (constructs, ethereal, too-large)
+    - Content is pure single-target with no relocation value
+    - Party lacks AoE to capitalize on clustered deposits
+    - No ally can peel for Grappler during Full Pin
+
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ██  SECTION 15: GCD & TEMPO                                                 ██
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+GCDAndTempo:
+  BaseGCD: "2.0s (SPD 10 = moderate tempo)"
+  GCDFloor: "1.2s (system standard — achievable with SPD investment but not Grappler's priority)"
+  FisherTempo: >
+    Deliberate. Extend (GCD) → wait for bind → decide (instant) → relocate (GCD)
+    → retract (2.0s forced). The Fisher's rhythm is SLOWER than GCD because
+    retraction adds mandatory downtime between grab cycles.
+  HolderTempo: >
+    Aggressive. Whip strikes fire at GCD rate. Faster, more percussive feel
+    than Fisher's reaching-grabbing. Whip → whip → whip → Seize (oGCD when
+    opening presents). The Holder FEELS faster because tentacle is rigid/snappy
+    rather than extending/retracting.
+  ModeContrastNote: >
+    Fisher = deliberate, reaching, patient (grab cycles have forced downtime).
+    Holder = aggressive, snapping, committed (whip spam until pin moment).
+    Same GCD, completely different FEEL because of what happens between GCDs.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF DESIGN FILE
+# Skills, ability details, and numeric values: Grappler_Skills.yaml
+# Validation tests and edge cases: Grappler_Validation.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
