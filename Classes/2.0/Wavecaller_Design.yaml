@@ -14,6 +14,7 @@
 # IDENTITY: Dolphin/orca/killer whale — physical, fast, playful-violent predator.
 # NOT enchantment/lure/song-charm. AVOID ALL SIREN TERMINOLOGY.
 #
+# Healer Authority: Guidebooks/DESIGN_OVERRIDE_HEALER.md > this file
 # Balance Ref: Combat/BalanceTargets.yaml
 # Last Updated: 2026-07-14
 # ══════════════════════════════════════════════════════════════════════════════════
@@ -41,7 +42,7 @@ identity:
   sub_role: "MED-primary (direct healing + drain)"
   weapon: "Harpoon (trident-style polearm — aquatic hunter identity)"
 
-  biological_lock:
+  unique_passive:
     type: Biological
     label: vocal_organ_aquatic
     justification: >
