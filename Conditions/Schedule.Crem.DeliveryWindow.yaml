@@ -1,9 +1,0 @@
-ConditionName: Crem.DeliveryWindow.4PM
-Category: Schedule                   # new Condition category -- ConditionCreator.pyw only has Quest/Inventory/Player-Stat/World/Buff/Combo tabs today
-Target: World.Clock.Primary.Hour
-RequiredValue: "16:00"
-ToleranceMinutes: 30
-Duration: 0
-Tags:
-  - Tag.Quest.Chef.Crem.Courier
-  - Tag.World.Clock

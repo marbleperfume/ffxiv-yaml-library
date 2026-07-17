@@ -13,9 +13,9 @@ def load_yaml(path):
         return yaml.safe_load(f) or {}
 
 def get_race_library():
-    """Flattened subrace list from Races/Race_Library.yaml (all categories,
+    """Flattened subrace list from Race_Ideas/Race_Library.yaml (all categories,
     including Monsters -- NPCs may legally carry monster races)."""
-    path = os.path.join("Races", "Race_Library.yaml")
+    path = os.path.join("Race_Ideas", "Race_Library.yaml")
     if not os.path.exists(path): return []
     races = []
     for members in load_yaml(path).values():
@@ -61,7 +61,7 @@ def check_race_bonus_skills(skill_registry):
     """Every Race BonusSkills entry must resolve to a real Skill, and if that
     skill declares RaceRestrictions, the granting race must be on the list --
     a race shouldn't be handed a skill its own restrictions forbid it."""
-    for f in glob.glob("Races/*.yaml"):
+    for f in glob.glob("Race_Ideas/*.yaml"):
         if os.path.basename(f) == "Race_Library.yaml": continue
         try:
             data = load_yaml(f)
@@ -127,7 +127,7 @@ def validate_project():
     print("--- Running Data Integrity Check ---")
 
     class_list = [os.path.basename(f).replace(".yaml", "") for f in glob.glob("Classes/*.yaml")]
-    race_specs = [os.path.basename(f).replace(".yaml", "") for f in glob.glob("Races/*.yaml")]
+    race_specs = [os.path.basename(f).replace(".yaml", "") for f in glob.glob("Race_Ideas/*.yaml")]
     race_library = get_race_library()
     zone_keys = get_zone_keys()
 
@@ -155,7 +155,7 @@ def validate_project():
         # RaceKey against the race library (includes Monsters category)
         race_key = data.get('RaceKey')
         if race_key and race_library and race_key not in race_library:
-            err(f"{npc_file} RaceKey '{race_key}' not in Races/Race_Library.yaml")
+            err(f"{npc_file} RaceKey '{race_key}' not in Race_Ideas/Race_Library.yaml")
 
         # Location zone segment against Zone_Library Regions/Towns
         location = data.get('Location')

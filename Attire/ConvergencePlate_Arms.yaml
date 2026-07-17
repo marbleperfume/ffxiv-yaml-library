@@ -1,9 +1,0 @@
-Name: Convergence Plate Arms
-Slot: Arms
-IsDyeable: true
-RestrictionTags:
-  - Tag.Character.Reiden.Unique
-IconPath: ""
-Description: >
-  Reinforced Gunlance-style vambraces/pauldrons, sized to brace a full-block
-  with the Elemental Convergence Shield without buckling.
