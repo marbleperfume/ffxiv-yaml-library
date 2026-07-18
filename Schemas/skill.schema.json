@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "juice-yaml-library/skill.schema.json",
+  "title": "Ability Record (v2 — methodology-first)",
+  "description": "v2 REVERSAL: this schema serializes the Guidebooks design methodology (strategy-first, item-anchored — see Guidebooks/class_item_baselines.md and Guidebooks/elementalist_shaman_rework.md 'Ability Framework'), not the old Skill Creator record. The per-class Classes/2.0/*_Skills.yaml files are the CURRENT format this schema formalizes; Skills/GenerateWater.yaml-style thin records are PRE-METHODOLOGY and are the migration targets. The methodology core of every ability is: TriggerCondition (when is this the correct button) | ItemBaselineReplaced (which consumable this is the premium replacement for — 'items are the floor, classes are the ceiling') | DecisionCreated (the choice it forces) | CCStage (the CC budget contract) | RankProgression (Rank = capability, gear = numbers). The typed Effects vocabulary (Schemas/EffectTypes.yaml) survives as the nested MECHANICAL PACKET — the most downstream detail, not the design. Existing files use lowercase/snake_case spellings; validators normalize via the alias map in x-fieldAliases rather than forcing rewrites. Per DESIGN_OVERRIDE_SYSTEMS.md §25, identity-defining abilities are RESOURCE-GATED, never long-cooldown-gated: a Cooldown/RecastTime over 15s without a §25 marker is audited. A methodology field whose value is or starts with 'PENDING' counts as undecided (draft), mirroring the stat contract's PENDING coefficient state.",
+  "x-fieldAliases": {
+    "Name": ["name"],
+    "TriggerCondition": ["trigger_condition", "Trigger"],
+    "ItemBaselineReplaced": ["item_baseline_replaced", "item_replaced", "ItemBaseline"],
+    "DecisionCreated": ["decision_created", "decision"],
+    "CCStage": ["cc_stage"],
+    "RankProgression": ["rank_progression", "RankBehavior", "RankEvolution"],
+    "CritCondition": ["crit_condition", "CritCondition"],
+    "ResourceCost": ["resource_cost", "Resource"],
+    "ResourceGeneration": ["resource_generation", "GaugeInteraction"],
+    "Cooldown": ["cooldown", "Recast", "RecastTime"],
+    "Type": ["type"],
+    "Potency": ["potency"],
+    "Effect": ["effect"]
+  },
+  "type": "object",
+  "required": ["Name"],
+  "additionalProperties": true,
+  "properties": {
+    "Key": {
+      "type": "string",
+      "description": "Namespaced id — standalone Skills/*.yaml records only; per-class entries are identified by Name + file."
+    },
+    "Name": { "type": "string", "minLength": 1 },
+
+    "TriggerCondition": {
+      "type": "string",
+      "description": "METHODOLOGY CORE. The situation that makes this the correct button ('Classes act when the SITUATION demands' — DESIGN_OVERRIDE.md §3). 'None (always available)' is a valid declared trigger."
+    },
+    "ItemBaselineReplaced": {
+      "type": "string",
+      "description": "METHODOLOGY CORE. Which item(s) a party without this class uses for the same strategic ground, and why this is the premium replacement (class_item_baselines.md). 'No item equivalent — <why>' is a valid declaration."
+    },
+    "DecisionCreated": {
+      "type": "string",
+      "description": "METHODOLOGY CORE. The player choice this ability forces — decision density is the game (Game Juice Taste Design.md, Position × Action × Time)."
+    },
+    "CCStage": {
+      "type": ["integer", "null", "string"],
+      "description": "METHODOLOGY CORE. CC budget contract: 0-3, null (no CC — an explicit declaration, keep the key), or a string for stance-variant cases ('Varies (Stealth=null, Ink=1, ...)')."
+    },
+    "RankProgression": {
+      "type": ["object", "string"],
+      "description": "METHODOLOGY CORE. Per-rank capability changes (rank_1..rank_4 / R1..R4 keys, or prose). Rank = capability, gear = numbers (DESIGN_OVERRIDE.md §2). 'PENDING — <note>' if the rank pass hasn't run."
+    },
+    "CritCondition": {
+      "type": "string",
+      "description": "Deterministic crit condition (crit is NEVER RNG — DESIGN_OVERRIDE.md §12). May instead live in a file-level crit section."
+    },
+    "FailureState": {
+      "type": "string",
+      "description": "What going wrong looks like — failure mode defined before success mode (DESIGN_LEARNINGS.md §9). Usually class/file-level; per-ability allowed."
+    },
+
+    "ResourceCost": {
+      "type": ["string", "number", "object"],
+      "description": "The §25 gate: what is spent (gauge/charges/state). Preferred over cooldowns for identity abilities."
+    },
+    "ResourceGeneration": { "type": ["string", "number"] },
+    "Cooldown": {
+      "type": ["string", "number"],
+      "description": "Allowed for tactical utilities. >15s on an identity ability without a §25 marker ('§25 PASS/CHANGE/COMPLIANT' in the value or a section_25_note) gets audited."
+    },
+    "section_25_note": { "type": "string" },
+
+    "Type": { "type": "string", "description": "Free-form action kind as the class files use it (GCD/oGCD flag lives separately or in the string): 'Tentacle Grab (Stealth)', 'Stance Passive', 'Weaponskill', ..." },
+    "ActionType": { "enum": ["Weaponskill", "Spell", "Ability", "GCD", "oGCD", "Passive"] },
+    "gcd": { "type": ["boolean", "string"] },
+    "Potency": { "type": ["number", "string", "object", "null"], "description": "Number, formula string ('150 + (Altitude × 5)'), per-weapon map, or null for pure utility." },
+    "Range": { "type": ["number", "string"] },
+    "CastTime": { "type": ["number", "string"] },
+    "Duration": { "type": ["number", "string"] },
+    "Targeting": { "type": "string" },
+    "StanceAvailability": { "type": "array", "items": { "type": "string" } },
+    "stance_availability": { "type": "array", "items": { "type": "string" } },
+
+    "Effects": {
+      "type": "array",
+      "description": "The typed MECHANICAL PACKET — Schemas/EffectTypes.yaml vocabulary. Downstream serialization of the design, never a substitute for the methodology fields above.",
+      "items": {
+        "type": "object",
+        "required": ["Type"],
+        "properties": {
+          "Type": {
+            "enum": ["Damage", "DoT", "Heal", "HoT", "Shield", "Barrier", "StatModifier", "CrowdControl", "Displacement", "Movement", "ResourceModify", "ZoneCreate", "StatusApply", "ExploitWindow"]
+          },
+          "Flavor": { "type": "string" },
+          "Note": { "type": "string" },
+          "Condition": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+
+    "Intent": { "type": "string" },
+    "Flavor": { "type": "string" },
+    "Tags": { "type": "array", "items": { "type": "string" } },
+    "ScalingStat": {
+      "enum": ["Strength", "Stamina", "Speed", "Craft", "Gather", "MagicCapacity", "Mag", "Med", "Dexterity", "Ntu", "Defense", "None", "Special"]
+    },
+    "AppliesStatuses": { "type": "array", "items": { "type": "string" } },
+    "ClassRestrictions": { "type": "array", "items": { "type": "string" } },
+    "BaseState": { "type": "object" },
+    "Mechanics": { "type": "object", "description": "v1 packet block — still valid; new records may flatten these fields to the top level instead." },
+    "Resource": { "type": "object" },
+    "Combo": { "type": ["object", "null"] }
+  }
+}

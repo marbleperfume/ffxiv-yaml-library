@@ -31,6 +31,24 @@
 Key: Classes.Healer.Spiritcaller
 
 # ─────────────────────────────────────────────────────────────────────────────
+# STAT OVERRIDES — formal deviations from Attributes/Base_Attributes.yaml
+# (declared per the stat contract; undeclared formula divergence is a
+#  validation error — see Schemas/stat_contract.schema.json)
+# ─────────────────────────────────────────────────────────────────────────────
+
+StatOverrides:
+  - OverridesDerivedStat: EffectiveDefense.DamageReduction
+    Scope: "Moisture resource only (class-unique). Does not touch the class's gear/Defense DR."
+    ReplacementFormula: "MoistureDR% = Moisture * 0.002    # linear: 20% DR at 100 Moisture, 0% at 0"
+    Interaction: stacks_with_base
+    Reason: >
+      Linear curve chosen for moment-to-moment readability: a melee healer must
+      instantly read how much defense the gauge is worth. The central asymptotic
+      Defense/(Defense+K) model is for durable, slow-moving gear stats; Moisture
+      swings every few seconds and needs a curve players can feel linearly.
+      Full contract: SECTION Moisture Gauge (DREffect) in this file.
+
+# ─────────────────────────────────────────────────────────────────────────────
 # SECTION 1: CLASS IDENTITY
 # ─────────────────────────────────────────────────────────────────────────────
 

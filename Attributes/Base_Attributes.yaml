@@ -5,6 +5,19 @@
 # TWO TIERS:
 #   Tier 1 — Base Attributes (investable, leveled, gear-affected)
 #   Tier 2 — Derived Stats (computed from Tier 1 + gear; NOT directly investable)
+#
+# CONTRACT SHAPE (machine-checkable — see Schemas/stat_contract.schema.json):
+#   Each DerivedStat declares:
+#     Inputs:       which Tier-1 attributes (and external terms) feed it
+#     Formula:      the expression, referencing named coefficients
+#     Coefficients: every tunable constant, by name. Value is either a number
+#                   or the literal PENDING — meaning the balance number is
+#                   intentionally not yet decided. PENDING is a first-class
+#                   state: tools must surface it, never invent a number.
+#     Prose:        design rationale / rules text. Human+LLM context, not parsed.
+#   Class-specific deviations from these formulas must be declared via a
+#   StatOverrides: block in that class's Design yaml (see Schemas/ docs).
+#   Attributes/attributes.json is GENERATED from this file — never hand-edit it.
 
 Base_Character:
 
@@ -31,136 +44,193 @@ Base_Character:
     # INT free if a future stat is needed. Do not wire into any file.
 
   # ═══════════════════════════════════════════════════════════════════════
-  # TIER 2: DERIVED STATS (formulas — coefficients are placeholders for tuning)
+  # TIER 2: DERIVED STATS
   # ═══════════════════════════════════════════════════════════════════════
 
   DerivedStats:
 
     MaxHP:
-      Formula: "Stamina × 100"
-      Example: "Stamina 10 → 1000 base HP"
-      Notes: >
-        Gear can increase Stamina for progression feedback.
-        Healing economy: healers operate on a DPS/HEAL ratio split. Heal factor
-        increases as allies get lower HP, but mana cost increases proportionally.
-        This replaces the flat >50% HP incoming damage amplification rule
-        (OverFiftyRule is SUPERSEDED).
+      Inputs: [Stamina]
+      Formula: "Stamina * hp_per_stamina"
+      Coefficients:
+        hp_per_stamina:
+          Value: 100
+          Note: "Established. Stamina 10 → 1000 base HP."
+      Prose:
+        Example: "Stamina 10 → 1000 base HP"
+        Notes: >
+          Gear can increase Stamina for progression feedback.
+          Healing economy: healers operate on a DPS/HEAL ratio split. Heal factor
+          increases as allies get lower HP, but mana cost increases proportionally.
+          This replaces the flat >50% HP incoming damage amplification rule
+          (OverFiftyRule is SUPERSEDED).
 
     MaxMana:
-      Formula: "MagicCapacity × 100"
-      Example: "MagicCapacity 100 → 10,000 base mana"
-      Reference: "Combat/ManaEconomy.yaml, Combat/ManaflowSystem.yaml"
+      Inputs: [MagicCapacity]
+      Formula: "MagicCapacity * mana_per_magiccapacity"
+      Coefficients:
+        mana_per_magiccapacity:
+          Value: 100
+          Note: "Established. MagicCapacity 100 → 10,000 base mana."
+      Prose:
+        Example: "MagicCapacity 100 → 10,000 base mana"
+        Reference: "Combat/ManaEconomy.yaml, Combat/ManaflowSystem.yaml"
 
     Evasion:
-      Formula: "Speed × [coeff_TBD]"
-      Source: "Speed ONLY. Dexterity does NOT contribute."
-      Model: "Differential — attacker Accuracy vs defender Evasion."
-      Intent: >
-        Speed-heavy builds dodge attacks. Dex-heavy builds exploit openings.
-        Clean stat identity: Speed = avoidance, Dex = precision damage.
+      Inputs: [Speed]
+      Formula: "Speed * evasion_per_speed"
+      Coefficients:
+        evasion_per_speed:
+          Value: PENDING
+          Note: "Balance pass not yet run."
+      Prose:
+        Source: "Speed ONLY. Dexterity does NOT contribute."
+        Model: "Differential — attacker Accuracy vs defender Evasion."
+        Intent: >
+          Speed-heavy builds dodge attacks. Dex-heavy builds exploit openings.
+          Clean stat identity: Speed = avoidance, Dex = precision damage.
 
     Haste:
-      Formula: "EffectiveGCD = BaseGCD / (1 + Speed × [coeff_TBD])"
-      Floor: "1.2s (speed of a single swipe or slash). Combo finisher floor remains higher at ~1.5s."
-      DamageIntegration: >
-        Haste is factored INTO the damage formula:
-          SkillDamage = BasePotency × (EffectiveGCD / BaseGCD)
-        Faster GCD = proportionally lower per-hit damage.
-        Net DPS stays approximately flat. Haste advantage is STRATEGIC:
-          - More decision points per window
-          - Faster animation throughput (positional uptime)
-          - More oGCD weave opportunities
-        Haste cost: each hit is weaker; burst is less explosive, sustain is smoother.
-      ComboFinisherException: >
-        Combo-ending GCDs have a HIGHER floor than normal GCDs (e.g. 1.4–1.6s
-        even when normal GCD is at minimum). This adds "weight" / feedback on
-        the heaviest hit of the rotation. Haste still reduces it but cannot
-        push finishers below this elevated floor.
+      Inputs: [Speed]
+      Formula: "EffectiveGCD = BaseGCD / (1 + Speed * haste_per_speed)"
+      Coefficients:
+        haste_per_speed:
+          Value: PENDING
+          Note: "Balance pass not yet run."
+      Prose:
+        Floor: "1.2s (speed of a single swipe or slash). Combo finisher floor remains higher at ~1.5s."
+        DamageIntegration: >
+          Haste is factored INTO the damage formula:
+            SkillDamage = BasePotency × (EffectiveGCD / BaseGCD)
+          Faster GCD = proportionally lower per-hit damage.
+          Net DPS stays approximately flat. Haste advantage is STRATEGIC:
+            - More decision points per window
+            - Faster animation throughput (positional uptime)
+            - More oGCD weave opportunities
+          Haste cost: each hit is weaker; burst is less explosive, sustain is smoother.
+        ComboFinisherException: >
+          Combo-ending GCDs have a HIGHER floor than normal GCDs (e.g. 1.4–1.6s
+          even when normal GCD is at minimum). This adds "weight" / feedback on
+          the heaviest hit of the rotation. Haste still reduces it but cannot
+          push finishers below this elevated floor.
 
     EffectiveDefense:
-      Formula: "Defense_base + (Stamina × [small_coeff]) + Gear_Defense"
+      Inputs: [Defense, Stamina, Gear_Defense]
+      Formula: "Defense_base + (Stamina * defense_per_stamina) + Gear_Defense"
       DamageReduction: "DR% = EffectiveDefense / (EffectiveDefense + K)"
-      KConstant: >
-        K is a content-tier constant. Prevents hard caps, ensures asymptotic
-        behavior. No amount of Defense reaches 100% reduction.
-      ShredModel: >
-        Defense shred MULTIPLIES the defender's EffectiveDefense by (1 - shred%).
-        Example: "Shred 20%" → defender's Defense × 0.8, then re-evaluate DR%.
-        This shifts the curve without breaking it. No flat bypass.
-      RacialArmor: >
-        Races with innate Defense (nonzero base) get permanent DR% baseline
-        but sacrifice equipment slots (slot lockout). Tradeoff: consistent
-        survivability floor vs gear flexibility. They can still gain Defense
-        from non-locked slots (accessories, etc.) but hit DR faster due to
-        the asymptotic formula.
-      FrontlinerDiversity: >
-        Adabold/Metaknight represent pinpoint-defense subtypes (positional
-        blocking, AoE shielding) while aggressive frontliners (Reaver,
-        Grappler, Siegebreaker) invest minimally in Defense. Goal is subtype
-        diversity, not one-size-fits-all.
-      DesignAntiPatterns:
-        - "NO flat defense-ignore bypass (DFO lesson: creates damage disparity spiral)"
-        - "NO elemental shred stacking (DFO lesson: lower skills outdamage burst)"
-        - "NO Fame-style band-aid systems (treats symptom, not root cause)"
-        - "Additive/subtractive only for very small numbers; DR curve handles scaling"
+      Coefficients:
+        defense_per_stamina:
+          Value: PENDING
+          Note: "Small coefficient — Stamina's Defense contribution is minor by design."
+        K:
+          Value: PENDING
+          Note: >
+            Content-tier constant (one value per content tier, not global).
+            Prevents hard caps, ensures asymptotic behavior. No amount of
+            Defense reaches 100% reduction.
+      Prose:
+        ShredModel: >
+          Defense shred MULTIPLIES the defender's EffectiveDefense by (1 - shred%).
+          Example: "Shred 20%" → defender's Defense × 0.8, then re-evaluate DR%.
+          This shifts the curve without breaking it. No flat bypass.
+        RacialArmor: >
+          Races with innate Defense (nonzero base) get permanent DR% baseline
+          but sacrifice equipment slots (slot lockout). Tradeoff: consistent
+          survivability floor vs gear flexibility. They can still gain Defense
+          from non-locked slots (accessories, etc.) but hit DR faster due to
+          the asymptotic formula.
+        FrontlinerDiversity: >
+          Adabold/Metaknight represent pinpoint-defense subtypes (positional
+          blocking, AoE shielding) while aggressive frontliners (Reaver,
+          Grappler, Siegebreaker) invest minimally in Defense. Goal is subtype
+          diversity, not one-size-fits-all.
+        DesignAntiPatterns:
+          - "NO flat defense-ignore bypass (DFO lesson: creates damage disparity spiral)"
+          - "NO elemental shred stacking (DFO lesson: lower skills outdamage burst)"
+          - "NO Fame-style band-aid systems (treats symptom, not root cause)"
+          - "Additive/subtractive only for very small numbers; DR curve handles scaling"
 
     Exploit:
-      ReplacesSystem: "Critical Hit / Critical Damage (RNG-based)"
-      Model: "DETERMINISTIC. No random chance. Bonus damage from conditions."
-      Source: "Dexterity scales the bonus; conditions trigger it."
-      Formula: "ExploitBonus = BaseBonusForCondition × (1 + Dexterity × [coeff_TBD])"
-      Conditions:
-        Positionals:
-          Flank: "+X% damage (class-specific; skill must connect from flank arc)"
-          Rear: "+Y% damage (Backstab — Dex scales this heavily; aim/precision fantasy)"
-        WeakSpots:
-          - "Armor broken (environmental interaction)"
-          - "Shield down (Adafold stripped enemy guard)"
-          - "Procgen terrain caused stumble/exposure"
-          - "Elemental reaction left enemy vulnerable"
-        VulnerablePosition:
-          - "Enemy mid-attack animation (counter-window, pairs with Parry)"
-          - "Enemy affected by Unfocus (suppressed AI = tactically exposed)"
-          - "Enemy pulled by Capacitor Pull (off-balance state)"
-          - "Enemy recovering from failed dash/teleport (Rank 3+ escape attempt)"
-      WhyNotCrits: >
-        RNG crits add extreme variance that makes encounters harder to balance.
-        Deterministic Exploit means: procgen environments CREATE the variance
-        (terrain, enemy behavior, spatial conditions) while player skill
-        expression = getting into position. Dex investment = better exploitation
-        of openings, not a bigger slot machine.
-      DexIdentity: >
-        Dexterity is a DAMAGE stat controlling: (1) ranged physical attack scaling
-        ("correct aim"), (2) Exploit bonus magnitude from positionals/weak spots,
-        (3) Backstab potency. It does NOT affect evasion or defensive stats.
+      Inputs: [Dexterity]
+      Formula: "ExploitBonus = BaseBonusForCondition * (1 + Dexterity * exploit_per_dexterity)"
+      Coefficients:
+        exploit_per_dexterity:
+          Value: PENDING
+          Note: "Balance pass not yet run. BaseBonusForCondition is per-condition, class-specific."
+      Prose:
+        ReplacesSystem: "Critical Hit / Critical Damage (RNG-based)"
+        Model: "DETERMINISTIC. No random chance. Bonus damage from conditions."
+        Source: "Dexterity scales the bonus; conditions trigger it."
+        Conditions:
+          Positionals:
+            Flank: "+X% damage (class-specific; skill must connect from flank arc)"
+            Rear: "+Y% damage (Backstab — Dex scales this heavily; aim/precision fantasy)"
+          WeakSpots:
+            - "Armor broken (environmental interaction)"
+            - "Shield down (Adafold stripped enemy guard)"
+            - "Procgen terrain caused stumble/exposure"
+            - "Elemental reaction left enemy vulnerable"
+          VulnerablePosition:
+            - "Enemy mid-attack animation (counter-window, pairs with Parry)"
+            - "Enemy affected by Unfocus (suppressed AI = tactically exposed)"
+            - "Enemy pulled by Capacitor Pull (off-balance state)"
+            - "Enemy recovering from failed dash/teleport (Rank 3+ escape attempt)"
+        WhyNotCrits: >
+          RNG crits add extreme variance that makes encounters harder to balance.
+          Deterministic Exploit means: procgen environments CREATE the variance
+          (terrain, enemy behavior, spatial conditions) while player skill
+          expression = getting into position. Dex investment = better exploitation
+          of openings, not a bigger slot machine.
+        DexIdentity: >
+          Dexterity is a DAMAGE stat controlling: (1) ranged physical attack scaling
+          ("correct aim"), (2) Exploit bonus magnitude from positionals/weak spots,
+          (3) Backstab potency. It does NOT affect evasion or defensive stats.
 
     PhysATK:
-      Formula: "(Strength OR Dexterity) × [coeff] — determined by WEAPON TYPE"
-      WeaponSwapModel: >
-        Weapon swap is permitted provided it does not swap class (FFXIV model)
-        or conflict with class compatibilities. Side-arm logic (ToS model):
-        multi-weapon carries are fine. The WEAPON determines which stat scales,
-        not the player's build choice mid-combat.
-      MeleeWeapons: "Scale from Strength (swords, axes, hammers, fists)"
-      RangedWeapons: "Scale from Dexterity (bows, guns, thrown — correct aim)"
-      HybridCase: >
-        If a class wields both melee and ranged (e.g., frontliner with thrown
-        side-arm), each weapon type uses its own stat. No conflict — Strength
-        for the main melee, Dexterity for the side-arm. Both stats have value
-        for the multi-weapon carrier without either being dead weight.
+      Inputs: [Strength, Dexterity, WeaponType]
+      Formula: "(Strength OR Dexterity) * physatk_per_stat — scaling stat determined by WeaponType"
+      Coefficients:
+        physatk_per_stat:
+          Value: PENDING
+          Note: "Balance pass not yet run."
+      Prose:
+        WeaponSwapModel: >
+          Weapon swap is permitted provided it does not swap class (FFXIV model)
+          or conflict with class compatibilities. Side-arm logic (ToS model):
+          multi-weapon carries are fine. The WEAPON determines which stat scales,
+          not the player's build choice mid-combat.
+        MeleeWeapons: "Scale from Strength (swords, axes, hammers, fists)"
+        RangedWeapons: "Scale from Dexterity (bows, guns, thrown — correct aim)"
+        HybridCase: >
+          If a class wields both melee and ranged (e.g., frontliner with thrown
+          side-arm), each weapon type uses its own stat. No conflict — Strength
+          for the main melee, Dexterity for the side-arm. Both stats have value
+          for the multi-weapon carrier without either being dead weight.
 
     MagATK:
-      Formula: "Mag × [coeff]"
-      Covers: "All magic damage, Shield strength, Barrier potency"
+      Inputs: [Mag]
+      Formula: "Mag * magatk_per_mag"
+      Coefficients:
+        magatk_per_mag:
+          Value: PENDING
+          Note: "Balance pass not yet run."
+      Prose:
+        Covers: "All magic damage, Shield strength, Barrier potency"
 
     HealPower:
-      Formula: "Med × [coeff]"
-      Covers: "Healing SKILL output only"
-      ItemHealNote: >
-        Healing ITEMS are STABLE OUTPUT with a COST (gold/materials/weight).
-        They do NOT scale from Med. Items heal a fixed amount regardless of stats.
-        This prevents Med from being a mandatory stat for non-healer classes
-        and keeps items as reliable emergency tools with economic cost as the gate.
+      Inputs: [Med]
+      Formula: "Med * healpower_per_med"
+      Coefficients:
+        healpower_per_med:
+          Value: PENDING
+          Note: "Balance pass not yet run."
+      Prose:
+        Covers: "Healing SKILL output only"
+        ItemHealNote: >
+          Healing ITEMS are STABLE OUTPUT with a COST (gold/materials/weight).
+          They do NOT scale from Med. Items heal a fixed amount regardless of stats.
+          This prevents Med from being a mandatory stat for non-healer classes
+          and keeps items as reliable emergency tools with economic cost as the gate.
 
   # ═══════════════════════════════════════════════════════════════════════
   # DEFAULT TAGS

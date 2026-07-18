@@ -84,14 +84,30 @@ Skills:
     Recast: 15s (stack-refreshed, 1 stack)
     Element: smoke/choking
 
-    Effect:
-      AccuracyDebuff: "-30% hit chance, 6s"
-      Suffocation: >
-        Stage 1 CC: coughing interrupts current action (cast/channel/aim
-        cancel). NOT root/slow/stun. Enemies can still MOVE freely.
-      VisionDenial: >
-        Smoke persists 4-6s as cloud. Enemies inside have reduced vision.
-        Enemies outside cannot see in. Team concealment.
+    # Typed effects per Schemas/EffectTypes.yaml (migrated from the old freeform
+    # Effect: block — AccuracyDebuff/Suffocation/VisionDenial prose preserved below)
+    Effects:
+      - Type: Damage
+        Potency: 90-110
+        Shape: "cone, ~60° arc"
+        Element: smoke/choking
+      - Type: StatModifier
+        Stat: Accuracy
+        Amount: "-30%"
+        Duration: 6s
+        Flavor: "Choking smoke — enemies can't aim through the coughing."
+      - Type: CrowdControl
+        Stage: 1
+        CCKind: interrupt
+        Note: >
+          Coughing interrupts current action (cast/channel/aim cancel).
+          NOT root/slow/stun. Enemies can still MOVE freely.
+      - Type: ZoneCreate
+        Shape: "cone footprint (smoke cloud)"
+        Duration: 4-6s
+        ZoneEffect: >
+          Enemies inside have reduced vision. Enemies outside cannot see in.
+          Team concealment.
 
     CritCondition: "Target mid-action when Suffocation interrupts"
     CritFailCase: "Idle target = nothing to interrupt = no crit"

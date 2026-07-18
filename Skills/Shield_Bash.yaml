@@ -6,6 +6,9 @@ Intent: >
   blunting an enemy's escalated (Doctrine Level2/3) kit rather than its
   baseline attacks. Other Tank classes are expected to get their own
   analogous Focus-generating skill later, not necessarily this one.
+Flavor: >
+  The Adafold answer to a problem their shield already solved — if it stops
+  a blade, it can start a fight.
 ActionType: Ability
 Tags:
   - Skill.Type.Ability
@@ -20,6 +23,24 @@ Acquisition:
     its own mini rank-test (see Ranks/Mercenary_Unlocks.yaml SkillQuestGate).
 RoleMechanic: Tank
 ClassMechanic: null
+
+# ── Methodology fields (Guidebooks ability framework) — added in the v2
+# migration; this file was a pre-methodology record ──────────────────────────
+TriggerCondition: >
+  Target is using its escalated (Doctrine Level2/3) kit — Unfocus blunts the
+  escalated abilities, not baseline attacks. Off-trigger use is aggro upkeep only.
+ItemBaselineReplaced: >
+  Attention Manipulation items (Pheromone Tag — single-use 8s aggro redirect;
+  Taunt Cracker; Hollowform Decoy — destructible, absorbs but never blunts).
+  Shield Bash is repeatable targeted Focus generation PLUS kit suppression —
+  items redirect attention, they cannot degrade what the enemy does with it.
+DecisionCreated: >
+  Which enemy's escalation to blunt. One 8s-recast oGCD — spend it on the
+  currently-escalated target, or hold it for the caster that escalates next?
+  Reading Doctrine tiers IS the tank's skill expression here.
+CCStage: null   # Unfocus is AI suppression / an Exploit condition (see Base_Attributes
+                # VulnerablePosition), not a CC stage — declared out of the CC budget.
+RankProgression: "PENDING — rank pass not yet run for this ability (potency/recast/stack behavior per rank undecided)"
 BaseState:
   Animation: Anim_ShieldBash
   VFX: VFX_Impact_Stagger
@@ -36,7 +57,18 @@ Resource:
   Type: None
   Cost: 0
 Combo: null
-FocusGeneration: 400   # high Focus-per-use relative to a typical damage skill -- this IS the aggro tool
+ScalingStat: Strength
+Effects:
+  - Type: Damage
+    Potency: 150
+    DamageType: physical
+  - Type: ResourceModify
+    Resource: Focus
+    Amount: 400
+    Note: "High Focus-per-use relative to a typical damage skill — this IS the aggro tool."
+  - Type: StatusApply
+    Status: Unfocus
+FocusGeneration: 400   # legacy field, kept for compatibility -- canonical form is the ResourceModify effect above
 AppliesStatuses:
   - Unfocus
 ClassRestrictions:

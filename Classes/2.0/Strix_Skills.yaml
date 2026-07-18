@@ -19,6 +19,7 @@ Skills:
       SETS UP the dive: marking targets, calculating AoE paths, applying debuffs.
       The "rotation" in air: ascend → 1-2 prep GCDs → read → commit dive.
 
+    Abilities:
     - Name: "Raptor Mark"
       ID: raptor_mark
       ActionType: GCD
@@ -106,6 +107,7 @@ Skills:
       Dive state has VERY LIMITED actions. Trajectory fixed — these skills
       modify IMPACT only. Committing dive IS the GCD action.
 
+    Abilities:
     - Name: "Raptor Dive"
       ID: raptor_dive
       ActionType: GCD
@@ -179,6 +181,7 @@ Skills:
       WEAKER than aerial but provides continuous DPS during mandatory ground time.
       Simple rotation: apply poison, cycle elements, find re-ascend window.
 
+    Abilities:
     - Name: "Storm Slash"
       ID: storm_slash
       ActionType: GCD
@@ -278,6 +281,7 @@ oGCDSkills:
   # Dashes defined in Strix_Design.yaml Section 5 (Evasion System)
   DashReference: "See Strix_Design.yaml: Slipstream, Tailwind Rush, Feather Fade, Barrel Roll"
 
+  Abilities:
   - Name: "Stormweave Toggle"
     ID: stormweave_toggle
     ActionType: oGCD
@@ -381,7 +385,7 @@ oGCDSkills:
       150 + 700 = 850p. Combined with Dive Accelerant at 100 AU:
       Activate TV → climb to 100 AU (fast) → Accelerant (drops to 70 AU) →
       dive from 70 AU at ×7: (150 + 490) × 1.3 = 832p.
-      OR: TV → 100 AU → dive raw: 150 + 700 = 850p.
+      OR: "TV → 100 AU → dive raw: 150 + 700 = 850p."
     Section25_Change: >
       CRITICAL CONVERSION from 120s CD to Dive Momentum gate. Class apex
       earned by PLAYING WELL (3 successful marked dives = proven read-commit
@@ -557,7 +561,7 @@ BalanceValidation:
       high altitude + Piercing Plunge on marked >50% HP target:
       TV at 100 AU → Accelerant (drops to 70 AU) → Plunge at ×7:
       (200 + 490) × 1.3 × 1.25 × 1.4 × 1.1 ≈ 1720p.
-      OR: TV at 100 AU → raw Plunge: (200 + 700) × 1.25 × 1.4 × 1.1 ≈ 1732p.
+      OR: "TV at 100 AU → raw Plunge: (200 + 700) × 1.25 × 1.4 × 1.1 ≈ 1732p."
       Requires: 3 Dive Momentum + 50+ AU altitude + marked + above 50% HP.
     GroundOnlyDPS: "Cave-locked: ~45-50 PPS. 55-60% of reference. INTENTIONALLY WEAK."
 

@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "juice-yaml-library/stat_contract.schema.json",
+  "title": "Stat Contract (Base_Attributes.yaml) + StatOverrides blocks",
+  "description": "Validates Attributes/Base_Attributes.yaml's structured DerivedStats shape, and (via #/definitions/StatOverride) the StatOverrides blocks class Design files use to declare formal deviations. PENDING is a first-class coefficient state meaning 'balance number intentionally not yet decided' — tools must surface it and never invent a value.",
+  "type": "object",
+  "required": ["Base_Character"],
+  "properties": {
+    "Base_Character": {
+      "type": "object",
+      "required": ["Attributes", "DerivedStats"],
+      "properties": {
+        "Attributes": {
+          "type": "object",
+          "description": "Tier 1 — investable base attributes with default values.",
+          "additionalProperties": { "type": "number" }
+        },
+        "DerivedStats": {
+          "type": "object",
+          "description": "Tier 2 — computed stats. Uniform machine-checkable shape.",
+          "additionalProperties": { "$ref": "#/definitions/DerivedStat" }
+        },
+        "DefaultTags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DerivedStat": {
+      "type": "object",
+      "required": ["Inputs", "Formula", "Coefficients"],
+      "additionalProperties": true,
+      "properties": {
+        "Inputs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tier-1 attributes and external terms (e.g. Gear_Defense, WeaponType) feeding this stat."
+        },
+        "Formula": {
+          "type": "string",
+          "description": "Expression referencing Inputs and named Coefficients. Legacy '[coeff_TBD]'-style bracket placeholders are forbidden — name the coefficient and mark it PENDING instead."
+        },
+        "Coefficients": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/definitions/Coefficient" }
+        },
+        "Prose": {
+          "type": "object",
+          "description": "Design rationale / rules text. Human+LLM context; not parsed by tools."
+        }
+      }
+    },
+    "Coefficient": {
+      "type": "object",
+      "required": ["Value"],
+      "properties": {
+        "Value": {
+          "oneOf": [
+            { "type": "number" },
+            { "const": "PENDING" }
+          ],
+          "description": "A number once balanced, or the literal PENDING while undecided."
+        },
+        "Note": { "type": "string" }
+      }
+    },
+    "StatOverride": {
+      "type": "object",
+      "required": ["OverridesDerivedStat", "Scope", "ReplacementFormula", "Interaction", "Reason"],
+      "properties": {
+        "OverridesDerivedStat": {
+          "type": "string",
+          "description": "Which central derived stat (or sub-formula, dot-pathed e.g. EffectiveDefense.DamageReduction) this class deviates from."
+        },
+        "Scope": {
+          "type": "string",
+          "description": "Exactly when/where the override applies — the deviation's boundary."
+        },
+        "ReplacementFormula": { "type": "string" },
+        "Interaction": {
+          "enum": ["replaces_within_scope", "stacks_with_base"],
+          "description": "Whether the override replaces the central formula inside its scope, or stacks on top of it."
+        },
+        "Reason": {
+          "type": "string",
+          "description": "WHY the deviation exists — the design argument, not just the math."
+        }
+      }
+    }
+  }
+}

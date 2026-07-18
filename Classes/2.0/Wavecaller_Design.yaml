@@ -42,7 +42,7 @@ identity:
   role: "Healer / DPS"
   sub_role: "MED-primary (direct healing + drain)"
 
-StatPriority:
+  StatPriority:
     Primary: MED    # Healing output scaling
     Secondary: SPD  # GCD reduction + Evasion (Tidepool-enhanced)
     Tertiary: STR   # Dive emergence damage (physical, melee-coded)
@@ -707,7 +707,7 @@ hit_miss_analysis:
     - "Positional tension as skill expression — heal at range vs damage in melee"
     - "Hydration Gauge creates map awareness — water terrain becomes strategic"
     - "Dolphin/orca identity — distinct, physical, fast, kinetically satisfying"
-      - "Race-exclusive passives — four unique systems interlock, no cross-race access (see DESIGN_OVERRIDE_RACIAL_LOCKS.md)"
+    - "Race-exclusive passives — four unique systems interlock, no cross-race access (see DESIGN_OVERRIDE_RACIAL_LOCKS.md)"
     - "Punishment rewards game sense not APM — Position × Action × Time"
     - "Speed-interrupt fills unique niche — 5s CD, faster than Shaman, no persistence"
     - "Dive maintains Hydration (positive feedback) — biology rewards aggression, role demands restraint"

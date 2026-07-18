@@ -1,0 +1,98 @@
+# Schemas/EffectTypes.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+# CONTROLLED VOCABULARY: Mechanical Effect Types
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Every skill's Effects: list is built from these types and ONLY these types.
+# A narrative/thematic concept ("dragon breath weapon", "tidal resonance")
+# becomes one or more typed effect instances; the theme prose lives in the
+# skill's Flavor/Intent fields, never inside the typed params.
+#
+# This file is the SINGLE SOURCE for per-type parameter rules. The JSON Schema
+# (skill.schema.json) validates only the envelope (each effect has a valid
+# Type); required/optional params per type are validated programmatically
+# FROM THIS FILE so the rules are never maintained twice.
+#
+# Param conventions:
+#   Potency  — number, or string when the value is conditional/expressed
+#              (e.g. "90-110", "120p per tick × 2"). Strings allowed but
+#              numbers preferred; tooling nudges toward numbers over time.
+#   Duration — seconds (number) or string range ("4-6s")
+#   Amount   — signed; "+", "-" meaningful ("-30%" = debuff direction)
+#
+# Every effect type also accepts these universal optional params:
+#   Flavor   — prose describing how the theme expresses in this effect
+#   Note     — designer note / edge-case commentary
+#   Condition — trigger/application condition if not unconditional
+
+EffectTypes:
+
+  Damage:
+    Description: "Direct damage packet."
+    RequiredParams: [Potency]
+    OptionalParams: [DamageType, Element, Shape, Range]
+
+  DoT:
+    Description: "Damage over time."
+    RequiredParams: [Potency, Duration]
+    OptionalParams: [TickInterval, DamageType, Element, MaxStacks]
+
+  Heal:
+    Description: "Direct heal packet. Scales from Med (HealPower) unless the skill declares otherwise."
+    RequiredParams: [Potency]
+    OptionalParams: [Targeting, Range]
+
+  HoT:
+    Description: "Heal over time."
+    RequiredParams: [Potency, Duration]
+    OptionalParams: [TickInterval, Ticks, Targeting, Range]
+
+  Shield:
+    Description: "Absorb shield on a unit. Scales from Mag (MagATK contract: 'Shield strength')."
+    RequiredParams: [Potency]
+    OptionalParams: [Duration, Targeting]
+
+  Barrier:
+    Description: "Spatial barrier/wall — blocks or filters movement, projectiles, or line of sight. Distinct from Shield (unit absorb) per the Mag contract's Shields-vs-Barriers split."
+    RequiredParams: [Shape, Duration]
+    OptionalParams: [BlockType, HP, Range]
+
+  StatModifier:
+    Description: "Buff or debuff to a stat or rate. Sign of Amount carries direction — one type covers both."
+    RequiredParams: [Stat, Amount, Duration]
+    OptionalParams: [MaxStacks, Targeting]
+
+  CrowdControl:
+    Description: "Control effect using the game's CC-stage system (Stage 1 = single-action interrupt, higher stages = harder control). NOT freeform — Stage is the contract."
+    RequiredParams: [Stage]
+    OptionalParams: [Duration, BreakCondition, CCKind]
+
+  Displacement:
+    Description: "Forced movement of the TARGET: knockback, pull, scatter, peel. Core to frontliner space-control design."
+    RequiredParams: [Direction, Distance]
+    OptionalParams: [Targeting, Shape]
+
+  Movement:
+    Description: "Movement of the CASTER: dash, leap, flight, dive, swap. Offense-only movement per the movement design philosophy."
+    RequiredParams: [Mode]
+    OptionalParams: [Distance, Duration, Restrictions]
+
+  ResourceModify:
+    Description: "Generates or spends a named resource/gauge (Focus, Hydration, Moisture, Altitude Units, Pressure Charges, Mana...). Sign of Amount = generate vs spend."
+    RequiredParams: [Resource, Amount]
+    OptionalParams: [Condition]
+
+  ZoneCreate:
+    Description: "Creates a persistent field/zone (Tidepool, smoke cloud, pollen). What the zone DOES is expressed as nested Effects applied to units inside it, or ZoneEffect prose during migration."
+    RequiredParams: [Shape, Duration]
+    OptionalParams: [Effects, ZoneEffect, Follows, Range]
+
+  StatusApply:
+    Description: "Applies a named status defined in Passives/ (e.g. Unfocus). The status file owns the mechanics; this effect is the reference."
+    RequiredParams: [Status]
+    OptionalParams: [Duration, Stacks]
+
+  ExploitWindow:
+    Description: "Creates a deterministic Exploit condition on the target (this game's crit replacement — see Base_Attributes.yaml Exploit contract). E.g. 'shield stripped', 'off-balance'."
+    RequiredParams: [Condition]
+    OptionalParams: [Duration]

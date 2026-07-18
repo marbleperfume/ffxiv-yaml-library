@@ -85,6 +85,18 @@ sound_healing:
     item_replaced: "Healing Specter"
     decision: "1.5s immobility. Safe at range. Dangerous in contested space. Weave slot is tight."
     notes: "Primary healing GCD. What you SHOULD be pressing. Stationary — moving cancels."
+    # Typed effects per Schemas/EffectTypes.yaml (worked-example migration —
+    # legacy fields above retained; typed form below is the canonical mechanics)
+    ScalingStat: Med
+    Effects:
+      - Type: HoT
+        Potency: 120
+        Ticks: 2
+        Duration: "1.5s channel"
+        Targeting: Area_Circle
+        Range: "20m radius, omnidirectional"
+        Condition: "Potency × (Hydration%/100); Resonance state scales further (Warm 100%, Resonant 120% + 5m radius)"
+        Flavor: "A sung tide — healing carried on sound, washing over everyone in earshot, walls be damned (70% through 1 wall)."
 
   - name: "Keening Pulse"
     delivery: Sound
