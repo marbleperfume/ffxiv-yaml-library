@@ -178,7 +178,7 @@ abilities:
       rank_progression:
         rank_1: 280 potency. 3s Silence. 30 Grip Gauge.
         rank_2: 320 potency. 3.5s Silence. Silent kill threshold → 120% overkill (room for error).
-        rank_3: 360 potency. 4s Silence. 25 Grip Gauge. If kill: next Drag Under costs 0 gauge.
+        rank_3: "360 potency. 4s Silence. 25 Grip Gauge. If kill: next Drag Under costs 0 gauge."
         rank_4: 400 potency. 4s Silence. AoE splash 60 potency to enemies within 2m of target (silent).
 
     - name: Drag Under
@@ -208,7 +208,7 @@ abilities:
         rank_1: 120 potency. 4s Restrain. 25 Grip Gauge. Isolation = +50% duration.
         rank_2: 140 potency. 4.5s Restrain. Isolation threshold → 12m (easier to trigger).
         rank_3: 160 potency. 5s Restrain. 20 Grip Gauge. Isolated targets take +15% damage from all sources.
-        rank_4: 180 potency. 5s Restrain. If target dies while Restrained: Grappler enters semi-stealth immediately.
+        rank_4: "180 potency. 5s Restrain. If target dies while Restrained: Grappler enters semi-stealth immediately."
 
     - name: Vanish Retreat
       stance_availability: [stealth]
@@ -244,7 +244,7 @@ abilities:
         rank_1: 2s invis. 4m displacement. 25 Grip Gauge.
         rank_2: 2.5s invis. 5m displacement. 22 Grip Gauge.
         rank_3: 3s invis. 6m displacement. 20 Grip Gauge. Leaves ink residue at departure point (2s -10% vision).
-        rank_4: 3s invis. 6m displacement. 18 Grip Gauge. If HP <25%: displacement → 8m (panic burst).
+        rank_4: "3s invis. 6m displacement. 18 Grip Gauge. If HP <25%: displacement → 8m (panic burst)."
 
   # -------------------------------------------------------------------------
   # LONG-RANGE STANCE ABILITIES
@@ -353,7 +353,7 @@ abilities:
         rank_1: 100 potency arrival. 2s Slow.
         rank_2: 120 potency. 2.5s Slow. Travel speed +20%.
         rank_3: 140 potency. 3s Slow. Can Tether Drag to ally positions (friendly anchor).
-        rank_4: 160 potency. 3s Slow. On arrival: AoE 80 potency shockwave (3m radius).
+        rank_4: "160 potency. 3s Slow. On arrival: AoE 80 potency shockwave (3m radius)."
 
   # -------------------------------------------------------------------------
   # INK STANCE ABILITIES
@@ -444,7 +444,7 @@ abilities:
       type: Tentacle Attack (Zone Detonation)
       gcd: true
       trigger_condition: Ink Saturation trigger active (3+ zones within 15m)
-      potency: 120 per zone (diminishing: 70% on 2nd+)
+      potency: "120 per zone (diminishing: 70% on 2nd+)"
       resource_cost: 2 Ink Charges (§25 CHANGE — was 20s cooldown)
       cooldown: NONE (§25 CHANGE — resource-gated only)
       effect: |
@@ -612,7 +612,7 @@ abilities:
       rank_progression:
         rank_1: 6s Silence OR Root. 15 Grip Gauge. Grab releases.
         rank_2: 7s duration. 13 Grip Gauge.
-        rank_3: 8s duration. 12 Grip Gauge. New option: Spine Lock (Stage 2 Paralyze — cannot act, 3s only).
+        rank_3: "8s duration. 12 Grip Gauge. New option: Spine Lock (Stage 2 Paralyze — cannot act, 3s only)."
         rank_4: 8s duration. 10 Grip Gauge. Submission generates 15 Grip Gauge refund on expiry (efficient cycle).
 
 # =============================================================================

@@ -86,7 +86,7 @@ Skills:
       Arc: 120° frontal, 3y depth
       Recovery: 0.4s
       Targets: all enemies in arc (no cap)
-      Stacks: 1 | Gauge: +4
+      Stacks: "1 | Gauge: +4"
 
     Strike2:
       Name: "Claw Rend"
@@ -94,7 +94,7 @@ Skills:
       Arc: 90° frontal, 4y depth (lunging)
       Recovery: 0.5s
       Targets: all enemies in arc (no cap)
-      Stacks: 1 | Gauge: +4
+      Stacks: "1 | Gauge: +4"
 
     Strike3:
       Name: "Tail Guillotine"
@@ -102,7 +102,7 @@ Skills:
       Arc: 180° frontal, 3.5y depth
       Recovery: 0.8s (LONGEST — most punishable)
       Targets: all enemies in arc (no cap)
-      Stacks: 2 | Gauge: +6
+      Stacks: "2 | Gauge: +6"
       CritCondition: "Connects on 2+ enemies simultaneously"
 
     TotalPotency: 500 per chain (×N targets hit — no falloff in arc)
@@ -170,7 +170,7 @@ Skills:
       - "2s Stagger (interrupts action, brief hitstun)"
       - "Rotates character 180° (now facing flankers)"
     CritCondition: "Hits enemy from behind (positional — they were flanking you)"
-    StackGeneration: 1 | BreathGaugeGain: 3
+    StackGeneration: "1 | BreathGaugeGain: 3"
     DesignIntent: >
       Anti-flank safety valve. Lower potency than Cleave = DPS LOSS to need it.
       Prevents total collapse when enemies circle. 180° rotation enables
@@ -194,7 +194,7 @@ Skills:
       WithTerrain: "Place terrain → cluster at edge → Buffet pushes them IN (forcing crossing damage)"
       WithTeam: "Push into ally CC zones, off ledges, into environmental hazards"
     CritCondition: none (utility skill)
-    StackGeneration: 1 | BreathGaugeGain: 2
+    StackGeneration: "1 | BreathGaugeGain: 2"
     DesignIntent: >
       Space creation tool. Sacrifice DPS for CONTROL. 15s CD enforces decision:
       WHEN to create space vs WHEN to stay and cleave.
@@ -214,7 +214,7 @@ Skills:
       - "280p single-target damage"
       - "Extends CC duration by 0.5s on affected target"
     CritCondition: "Target is Groggy/Downed (shared all-forms crit)"
-    StackGeneration: 2 | BreathGaugeGain: 5
+    StackGeneration: "2 | BreathGaugeGain: 5"
     DesignIntent: >
       Single-target spike during punish windows ONLY. Dead button otherwise.
       Rewards setting up OWN CC (Hawk-Dive knockup, Tail Sweep stagger) or
