@@ -35,6 +35,23 @@
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # ─────────────────────────────────────────────────────────────────────────────
+# STAT OVERRIDES — formal deviations from Attributes/Base_Attributes.yaml
+# (declared per the stat contract; undeclared formula divergence is a
+#  validation error — see Schemas/stat_contract.schema.json)
+# ─────────────────────────────────────────────────────────────────────────────
+
+StatOverrides:
+  - OverridesDerivedStat: PhysATK
+    Scope: "Dive attacks only. Ground weapon combos still scale normally from PhysATK."
+    ReplacementFormula: "DiveDamage = BaseDamage * (1 + AU/100 * ScalingCoeff)    # AU = Altitude Units"
+    Interaction: replaces_within_scope
+    Reason: >
+      MOMENTUM damage, not STR. Altitude → acceleration → kinetic energy; STR is
+      irrelevant to a falling body's impact (already stated in the Altitude
+      System's DiveScaling.MomentumNote). Full contract: Altitude System
+      section (DiveScaling) in this file.
+
+# ─────────────────────────────────────────────────────────────────────────────
 # SECTION 1: CLASS IDENTITY
 # ─────────────────────────────────────────────────────────────────────────────
 

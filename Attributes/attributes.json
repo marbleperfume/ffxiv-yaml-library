@@ -1,42 +1,47 @@
 {
+    "_generated": "AUTO-GENERATED from Attributes/Base_Attributes.yaml — do not hand-edit. Regenerate with: python WebApp/backend/generate_legacy.py",
     "STRENGTH": {
         "default": "10",
-        "intent": "Physical damage and structural force."
+        "intent": "Melee physical damage scaling"
     },
     "STAMINA": {
         "default": "10",
-        "intent": "Directly anchors the Base Health pool."
+        "intent": "HP pool + small Defense contribution"
     },
     "SPEED": {
         "default": "10",
-        "intent": "Movement speed and animation frame throughput."
+        "intent": "Haste (GCD reduction) + Evasion + Movement speed"
     },
     "CRAFT": {
         "default": "0",
-        "intent": "Efficiency in item assembly and repair."
+        "intent": "Non-combat: item assembly & repair efficiency"
     },
     "GATHER": {
         "default": "0",
-        "intent": "Yield efficiency for raw materials."
+        "intent": "Non-combat: raw material yield efficiency"
     },
     "MAGICCAPACITY": {
         "default": "100",
-        "intent": "Resource pool for casting abilities. 1 point = 100 mana (MaxMana = MAGICCAPACITY * 100). See Combat/ManaEconomy.yaml for regen rules and Combat/ManaflowSystem.yaml for the caster mana-recovery skill contract."
+        "intent": "Mana pool (MaxMana = MagicCapacity × 100)"
     },
     "MAG": {
         "default": "10",
-        "intent": "Scaling for Shields, Barriers, and offensive magic output."
+        "intent": "Offensive magic, Shields, Barriers scaling"
     },
     "MED": {
         "default": "10",
-        "intent": "Scaling for raw Healing output and medicinal items."
+        "intent": "Healing SKILL output scaling. Does NOT affect item heals."
     },
     "DEXTERITY": {
         "default": "2",
-        "intent": "Controls critical damage and is the damage modifier for ranged physical attacks."
+        "intent": "Ranged physical scaling + Exploit bonus (positionals, weak spots)"
     },
     "NTU": {
         "default": "5",
-        "intent": "Intuition. Governs how many scripted 'correct response' prompts get surfaced to the player during Mercenary Rank 2+ encounters -- a deliberate middle ground between a purely manual reaction and auto-battle: the game highlights the right button, the player still has to press it. See Combat/IntuitionPrompts.yaml."
+        "intent": "Intuition — governs correct-response prompts (see Combat/IntuitionPrompts.yaml)"
+    },
+    "DEFENSE": {
+        "default": "0",
+        "intent": "Racial Armor (innate AC). Default 0; races with natural armor get a nonzero base + equipment slot lockout as tradeoff."
     }
 }
