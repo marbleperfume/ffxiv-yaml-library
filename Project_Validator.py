@@ -3,10 +3,14 @@ import yaml
 import glob
 
 errors = []
+_collector = None  # set by validate_project(collector=...): err() reports there instead of printing
 
 def err(msg):
     errors.append(msg)
-    print(f"[ERROR] {msg}")
+    if _collector is None:
+        print(f"[ERROR] {msg}")
+    else:
+        _collector.append(msg)
 
 def load_yaml(path):
     with open(path, 'r') as f:
@@ -123,8 +127,13 @@ def check_rank_profile(npc_file, profile):
                 err(f"{npc_file}: Doctrine.{tier_name} KnowledgeCheck '{mech}' has no LoreSource "
                     "(external-knowledge checks must be a declared, deliberate choice)")
 
-def validate_project():
-    print("--- Running Data Integrity Check ---")
+def validate_project(collector=None):
+    global _collector
+    _collector = collector
+    del errors[:]
+    quiet = collector is not None
+    if not quiet:
+        print("--- Running Data Integrity Check ---")
 
     class_list = [os.path.basename(f).replace(".yaml", "") for f in glob.glob("Classes/*.yaml")]
     race_specs = [os.path.basename(f).replace(".yaml", "") for f in glob.glob("Race_Ideas/*.yaml")]
@@ -171,11 +180,13 @@ def validate_project():
             err(f"{npc_file} uses legacy 'RankScaling' -- migrate to 'RankProfile' "
                 "(see Ranks/Rank_System.yaml)")
 
-    print("--- Integrity Check Complete ---")
-    if errors:
-        print(f"FAILED: {len(errors)} error(s).")
-    else:
-        print("PASSED: no integrity errors.")
+    if not quiet:
+        print("--- Integrity Check Complete ---")
+        if errors:
+            print(f"FAILED: {len(errors)} error(s).")
+        else:
+            print("PASSED: no integrity errors.")
+    _collector = None
     return len(errors)
 
 if __name__ == "__main__":
